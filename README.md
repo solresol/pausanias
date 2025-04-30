@@ -29,3 +29,12 @@ This should respond with
 Successfully imported 3170 passages into pausanias.sqlite
 ```
 
+# Daily
+
+I didn't have enough token allocation to run the whole corpus in one go, so
+I broke it up into smaller chunks. Schedule `cronscript.sh` (and alter the
+`--stop` parameter smaller if you have less allocation than me, or increase
+it if you don't mind spending money).
+
+
+
