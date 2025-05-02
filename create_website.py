@@ -25,6 +25,11 @@ def parse_arguments():
     
     return parser.parse_args()
 
+def passage_id_sort_key(passage_id):
+    """Create a sort key for passage IDs in the format X.Y.Z."""
+    parts = passage_id.split('.')
+    # Convert each part to integer for proper numerical sorting
+    return tuple(int(part) for part in parts)
 
 def get_proper_nouns_by_passage(conn):
     """Get proper nouns (in nominative form) grouped by passage."""
@@ -67,10 +72,15 @@ def get_analyzed_passages(conn, limit=None):
     ORDER BY p.id
     """
     
-    if limit:
-        query += f" LIMIT {limit}"
-    
     df = pd.read_sql_query(query, conn)
+    df['sort_key'] = df['id'].apply(passage_id_sort_key)
+    df = df.sort_values('sort_key')
+    
+    # Remove the sort_key column as it's no longer needed
+    df = df.drop('sort_key', axis=1)
+    if limit:
+        df = df.head(limit)
+
     return df
 
 def get_mythicness_predictors(conn):
@@ -212,8 +222,9 @@ def create_website_structure(output_dir):
     .proper-nouns {
         margin-top: 15px;
         padding-top: 10px;
-        border-top: 1px dashed #ccc;
         font-size: 0.6em;
+        border-radius: 5px;
+        border: 2px solid #5c5142;
     }
     
     .proper-noun-tag {
@@ -439,7 +450,7 @@ def highlight_passage(passage, predictor_map, color_map, class_map, is_mythic_pa
                     style_class = ' non-skeptical'
             
             # Create a regex pattern that matches the whole word/phrase
-            pattern = re.escape(predictor)
+            pattern = r'\b' + re.escape(predictor) + r'\b'
             
             # Highlight the word/phrase
             replacement = f'<span style="color: {color};" class="{css_class}{style_class}">{predictor}</span>'
