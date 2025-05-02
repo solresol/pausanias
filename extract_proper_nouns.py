@@ -8,7 +8,6 @@ import sys
 import time
 from datetime import datetime
 
-import openai
 from openai import OpenAI
 from tqdm import tqdm
 
@@ -31,21 +30,20 @@ def parse_arguments():
 
 def load_openai_api_key(key_file):
     key_path = os.path.expanduser(key_file)
-    try:
-        with open(key_path, 'r') as f:
-            return f.read().strip()
-    except FileNotFoundError:
-        raise FileNotFoundError(f"OpenAI API key file not found: {key_file}")
+    with open(key_path, 'r') as f:
+        return f.read().strip()
 
 def create_noun_tables(conn):
     """Create tables for storing proper nouns and tracking processed passages."""
-    # Table for storing proper nouns
+    # Table for storing proper nouns with enhanced schema
     conn.execute('''
     CREATE TABLE IF NOT EXISTS proper_nouns (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         passage_id TEXT NOT NULL,
         exact_form TEXT NOT NULL,
         reference_form TEXT NOT NULL,
+        english_transcription TEXT NOT NULL,
+        entity_type TEXT NOT NULL,
         FOREIGN KEY (passage_id) REFERENCES passages(id),
         UNIQUE(passage_id, exact_form)
     )
@@ -90,18 +88,21 @@ def save_proper_nouns(conn, passage_id, noun_list):
     
     cursor = conn.cursor()
     
-    # Insert each proper noun
+    # Insert each proper noun with enhanced data
     for noun_entry in noun_list:
         exact_form = noun_entry.get("as_appears_in_passage")
         reference_form = noun_entry.get("canonical_form")
+        english_transcription = noun_entry.get("english_transcription")
+        entity_type = noun_entry.get("entity_type")
         
-        if exact_form and reference_form:
+        if exact_form and reference_form and english_transcription and entity_type:
             cursor.execute(
                 """
-                INSERT OR IGNORE INTO proper_nouns (passage_id, exact_form, reference_form)
-                VALUES (?, ?, ?)
+                INSERT OR IGNORE INTO proper_nouns 
+                (passage_id, exact_form, reference_form, english_transcription, entity_type)
+                VALUES (?, ?, ?, ?, ?)
                 """,
-                (passage_id, exact_form, reference_form)
+                (passage_id, exact_form, reference_form, english_transcription, entity_type)
             )
     
     conn.commit()
@@ -144,9 +145,18 @@ def extract_proper_nouns(client, model, passage_id, passage_text, debug=False):
                                     "canonical_form": {
                                         "type": "string",
                                         "description": "The canonical nominative form of the proper noun as it would appear in a reference work"
+                                    },
+                                    "english_transcription": {
+                                        "type": "string",
+                                        "description": "English transliteration or transcription of the Greek proper noun"
+                                    },
+                                    "entity_type": {
+                                        "type": "string",
+                                        "enum": ["person", "place", "deity", "other"],
+                                        "description": "The type of entity this proper noun represents"
                                     }
                                 },
-                                "required": ["as_appears_in_passage", "canonical_form"]
+                                "required": ["as_appears_in_passage", "canonical_form", "english_transcription", "entity_type"]
                             }
                         }
                     },
@@ -156,18 +166,24 @@ def extract_proper_nouns(client, model, passage_id, passage_text, debug=False):
         }
     ]
     
-    system_prompt = """Act as a Classical Greek scholar specializing in Pausanias. Extract all proper nouns (people and places) from the given passage. For each proper noun, provide both:
+    system_prompt = """Act as a Classical Greek scholar specializing in Pausanias. Extract all proper nouns (people, places, deities) from the given passage. For each proper noun, provide:
 1. The exact form as it appears in the passage (preserve case and inflection)
 2. The canonical nominative form you would use in a reference work or index
+3. An English transcription/transliteration of the name
+4. The entity type (person, place, deity, or other)
 
 Return a list of objects, where each object contains:
 - "as_appears_in_passage": the exact form as it appears in the text
 - "canonical_form": the canonical nominative form
+- "english_transcription": how the name would be written in English (e.g., "Athens" for "Ἀθῆναι")
+- "entity_type": one of "person", "place", "deity", or "other"
 
 For example, if "Ἀθηνᾶς" appears in the text, you would include:
 {
   "as_appears_in_passage": "Ἀθηνᾶς",
-  "canonical_form": "Ἀθηνᾶ"
+  "canonical_form": "Ἀθηνᾶ",
+  "english_transcription": "Athena",
+  "entity_type": "deity"
 }
 
 If no proper nouns are found (which is unlikely in Pausanias), return an empty list.
@@ -179,7 +195,7 @@ IMPORTANT: Almost every passage from Pausanias mentions at least one place or pe
             model=model,
             messages=[
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": f"Passage {passage_id}:\n\n{passage_text}\n\nExtract all proper nouns (people and places) from this passage. For each proper noun, provide both the exact form as it appears and the canonical nominative form."}
+                {"role": "user", "content": f"Passage {passage_id}:\n\n{passage_text}\n\nExtract all proper nouns from this passage with their English transcriptions and entity types."}
             ],
             tools=tools,
             tool_choice={"type": "function", "function": {"name": "save_proper_nouns"}}
@@ -266,7 +282,7 @@ if __name__ == '__main__':
                 if not args.progress_bar:
                     print(f"Processed passage {passage_id}: found {len(proper_nouns)} proper nouns, tokens={input_tokens}/{output_tokens}")
                     for noun in proper_nouns:
-                        print(f"  - {noun.get('as_appears_in_passage')} → {noun.get('canonical_form')}")
+                        print(f"  - {noun.get('as_appears_in_passage')} → {noun.get('canonical_form')} ({noun.get('english_transcription')}, {noun.get('entity_type')})")
             else:
                 if not args.progress_bar:
                     print(f"Processed passage {passage_id}: no proper nouns found, tokens={input_tokens}/{output_tokens}")
@@ -280,8 +296,8 @@ if __name__ == '__main__':
         print(f"Processing complete. Total tokens used: {total_input_tokens} input, {total_output_tokens} output")
     
     except Exception as e:
-        print(f"Error: {str(e)}")
-        sys.exit(1)
+        # Let the exception propagate to get the stack trace as per your preference
+        raise e
     
     finally:
         conn.close()
