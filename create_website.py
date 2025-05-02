@@ -25,6 +25,11 @@ def parse_arguments():
     
     return parser.parse_args()
 
+def passage_id_sort_key(passage_id):
+    """Create a sort key for passage IDs in the format X.Y.Z."""
+    parts = passage_id.split('.')
+    # Convert each part to integer for proper numerical sorting
+    return tuple(int(part) for part in parts)
 
 def get_proper_nouns_by_passage(conn):
     """Get proper nouns (in nominative form) grouped by passage."""
@@ -67,10 +72,15 @@ def get_analyzed_passages(conn, limit=None):
     ORDER BY p.id
     """
     
-    if limit:
-        query += f" LIMIT {limit}"
-    
     df = pd.read_sql_query(query, conn)
+    df['sort_key'] = df['id'].apply(passage_id_sort_key)
+    df = df.sort_values('sort_key')
+    
+    # Remove the sort_key column as it's no longer needed
+    df = df.drop('sort_key', axis=1)
+    if limit:
+        df = df.head(limit)
+
     return df
 
 def get_mythicness_predictors(conn):
