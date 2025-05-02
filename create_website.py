@@ -222,8 +222,9 @@ def create_website_structure(output_dir):
     .proper-nouns {
         margin-top: 15px;
         padding-top: 10px;
-        border-top: 1px dashed #ccc;
         font-size: 0.6em;
+        border-radius: 5px;
+        border: 2px solid #5c5142;
     }
     
     .proper-noun-tag {
