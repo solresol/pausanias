@@ -450,7 +450,7 @@ def highlight_passage(passage, predictor_map, color_map, class_map, is_mythic_pa
                     style_class = ' non-skeptical'
             
             # Create a regex pattern that matches the whole word/phrase
-            pattern = re.escape(predictor)
+            pattern = r'\b' + re.escape(predictor) + r'\b'
             
             # Highlight the word/phrase
             replacement = f'<span style="color: {color};" class="{css_class}{style_class}">{predictor}</span>'
