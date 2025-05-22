@@ -5,6 +5,7 @@
 import argparse
 import sqlite3
 import sys
+import os
 from datetime import datetime
 
 from .data import (
