@@ -1,0 +1,82 @@
+\documentclass{beamer}
+\usetheme{Madrid}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\title{Digital Analysis of Pausanias}
+\author{COMP3420 Documentation}
+\date{\today}
+\begin{document}
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Project Overview}
+  \begin{itemize}
+    \item Pausanias' \emph{Description of Greece} (2nd~c.~CE) mixes myth and travelogue.
+    \item Scholars debate how critically Pausanias reports local traditions.
+    \item This project provides tools to analyse the text using modern NLP.
+    \item Pipeline: import \textrightarrow{} annotate \textrightarrow{} model \textrightarrow{} visualise.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Data Ingestion}
+  \begin{itemize}
+    \item Raw text segmented as passages with IDs (e.g., \texttt{1.1.1}).
+    \item \texttt{pausanias\_importer.py} loads passages into a SQLite database.
+    \item \texttt{translate\_pausanias.py} uses the OpenAI API to produce English translations.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Proper Noun Extraction}
+  \begin{itemize}
+    \item \texttt{extract\_proper\_nouns.py} queries the API with tool calls to identify people, places, and deities.
+    \item Results stored with entity type and canonical form.
+    \item These nouns act as stopwords and later form a co--occurrence network.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Mythic vs Historical \& Skepticism}
+  \begin{itemize}
+    \item \texttt{mythic\_sceptic\_analyser.py} labels each passage:
+          \begin{enumerate}
+            \item Does it reference mythic time or real history?
+            \item Does Pausanias express scepticism?
+          \end{enumerate}
+    \item Metadata on token usage is recorded for reproducibility.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Machine Learning Models}
+  \begin{itemize}
+    \item \texttt{find\_predictors.py} builds logistic regression models using \texttt{scikit\-learn}.
+    \item TF--IDF features highlight words associated with mythic content or scepticism.
+    \item COMP3420 students will recognise this pipeline of vectorisation and classification.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Network Analysis}
+  \begin{itemize}
+    \item \texttt{analyse\_noun\_network.py} constructs a graph with NetworkX.
+    \item Nodes: proper nouns; edges: co--occurrence in passages.
+    \item Centrality metrics (degree, betweenness, PageRank) reveal key figures like Apollo or Athens.
+    \item Output visualisations use D3.js in an interactive web page.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Website Generation}
+  \begin{itemize}
+    \item Modular code in \texttt{website/} creates a static site showing analyses.
+    \item Passages are highlighted with predictive words, translated text, and lists of proper nouns.
+    \item \texttt{cronscript.sh} can run the entire pipeline daily and sync results to a server.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Takeaways}
+  \begin{itemize}
+    \item Combines classical scholarship with modern NLP methods you know from scikit--learn and Keras.
+    \item Encourages reflection on how language signals mythic storytelling and scepticism in ancient texts.
+    \item Code is modular and can be adapted for other corpora or further analyses.
+  \end{itemize}
+\end{frame}
+
+\end{document}
