@@ -1293,7 +1293,7 @@ def visualize_network(full_graph, all_centrality_df, component_graphs, output_di
     plt.figure(figsize=(16, 16))
     
     # Color map for components (cycle through colors)
-    cmap = plt.cm.get_cmap('tab20', len(component_graphs))
+    cmap = plt.get_cmap('tab20', len(component_graphs))
     
     # Use spring layout for the full graph
     pos = nx.spring_layout(full_graph, seed=42, k=0.3, iterations=100)
