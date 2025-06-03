@@ -12,11 +12,15 @@ def create_predictor_maps(mythic_predictors, skeptic_predictors):
     skeptic_scaler = MinMaxScaler(feature_range=(0.3, 1.0))
     
     # Split predictors by mythic/historical and skeptical/non-skeptical
-    mythic_positive = mythic_predictors[mythic_predictors['is_mythic'] == 1]
-    mythic_negative = mythic_predictors[mythic_predictors['is_mythic'] == 0]
-    
-    skeptic_positive = skeptic_predictors[skeptic_predictors['is_skeptical'] == 1]
-    skeptic_negative = skeptic_predictors[skeptic_predictors['is_skeptical'] == 0]
+    mythic_positive = mythic_predictors[mythic_predictors["is_mythic"] == 1].copy()
+    mythic_negative = mythic_predictors[mythic_predictors["is_mythic"] == 0].copy()
+
+    skeptic_positive = (
+        skeptic_predictors[skeptic_predictors["is_skeptical"] == 1].copy()
+    )
+    skeptic_negative = (
+        skeptic_predictors[skeptic_predictors["is_skeptical"] == 0].copy()
+    )
     
     # Scale coefficients for color intensity
     if not mythic_positive.empty:
