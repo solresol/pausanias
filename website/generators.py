@@ -28,6 +28,7 @@ def generate_home_page(output_dir, title, timestamp):
             <a href="skepticism.html">Skepticism Analysis</a>
             <a href="mythic_words.html">Mythic Words</a>
             <a href="skeptic_words.html">Skeptic Words</a>
+            <a href="network_viz/index.html">Network Analysis</a>
         </nav>
         
         <div class="container">
@@ -90,6 +91,7 @@ def generate_mythic_page(passages_df, mythic_color_map, mythic_class_map, proper
             <a href="skepticism.html">Skepticism Analysis</a>
             <a href="mythic_words.html">Mythic Words</a>
             <a href="skeptic_words.html">Skeptic Words</a>
+            <a href="network_viz/index.html">Network Analysis</a>
         </nav>
         
         <div class="container">
@@ -201,6 +203,7 @@ def generate_skepticism_page(passages_df, skeptic_color_map, skeptic_class_map, 
             <a href="skepticism.html" class="active">Skepticism Analysis</a>
             <a href="mythic_words.html">Mythic Words</a>
             <a href="skeptic_words.html">Skeptic Words</a>
+            <a href="network_viz/index.html">Network Analysis</a>
         </nav>
         
         <div class="container">
@@ -316,6 +319,7 @@ def generate_mythic_words_page(mythic_predictors, output_dir, title):
             <a href="skepticism.html">Skepticism Analysis</a>
             <a href="mythic_words.html" class="active">Mythic Words</a>
             <a href="skeptic_words.html">Skeptic Words</a>
+            <a href="network_viz/index.html">Network Analysis</a>
         </nav>
         
         <div class="container">
@@ -410,6 +414,7 @@ def generate_skeptic_words_page(skeptic_predictors, output_dir, title):
             <a href="skepticism.html">Skepticism Analysis</a>
             <a href="mythic_words.html">Mythic Words</a>
             <a href="skeptic_words.html" class="active">Skeptic Words</a>
+            <a href="network_viz/index.html">Network Analysis</a>
         </nav>
         
         <div class="container">
