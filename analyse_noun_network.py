@@ -422,7 +422,8 @@ def create_d3_html_template(output_dir):
             <p>Larger nodes have higher centrality values. Thicker connections represent more frequent co-occurrences.</p>
         </div>
         
-        <div id="visualization"></div>
+        <div id="loading-spinner" style="text-align:center; padding:20px;">Loading network data…</div>
+        <div id="visualization" style="display:none;"></div>
         
         <div id="tooltip" class="tooltip"></div>
         
@@ -434,6 +435,8 @@ def create_d3_html_template(output_dir):
     <script>
         // Load the network data
         d3.json('network_data.json').then(data => {
+            document.getElementById('loading-spinner').style.display = 'none';
+            document.getElementById('visualization').style.display = 'block';
             const timestamp = new Date().toISOString();
             document.getElementById('timestamp').textContent = new Date().toLocaleString();
             
@@ -487,8 +490,13 @@ def create_d3_html_template(output_dir):
             
             // Create tooltip
             const tooltip = d3.select('#tooltip');
-            
+
+            function getId(val) {
+                return typeof val === 'object' ? val.id : val;
+            }
+
             // Function to update the visualization
+
             function updateVisualization() {
                 // Get filter values
                 const selectedComponent = componentSelect.value;
@@ -516,9 +524,11 @@ def create_d3_html_template(output_dir):
                     
                     filteredNodes = data.nodes.filter(n => includedComponents.has(n.component));
                     filteredLinks = data.links.filter(l => {
-                        const sourceNode = data.nodes.find(n => n.id === l.source);
-                        const targetNode = data.nodes.find(n => n.id === l.target);
-                        return sourceNode && targetNode && 
+                        const sourceId = getId(l.source);
+                        const targetId = getId(l.target);
+                        const sourceNode = data.nodes.find(n => n.id === sourceId);
+                        const targetNode = data.nodes.find(n => n.id === targetId);
+                        return sourceNode && targetNode &&
                                includedComponents.has(sourceNode.component) &&
                                includedComponents.has(targetNode.component) &&
                                l.weight >= minLinks;
@@ -530,8 +540,8 @@ def create_d3_html_template(output_dir):
                         .slice(0, nodeLimit);
                     
                     const nodeIds = new Set(filteredNodes.map(n => n.id));
-                    filteredLinks = data.links.filter(l => 
-                        nodeIds.has(l.source) && nodeIds.has(l.target) && l.weight >= minLinks
+                    filteredLinks = data.links.filter(l =>
+                        nodeIds.has(getId(l.source)) && nodeIds.has(getId(l.target)) && l.weight >= minLinks
                     );
                 }
                 
@@ -541,8 +551,10 @@ def create_d3_html_template(output_dir):
                     // Calculate degree from links
                     const degreeCount = {};
                     filteredLinks.forEach(l => {
-                        degreeCount[l.source] = (degreeCount[l.source] || 0) + 1;
-                        degreeCount[l.target] = (degreeCount[l.target] || 0) + 1;
+                        const s = getId(l.source);
+                        const t = getId(l.target);
+                        degreeCount[s] = (degreeCount[s] || 0) + 1;
+                        degreeCount[t] = (degreeCount[t] || 0) + 1;
                     });
                     centralityValues = filteredNodes.map(n => degreeCount[n.id] || 0);
                 } else {
@@ -872,7 +884,8 @@ def create_d3_html_template(output_dir):
             <p>Larger nodes have higher centrality values. Thicker connections represent more frequent co-occurrences.</p>
         </div>
         
-        <div id="visualization"></div>
+        <div id="loading-spinner" style="text-align:center; padding:20px;">Loading network data…</div>
+        <div id="visualization" style="display:none;"></div>
         
         <div id="tooltip" class="tooltip"></div>
         
@@ -884,6 +897,8 @@ def create_d3_html_template(output_dir):
     <script>
         // Load the network data
         d3.json('component_{component_id}/network_data.json').then(data => {
+            document.getElementById('loading-spinner').style.display = 'none';
+            document.getElementById('visualization').style.display = 'block';
             const timestamp = new Date().toISOString();
             document.getElementById('timestamp').textContent = new Date().toLocaleString();
             
@@ -932,12 +947,14 @@ def create_d3_html_template(output_dir):
                 
                 // Filter links based on minimum weight
                 const filteredLinks = data.links.filter(l => l.weight >= minLinks);
-                
+
                 // Get node IDs that are part of the filtered links
                 const connectedNodeIds = new Set();
                 filteredLinks.forEach(l => {
-                    connectedNodeIds.add(l.source);
-                    connectedNodeIds.add(l.target);
+                    const s = getId(l.source);
+                    const t = getId(l.target);
+                    connectedNodeIds.add(s);
+                    connectedNodeIds.add(t);
                 });
                 
                 // Filter nodes to include only those in the filtered links
@@ -949,8 +966,10 @@ def create_d3_html_template(output_dir):
                     // Calculate degree from links
                     const degreeCount = {};
                     filteredLinks.forEach(l => {
-                        degreeCount[l.source] = (degreeCount[l.source] || 0) + 1;
-                        degreeCount[l.target] = (degreeCount[l.target] || 0) + 1;
+                        const s = getId(l.source);
+                        const t = getId(l.target);
+                        degreeCount[s] = (degreeCount[s] || 0) + 1;
+                        degreeCount[t] = (degreeCount[t] || 0) + 1;
                     });
                     centralityValues = filteredNodes.map(n => degreeCount[n.id] || 0);
                 } else {
