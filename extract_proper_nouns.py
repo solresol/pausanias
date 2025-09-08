@@ -48,7 +48,7 @@ def create_noun_tables(conn):
         UNIQUE(passage_id, exact_form)
     )
     ''')
-    
+
     # Table for tracking processed passages
     conn.execute('''
     CREATE TABLE IF NOT EXISTS noun_extraction_status (
@@ -61,7 +61,15 @@ def create_noun_tables(conn):
         FOREIGN KEY (passage_id) REFERENCES passages(id)
     )
     ''')
-    
+
+    # Table for manually specified stopwords that may have been missed as proper nouns
+    conn.execute('''
+    CREATE TABLE IF NOT EXISTS manual_stopwords (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        word TEXT UNIQUE NOT NULL
+    )
+    ''')
+
     conn.commit()
 
 def get_unprocessed_passages(conn, limit=None):
