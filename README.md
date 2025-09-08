@@ -37,4 +37,19 @@ I broke it up into smaller chunks. Schedule `cronscript.sh` (and alter the
 it if you don't mind spending money).
 
 
+## Manual stop words
+
+Some words that are really proper nouns might slip past the automated
+extractor. To make sure they don't influence the TF‑IDF model, you can add
+them to a `manual_stopwords` table in the database. Create or view the table
+with any SQLite tool:
+
+```bash
+sqlite3 pausanias.sqlite "INSERT INTO manual_stopwords(word) VALUES ('Athens');"
+```
+
+When `find_predictors.py` runs it combines these entries with the proper
+noun list and uses the union as stop words for the mythicness model.
+
+
 

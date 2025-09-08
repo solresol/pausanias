@@ -85,9 +85,23 @@ def get_proper_nouns(conn):
     SELECT DISTINCT exact_form
     FROM proper_nouns
     """
-    
+
     df = pd.read_sql_query(query, conn)
     return df['exact_form'].tolist()
+
+def get_manual_stopwords(conn):
+    """Get manually specified stopwords from the database."""
+    # Ensure the table exists so users can manually insert words later
+    conn.execute('''
+    CREATE TABLE IF NOT EXISTS manual_stopwords (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        word TEXT UNIQUE NOT NULL
+    )
+    ''')
+    conn.commit()
+
+    df = pd.read_sql_query("SELECT word FROM manual_stopwords", conn)
+    return df['word'].tolist()
 
 def save_predictors(conn, feature_names, coefficients, label, table_name):
     """Save predictive features to the database."""
@@ -184,15 +198,19 @@ if __name__ == '__main__':
         print(f"References mythic era: {passages_df['references_mythic_era'].sum()} passages")
         print(f"Expresses skepticism: {passages_df['expresses_scepticism'].sum()} passages")
         
-        # Get proper nouns for stopwords
+        # Get stopwords: proper nouns plus any manually specified additions
         proper_nouns = get_proper_nouns(conn)
-        print(f"Using {len(proper_nouns)} proper nouns as stopwords for mythicness model.")
-        
-        # Build mythicness model (with proper nouns as stopwords)
+        manual_stopwords = get_manual_stopwords(conn)
+        all_stopwords = proper_nouns + manual_stopwords
+        print(
+            f"Using {len(proper_nouns)} proper nouns and {len(manual_stopwords)} manual stopwords as stopwords for mythicness model."
+        )
+
+        # Build mythicness model (with stopwords)
         mythic_vectorizer_params = {
             'max_features': args.max_features,
             'ngram_range': (ngram_min, ngram_max),
-            'stop_words': proper_nouns
+            'stop_words': all_stopwords
         }
         
         mythic_model_params = {
