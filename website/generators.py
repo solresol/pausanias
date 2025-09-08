@@ -24,8 +24,8 @@ def generate_home_page(output_dir, title, timestamp):
         
         <nav>
             <a href="index.html" class="active">Home</a>
-            <a href="mythic.html">Mythic Analysis</a>
-            <a href="skepticism.html">Skepticism Analysis</a>
+            <a href="mythic/index.html">Mythic Analysis</a>
+            <a href="skepticism/index.html">Skepticism Analysis</a>
             <a href="mythic_words.html">Mythic Words</a>
             <a href="skeptic_words.html">Skeptic Words</a>
             <a href="network_viz/index.html">Network Analysis</a>
@@ -40,14 +40,14 @@ def generate_home_page(output_dir, title, timestamp):
                 <h2>Mythic vs. Historical Content</h2>
                 <p>Explore passages with mythical content highlighted in warm colors and italics, 
                    while historical content appears in cool colors.</p>
-                <a href="mythic.html">View Mythic Analysis</a>
+                <a href="mythic/index.html">View Mythic Analysis</a>
             </div>
             
             <div class="home-card">
                 <h2>Expression of Skepticism</h2>
                 <p>Discover how Pausanias expresses skepticism (or credulity) through his writing. 
                    Skeptical content is highlighted in green, while non-skeptical appears in orange and bold.</p>
-                <a href="skepticism.html">View Skepticism Analysis</a>
+                <a href="skepticism/index.html">View Skepticism Analysis</a>
             </div>
             
             <div class="home-card">
@@ -70,105 +70,161 @@ def generate_home_page(output_dir, title, timestamp):
         f.write(html_content)
 
 def generate_mythic_page(passages_df, mythic_color_map, mythic_class_map, proper_nouns_dict, output_dir, title):
-    """Generate the page showing mythic aspects of passages."""
-    html_content = f"""<!DOCTYPE html>
-    <html lang="en">
+    """Generate pages showing mythic aspects of passages grouped by chapter."""
+
+    passages_df = passages_df.copy()
+    passages_df['chapter'] = passages_df['id'].apply(lambda pid: '.'.join(pid.split('.')[:2]))
+    chapters = sorted(passages_df['chapter'].unique(), key=lambda c: [int(p) for p in c.split('.')])
+
+    mythic_dir = os.path.join(output_dir, 'mythic')
+    os.makedirs(mythic_dir, exist_ok=True)
+
+    # Create chapter pages
+    for chapter in chapters:
+        chapter_passages = passages_df[passages_df['chapter'] == chapter]
+        html_content = f"""<!DOCTYPE html>
+    <html lang=\"en\">
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{title} - Mythic Analysis</title>
-        <link rel="stylesheet" href="css/style.css">
+        <meta charset=\"UTF-8\">
+        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+        <title>{title} - Mythic Analysis {chapter}</title>
+        <link rel=\"stylesheet\" href=\"../css/style.css\">
     </head>
     <body>
         <header>
             <h1>{title}</h1>
             <p>Analysis of Mythic vs. Historical Elements in Pausanias</p>
         </header>
-        
+
         <nav>
-            <a href="index.html">Home</a>
-            <a href="mythic.html" class="active">Mythic Analysis</a>
-            <a href="skepticism.html">Skepticism Analysis</a>
-            <a href="mythic_words.html">Mythic Words</a>
-            <a href="skeptic_words.html">Skeptic Words</a>
-            <a href="network_viz/index.html">Network Analysis</a>
+            <a href=\"../index.html\">Home</a>
+            <a href=\"index.html\" class=\"active\">Mythic Analysis</a>
+            <a href=\"../skepticism/index.html\">Skepticism Analysis</a>
+            <a href=\"../mythic_words.html\">Mythic Words</a>
+            <a href=\"../skeptic_words.html\">Skeptic Words</a>
+            <a href=\"../network_viz/index.html\">Network Analysis</a>
         </nav>
-        
-        <div class="container">
-            <div class="legend">
+
+        <div class=\"container\">
+            <div class=\"legend\">
                 <h3>Legend:</h3>
-                <div class="legend-item">
-                    <span class="color-sample mythic-sample"></span> Mythic content (warmer colors, <span class="mythic">italics</span>)
+                <div class=\"legend-item\">
+                    <span class=\"color-sample mythic-sample\"></span> Mythic content (warmer colors, <span class=\"mythic\">italics</span>)
                 </div>
-                <div class="legend-item">
-                    <span class="color-sample historical-sample"></span> Historical content (cooler colors)
+                <div class=\"legend-item\">
+                    <span class=\"color-sample historical-sample\"></span> Historical content (cooler colors)
                 </div>
                 <p>Color intensity indicates the strength of the predictive word or phrase.</p>
             </div>
-            
-            <h2>Passages</h2>
+
+            <h2>Chapter {chapter}</h2>
     """
-    
-    # Add each passage with highlighting
-    for _, row in passages_df.iterrows():
-        passage_id = row['id']
-        passage_text = row['passage']
-        is_mythic = row['references_mythic_era']
-        translation = row.get('english_translation', None)
-        proper_nouns = proper_nouns_dict.get(passage_id, [])
-        
-        highlighted_passage = highlight_passage(
-            passage_text, 
-            mythic_color_map, 
-            mythic_color_map, 
-            mythic_class_map,
-            is_mythic_page=True
-        )
-        
-        html_content += f"""
-            <div class="passage">
-                <div class="passage-header">
-                    <span class="passage-id">Passage {passage_id}</span>
-                    <span class="passage-class">Class: {'Mythic' if is_mythic else 'Historical'}</span>
+
+        for _, row in chapter_passages.iterrows():
+            passage_id = row['id']
+            passage_text = row['passage']
+            is_mythic = row['references_mythic_era']
+            translation = row.get('english_translation', None)
+            proper_nouns = proper_nouns_dict.get(passage_id, [])
+
+            highlighted_passage = highlight_passage(
+                passage_text,
+                mythic_color_map,
+                mythic_color_map,
+                mythic_class_map,
+                is_mythic_page=True
+            )
+
+            html_content += f"""
+            <div class=\"passage\">
+                <div class=\"passage-header\">
+                    <span class=\"passage-id\">Passage {passage_id}</span>
+                    <span class=\"passage-class\">Class: {'Mythic' if is_mythic else 'Historical'}</span>
                 </div>
-                <div class="passage-container">
-                     <div class="greek-text">
+                <div class=\"passage-container\">
+                     <div class=\"greek-text\">
                          {highlighted_passage}
         """
 
-        if proper_nouns:
-            html_content += f"""
-                        <div class="proper-nouns">
-                            <div class="proper-noun-header">Proper Nouns:</div>
-            """
-            
-            for noun in sorted(proper_nouns):
+            if proper_nouns:
                 html_content += f"""
-                            <span class="proper-noun-tag">{html.escape(noun)}</span>
-                """
-            
-            html_content += """
-                        </div>
+                        <div class=\"proper-nouns\">
+                            <div class=\"proper-noun-header\">Proper Nouns:</div>
             """
 
-        html_content += """
+                for noun in sorted(proper_nouns):
+                    html_content += f"""
+                            <span class=\"proper-noun-tag\">{html.escape(noun)}</span>
+                """
+
+                html_content += """
+                        </div>
+                """
+
+            html_content += """
                      </div>
         """
 
-        if translation and not pd.isna(translation):
-            html_content += f"""
-                    <div class="english-translation">
+            if translation and not pd.isna(translation):
+                html_content += f"""
+                    <div class=\"english-translation\">
                         {translation}
                     </div>
             """
 
-    html_content += """
+            html_content += """
                 </div>
             </div>
         """
-    
-    # Close the HTML
-    html_content += """
+
+        html_content += f"""
+            <footer>
+                Generated on {datetime.now().strftime("%Y-%m-%d at %H:%M:%S")}
+            </footer>
+        </div>
+    </body>
+    </html>
+    """
+
+        filename = f"{chapter.replace('.', '_')}.html"
+        with open(os.path.join(mythic_dir, filename), 'w', encoding='utf-8') as f:
+            f.write(html_content)
+
+    # Create index page linking to chapters
+    index_content = f"""<!DOCTYPE html>
+    <html lang=\"en\">
+    <head>
+        <meta charset=\"UTF-8\">
+        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+        <title>{title} - Mythic Analysis</title>
+        <link rel=\"stylesheet\" href=\"../css/style.css\">
+    </head>
+    <body>
+        <header>
+            <h1>{title}</h1>
+            <p>Analysis of Mythic vs. Historical Elements in Pausanias</p>
+        </header>
+
+        <nav>
+            <a href=\"../index.html\">Home</a>
+            <a href=\"index.html\" class=\"active\">Mythic Analysis</a>
+            <a href=\"../skepticism/index.html\">Skepticism Analysis</a>
+            <a href=\"../mythic_words.html\">Mythic Words</a>
+            <a href=\"../skeptic_words.html\">Skeptic Words</a>
+            <a href=\"../network_viz/index.html\">Network Analysis</a>
+        </nav>
+
+        <div class=\"container\">
+            <h2>Chapters</h2>
+            <ul>
+    """
+
+    for chapter in chapters:
+        filename = f"{chapter.replace('.', '_')}.html"
+        index_content += f"<li><a href=\"{filename}\">Chapter {chapter}</a></li>\n"
+
+    index_content += """
+            </ul>
             <footer>
                 Generated on """ + datetime.now().strftime("%Y-%m-%d at %H:%M:%S") + """
             </footer>
@@ -176,110 +232,165 @@ def generate_mythic_page(passages_df, mythic_color_map, mythic_class_map, proper
     </body>
     </html>
     """
-    
-    # Write the file
-    with open(os.path.join(output_dir, 'mythic.html'), 'w', encoding='utf-8') as f:
-        f.write(html_content)
+
+    with open(os.path.join(mythic_dir, 'index.html'), 'w', encoding='utf-8') as f:
+        f.write(index_content)
 
 def generate_skepticism_page(passages_df, skeptic_color_map, skeptic_class_map, proper_nouns_dict, output_dir, title):
-    """Generate the page showing skeptical aspects of passages."""
-    html_content = f"""<!DOCTYPE html>
-    <html lang="en">
+    """Generate pages showing skeptical aspects of passages grouped by chapter."""
+
+    passages_df = passages_df.copy()
+    passages_df['chapter'] = passages_df['id'].apply(lambda pid: '.'.join(pid.split('.')[:2]))
+    chapters = sorted(passages_df['chapter'].unique(), key=lambda c: [int(p) for p in c.split('.')])
+
+    skeptic_dir = os.path.join(output_dir, 'skepticism')
+    os.makedirs(skeptic_dir, exist_ok=True)
+
+    for chapter in chapters:
+        chapter_passages = passages_df[passages_df['chapter'] == chapter]
+        html_content = f"""<!DOCTYPE html>
+    <html lang=\"en\">
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{title} - Skepticism Analysis</title>
-        <link rel="stylesheet" href="css/style.css">
+        <meta charset=\"UTF-8\">
+        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+        <title>{title} - Skepticism Analysis {chapter}</title>
+        <link rel=\"stylesheet\" href=\"../css/style.css\">
     </head>
     <body>
         <header>
             <h1>{title}</h1>
             <p>Analysis of Skepticism in Pausanias</p>
         </header>
-        
+
         <nav>
-            <a href="index.html">Home</a>
-            <a href="mythic.html">Mythic Analysis</a>
-            <a href="skepticism.html" class="active">Skepticism Analysis</a>
-            <a href="mythic_words.html">Mythic Words</a>
-            <a href="skeptic_words.html">Skeptic Words</a>
-            <a href="network_viz/index.html">Network Analysis</a>
+            <a href=\"../index.html\">Home</a>
+            <a href=\"../mythic/index.html\">Mythic Analysis</a>
+            <a href=\"index.html\" class=\"active\">Skepticism Analysis</a>
+            <a href=\"../mythic_words.html\">Mythic Words</a>
+            <a href=\"../skeptic_words.html\">Skeptic Words</a>
+            <a href=\"../network_viz/index.html\">Network Analysis</a>
         </nav>
-        
-        <div class="container">
-            <div class="legend">
+
+        <div class=\"container\">
+            <div class=\"legend\">
                 <h3>Legend:</h3>
-                <div class="legend-item">
-                    <span class="color-sample skeptical-sample"></span> Skeptical content (green)
+                <div class=\"legend-item\">
+                    <span class=\"color-sample skeptical-sample\"></span> Skeptical content (green)
                 </div>
-                <div class="legend-item">
-                    <span class="color-sample non-skeptical-sample"></span> Non-skeptical content (orange, <strong>bold</strong>)
+                <div class=\"legend-item\">
+                    <span class=\"color-sample non-skeptical-sample\"></span> Non-skeptical content (orange, <strong>bold</strong>)
                 </div>
                 <p>Color intensity indicates the strength of the predictive word or phrase.</p>
             </div>
-            
-            <h2>Passages</h2>
+
+            <h2>Chapter {chapter}</h2>
     """
-    
-    # Add each passage with highlighting
-    for _, row in passages_df.iterrows():
-        passage_id = row['id']
-        passage_text = row['passage']
-        is_skeptical = row['expresses_scepticism']
-        translation = row.get('english_translation', None)
-        proper_nouns = proper_nouns_dict.get(passage_id, [])
-        
-        highlighted_passage = highlight_passage(
-            passage_text, 
-            skeptic_color_map, 
-            skeptic_color_map, 
-            skeptic_class_map,
-            is_mythic_page=False
-        )
-        
-        html_content += f"""
-            <div class="passage">
-                <div class="passage-header">
-                    <span class="passage-id">Passage {passage_id}</span>
-                    <span class="passage-class">Class: {'Skeptical' if is_skeptical else 'Non-skeptical'}</span>
+
+        for _, row in chapter_passages.iterrows():
+            passage_id = row['id']
+            passage_text = row['passage']
+            is_skeptical = row['expresses_scepticism']
+            translation = row.get('english_translation', None)
+            proper_nouns = proper_nouns_dict.get(passage_id, [])
+
+            highlighted_passage = highlight_passage(
+                passage_text,
+                skeptic_color_map,
+                skeptic_color_map,
+                skeptic_class_map,
+                is_mythic_page=False
+            )
+
+            html_content += f"""
+            <div class=\"passage\">
+                <div class=\"passage-header\">
+                    <span class=\"passage-id\">Passage {passage_id}</span>
+                    <span class=\"passage-class\">Class: {'Skeptical' if is_skeptical else 'Non-skeptical'}</span>
                 </div>
-                <div class="passage-container">
-                   <div class="greek-text">
+                <div class=\"passage-container\">
+                   <div class=\"greek-text\">
                     {highlighted_passage}
         """
 
-        if proper_nouns:
-            html_content += f"""
-                        <div class="proper-nouns">
-                            <div class="proper-noun-header">Proper Nouns:</div>
-            """
-            
-            for noun in sorted(proper_nouns):
+            if proper_nouns:
                 html_content += f"""
-                            <span class="proper-noun-tag">{html.escape(noun)}</span>
-                """
-            
-            html_content += """
-                        </div>
+                        <div class=\"proper-nouns\">
+                            <div class=\"proper-noun-header\">Proper Nouns:</div>
             """
-        html_content += """
+
+                for noun in sorted(proper_nouns):
+                    html_content += f"""
+                            <span class=\"proper-noun-tag\">{html.escape(noun)}</span>
+                """
+
+                html_content += """
+                        </div>
+                """
+
+            html_content += """
                    </div>
         """
 
-        if translation and not pd.isna(translation):
-            html_content += f"""
-                    <div class="english-translation">
+            if translation and not pd.isna(translation):
+                html_content += f"""
+                    <div class=\"english-translation\">
                         {translation}
                     </div>
             """
 
-        html_content += """
+            html_content += """
             </div>
         </div>
         """
-    
-    # Close the HTML
-    html_content += """
+
+        html_content += f"""
+            <footer>
+                Generated on {datetime.now().strftime("%Y-%m-%d at %H:%M:%S")}
+            </footer>
+        </div>
+    </body>
+    </html>
+    """
+
+        filename = f"{chapter.replace('.', '_')}.html"
+        with open(os.path.join(skeptic_dir, filename), 'w', encoding='utf-8') as f:
+            f.write(html_content)
+
+    # Create index page linking to chapters
+    index_content = f"""<!DOCTYPE html>
+    <html lang=\"en\">
+    <head>
+        <meta charset=\"UTF-8\">
+        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+        <title>{title} - Skepticism Analysis</title>
+        <link rel=\"stylesheet\" href=\"../css/style.css\">
+    </head>
+    <body>
+        <header>
+            <h1>{title}</h1>
+            <p>Analysis of Skepticism in Pausanias</p>
+        </header>
+
+        <nav>
+            <a href=\"../index.html\">Home</a>
+            <a href=\"../mythic/index.html\">Mythic Analysis</a>
+            <a href=\"index.html\" class=\"active\">Skepticism Analysis</a>
+            <a href=\"../mythic_words.html\">Mythic Words</a>
+            <a href=\"../skeptic_words.html\">Skeptic Words</a>
+            <a href=\"../network_viz/index.html\">Network Analysis</a>
+        </nav>
+
+        <div class=\"container\">
+            <h2>Chapters</h2>
+            <ul>
+    """
+
+    for chapter in chapters:
+        filename = f"{chapter.replace('.', '_')}.html"
+        index_content += f"<li><a href=\"{filename}\">Chapter {chapter}</a></li>\n"
+
+    index_content += """
+            </ul>
             <footer>
                 Generated on """ + datetime.now().strftime("%Y-%m-%d at %H:%M:%S") + """
             </footer>
@@ -287,10 +398,9 @@ def generate_skepticism_page(passages_df, skeptic_color_map, skeptic_class_map, 
     </body>
     </html>
     """
-    
-    # Write the file
-    with open(os.path.join(output_dir, 'skepticism.html'), 'w', encoding='utf-8') as f:
-        f.write(html_content)
+
+    with open(os.path.join(skeptic_dir, 'index.html'), 'w', encoding='utf-8') as f:
+        f.write(index_content)
 
 def generate_mythic_words_page(mythic_predictors, output_dir, title):
     """Generate a page showing words and phrases that predict mythic/historical content."""
@@ -315,8 +425,8 @@ def generate_mythic_words_page(mythic_predictors, output_dir, title):
         
         <nav>
             <a href="index.html">Home</a>
-            <a href="mythic.html">Mythic Analysis</a>
-            <a href="skepticism.html">Skepticism Analysis</a>
+            <a href="mythic/index.html">Mythic Analysis</a>
+            <a href="skepticism/index.html">Skepticism Analysis</a>
             <a href="mythic_words.html" class="active">Mythic Words</a>
             <a href="skeptic_words.html">Skeptic Words</a>
             <a href="network_viz/index.html">Network Analysis</a>
@@ -410,8 +520,8 @@ def generate_skeptic_words_page(skeptic_predictors, output_dir, title):
         
         <nav>
             <a href="index.html">Home</a>
-            <a href="mythic.html">Mythic Analysis</a>
-            <a href="skepticism.html">Skepticism Analysis</a>
+            <a href="mythic/index.html">Mythic Analysis</a>
+            <a href="skepticism/index.html">Skepticism Analysis</a>
             <a href="mythic_words.html">Mythic Words</a>
             <a href="skeptic_words.html" class="active">Skeptic Words</a>
             <a href="network_viz/index.html">Network Analysis</a>

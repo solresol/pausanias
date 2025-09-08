@@ -367,8 +367,8 @@ def create_d3_html_template(output_dir):
     
     <nav>
         <a href="../index.html">Home</a>
-        <a href="../mythic.html">Mythic Analysis</a>
-        <a href="../skepticism.html">Skepticism Analysis</a>
+        <a href="../mythic/index.html">Mythic Analysis</a>
+        <a href="../skepticism/index.html">Skepticism Analysis</a>
         <a href="../mythic_words.html">Mythic Words</a>
         <a href="../skeptic_words.html">Skeptic Words</a>
         <a href="index.html" class="active">Network Analysis</a>
@@ -840,8 +840,8 @@ def create_d3_html_template(output_dir):
     
     <nav>
         <a href="../index.html">Home</a>
-        <a href="../mythic.html">Mythic Analysis</a>
-        <a href="../skepticism.html">Skepticism Analysis</a>
+        <a href="../mythic/index.html">Mythic Analysis</a>
+        <a href="../skepticism/index.html">Skepticism Analysis</a>
         <a href="../mythic_words.html">Mythic Words</a>
         <a href="../skeptic_words.html">Skeptic Words</a>
         <a href="index.html">Network Analysis</a>
