@@ -13,3 +13,4 @@ uv run analyse_noun_network.py
 uv run sentence_mythic_sceptic_analyser.py --stop 25
 uv run create_website.py
 rsync -avz pausanias_site/ merah:/var/www/vhosts/pausanias.symmachus.org/htdocs/
+rsync -avz pausanias.sqlite merah:/var/www/vhosts/pausanias.symmachus.org/htdocs/
