@@ -84,6 +84,30 @@ def get_skepticism_predictors(conn):
     return df
 
 
+def get_sentence_mythicness_predictors(conn):
+    """Get sentence-level words/phrases that predict mythicness/historicity."""
+    query = """
+    SELECT phrase, coefficient, is_mythic
+    FROM sentence_mythicness_predictors
+    ORDER BY coefficient DESC
+    """
+
+    df = pd.read_sql_query(query, conn)
+    return df
+
+
+def get_sentence_skepticism_predictors(conn):
+    """Get sentence-level words/phrases that predict skepticism/non-skepticism."""
+    query = """
+    SELECT phrase, coefficient, is_skeptical
+    FROM sentence_skepticism_predictors
+    ORDER BY coefficient DESC
+    """
+
+    df = pd.read_sql_query(query, conn)
+    return df
+
+
 def get_all_sentences(conn):
     """Retrieve all Greek and English sentences with analysis flags."""
     query = """
