@@ -28,7 +28,7 @@ def generate_home_page(output_dir, title, timestamp):
             <a href="skepticism/index.html">Skepticism Analysis</a>
             <a href="mythic_words.html">Mythic Words</a>
             <a href="skeptic_words.html">Skeptic Words</a>
-            <a href="sentences.html">Sentences</a>
+            <a href="sentences/index.html">Sentences</a>
             <a href="sentence_mythic_words.html">Sentence Mythic Words</a>
             <a href="sentence_skeptic_words.html">Sentence Skeptic Words</a>
             <a href="network_viz/index.html">Network Analysis</a>
@@ -107,7 +107,7 @@ def generate_mythic_page(passages_df, mythic_color_map, mythic_class_map, proper
             <a href=\"../skepticism/index.html\">Skepticism Analysis</a>
             <a href=\"../mythic_words.html\">Mythic Words</a>
             <a href=\"../skeptic_words.html\">Skeptic Words</a>
-            <a href=\"../sentences.html\">Sentences</a>
+            <a href=\"../sentences/index.html\">Sentences</a>
             <a href=\"../sentence_mythic_words.html\">Sentence Mythic Words</a>
             <a href=\"../sentence_skeptic_words.html\">Sentence Skeptic Words</a>
             <a href=\"../network_viz/index.html\">Network Analysis</a>
@@ -219,7 +219,7 @@ def generate_mythic_page(passages_df, mythic_color_map, mythic_class_map, proper
             <a href=\"../skepticism/index.html\">Skepticism Analysis</a>
             <a href=\"../mythic_words.html\">Mythic Words</a>
             <a href=\"../skeptic_words.html\">Skeptic Words</a>
-            <a href=\"../sentences.html\">Sentences</a>
+            <a href=\"../sentences/index.html\">Sentences</a>
             <a href=\"../sentence_mythic_words.html\">Sentence Mythic Words</a>
             <a href=\"../sentence_skeptic_words.html\">Sentence Skeptic Words</a>
             <a href=\"../network_viz/index.html\">Network Analysis</a>
@@ -279,7 +279,7 @@ def generate_skepticism_page(passages_df, skeptic_color_map, skeptic_class_map, 
             <a href=\"index.html\" class=\"active\">Skepticism Analysis</a>
             <a href=\"../mythic_words.html\">Mythic Words</a>
             <a href=\"../skeptic_words.html\">Skeptic Words</a>
-            <a href=\"../sentences.html\">Sentences</a>
+            <a href=\"../sentences/index.html\">Sentences</a>
             <a href=\"../sentence_mythic_words.html\">Sentence Mythic Words</a>
             <a href=\"../sentence_skeptic_words.html\">Sentence Skeptic Words</a>
             <a href=\"../network_viz/index.html\">Network Analysis</a>
@@ -391,7 +391,7 @@ def generate_skepticism_page(passages_df, skeptic_color_map, skeptic_class_map, 
             <a href=\"index.html\" class=\"active\">Skepticism Analysis</a>
             <a href=\"../mythic_words.html\">Mythic Words</a>
             <a href=\"../skeptic_words.html\">Skeptic Words</a>
-            <a href=\"../sentences.html\">Sentences</a>
+            <a href=\"../sentences/index.html\">Sentences</a>
             <a href=\"../sentence_mythic_words.html\">Sentence Mythic Words</a>
             <a href=\"../sentence_skeptic_words.html\">Sentence Skeptic Words</a>
             <a href=\"../network_viz/index.html\">Network Analysis</a>
@@ -446,7 +446,7 @@ def generate_mythic_words_page(mythic_predictors, output_dir, title):
             <a href="skepticism/index.html">Skepticism Analysis</a>
             <a href="mythic_words.html" class="active">Mythic Words</a>
             <a href="skeptic_words.html">Skeptic Words</a>
-            <a href="sentences.html">Sentences</a>
+            <a href="sentences/index.html">Sentences</a>
             <a href="sentence_mythic_words.html">Sentence Mythic Words</a>
             <a href="sentence_skeptic_words.html">Sentence Skeptic Words</a>
             <a href="network_viz/index.html">Network Analysis</a>
@@ -544,7 +544,7 @@ def generate_skeptic_words_page(skeptic_predictors, output_dir, title):
             <a href="skepticism/index.html">Skepticism Analysis</a>
             <a href="mythic_words.html">Mythic Words</a>
             <a href="skeptic_words.html" class="active">Skeptic Words</a>
-            <a href="sentences.html">Sentences</a>
+            <a href="sentences/index.html">Sentences</a>
             <a href="sentence_mythic_words.html">Sentence Mythic Words</a>
             <a href="sentence_skeptic_words.html">Sentence Skeptic Words</a>
             <a href="network_viz/index.html">Network Analysis</a>
@@ -642,7 +642,7 @@ def generate_sentence_mythic_words_page(mythic_predictors, output_dir, title):
             <a href="skepticism/index.html">Skepticism Analysis</a>
             <a href="mythic_words.html">Mythic Words</a>
             <a href="skeptic_words.html">Skeptic Words</a>
-            <a href="sentences.html">Sentences</a>
+            <a href="sentences/index.html">Sentences</a>
             <a href="sentence_mythic_words.html" class="active">Sentence Mythic Words</a>
             <a href="sentence_skeptic_words.html">Sentence Skeptic Words</a>
             <a href="network_viz/index.html">Network Analysis</a>
@@ -727,7 +727,7 @@ def generate_sentence_skeptic_words_page(skeptic_predictors, output_dir, title):
             <a href="skepticism/index.html">Skepticism Analysis</a>
             <a href="mythic_words.html">Mythic Words</a>
             <a href="skeptic_words.html">Skeptic Words</a>
-            <a href="sentences.html">Sentences</a>
+            <a href="sentences/index.html">Sentences</a>
             <a href="sentence_mythic_words.html">Sentence Mythic Words</a>
             <a href="sentence_skeptic_words.html" class="active">Sentence Skeptic Words</a>
             <a href="network_viz/index.html">Network Analysis</a>
@@ -787,83 +787,148 @@ def generate_sentence_skeptic_words_page(skeptic_predictors, output_dir, title):
 
 
 def generate_sentences_page(sentences_df, output_dir, title):
-    """Generate a page listing Greek passages split into sentences."""
+    """Generate pages listing Greek passages split into sentences, grouped by chapter."""
 
-    html_content = f"""<!DOCTYPE html>
-    <html lang=\"en\">
-    <head>
-        <meta charset=\"UTF-8\">
-        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
-        <title>{title} - Sentences</title>
-        <link rel=\"stylesheet\" href=\"css/style.css\">
-    </head>
-    <body>
-        <header>
-            <h1>{title}</h1>
-            <p>Greek passages split into sentences with English translation</p>
-        </header>
+    sentences_df = sentences_df.copy()
+    sentences_df["chapter"] = sentences_df["passage_id"].apply(lambda pid: ".".join(pid.split(".")[:2]))
+    chapters = sorted(
+        sentences_df["chapter"].unique(),
+        key=lambda c: [int(p) for p in c.split(".")],
+    )
 
-        <nav>
-            <a href=\"index.html\">Home</a>
-            <a href=\"mythic/index.html\">Mythic Analysis</a>
-            <a href=\"skepticism/index.html\">Skepticism Analysis</a>
-            <a href=\"mythic_words.html\">Mythic Words</a>
-            <a href=\"skeptic_words.html\">Skeptic Words</a>
-            <a href=\"sentences.html\" class=\"active\">Sentences</a>
-            <a href=\"sentence_mythic_words.html\">Sentence Mythic Words</a>
-            <a href=\"sentence_skeptic_words.html\">Sentence Skeptic Words</a>
-            <a href=\"network_viz/index.html\">Network Analysis</a>
-        </nav>
+    sentences_dir = os.path.join(output_dir, "sentences")
+    os.makedirs(sentences_dir, exist_ok=True)
 
-        <div class=\"container\">
-            <h2>Sentence-level Translations</h2>
-            <table class=\"sentences-table\">
-                <thead>
-                    <tr>
-                        <th>Passage</th>
-                        <th>Sentence</th>
-                        <th>Greek</th>
-                        <th>English</th>
-                        <th>Era</th>
-                        <th>Skepticism</th>
-                    </tr>
-                </thead>
-                <tbody>
-    """
+    # Create chapter pages
+    for chapter in chapters:
+        chapter_df = sentences_df[sentences_df["chapter"] == chapter]
+        html_content = f"""<!DOCTYPE html>
+<html lang=\"en\">
+<head>
+    <meta charset=\"UTF-8\">
+    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+    <title>{title} - Sentences {chapter}</title>
+    <link rel=\"stylesheet\" href=\"../css/style.css\">
+</head>
+<body>
+    <header>
+        <h1>{title}</h1>
+        <p>Greek passages split into sentences with English translation</p>
+    </header>
 
-    for _, row in sentences_df.iterrows():
-        if pd.isna(row["references_mythic_era"]):
-            era = "?"
-        else:
-            era = "Mythic" if row["references_mythic_era"] else "Historical"
+    <nav>
+        <a href=\"../index.html\">Home</a>
+        <a href=\"../mythic/index.html\">Mythic Analysis</a>
+        <a href=\"../skepticism/index.html\">Skepticism Analysis</a>
+        <a href=\"../mythic_words.html\">Mythic Words</a>
+        <a href=\"../skeptic_words.html\">Skeptic Words</a>
+        <a href=\"index.html\" class=\"active\">Sentences</a>
+        <a href=\"../sentence_mythic_words.html\">Sentence Mythic Words</a>
+        <a href=\"../sentence_skeptic_words.html\">Sentence Skeptic Words</a>
+        <a href=\"../network_viz/index.html\">Network Analysis</a>
+    </nav>
 
-        if pd.isna(row["expresses_scepticism"]):
-            sceptic = "?"
-        else:
-            sceptic = "Skeptical" if row["expresses_scepticism"] else "Not Skeptical"
+    <div class=\"container\">
+        <h2>Chapter {chapter}</h2>
+        <table class=\"sentences-table\">
+            <thead>
+                <tr>
+                    <th>Passage</th>
+                    <th>Sentence</th>
+                    <th>Greek</th>
+                    <th>English</th>
+                    <th>Era</th>
+                    <th>Skepticism</th>
+                </tr>
+            </thead>
+            <tbody>
+"""
+
+        for _, row in chapter_df.iterrows():
+            if pd.isna(row["references_mythic_era"]):
+                era = "?"
+            else:
+                era = "Mythic" if row["references_mythic_era"] else "Historical"
+
+            if pd.isna(row["expresses_scepticism"]):
+                sceptic = "?"
+            else:
+                sceptic = (
+                    "Skeptical" if row["expresses_scepticism"] else "Not Skeptical"
+                )
+
+            html_content += f"""
+                <tr>
+                    <td>{html.escape(row['passage_id'])}</td>
+                    <td>{row['sentence_number']}</td>
+                    <td>{html.escape(row['sentence'])}</td>
+                    <td>{html.escape(row['english_sentence'])}</td>
+                    <td>{era}</td>
+                    <td>{sceptic}</td>
+                </tr>
+"""
 
         html_content += f"""
-                    <tr>
-                        <td>{html.escape(row['passage_id'])}</td>
-                        <td>{row['sentence_number']}</td>
-                        <td>{html.escape(row['sentence'])}</td>
-                        <td>{html.escape(row['english_sentence'])}</td>
-                        <td>{era}</td>
-                        <td>{sceptic}</td>
-                    </tr>
-        """
+            </tbody>
+        </table>
 
-    html_content += """
-                </tbody>
-            </table>
+        <footer>
+            Generated on {datetime.now().strftime("%Y-%m-%d at %H:%M:%S")}
+        </footer>
+    </div>
+</body>
+</html>
+"""
 
-            <footer>
-                Generated on """ + datetime.now().strftime("%Y-%m-%d at %H:%M:%S") + """
-            </footer>
-        </div>
-    </body>
-    </html>
-    """
+        filename = f"{chapter.replace('.', '_')}.html"
+        with open(os.path.join(sentences_dir, filename), "w", encoding="utf-8") as f:
+            f.write(html_content)
 
-    with open(os.path.join(output_dir, 'sentences.html'), 'w', encoding='utf-8') as f:
-        f.write(html_content)
+    # Create index page linking to chapters
+    index_content = f"""<!DOCTYPE html>
+<html lang=\"en\">
+<head>
+    <meta charset=\"UTF-8\">
+    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+    <title>{title} - Sentences</title>
+    <link rel=\"stylesheet\" href=\"../css/style.css\">
+</head>
+<body>
+    <header>
+        <h1>{title}</h1>
+        <p>Greek passages split into sentences with English translation</p>
+    </header>
+
+    <nav>
+        <a href=\"../index.html\">Home</a>
+        <a href=\"../mythic/index.html\">Mythic Analysis</a>
+        <a href=\"../skepticism/index.html\">Skepticism Analysis</a>
+        <a href=\"../mythic_words.html\">Mythic Words</a>
+        <a href=\"../skeptic_words.html\">Skeptic Words</a>
+        <a href=\"index.html\" class=\"active\">Sentences</a>
+        <a href=\"../sentence_mythic_words.html\">Sentence Mythic Words</a>
+        <a href=\"../sentence_skeptic_words.html\">Sentence Skeptic Words</a>
+        <a href=\"../network_viz/index.html\">Network Analysis</a>
+    </nav>
+
+    <div class=\"container\">
+        <h2>Chapters</h2>
+        <ul>
+"""
+
+    for chapter in chapters:
+        filename = f"{chapter.replace('.', '_')}.html"
+        index_content += f"            <li><a href=\"{filename}\">Chapter {chapter}</a></li>\n"
+
+    index_content += f"""
+        </ul>
+        <footer>
+            Generated on {datetime.now().strftime("%Y-%m-%d at %H:%M:%S")}
+        </footer>
+    </div>
+</body>
+</html>
+"""
+
+    with open(os.path.join(sentences_dir, "index.html"), "w", encoding="utf-8") as f:
+        f.write(index_content)
