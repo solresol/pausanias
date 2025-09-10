@@ -12,7 +12,8 @@ from .data import (
     get_analyzed_passages,
     get_mythicness_predictors,
     get_skepticism_predictors,
-    get_proper_nouns_by_passage
+    get_proper_nouns_by_passage,
+    get_all_sentences,
 )
 from .structure import create_website_structure
 from .highlighting import create_predictor_maps
@@ -21,7 +22,8 @@ from .generators import (
     generate_mythic_page,
     generate_skepticism_page,
     generate_mythic_words_page,
-    generate_skeptic_words_page
+    generate_skeptic_words_page,
+    generate_sentences_page,
 )
 
 def parse_arguments():
@@ -49,6 +51,7 @@ def main():
         mythic_predictors = get_mythicness_predictors(conn)
         skeptic_predictors = get_skepticism_predictors(conn)
         proper_nouns_dict = get_proper_nouns_by_passage(conn)
+        sentences_df = get_all_sentences(conn)
         
         if len(passages_df) == 0:
             print("No analyzed passages found in the database.")
@@ -79,6 +82,7 @@ def main():
         generate_skepticism_page(passages_df, skeptic_color_map, skeptic_class_map, proper_nouns_dict, output_dir, args.title)
         generate_mythic_words_page(mythic_predictors, output_dir, args.title)
         generate_skeptic_words_page(skeptic_predictors, output_dir, args.title)
+        generate_sentences_page(sentences_df, output_dir, args.title)
         
         print(f"Website generated successfully in '{output_dir}'")
         print(f"Open '{os.path.join(output_dir, 'index.html')}' in a web browser to view it.")
