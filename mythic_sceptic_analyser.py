@@ -23,8 +23,8 @@ def parse_arguments():
                         help="Maximum number of records to process (default: all)")
     parser.add_argument("--progress-bar", action="store_true", default=False,
                         help="Show progress bar")
-    parser.add_argument("--model", default="gpt-4.1",
-                        help="OpenAI model to use (default: gpt-4.1)")
+    parser.add_argument("--model", default="gpt-5",
+                        help="OpenAI model to use (default: gpt-5)")
     
     return parser.parse_args()
 
