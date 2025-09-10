@@ -79,6 +79,18 @@ def get_skepticism_predictors(conn):
     FROM skepticism_predictors
     ORDER BY coefficient DESC
     """
-    
+
+    df = pd.read_sql_query(query, conn)
+    return df
+
+
+def get_all_sentences(conn):
+    """Retrieve all Greek and English sentences."""
+    query = """
+    SELECT passage_id, sentence_number, sentence, english_sentence
+    FROM greek_sentences
+    ORDER BY passage_id, sentence_number
+    """
+
     df = pd.read_sql_query(query, conn)
     return df
