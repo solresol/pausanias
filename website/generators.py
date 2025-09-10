@@ -636,18 +636,32 @@ def generate_sentences_page(sentences_df, output_dir, title):
                         <th>Sentence</th>
                         <th>Greek</th>
                         <th>English</th>
+                        <th>Era</th>
+                        <th>Skepticism</th>
                     </tr>
                 </thead>
                 <tbody>
     """
 
     for _, row in sentences_df.iterrows():
+        if pd.isna(row["references_mythic_era"]):
+            era = "?"
+        else:
+            era = "Mythic" if row["references_mythic_era"] else "Historical"
+
+        if pd.isna(row["expresses_scepticism"]):
+            sceptic = "?"
+        else:
+            sceptic = "Skeptical" if row["expresses_scepticism"] else "Not Skeptical"
+
         html_content += f"""
                     <tr>
                         <td>{html.escape(row['passage_id'])}</td>
                         <td>{row['sentence_number']}</td>
                         <td>{html.escape(row['sentence'])}</td>
                         <td>{html.escape(row['english_sentence'])}</td>
+                        <td>{era}</td>
+                        <td>{sceptic}</td>
                     </tr>
         """
 
