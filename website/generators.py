@@ -63,7 +63,7 @@ def generate_home_page(output_dir, title, timestamp):
             </div>
             
             <footer>
-                Site last updated on {timestamp}
+                Site generated on {timestamp} from <a href="pausanias.sqlite">pausanias.sqlite</a>
             </footer>
         </div>
     </body>
@@ -187,7 +187,7 @@ def generate_mythic_page(passages_df, mythic_color_map, mythic_class_map, proper
 
         html_content += f"""
             <footer>
-                Generated on {datetime.now().strftime("%Y-%m-%d at %H:%M:%S")}
+                Generated on {datetime.now().strftime("%Y-%m-%d at %H:%M:%S")} from <a href=\"../pausanias.sqlite\">pausanias.sqlite</a>
             </footer>
         </div>
     </body>
@@ -237,7 +237,7 @@ def generate_mythic_page(passages_df, mythic_color_map, mythic_class_map, proper
     index_content += """
             </ul>
             <footer>
-                Generated on """ + datetime.now().strftime("%Y-%m-%d at %H:%M:%S") + """
+                Generated on """ + datetime.now().strftime("%Y-%m-%d at %H:%M:%S") + """ from <a href=\"../pausanias.sqlite\">pausanias.sqlite</a>
             </footer>
         </div>
     </body>
@@ -359,7 +359,7 @@ def generate_skepticism_page(passages_df, skeptic_color_map, skeptic_class_map, 
 
         html_content += f"""
             <footer>
-                Generated on {datetime.now().strftime("%Y-%m-%d at %H:%M:%S")}
+                Generated on {datetime.now().strftime("%Y-%m-%d at %H:%M:%S")} from <a href=\"../pausanias.sqlite\">pausanias.sqlite</a>
             </footer>
         </div>
     </body>
@@ -409,7 +409,7 @@ def generate_skepticism_page(passages_df, skeptic_color_map, skeptic_class_map, 
     index_content += """
             </ul>
             <footer>
-                Generated on """ + datetime.now().strftime("%Y-%m-%d at %H:%M:%S") + """
+                Generated on """ + datetime.now().strftime("%Y-%m-%d at %H:%M:%S") + """ from <a href=\"../pausanias.sqlite\">pausanias.sqlite</a>
             </footer>
         </div>
     </body>
@@ -504,9 +504,9 @@ def generate_mythic_words_page(mythic_predictors, output_dir, title):
     html_content += """
                 </tbody>
             </table>
-            
+
             <footer>
-                Generated on """ + datetime.now().strftime("%Y-%m-%d at %H:%M:%S") + """
+                Generated on """ + datetime.now().strftime("%Y-%m-%d at %H:%M:%S") + """ from <a href=\"pausanias.sqlite\">pausanias.sqlite</a>
             </footer>
         </div>
     </body>
@@ -604,7 +604,7 @@ def generate_skeptic_words_page(skeptic_predictors, output_dir, title):
             </table>
             
             <footer>
-                Generated on """ + datetime.now().strftime("%Y-%m-%d at %H:%M:%S") + """
+                Generated on """ + datetime.now().strftime("%Y-%m-%d at %H:%M:%S") + """ from <a href=\"pausanias.sqlite\">pausanias.sqlite</a>
             </footer>
         </div>
     </body>
@@ -690,7 +690,7 @@ def generate_sentence_mythic_words_page(mythic_predictors, output_dir, title):
             </table>
 
             <footer>
-                Generated on """ + datetime.now().strftime("%Y-%m-%d at %H:%M:%S") + """
+                Generated on """ + datetime.now().strftime("%Y-%m-%d at %H:%M:%S") + """ from <a href=\"pausanias.sqlite\">pausanias.sqlite</a>
             </footer>
         </div>
     </body>
@@ -775,7 +775,7 @@ def generate_sentence_skeptic_words_page(skeptic_predictors, output_dir, title):
             </table>
 
             <footer>
-                Generated on """ + datetime.now().strftime("%Y-%m-%d at %H:%M:%S") + """
+                Generated on """ + datetime.now().strftime("%Y-%m-%d at %H:%M:%S") + """ from <a href=\"pausanias.sqlite\">pausanias.sqlite</a>
             </footer>
         </div>
     </body>
@@ -873,7 +873,7 @@ def generate_sentences_page(sentences_df, output_dir, title):
         </table>
 
         <footer>
-            Generated on {datetime.now().strftime("%Y-%m-%d at %H:%M:%S")}
+            Generated on {datetime.now().strftime("%Y-%m-%d at %H:%M:%S")} from <a href=\"../pausanias.sqlite\">pausanias.sqlite</a>
         </footer>
     </div>
 </body>
@@ -923,7 +923,7 @@ def generate_sentences_page(sentences_df, output_dir, title):
     index_content += f"""
         </ul>
         <footer>
-            Generated on {datetime.now().strftime("%Y-%m-%d at %H:%M:%S")}
+            Generated on {datetime.now().strftime("%Y-%m-%d at %H:%M:%S")} from <a href=\"../pausanias.sqlite\">pausanias.sqlite</a>
         </footer>
     </div>
 </body>
