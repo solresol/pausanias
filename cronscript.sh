@@ -1,6 +1,7 @@
 #!/bin/sh
 
 cd $(dirname $0)
+git pull -q
 
 uv run mythic_sceptic_analyser.py --stop 50
 uv run extract_proper_nouns.py --stop 50
