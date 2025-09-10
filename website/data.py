@@ -85,9 +85,10 @@ def get_skepticism_predictors(conn):
 
 
 def get_all_sentences(conn):
-    """Retrieve all Greek and English sentences."""
+    """Retrieve all Greek and English sentences with analysis flags."""
     query = """
-    SELECT passage_id, sentence_number, sentence, english_sentence
+    SELECT passage_id, sentence_number, sentence, english_sentence,
+           references_mythic_era, expresses_scepticism
     FROM greek_sentences
     ORDER BY passage_id, sentence_number
     """
