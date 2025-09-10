@@ -29,6 +29,8 @@ def generate_home_page(output_dir, title, timestamp):
             <a href="mythic_words.html">Mythic Words</a>
             <a href="skeptic_words.html">Skeptic Words</a>
             <a href="sentences.html">Sentences</a>
+            <a href="sentence_mythic_words.html">Sentence Mythic Words</a>
+            <a href="sentence_skeptic_words.html">Sentence Skeptic Words</a>
             <a href="network_viz/index.html">Network Analysis</a>
         </nav>
         
@@ -56,6 +58,8 @@ def generate_home_page(output_dir, title, timestamp):
                 <p>Examine the specific words and phrases that are most strongly associated with mythic content and skepticism.</p>
                 <a href="mythic_words.html">Mythic Predictors</a>
                 <a href="skeptic_words.html">Skepticism Predictors</a>
+                <a href="sentence_mythic_words.html">Sentence Mythic Predictors</a>
+                <a href="sentence_skeptic_words.html">Sentence Skepticism Predictors</a>
             </div>
             
             <footer>
@@ -104,6 +108,8 @@ def generate_mythic_page(passages_df, mythic_color_map, mythic_class_map, proper
             <a href=\"../mythic_words.html\">Mythic Words</a>
             <a href=\"../skeptic_words.html\">Skeptic Words</a>
             <a href=\"../sentences.html\">Sentences</a>
+            <a href=\"../sentence_mythic_words.html\">Sentence Mythic Words</a>
+            <a href=\"../sentence_skeptic_words.html\">Sentence Skeptic Words</a>
             <a href=\"../network_viz/index.html\">Network Analysis</a>
         </nav>
 
@@ -214,6 +220,8 @@ def generate_mythic_page(passages_df, mythic_color_map, mythic_class_map, proper
             <a href=\"../mythic_words.html\">Mythic Words</a>
             <a href=\"../skeptic_words.html\">Skeptic Words</a>
             <a href=\"../sentences.html\">Sentences</a>
+            <a href=\"../sentence_mythic_words.html\">Sentence Mythic Words</a>
+            <a href=\"../sentence_skeptic_words.html\">Sentence Skeptic Words</a>
             <a href=\"../network_viz/index.html\">Network Analysis</a>
         </nav>
 
@@ -272,6 +280,8 @@ def generate_skepticism_page(passages_df, skeptic_color_map, skeptic_class_map, 
             <a href=\"../mythic_words.html\">Mythic Words</a>
             <a href=\"../skeptic_words.html\">Skeptic Words</a>
             <a href=\"../sentences.html\">Sentences</a>
+            <a href=\"../sentence_mythic_words.html\">Sentence Mythic Words</a>
+            <a href=\"../sentence_skeptic_words.html\">Sentence Skeptic Words</a>
             <a href=\"../network_viz/index.html\">Network Analysis</a>
         </nav>
 
@@ -382,6 +392,8 @@ def generate_skepticism_page(passages_df, skeptic_color_map, skeptic_class_map, 
             <a href=\"../mythic_words.html\">Mythic Words</a>
             <a href=\"../skeptic_words.html\">Skeptic Words</a>
             <a href=\"../sentences.html\">Sentences</a>
+            <a href=\"../sentence_mythic_words.html\">Sentence Mythic Words</a>
+            <a href=\"../sentence_skeptic_words.html\">Sentence Skeptic Words</a>
             <a href=\"../network_viz/index.html\">Network Analysis</a>
         </nav>
 
@@ -435,6 +447,8 @@ def generate_mythic_words_page(mythic_predictors, output_dir, title):
             <a href="mythic_words.html" class="active">Mythic Words</a>
             <a href="skeptic_words.html">Skeptic Words</a>
             <a href="sentences.html">Sentences</a>
+            <a href="sentence_mythic_words.html">Sentence Mythic Words</a>
+            <a href="sentence_skeptic_words.html">Sentence Skeptic Words</a>
             <a href="network_viz/index.html">Network Analysis</a>
         </nav>
         
@@ -531,6 +545,8 @@ def generate_skeptic_words_page(skeptic_predictors, output_dir, title):
             <a href="mythic_words.html">Mythic Words</a>
             <a href="skeptic_words.html" class="active">Skeptic Words</a>
             <a href="sentences.html">Sentences</a>
+            <a href="sentence_mythic_words.html">Sentence Mythic Words</a>
+            <a href="sentence_skeptic_words.html">Sentence Skeptic Words</a>
             <a href="network_viz/index.html">Network Analysis</a>
         </nav>
         
@@ -600,6 +616,176 @@ def generate_skeptic_words_page(skeptic_predictors, output_dir, title):
         f.write(html_content)
 
 
+def generate_sentence_mythic_words_page(mythic_predictors, output_dir, title):
+    """Generate a page showing sentence-level predictors of mythic/historical content."""
+
+    mythic_words = mythic_predictors[mythic_predictors['is_mythic'] == 1].sort_values('coefficient', ascending=False)
+    historical_words = mythic_predictors[mythic_predictors['is_mythic'] == 0].sort_values('coefficient', ascending=True)
+
+    html_content = f"""<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{title} - Sentence Mythic Predictors</title>
+        <link rel="stylesheet" href="css/style.css">
+    </head>
+    <body>
+        <header>
+            <h1>{title}</h1>
+            <p>Sentence-level words and phrases that predict mythic vs. historical content</p>
+        </header>
+
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="mythic/index.html">Mythic Analysis</a>
+            <a href="skepticism/index.html">Skepticism Analysis</a>
+            <a href="mythic_words.html">Mythic Words</a>
+            <a href="skeptic_words.html">Skeptic Words</a>
+            <a href="sentences.html">Sentences</a>
+            <a href="sentence_mythic_words.html" class="active">Sentence Mythic Words</a>
+            <a href="sentence_skeptic_words.html">Sentence Skeptic Words</a>
+            <a href="network_viz/index.html">Network Analysis</a>
+        </nav>
+
+        <div class="container">
+            <h2>Sentence Predictors of Mythic Content</h2>
+            <table class="predictor-table">
+                <thead>
+                    <tr><th>Word/Phrase</th><th>Coefficient</th></tr>
+                </thead>
+                <tbody>
+    """
+
+    for _, row in mythic_words.iterrows():
+        html_content += f"""
+                    <tr>
+                        <td class="mythic-word">{html.escape(row['phrase'])}</td>
+                        <td>{row['coefficient']:.4f}</td>
+                    </tr>
+        """
+
+    html_content += """
+                </tbody>
+            </table>
+
+            <h2>Sentence Predictors of Historical Content</h2>
+            <table class="predictor-table">
+                <thead>
+                    <tr><th>Word/Phrase</th><th>Coefficient</th></tr>
+                </thead>
+                <tbody>
+    """
+
+    for _, row in historical_words.iterrows():
+        html_content += f"""
+                    <tr>
+                        <td class="historical-word">{html.escape(row['phrase'])}</td>
+                        <td>{row['coefficient']:.4f}</td>
+                    </tr>
+        """
+
+    html_content += """
+                </tbody>
+            </table>
+
+            <footer>
+                Generated on """ + datetime.now().strftime("%Y-%m-%d at %H:%M:%S") + """
+            </footer>
+        </div>
+    </body>
+    </html>
+    """
+
+    with open(os.path.join(output_dir, 'sentence_mythic_words.html'), 'w', encoding='utf-8') as f:
+        f.write(html_content)
+
+
+def generate_sentence_skeptic_words_page(skeptic_predictors, output_dir, title):
+    """Generate a page showing sentence-level predictors of skepticism."""
+
+    skeptical_words = skeptic_predictors[skeptic_predictors['is_skeptical'] == 1].sort_values('coefficient', ascending=False)
+    non_skeptical_words = skeptic_predictors[skeptic_predictors['is_skeptical'] == 0].sort_values('coefficient', ascending=True)
+
+    html_content = f"""<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{title} - Sentence Skeptic Predictors</title>
+        <link rel="stylesheet" href="css/style.css">
+    </head>
+    <body>
+        <header>
+            <h1>{title}</h1>
+            <p>Sentence-level words and phrases that predict skepticism vs. non-skepticism</p>
+        </header>
+
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="mythic/index.html">Mythic Analysis</a>
+            <a href="skepticism/index.html">Skepticism Analysis</a>
+            <a href="mythic_words.html">Mythic Words</a>
+            <a href="skeptic_words.html">Skeptic Words</a>
+            <a href="sentences.html">Sentences</a>
+            <a href="sentence_mythic_words.html">Sentence Mythic Words</a>
+            <a href="sentence_skeptic_words.html" class="active">Sentence Skeptic Words</a>
+            <a href="network_viz/index.html">Network Analysis</a>
+        </nav>
+
+        <div class="container">
+            <h2>Sentence Predictors of Skeptical Content</h2>
+            <table class="predictor-table">
+                <thead>
+                    <tr><th>Word/Phrase</th><th>Coefficient</th></tr>
+                </thead>
+                <tbody>
+    """
+
+    for _, row in skeptical_words.iterrows():
+        html_content += f"""
+                    <tr>
+                        <td class="skeptical-word">{html.escape(row['phrase'])}</td>
+                        <td>{row['coefficient']:.4f}</td>
+                    </tr>
+        """
+
+    html_content += """
+                </tbody>
+            </table>
+
+            <h2>Sentence Predictors of Non-skeptical Content</h2>
+            <table class="predictor-table">
+                <thead>
+                    <tr><th>Word/Phrase</th><th>Coefficient</th></tr>
+                </thead>
+                <tbody>
+    """
+
+    for _, row in non_skeptical_words.iterrows():
+        html_content += f"""
+                    <tr>
+                        <td class="non-skeptical-word">{html.escape(row['phrase'])}</td>
+                        <td>{row['coefficient']:.4f}</td>
+                    </tr>
+        """
+
+    html_content += """
+                </tbody>
+            </table>
+
+            <footer>
+                Generated on """ + datetime.now().strftime("%Y-%m-%d at %H:%M:%S") + """
+            </footer>
+        </div>
+    </body>
+    </html>
+    """
+
+    with open(os.path.join(output_dir, 'sentence_skeptic_words.html'), 'w', encoding='utf-8') as f:
+        f.write(html_content)
+
+
 def generate_sentences_page(sentences_df, output_dir, title):
     """Generate a page listing Greek passages split into sentences."""
 
@@ -624,6 +810,8 @@ def generate_sentences_page(sentences_df, output_dir, title):
             <a href=\"mythic_words.html\">Mythic Words</a>
             <a href=\"skeptic_words.html\">Skeptic Words</a>
             <a href=\"sentences.html\" class=\"active\">Sentences</a>
+            <a href=\"sentence_mythic_words.html\">Sentence Mythic Words</a>
+            <a href=\"sentence_skeptic_words.html\">Sentence Skeptic Words</a>
             <a href=\"network_viz/index.html\">Network Analysis</a>
         </nav>
 
