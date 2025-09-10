@@ -428,7 +428,7 @@ def create_d3_html_template(output_dir):
         <div id="tooltip" class="tooltip"></div>
         
         <footer>
-            Generated on <span id="timestamp"></span>
+            Generated on <span id="timestamp"></span> from <a href="../pausanias.sqlite">pausanias.sqlite</a>
         </footer>
     </div>
     
@@ -890,7 +890,7 @@ def create_d3_html_template(output_dir):
         <div id="tooltip" class="tooltip"></div>
         
         <footer>
-            Generated on <span id="timestamp"></span>
+            Generated on <span id="timestamp"></span> from <a href="../../pausanias.sqlite">pausanias.sqlite</a>
         </footer>
     </div>
     
