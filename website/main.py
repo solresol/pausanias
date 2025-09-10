@@ -14,6 +14,8 @@ from .data import (
     get_skepticism_predictors,
     get_proper_nouns_by_passage,
     get_all_sentences,
+    get_sentence_mythicness_predictors,
+    get_sentence_skepticism_predictors,
 )
 from .structure import create_website_structure
 from .highlighting import create_predictor_maps
@@ -24,6 +26,8 @@ from .generators import (
     generate_mythic_words_page,
     generate_skeptic_words_page,
     generate_sentences_page,
+    generate_sentence_mythic_words_page,
+    generate_sentence_skeptic_words_page,
 )
 
 def parse_arguments():
@@ -52,18 +56,26 @@ def main():
         skeptic_predictors = get_skepticism_predictors(conn)
         proper_nouns_dict = get_proper_nouns_by_passage(conn)
         sentences_df = get_all_sentences(conn)
+        sentence_mythic_predictors = get_sentence_mythicness_predictors(conn)
+        sentence_skeptic_predictors = get_sentence_skepticism_predictors(conn)
         
         if len(passages_df) == 0:
             print("No analyzed passages found in the database.")
             sys.exit(0)
         
         if len(mythic_predictors) == 0 or len(skeptic_predictors) == 0:
-            print("No predictor data found in the database. Run the analysis program first.")
+            print("No passage-level predictor data found in the database. Run the analysis program first.")
+            sys.exit(1)
+
+        if len(sentence_mythic_predictors) == 0 or len(sentence_skeptic_predictors) == 0:
+            print("No sentence-level predictor data found in the database. Run the sentence analysis program.")
             sys.exit(1)
         
         print(f"Found {len(passages_df)} analyzed passages.")
         print(f"Found {len(mythic_predictors)} mythicness predictors.")
         print(f"Found {len(skeptic_predictors)} skepticism predictors.")
+        print(f"Found {len(sentence_mythic_predictors)} sentence-level mythicness predictors.")
+        print(f"Found {len(sentence_skeptic_predictors)} sentence-level skepticism predictors.")
         
         # Create website structure
         output_dir, css_dir = create_website_structure(args.output_dir)
@@ -83,6 +95,8 @@ def main():
         generate_mythic_words_page(mythic_predictors, output_dir, args.title)
         generate_skeptic_words_page(skeptic_predictors, output_dir, args.title)
         generate_sentences_page(sentences_df, output_dir, args.title)
+        generate_sentence_mythic_words_page(sentence_mythic_predictors, output_dir, args.title)
+        generate_sentence_skeptic_words_page(sentence_skeptic_predictors, output_dir, args.title)
         
         print(f"Website generated successfully in '{output_dir}'")
         print(f"Open '{os.path.join(output_dir, 'index.html')}' in a web browser to view it.")
