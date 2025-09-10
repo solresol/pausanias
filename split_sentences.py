@@ -71,6 +71,8 @@ def create_sentences_table(conn):
         sentence_number INTEGER NOT NULL,
         sentence TEXT NOT NULL,
         english_sentence TEXT NOT NULL,
+        references_mythic_era BOOLEAN,
+        expresses_scepticism BOOLEAN,
         PRIMARY KEY (passage_id, sentence_number),
         FOREIGN KEY (passage_id) REFERENCES passages(id)
     )
