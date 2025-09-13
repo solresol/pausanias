@@ -15,6 +15,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 import joblib
 
+from stats_utils import compute_p_q_values
+
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Create TF-IDF and logistic regression models for Pausanias sentences")
     parser.add_argument("--database", default="pausanias.sqlite", 
@@ -46,6 +48,8 @@ def create_predictor_tables(conn):
         is_mythic INTEGER NOT NULL,
         mythic_count INTEGER NOT NULL,
         non_mythic_count INTEGER NOT NULL,
+        p_value REAL NOT NULL,
+        q_value REAL NOT NULL,
         timestamp TEXT NOT NULL
     )
     ''')
@@ -60,6 +64,8 @@ def create_predictor_tables(conn):
         is_skeptical INTEGER NOT NULL,
         skeptical_count INTEGER NOT NULL,
         non_skeptical_count INTEGER NOT NULL,
+        p_value REAL NOT NULL,
+        q_value REAL NOT NULL,
         timestamp TEXT NOT NULL
     )
     ''')
@@ -109,7 +115,7 @@ def get_manual_stopwords(conn):
     df = pd.read_sql_query("SELECT word FROM manual_stopwords", conn)
     return df['word'].tolist()
 
-def save_predictors(conn, feature_names, coefficients, label, table_name, pos_counts, neg_counts):
+def save_predictors(conn, feature_names, coefficients, label, table_name, pos_counts, neg_counts, p_values, q_values):
     """Save predictive features to the database."""
     timestamp = datetime.now().isoformat()
     cursor = conn.cursor()
@@ -117,15 +123,15 @@ def save_predictors(conn, feature_names, coefficients, label, table_name, pos_co
     pos_col = f"{label}_count"
     neg_col = f"non_{label}_count"
 
-    for feature, coef, pos, neg in zip(feature_names, coefficients, pos_counts, neg_counts):
+    for feature, coef, pos, neg, p, q in zip(feature_names, coefficients, pos_counts, neg_counts, p_values, q_values):
         is_positive = 1 if coef > 0 else 0
 
         cursor.execute(
             f"""
-            INSERT INTO {table_name} (phrase, coefficient, is_{label}, {pos_col}, {neg_col}, timestamp)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO {table_name} (phrase, coefficient, is_{label}, {pos_col}, {neg_col}, p_value, q_value, timestamp)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            (feature, float(coef), is_positive, int(pos), int(neg), timestamp)
+            (feature, float(coef), is_positive, int(pos), int(neg), float(p), float(q), timestamp),
         )
 
     conn.commit()
@@ -156,19 +162,24 @@ def build_and_evaluate_model(X, y, vectorizer_params, model_params, feature_labe
     feature_names = vectorizer.get_feature_names_out()
     coefficients = model.coef_[0]
 
-    # Compute token counts for each class
+    # Compute sentence-level token counts for each class
     analyzer = vectorizer.build_analyzer()
     vocab_set = set(feature_names)
     pos_counter = Counter()
     neg_counter = Counter()
+    total_pos = int(np.sum(y))
+    total_neg = len(y) - total_pos
     for text, label_val in zip(X, y):
-        tokens = [t for t in analyzer(text) if t in vocab_set]
+        tokens = {t for t in analyzer(text) if t in vocab_set}
         if label_val:
             pos_counter.update(tokens)
         else:
             neg_counter.update(tokens)
     pos_counts = np.array([pos_counter.get(f, 0) for f in feature_names])
     neg_counts = np.array([neg_counter.get(f, 0) for f in feature_names])
+
+    # Compute p- and q-values
+    p_values, q_values = compute_p_q_values(pos_counts, neg_counts, total_pos, total_neg)
     
     # Get top positive and negative predictors
     sorted_indices = np.argsort(coefficients)
@@ -181,7 +192,7 @@ def build_and_evaluate_model(X, y, vectorizer_params, model_params, feature_labe
         feature = feature_names[i]
         coef = coefficients[i]
         print(
-            f"  {feature}: {coef:.4f} ({feature_label}={pos_counts[i]}, non_{feature_label}={neg_counts[i]})"
+            f"  {feature}: {coef:.4f} ({feature_label}={pos_counts[i]}, non_{feature_label}={neg_counts[i]}, p={p_values[i]:.3g}, q={q_values[i]:.3g})"
         )
 
     print(f"\nTop predictors for {feature_label}:")
@@ -189,7 +200,7 @@ def build_and_evaluate_model(X, y, vectorizer_params, model_params, feature_labe
         feature = feature_names[i]
         coef = coefficients[i]
         print(
-            f"  {feature}: {coef:.4f} ({feature_label}={pos_counts[i]}, non_{feature_label}={neg_counts[i]})"
+            f"  {feature}: {coef:.4f} ({feature_label}={pos_counts[i]}, non_{feature_label}={neg_counts[i]}, p={p_values[i]:.3g}, q={q_values[i]:.3g})"
         )
 
     # Save predictors to database
@@ -198,6 +209,8 @@ def build_and_evaluate_model(X, y, vectorizer_params, model_params, feature_labe
     all_coefficients = [coefficients[i] for i in selected_indices]
     all_pos_counts = [pos_counts[i] for i in selected_indices]
     all_neg_counts = [neg_counts[i] for i in selected_indices]
+    all_p_values = [p_values[i] for i in selected_indices]
+    all_q_values = [q_values[i] for i in selected_indices]
     save_predictors(
         conn,
         all_feature_names,
@@ -206,6 +219,8 @@ def build_and_evaluate_model(X, y, vectorizer_params, model_params, feature_labe
         table_name,
         all_pos_counts,
         all_neg_counts,
+        all_p_values,
+        all_q_values,
     )
     
     return pipeline
