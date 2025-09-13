@@ -5,6 +5,7 @@ import sqlite3
 import sys
 import numpy as np
 import pandas as pd
+from collections import Counter
 from datetime import datetime
 
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -35,28 +36,34 @@ def parse_arguments():
 
 def create_predictor_tables(conn):
     """Create tables for storing predictive words/phrases."""
-    # Table for mythicness predictors
+    # Recreate mythicness predictors table with count columns
+    conn.execute("DROP TABLE IF EXISTS mythicness_predictors")
     conn.execute('''
-    CREATE TABLE IF NOT EXISTS mythicness_predictors (
+    CREATE TABLE mythicness_predictors (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         phrase TEXT NOT NULL,
         coefficient REAL NOT NULL,
         is_mythic INTEGER NOT NULL,
+        mythic_count INTEGER NOT NULL,
+        non_mythic_count INTEGER NOT NULL,
         timestamp TEXT NOT NULL
     )
     ''')
-    
-    # Table for skepticism predictors
+
+    # Recreate skepticism predictors table with count columns
+    conn.execute("DROP TABLE IF EXISTS skepticism_predictors")
     conn.execute('''
-    CREATE TABLE IF NOT EXISTS skepticism_predictors (
+    CREATE TABLE skepticism_predictors (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         phrase TEXT NOT NULL,
         coefficient REAL NOT NULL,
         is_skeptical INTEGER NOT NULL,
+        skeptical_count INTEGER NOT NULL,
+        non_skeptical_count INTEGER NOT NULL,
         timestamp TEXT NOT NULL
     )
     ''')
-    
+
     conn.commit()
 
 def clear_predictor_tables(conn):
@@ -103,22 +110,25 @@ def get_manual_stopwords(conn):
     df = pd.read_sql_query("SELECT word FROM manual_stopwords", conn)
     return df['word'].tolist()
 
-def save_predictors(conn, feature_names, coefficients, label, table_name):
+def save_predictors(conn, feature_names, coefficients, label, table_name, pos_counts, neg_counts):
     """Save predictive features to the database."""
     timestamp = datetime.now().isoformat()
     cursor = conn.cursor()
-    
-    for feature, coef in zip(feature_names, coefficients):
+
+    pos_col = f"{label}_count"
+    neg_col = f"non_{label}_count"
+
+    for feature, coef, pos, neg in zip(feature_names, coefficients, pos_counts, neg_counts):
         is_positive = 1 if coef > 0 else 0
-        
+
         cursor.execute(
             f"""
-            INSERT INTO {table_name} (phrase, coefficient, is_{label}, timestamp)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO {table_name} (phrase, coefficient, is_{label}, {pos_col}, {neg_col}, timestamp)
+            VALUES (?, ?, ?, ?, ?, ?)
             """,
-            (feature, float(coef), is_positive, timestamp)
+            (feature, float(coef), is_positive, int(pos), int(neg), timestamp)
         )
-    
+
     conn.commit()
 
 def build_and_evaluate_model(X, y, vectorizer_params, model_params, feature_label, conn, table_name, top_n=30):
@@ -143,31 +153,61 @@ def build_and_evaluate_model(X, y, vectorizer_params, model_params, feature_labe
     # Get feature names and coefficients
     vectorizer = pipeline.named_steps['tfidf']
     model = pipeline.named_steps['logreg']
-    
+
     feature_names = vectorizer.get_feature_names_out()
     coefficients = model.coef_[0]
+
+    # Compute token counts for each class
+    analyzer = vectorizer.build_analyzer()
+    vocab_set = set(feature_names)
+    pos_counter = Counter()
+    neg_counter = Counter()
+    for text, label_val in zip(X, y):
+        tokens = [t for t in analyzer(text) if t in vocab_set]
+        if label_val:
+            pos_counter.update(tokens)
+        else:
+            neg_counter.update(tokens)
+    pos_counts = np.array([pos_counter.get(f, 0) for f in feature_names])
+    neg_counts = np.array([neg_counter.get(f, 0) for f in feature_names])
     
     # Get top positive and negative predictors
     sorted_indices = np.argsort(coefficients)
     top_negative_indices = sorted_indices[:top_n]
     top_positive_indices = sorted_indices[-top_n:]
     
-    top_negative_features = [(feature_names[i], coefficients[i]) for i in top_negative_indices]
-    top_positive_features = [(feature_names[i], coefficients[i]) for i in top_positive_indices]
-    
     # Print top predictors
     print(f"\nTop predictors for NOT {feature_label}:")
-    for feature, coef in top_negative_features:
-        print(f"  {feature}: {coef:.4f}")
-    
+    for i in top_negative_indices:
+        feature = feature_names[i]
+        coef = coefficients[i]
+        print(
+            f"  {feature}: {coef:.4f} ({feature_label}={pos_counts[i]}, non_{feature_label}={neg_counts[i]})"
+        )
+
     print(f"\nTop predictors for {feature_label}:")
-    for feature, coef in top_positive_features:
-        print(f"  {feature}: {coef:.4f}")
-    
+    for i in top_positive_indices:
+        feature = feature_names[i]
+        coef = coefficients[i]
+        print(
+            f"  {feature}: {coef:.4f} ({feature_label}={pos_counts[i]}, non_{feature_label}={neg_counts[i]})"
+        )
+
     # Save predictors to database
-    all_feature_names = [feature_names[i] for i in np.concatenate([top_negative_indices, top_positive_indices])]
-    all_coefficients = [coefficients[i] for i in np.concatenate([top_negative_indices, top_positive_indices])]
-    save_predictors(conn, all_feature_names, all_coefficients, feature_label, table_name)
+    selected_indices = np.concatenate([top_negative_indices, top_positive_indices])
+    all_feature_names = [feature_names[i] for i in selected_indices]
+    all_coefficients = [coefficients[i] for i in selected_indices]
+    all_pos_counts = [pos_counts[i] for i in selected_indices]
+    all_neg_counts = [neg_counts[i] for i in selected_indices]
+    save_predictors(
+        conn,
+        all_feature_names,
+        all_coefficients,
+        feature_label,
+        table_name,
+        all_pos_counts,
+        all_neg_counts,
+    )
     
     return pipeline
 
