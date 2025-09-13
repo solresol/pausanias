@@ -461,17 +461,21 @@ def generate_mythic_words_page(mythic_predictors, output_dir, title):
                     <tr>
                         <th>Word/Phrase</th>
                         <th>Coefficient</th>
+                        <th>Mythic Count</th>
+                        <th>Non-mythic Count</th>
                     </tr>
                 </thead>
                 <tbody>
     """
-    
+
     # Add mythic predictors
     for _, row in mythic_words.iterrows():
         html_content += f"""
                     <tr>
                         <td class="mythic-word">{html.escape(row['phrase'])}</td>
                         <td>{row['coefficient']:.4f}</td>
+                        <td>{row['mythic_count']}</td>
+                        <td>{row['non_mythic_count']}</td>
                     </tr>
         """
     
@@ -487,17 +491,21 @@ def generate_mythic_words_page(mythic_predictors, output_dir, title):
                     <tr>
                         <th>Word/Phrase</th>
                         <th>Coefficient</th>
+                        <th>Mythic Count</th>
+                        <th>Non-mythic Count</th>
                     </tr>
                 </thead>
                 <tbody>
     """
-    
+
     # Add historical predictors
     for _, row in historical_words.iterrows():
         html_content += f"""
                     <tr>
                         <td class="historical-word">{html.escape(row['phrase'])}</td>
                         <td>{row['coefficient']:.4f}</td>
+                        <td>{row['mythic_count']}</td>
+                        <td>{row['non_mythic_count']}</td>
                     </tr>
         """
     
