@@ -64,11 +64,11 @@ def get_analyzed_passages(conn, limit=None):
 def get_mythicness_predictors(conn):
     """Get words/phrases that predict mythicness/historicity."""
     query = """
-    SELECT phrase, coefficient, is_mythic
+    SELECT phrase, coefficient, is_mythic, mythic_count, non_mythic_count
     FROM mythicness_predictors
     ORDER BY coefficient DESC
     """
-    
+
     df = pd.read_sql_query(query, conn)
     return df
 
