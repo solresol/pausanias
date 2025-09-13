@@ -463,6 +463,8 @@ def generate_mythic_words_page(mythic_predictors, output_dir, title):
                         <th>Coefficient</th>
                         <th>Mythic Count</th>
                         <th>Non-mythic Count</th>
+                        <th>p-value</th>
+                        <th>q-value</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -476,6 +478,8 @@ def generate_mythic_words_page(mythic_predictors, output_dir, title):
                         <td>{row['coefficient']:.4f}</td>
                         <td>{row['mythic_count']}</td>
                         <td>{row['non_mythic_count']}</td>
+                        <td>{row['p_value']:.3g}</td>
+                        <td>{row['q_value']:.3g}</td>
                     </tr>
         """
     
@@ -493,6 +497,8 @@ def generate_mythic_words_page(mythic_predictors, output_dir, title):
                         <th>Coefficient</th>
                         <th>Mythic Count</th>
                         <th>Non-mythic Count</th>
+                        <th>p-value</th>
+                        <th>q-value</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -506,6 +512,8 @@ def generate_mythic_words_page(mythic_predictors, output_dir, title):
                         <td>{row['coefficient']:.4f}</td>
                         <td>{row['mythic_count']}</td>
                         <td>{row['non_mythic_count']}</td>
+                        <td>{row['p_value']:.3g}</td>
+                        <td>{row['q_value']:.3g}</td>
                     </tr>
         """
     
@@ -567,6 +575,10 @@ def generate_skeptic_words_page(skeptic_predictors, output_dir, title):
                     <tr>
                         <th>Word/Phrase</th>
                         <th>Coefficient</th>
+                        <th>Skeptical Count</th>
+                        <th>Non-skeptical Count</th>
+                        <th>p-value</th>
+                        <th>q-value</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -578,6 +590,10 @@ def generate_skeptic_words_page(skeptic_predictors, output_dir, title):
                     <tr>
                         <td class="skeptical-word">{html.escape(row['phrase'])}</td>
                         <td>{row['coefficient']:.4f}</td>
+                        <td>{row['skeptical_count']}</td>
+                        <td>{row['non_skeptical_count']}</td>
+                        <td>{row['p_value']:.3g}</td>
+                        <td>{row['q_value']:.3g}</td>
                     </tr>
         """
     
@@ -593,6 +609,10 @@ def generate_skeptic_words_page(skeptic_predictors, output_dir, title):
                     <tr>
                         <th>Word/Phrase</th>
                         <th>Coefficient</th>
+                        <th>Skeptical Count</th>
+                        <th>Non-skeptical Count</th>
+                        <th>p-value</th>
+                        <th>q-value</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -604,6 +624,10 @@ def generate_skeptic_words_page(skeptic_predictors, output_dir, title):
                     <tr>
                         <td class="non-skeptical-word">{html.escape(row['phrase'])}</td>
                         <td>{row['coefficient']:.4f}</td>
+                        <td>{row['skeptical_count']}</td>
+                        <td>{row['non_skeptical_count']}</td>
+                        <td>{row['p_value']:.3g}</td>
+                        <td>{row['q_value']:.3g}</td>
                     </tr>
         """
     
@@ -660,7 +684,14 @@ def generate_sentence_mythic_words_page(mythic_predictors, output_dir, title):
             <h2>Sentence Predictors of Mythic Content</h2>
             <table class="predictor-table">
                 <thead>
-                    <tr><th>Word/Phrase</th><th>Coefficient</th></tr>
+                    <tr>
+                        <th>Word/Phrase</th>
+                        <th>Coefficient</th>
+                        <th>Mythic Count</th>
+                        <th>Non-mythic Count</th>
+                        <th>p-value</th>
+                        <th>q-value</th>
+                    </tr>
                 </thead>
                 <tbody>
     """
@@ -670,6 +701,10 @@ def generate_sentence_mythic_words_page(mythic_predictors, output_dir, title):
                     <tr>
                         <td class="mythic-word">{html.escape(row['phrase'])}</td>
                         <td>{row['coefficient']:.4f}</td>
+                        <td>{row['mythic_count']}</td>
+                        <td>{row['non_mythic_count']}</td>
+                        <td>{row['p_value']:.3g}</td>
+                        <td>{row['q_value']:.3g}</td>
                     </tr>
         """
 
@@ -680,7 +715,14 @@ def generate_sentence_mythic_words_page(mythic_predictors, output_dir, title):
             <h2>Sentence Predictors of Historical Content</h2>
             <table class="predictor-table">
                 <thead>
-                    <tr><th>Word/Phrase</th><th>Coefficient</th></tr>
+                    <tr>
+                        <th>Word/Phrase</th>
+                        <th>Coefficient</th>
+                        <th>Mythic Count</th>
+                        <th>Non-mythic Count</th>
+                        <th>p-value</th>
+                        <th>q-value</th>
+                    </tr>
                 </thead>
                 <tbody>
     """
@@ -690,6 +732,10 @@ def generate_sentence_mythic_words_page(mythic_predictors, output_dir, title):
                     <tr>
                         <td class="historical-word">{html.escape(row['phrase'])}</td>
                         <td>{row['coefficient']:.4f}</td>
+                        <td>{row['mythic_count']}</td>
+                        <td>{row['non_mythic_count']}</td>
+                        <td>{row['p_value']:.3g}</td>
+                        <td>{row['q_value']:.3g}</td>
                     </tr>
         """
 
@@ -745,7 +791,14 @@ def generate_sentence_skeptic_words_page(skeptic_predictors, output_dir, title):
             <h2>Sentence Predictors of Skeptical Content</h2>
             <table class="predictor-table">
                 <thead>
-                    <tr><th>Word/Phrase</th><th>Coefficient</th></tr>
+                    <tr>
+                        <th>Word/Phrase</th>
+                        <th>Coefficient</th>
+                        <th>Skeptical Count</th>
+                        <th>Non-skeptical Count</th>
+                        <th>p-value</th>
+                        <th>q-value</th>
+                    </tr>
                 </thead>
                 <tbody>
     """
@@ -755,6 +808,10 @@ def generate_sentence_skeptic_words_page(skeptic_predictors, output_dir, title):
                     <tr>
                         <td class="skeptical-word">{html.escape(row['phrase'])}</td>
                         <td>{row['coefficient']:.4f}</td>
+                        <td>{row['skeptical_count']}</td>
+                        <td>{row['non_skeptical_count']}</td>
+                        <td>{row['p_value']:.3g}</td>
+                        <td>{row['q_value']:.3g}</td>
                     </tr>
         """
 
@@ -765,7 +822,14 @@ def generate_sentence_skeptic_words_page(skeptic_predictors, output_dir, title):
             <h2>Sentence Predictors of Non-skeptical Content</h2>
             <table class="predictor-table">
                 <thead>
-                    <tr><th>Word/Phrase</th><th>Coefficient</th></tr>
+                    <tr>
+                        <th>Word/Phrase</th>
+                        <th>Coefficient</th>
+                        <th>Skeptical Count</th>
+                        <th>Non-skeptical Count</th>
+                        <th>p-value</th>
+                        <th>q-value</th>
+                    </tr>
                 </thead>
                 <tbody>
     """
@@ -775,6 +839,10 @@ def generate_sentence_skeptic_words_page(skeptic_predictors, output_dir, title):
                     <tr>
                         <td class="non-skeptical-word">{html.escape(row['phrase'])}</td>
                         <td>{row['coefficient']:.4f}</td>
+                        <td>{row['skeptical_count']}</td>
+                        <td>{row['non_skeptical_count']}</td>
+                        <td>{row['p_value']:.3g}</td>
+                        <td>{row['q_value']:.3g}</td>
                     </tr>
         """
 

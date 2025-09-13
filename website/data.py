@@ -64,7 +64,8 @@ def get_analyzed_passages(conn, limit=None):
 def get_mythicness_predictors(conn):
     """Get words/phrases that predict mythicness/historicity."""
     query = """
-    SELECT phrase, coefficient, is_mythic, mythic_count, non_mythic_count
+    SELECT phrase, coefficient, is_mythic, mythic_count, non_mythic_count,
+           p_value, q_value
     FROM mythicness_predictors
     ORDER BY coefficient DESC
     """
@@ -75,7 +76,8 @@ def get_mythicness_predictors(conn):
 def get_skepticism_predictors(conn):
     """Get words/phrases that predict skepticism/non-skepticism."""
     query = """
-    SELECT phrase, coefficient, is_skeptical
+    SELECT phrase, coefficient, is_skeptical, skeptical_count,
+           non_skeptical_count, p_value, q_value
     FROM skepticism_predictors
     ORDER BY coefficient DESC
     """
@@ -87,7 +89,8 @@ def get_skepticism_predictors(conn):
 def get_sentence_mythicness_predictors(conn):
     """Get sentence-level words/phrases that predict mythicness/historicity."""
     query = """
-    SELECT phrase, coefficient, is_mythic
+    SELECT phrase, coefficient, is_mythic, mythic_count, non_mythic_count,
+           p_value, q_value
     FROM sentence_mythicness_predictors
     ORDER BY coefficient DESC
     """
@@ -99,7 +102,8 @@ def get_sentence_mythicness_predictors(conn):
 def get_sentence_skepticism_predictors(conn):
     """Get sentence-level words/phrases that predict skepticism/non-skepticism."""
     query = """
-    SELECT phrase, coefficient, is_skeptical
+    SELECT phrase, coefficient, is_skeptical, skeptical_count,
+           non_skeptical_count, p_value, q_value
     FROM sentence_skepticism_predictors
     ORDER BY coefficient DESC
     """
