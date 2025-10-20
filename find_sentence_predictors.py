@@ -3,6 +3,7 @@
 import argparse
 import sqlite3
 import sys
+import re
 import numpy as np
 import pandas as pd
 from collections import Counter
@@ -16,6 +17,19 @@ from sklearn.metrics import classification_report
 import joblib
 
 from stats_utils import compute_p_q_values
+
+TOKEN_PATTERN = re.compile(r"(?u)\\b\\w\\w+\\b")
+
+
+def normalize_stopwords(stopwords):
+    """Normalize stopwords to match the vectorizer's preprocessing."""
+
+    normalized = []
+    for word in stopwords:
+        tokens = TOKEN_PATTERN.findall(word.casefold())
+        normalized.extend(tokens)
+
+    return list(dict.fromkeys(normalized))
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Create TF-IDF and logistic regression models for Pausanias sentences")
@@ -255,9 +269,9 @@ if __name__ == '__main__':
         # Get stopwords: proper nouns plus any manually specified additions
         proper_nouns = get_proper_nouns(conn)
         manual_stopwords = get_manual_stopwords(conn)
-        all_stopwords = proper_nouns + manual_stopwords
+        all_stopwords = normalize_stopwords(proper_nouns + manual_stopwords)
         print(
-            f"Using {len(proper_nouns)} proper nouns and {len(manual_stopwords)} manual stopwords as stopwords for mythicness model."
+            f"Using {len(proper_nouns)} proper nouns and {len(manual_stopwords)} manual stopwords (normalized to {len(all_stopwords)} unique tokens) as stopwords for mythicness model."
         )
 
         # Build mythicness model (with stopwords)
