@@ -16,6 +16,10 @@ from .data import (
     get_all_sentences,
     get_sentence_mythicness_predictors,
     get_sentence_skepticism_predictors,
+    get_passage_mythicness_metrics,
+    get_passage_skepticism_metrics,
+    get_sentence_mythicness_metrics,
+    get_sentence_skepticism_metrics,
 )
 from .structure import create_website_structure
 from .highlighting import create_predictor_maps
@@ -58,6 +62,12 @@ def main():
         sentences_df = get_all_sentences(conn)
         sentence_mythic_predictors = get_sentence_mythicness_predictors(conn)
         sentence_skeptic_predictors = get_sentence_skepticism_predictors(conn)
+
+        # Get classification metrics
+        passage_mythic_metrics = get_passage_mythicness_metrics(conn)
+        passage_skeptic_metrics = get_passage_skepticism_metrics(conn)
+        sentence_mythic_metrics = get_sentence_mythicness_metrics(conn)
+        sentence_skeptic_metrics = get_sentence_skepticism_metrics(conn)
         
         if len(passages_df) == 0:
             print("No analyzed passages found in the database.")
@@ -92,11 +102,11 @@ def main():
         generate_home_page(output_dir, args.title, timestamp)
         generate_mythic_page(passages_df, mythic_color_map, mythic_class_map, proper_nouns_dict, output_dir, args.title)
         generate_skepticism_page(passages_df, skeptic_color_map, skeptic_class_map, proper_nouns_dict, output_dir, args.title)
-        generate_mythic_words_page(mythic_predictors, output_dir, args.title)
-        generate_skeptic_words_page(skeptic_predictors, output_dir, args.title)
+        generate_mythic_words_page(mythic_predictors, output_dir, args.title, passage_mythic_metrics)
+        generate_skeptic_words_page(skeptic_predictors, output_dir, args.title, passage_skeptic_metrics)
         generate_sentences_page(sentences_df, output_dir, args.title)
-        generate_sentence_mythic_words_page(sentence_mythic_predictors, output_dir, args.title)
-        generate_sentence_skeptic_words_page(sentence_skeptic_predictors, output_dir, args.title)
+        generate_sentence_mythic_words_page(sentence_mythic_predictors, output_dir, args.title, sentence_mythic_metrics)
+        generate_sentence_skeptic_words_page(sentence_skeptic_predictors, output_dir, args.title, sentence_skeptic_metrics)
         
         print(f"Website generated successfully in '{output_dir}'")
         print(f"Open '{os.path.join(output_dir, 'index.html')}' in a web browser to view it.")

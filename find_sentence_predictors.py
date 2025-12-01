@@ -13,7 +13,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, precision_recall_fscore_support, accuracy_score, confusion_matrix
 import joblib
 
 from stats_utils import compute_p_q_values
@@ -86,6 +86,63 @@ def create_predictor_tables(conn):
 
     conn.commit()
 
+def create_classification_metrics_tables(conn):
+    """Create tables for storing sentence-level classification metrics."""
+    conn.execute("DROP TABLE IF EXISTS sentence_mythicness_metrics")
+    conn.execute('''
+    CREATE TABLE sentence_mythicness_metrics (
+        id INTEGER PRIMARY KEY,
+        accuracy REAL NOT NULL,
+        precision_0 REAL NOT NULL,
+        recall_0 REAL NOT NULL,
+        f1_0 REAL NOT NULL,
+        support_0 INTEGER NOT NULL,
+        precision_1 REAL NOT NULL,
+        recall_1 REAL NOT NULL,
+        f1_1 REAL NOT NULL,
+        support_1 INTEGER NOT NULL,
+        timestamp TEXT NOT NULL
+    )
+    ''')
+
+    conn.execute("DROP TABLE IF EXISTS sentence_skepticism_metrics")
+    conn.execute('''
+    CREATE TABLE sentence_skepticism_metrics (
+        id INTEGER PRIMARY KEY,
+        accuracy REAL NOT NULL,
+        precision_0 REAL NOT NULL,
+        recall_0 REAL NOT NULL,
+        f1_0 REAL NOT NULL,
+        support_0 INTEGER NOT NULL,
+        precision_1 REAL NOT NULL,
+        recall_1 REAL NOT NULL,
+        f1_1 REAL NOT NULL,
+        support_1 INTEGER NOT NULL,
+        timestamp TEXT NOT NULL
+    )
+    ''')
+    conn.commit()
+
+def save_classification_metrics(conn, table_name, y_true, y_pred):
+    """Save classification metrics to the database."""
+    precision, recall, f1, support = precision_recall_fscore_support(y_true, y_pred, average=None, zero_division=0)
+    accuracy = accuracy_score(y_true, y_pred)
+    timestamp = datetime.now().isoformat()
+
+    cursor = conn.cursor()
+    cursor.execute(
+        f"""
+        INSERT INTO {table_name}
+        (accuracy, precision_0, recall_0, f1_0, support_0, precision_1, recall_1, f1_1, support_1, timestamp)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (float(accuracy),
+         float(precision[0]), float(recall[0]), float(f1[0]), int(support[0]),
+         float(precision[1]), float(recall[1]), float(f1[1]), int(support[1]),
+         timestamp)
+    )
+    conn.commit()
+
 def clear_predictor_tables(conn):
     """Clear existing sentence-level predictor tables before inserting new values."""
     conn.execute("DELETE FROM sentence_mythicness_predictors")
@@ -150,24 +207,27 @@ def save_predictors(conn, feature_names, coefficients, label, table_name, pos_co
 
     conn.commit()
 
-def build_and_evaluate_model(X, y, vectorizer_params, model_params, feature_label, conn, table_name, top_n=30):
+def build_and_evaluate_model(X, y, vectorizer_params, model_params, feature_label, conn, table_name, metrics_table_name, top_n=30):
     """Build a TF-IDF + LogReg model, evaluate it, and save top predictors."""
     # Split data
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=args.test_size, random_state=42)
-    
+
     # Create pipeline
     pipeline = Pipeline([
         ('tfidf', TfidfVectorizer(**vectorizer_params)),
         ('logreg', LogisticRegression(**model_params))
     ])
-    
+
     # Train model
     pipeline.fit(X_train, y_train)
-    
+
     # Evaluate model
     y_pred = pipeline.predict(X_test)
     print(f"\n=== {feature_label.capitalize()} Model Evaluation ===")
     print(classification_report(y_test, y_pred))
+
+    # Save classification metrics to database
+    save_classification_metrics(conn, metrics_table_name, y_test, y_pred)
     
     # Get feature names and coefficients
     vectorizer = pipeline.named_steps['tfidf']
@@ -251,7 +311,10 @@ if __name__ == '__main__':
     try:
         # Create predictor tables if they don't exist
         create_predictor_tables(conn)
-        
+
+        # Create classification metrics tables
+        create_classification_metrics_tables(conn)
+
         # Clear existing predictor data
         clear_predictor_tables(conn)
         
@@ -297,6 +360,7 @@ if __name__ == '__main__':
             'mythic',
             conn,
             'sentence_mythicness_predictors',
+            'sentence_mythicness_metrics',
             args.top_features
         )
         
@@ -323,6 +387,7 @@ if __name__ == '__main__':
             'skeptical',
             conn,
             'sentence_skepticism_predictors',
+            'sentence_skepticism_metrics',
             args.top_features
         )
         

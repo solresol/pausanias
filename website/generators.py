@@ -6,6 +6,62 @@ import pandas as pd
 from datetime import datetime
 from .highlighting import highlight_passage
 
+
+def format_classification_metrics(metrics, class_0_label, class_1_label):
+    """Format classification metrics into an HTML table.
+
+    Args:
+        metrics: Dictionary containing classification metrics
+        class_0_label: Label for class 0 (e.g., 'Historical', 'Non-skeptical')
+        class_1_label: Label for class 1 (e.g., 'Mythic', 'Skeptical')
+
+    Returns:
+        HTML string containing the formatted metrics table
+    """
+    if metrics is None:
+        return "<p>No classification metrics available.</p>"
+
+    html_content = f"""
+    <div class="metrics-section">
+        <h3>Model Performance Metrics</h3>
+        <p>The following metrics are from the logistic regression classifier's performance on the test set:</p>
+
+        <table class="metrics-table">
+            <thead>
+                <tr>
+                    <th>Class</th>
+                    <th>Precision</th>
+                    <th>Recall</th>
+                    <th>F1-Score</th>
+                    <th>Support</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{class_0_label}</td>
+                    <td>{metrics['precision_0']:.3f}</td>
+                    <td>{metrics['recall_0']:.3f}</td>
+                    <td>{metrics['f1_0']:.3f}</td>
+                    <td>{metrics['support_0']}</td>
+                </tr>
+                <tr>
+                    <td>{class_1_label}</td>
+                    <td>{metrics['precision_1']:.3f}</td>
+                    <td>{metrics['recall_1']:.3f}</td>
+                    <td>{metrics['f1_1']:.3f}</td>
+                    <td>{metrics['support_1']}</td>
+                </tr>
+                <tr class="metrics-summary">
+                    <td><strong>Overall Accuracy</strong></td>
+                    <td colspan="3"><strong>{metrics['accuracy']:.3f}</strong></td>
+                    <td><strong>{metrics['support_0'] + metrics['support_1']}</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    """
+    return html_content
+
 def generate_home_page(output_dir, title, timestamp):
     """Generate the home page with build timestamp and links to other pages."""
     html_content = f"""<!DOCTYPE html>
@@ -419,13 +475,13 @@ def generate_skepticism_page(passages_df, skeptic_color_map, skeptic_class_map, 
     with open(os.path.join(skeptic_dir, 'index.html'), 'w', encoding='utf-8') as f:
         f.write(index_content)
 
-def generate_mythic_words_page(mythic_predictors, output_dir, title):
+def generate_mythic_words_page(mythic_predictors, output_dir, title, metrics=None):
     """Generate a page showing words and phrases that predict mythic/historical content."""
-    
+
     # Split into mythic and historical predictors
     mythic_words = mythic_predictors[mythic_predictors['is_mythic'] == 1].sort_values('coefficient', ascending=False)
     historical_words = mythic_predictors[mythic_predictors['is_mythic'] == 0].sort_values('coefficient', ascending=True)
-    
+
     html_content = f"""<!DOCTYPE html>
     <html lang="en">
     <head>
@@ -439,7 +495,7 @@ def generate_mythic_words_page(mythic_predictors, output_dir, title):
             <h1>{title}</h1>
             <p>Words and Phrases that Predict Mythic vs. Historical Content</p>
         </header>
-        
+
         <nav>
             <a href="index.html">Home</a>
             <a href="mythic/index.html">Mythic Analysis</a>
@@ -451,8 +507,10 @@ def generate_mythic_words_page(mythic_predictors, output_dir, title):
             <a href="sentence_skeptic_words.html">Sentence Skeptic Words</a>
             <a href="network_viz/index.html">Network Analysis</a>
         </nav>
-        
+
         <div class="container">
+            {format_classification_metrics(metrics, 'Historical', 'Mythic')}
+
             <h2>Predictors of Mythic Content</h2>
             <p>These words and phrases are most strongly associated with mythic content in Pausanias.</p>
             
@@ -533,13 +591,13 @@ def generate_mythic_words_page(mythic_predictors, output_dir, title):
     with open(os.path.join(output_dir, 'mythic_words.html'), 'w', encoding='utf-8') as f:
         f.write(html_content)
 
-def generate_skeptic_words_page(skeptic_predictors, output_dir, title):
+def generate_skeptic_words_page(skeptic_predictors, output_dir, title, metrics=None):
     """Generate a page showing words and phrases that predict skeptical/non-skeptical content."""
-    
+
     # Split into skeptical and non-skeptical predictors
     skeptical_words = skeptic_predictors[skeptic_predictors['is_skeptical'] == 1].sort_values('coefficient', ascending=False)
     non_skeptical_words = skeptic_predictors[skeptic_predictors['is_skeptical'] == 0].sort_values('coefficient', ascending=True)
-    
+
     html_content = f"""<!DOCTYPE html>
     <html lang="en">
     <head>
@@ -553,7 +611,7 @@ def generate_skeptic_words_page(skeptic_predictors, output_dir, title):
             <h1>{title}</h1>
             <p>Words and Phrases that Predict Skeptical vs. Non-skeptical Content</p>
         </header>
-        
+
         <nav>
             <a href="index.html">Home</a>
             <a href="mythic/index.html">Mythic Analysis</a>
@@ -565,8 +623,10 @@ def generate_skeptic_words_page(skeptic_predictors, output_dir, title):
             <a href="sentence_skeptic_words.html">Sentence Skeptic Words</a>
             <a href="network_viz/index.html">Network Analysis</a>
         </nav>
-        
+
         <div class="container">
+            {format_classification_metrics(metrics, 'Non-skeptical', 'Skeptical')}
+
             <h2>Predictors of Skeptical Content</h2>
             <p>These words and phrases are most strongly associated with skeptical content in Pausanias.</p>
             
@@ -648,7 +708,7 @@ def generate_skeptic_words_page(skeptic_predictors, output_dir, title):
         f.write(html_content)
 
 
-def generate_sentence_mythic_words_page(mythic_predictors, output_dir, title):
+def generate_sentence_mythic_words_page(mythic_predictors, output_dir, title, metrics=None):
     """Generate a page showing sentence-level predictors of mythic/historical content."""
 
     mythic_words = mythic_predictors[mythic_predictors['is_mythic'] == 1].sort_values('coefficient', ascending=False)
@@ -681,6 +741,8 @@ def generate_sentence_mythic_words_page(mythic_predictors, output_dir, title):
         </nav>
 
         <div class="container">
+            {format_classification_metrics(metrics, 'Historical', 'Mythic')}
+
             <h2>Sentence Predictors of Mythic Content</h2>
             <table class="predictor-table">
                 <thead>
@@ -755,7 +817,7 @@ def generate_sentence_mythic_words_page(mythic_predictors, output_dir, title):
         f.write(html_content)
 
 
-def generate_sentence_skeptic_words_page(skeptic_predictors, output_dir, title):
+def generate_sentence_skeptic_words_page(skeptic_predictors, output_dir, title, metrics=None):
     """Generate a page showing sentence-level predictors of skepticism."""
 
     skeptical_words = skeptic_predictors[skeptic_predictors['is_skeptical'] == 1].sort_values('coefficient', ascending=False)
@@ -788,6 +850,8 @@ def generate_sentence_skeptic_words_page(skeptic_predictors, output_dir, title):
         </nav>
 
         <div class="container">
+            {format_classification_metrics(metrics, 'Non-skeptical', 'Skeptical')}
+
             <h2>Sentence Predictors of Skeptical Content</h2>
             <table class="predictor-table">
                 <thead>
