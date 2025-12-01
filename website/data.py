@@ -123,3 +123,63 @@ def get_all_sentences(conn):
 
     df = pd.read_sql_query(query, conn)
     return df
+
+
+def get_passage_mythicness_metrics(conn):
+    """Get classification metrics for passage-level mythicness prediction."""
+    query = """
+    SELECT accuracy, precision_0, recall_0, f1_0, support_0,
+           precision_1, recall_1, f1_1, support_1, timestamp
+    FROM passage_mythicness_metrics
+    ORDER BY id DESC
+    LIMIT 1
+    """
+    df = pd.read_sql_query(query, conn)
+    if len(df) == 0:
+        return None
+    return df.iloc[0].to_dict()
+
+
+def get_passage_skepticism_metrics(conn):
+    """Get classification metrics for passage-level skepticism prediction."""
+    query = """
+    SELECT accuracy, precision_0, recall_0, f1_0, support_0,
+           precision_1, recall_1, f1_1, support_1, timestamp
+    FROM passage_skepticism_metrics
+    ORDER BY id DESC
+    LIMIT 1
+    """
+    df = pd.read_sql_query(query, conn)
+    if len(df) == 0:
+        return None
+    return df.iloc[0].to_dict()
+
+
+def get_sentence_mythicness_metrics(conn):
+    """Get classification metrics for sentence-level mythicness prediction."""
+    query = """
+    SELECT accuracy, precision_0, recall_0, f1_0, support_0,
+           precision_1, recall_1, f1_1, support_1, timestamp
+    FROM sentence_mythicness_metrics
+    ORDER BY id DESC
+    LIMIT 1
+    """
+    df = pd.read_sql_query(query, conn)
+    if len(df) == 0:
+        return None
+    return df.iloc[0].to_dict()
+
+
+def get_sentence_skepticism_metrics(conn):
+    """Get classification metrics for sentence-level skepticism prediction."""
+    query = """
+    SELECT accuracy, precision_0, recall_0, f1_0, support_0,
+           precision_1, recall_1, f1_1, support_1, timestamp
+    FROM sentence_skepticism_metrics
+    ORDER BY id DESC
+    LIMIT 1
+    """
+    df = pd.read_sql_query(query, conn)
+    if len(df) == 0:
+        return None
+    return df.iloc[0].to_dict()
