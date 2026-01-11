@@ -518,6 +518,7 @@ def generate_mythic_words_page(mythic_predictors, output_dir, title, metrics=Non
                 <thead>
                     <tr>
                         <th>Word/Phrase</th>
+                        <th>English</th>
                         <th>Coefficient</th>
                         <th>Mythic Count</th>
                         <th>Non-mythic Count</th>
@@ -530,9 +531,11 @@ def generate_mythic_words_page(mythic_predictors, output_dir, title, metrics=Non
 
     # Add mythic predictors
     for _, row in mythic_words.iterrows():
+        english = row.get('english_translation', '')
         html_content += f"""
                     <tr>
                         <td class="mythic-word">{html.escape(row['phrase'])}</td>
+                        <td>{html.escape(english)}</td>
                         <td>{row['coefficient']:.4f}</td>
                         <td>{row['mythic_count']}</td>
                         <td>{row['non_mythic_count']}</td>
@@ -552,6 +555,7 @@ def generate_mythic_words_page(mythic_predictors, output_dir, title, metrics=Non
                 <thead>
                     <tr>
                         <th>Word/Phrase</th>
+                        <th>English</th>
                         <th>Coefficient</th>
                         <th>Mythic Count</th>
                         <th>Non-mythic Count</th>
@@ -564,9 +568,11 @@ def generate_mythic_words_page(mythic_predictors, output_dir, title, metrics=Non
 
     # Add historical predictors
     for _, row in historical_words.iterrows():
+        english = row.get('english_translation', '')
         html_content += f"""
                     <tr>
                         <td class="historical-word">{html.escape(row['phrase'])}</td>
+                        <td>{html.escape(english)}</td>
                         <td>{row['coefficient']:.4f}</td>
                         <td>{row['mythic_count']}</td>
                         <td>{row['non_mythic_count']}</td>
@@ -634,6 +640,7 @@ def generate_skeptic_words_page(skeptic_predictors, output_dir, title, metrics=N
                 <thead>
                     <tr>
                         <th>Word/Phrase</th>
+                        <th>English</th>
                         <th>Coefficient</th>
                         <th>Skeptical Count</th>
                         <th>Non-skeptical Count</th>
@@ -643,12 +650,14 @@ def generate_skeptic_words_page(skeptic_predictors, output_dir, title, metrics=N
                 </thead>
                 <tbody>
     """
-    
+
     # Add skeptical predictors
     for _, row in skeptical_words.iterrows():
+        english = row.get('english_translation', '')
         html_content += f"""
                     <tr>
                         <td class="skeptical-word">{html.escape(row['phrase'])}</td>
+                        <td>{html.escape(english)}</td>
                         <td>{row['coefficient']:.4f}</td>
                         <td>{row['skeptical_count']}</td>
                         <td>{row['non_skeptical_count']}</td>
@@ -668,6 +677,7 @@ def generate_skeptic_words_page(skeptic_predictors, output_dir, title, metrics=N
                 <thead>
                     <tr>
                         <th>Word/Phrase</th>
+                        <th>English</th>
                         <th>Coefficient</th>
                         <th>Skeptical Count</th>
                         <th>Non-skeptical Count</th>
@@ -677,12 +687,14 @@ def generate_skeptic_words_page(skeptic_predictors, output_dir, title, metrics=N
                 </thead>
                 <tbody>
     """
-    
+
     # Add non-skeptical predictors
     for _, row in non_skeptical_words.iterrows():
+        english = row.get('english_translation', '')
         html_content += f"""
                     <tr>
                         <td class="non-skeptical-word">{html.escape(row['phrase'])}</td>
+                        <td>{html.escape(english)}</td>
                         <td>{row['coefficient']:.4f}</td>
                         <td>{row['skeptical_count']}</td>
                         <td>{row['non_skeptical_count']}</td>
@@ -748,6 +760,7 @@ def generate_sentence_mythic_words_page(mythic_predictors, output_dir, title, me
                 <thead>
                     <tr>
                         <th>Word/Phrase</th>
+                        <th>English</th>
                         <th>Coefficient</th>
                         <th>Mythic Count</th>
                         <th>Non-mythic Count</th>
@@ -759,9 +772,11 @@ def generate_sentence_mythic_words_page(mythic_predictors, output_dir, title, me
     """
 
     for _, row in mythic_words.iterrows():
+        english = row.get('english_translation', '')
         html_content += f"""
                     <tr>
                         <td class="mythic-word">{html.escape(row['phrase'])}</td>
+                        <td>{html.escape(english)}</td>
                         <td>{row['coefficient']:.4f}</td>
                         <td>{row['mythic_count']}</td>
                         <td>{row['non_mythic_count']}</td>
@@ -779,6 +794,7 @@ def generate_sentence_mythic_words_page(mythic_predictors, output_dir, title, me
                 <thead>
                     <tr>
                         <th>Word/Phrase</th>
+                        <th>English</th>
                         <th>Coefficient</th>
                         <th>Mythic Count</th>
                         <th>Non-mythic Count</th>
@@ -790,9 +806,11 @@ def generate_sentence_mythic_words_page(mythic_predictors, output_dir, title, me
     """
 
     for _, row in historical_words.iterrows():
+        english = row.get('english_translation', '')
         html_content += f"""
                     <tr>
                         <td class="historical-word">{html.escape(row['phrase'])}</td>
+                        <td>{html.escape(english)}</td>
                         <td>{row['coefficient']:.4f}</td>
                         <td>{row['mythic_count']}</td>
                         <td>{row['non_mythic_count']}</td>
@@ -857,6 +875,7 @@ def generate_sentence_skeptic_words_page(skeptic_predictors, output_dir, title, 
                 <thead>
                     <tr>
                         <th>Word/Phrase</th>
+                        <th>English</th>
                         <th>Coefficient</th>
                         <th>Skeptical Count</th>
                         <th>Non-skeptical Count</th>
@@ -868,9 +887,11 @@ def generate_sentence_skeptic_words_page(skeptic_predictors, output_dir, title, 
     """
 
     for _, row in skeptical_words.iterrows():
+        english = row.get('english_translation', '')
         html_content += f"""
                     <tr>
                         <td class="skeptical-word">{html.escape(row['phrase'])}</td>
+                        <td>{html.escape(english)}</td>
                         <td>{row['coefficient']:.4f}</td>
                         <td>{row['skeptical_count']}</td>
                         <td>{row['non_skeptical_count']}</td>
@@ -888,6 +909,7 @@ def generate_sentence_skeptic_words_page(skeptic_predictors, output_dir, title, 
                 <thead>
                     <tr>
                         <th>Word/Phrase</th>
+                        <th>English</th>
                         <th>Coefficient</th>
                         <th>Skeptical Count</th>
                         <th>Non-skeptical Count</th>
@@ -899,9 +921,11 @@ def generate_sentence_skeptic_words_page(skeptic_predictors, output_dir, title, 
     """
 
     for _, row in non_skeptical_words.iterrows():
+        english = row.get('english_translation', '')
         html_content += f"""
                     <tr>
                         <td class="non-skeptical-word">{html.escape(row['phrase'])}</td>
+                        <td>{html.escape(english)}</td>
                         <td>{row['coefficient']:.4f}</td>
                         <td>{row['skeptical_count']}</td>
                         <td>{row['non_skeptical_count']}</td>

@@ -2,6 +2,8 @@
 
 import pandas as pd
 import sqlite3
+from typing import Optional
+from openai import OpenAI
 
 def passage_id_sort_key(passage_id):
     """Create a sort key for passage IDs in the format X.Y.Z."""
@@ -183,3 +185,41 @@ def get_sentence_skepticism_metrics(conn):
     if len(df) == 0:
         return None
     return df.iloc[0].to_dict()
+
+
+def add_phrase_translations(df: pd.DataFrame, conn, client: Optional[OpenAI] = None,
+                           model: str = "gpt-5") -> pd.DataFrame:
+    """Add English translations to a predictor dataframe.
+
+    Args:
+        df: Dataframe with a 'phrase' column containing Greek phrases
+        conn: Database connection
+        client: Optional OpenAI client for fetching new translations
+        model: Model to use for new translations
+
+    Returns:
+        Dataframe with added 'english_translation' column
+    """
+    import sys
+    import os
+    # Add parent directory to path to import phrase_translator
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    from phrase_translator import get_translations_for_phrases
+
+    if 'phrase' not in df.columns:
+        raise ValueError("Dataframe must have a 'phrase' column")
+
+    # Get unique phrases
+    phrases = df['phrase'].unique().tolist()
+
+    # Get translations
+    translations = get_translations_for_phrases(conn, client, model, phrases)
+
+    # Add translation column
+    df = df.copy()
+    df['english_translation'] = df['phrase'].map(translations)
+
+    # Fill any missing translations with empty string
+    df['english_translation'] = df['english_translation'].fillna('')
+
+    return df
