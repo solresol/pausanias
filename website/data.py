@@ -198,7 +198,7 @@ def add_phrase_translations(df: pd.DataFrame, conn, client: Optional[OpenAI] = N
         model: Model to use for new translations
 
     Returns:
-        Dataframe with added 'english_translation' column
+        Dataframe with added 'english_translation' and 'is_proper_noun' columns
     """
     import sys
     import os
@@ -212,14 +212,16 @@ def add_phrase_translations(df: pd.DataFrame, conn, client: Optional[OpenAI] = N
     # Get unique phrases
     phrases = df['phrase'].unique().tolist()
 
-    # Get translations
+    # Get translations (returns dict of phrase -> (translation, is_proper_noun))
     translations = get_translations_for_phrases(conn, client, model, phrases)
 
-    # Add translation column
+    # Add columns
     df = df.copy()
-    df['english_translation'] = df['phrase'].map(translations)
+    df['english_translation'] = df['phrase'].map(lambda p: translations.get(p, ('', False))[0])
+    df['is_proper_noun'] = df['phrase'].map(lambda p: translations.get(p, ('', False))[1])
 
-    # Fill any missing translations with empty string
+    # Fill any missing values
     df['english_translation'] = df['english_translation'].fillna('')
+    df['is_proper_noun'] = df['is_proper_noun'].fillna(False)
 
     return df
