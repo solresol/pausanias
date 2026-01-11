@@ -17,6 +17,7 @@ def create_phrase_translations_table(conn):
     CREATE TABLE IF NOT EXISTS phrase_translations (
         phrase TEXT PRIMARY KEY,
         english_translation TEXT NOT NULL,
+        is_proper_noun BOOLEAN DEFAULT 0,
         timestamp TEXT NOT NULL,
         model TEXT NOT NULL,
         input_tokens INTEGER NOT NULL,
@@ -26,7 +27,7 @@ def create_phrase_translations_table(conn):
     conn.commit()
 
 
-def get_phrase_translation(conn, phrase: str) -> Optional[str]:
+def get_phrase_translation(conn, phrase: str) -> Optional[tuple[str, bool]]:
     """Get the English translation for a Greek phrase from the cache.
 
     Args:
@@ -34,25 +35,26 @@ def get_phrase_translation(conn, phrase: str) -> Optional[str]:
         phrase: Greek phrase to look up
 
     Returns:
-        English translation if found, None otherwise
+        Tuple of (english_translation, is_proper_noun) if found, None otherwise
     """
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT english_translation FROM phrase_translations WHERE phrase = ?",
+        "SELECT english_translation, is_proper_noun FROM phrase_translations WHERE phrase = ?",
         (phrase,)
     )
     result = cursor.fetchone()
-    return result[0] if result else None
+    return (result[0], bool(result[1])) if result else None
 
 
-def save_phrase_translation(conn, phrase: str, translation: str, model: str,
-                           input_tokens: int, output_tokens: int):
+def save_phrase_translation(conn, phrase: str, translation: str, is_proper_noun: bool,
+                           model: str, input_tokens: int, output_tokens: int):
     """Save a phrase translation to the database.
 
     Args:
         conn: Database connection
         phrase: Greek phrase
         translation: English translation
+        is_proper_noun: Whether the phrase is a proper noun
         model: Model name used for translation
         input_tokens: Number of input tokens used
         output_tokens: Number of output tokens generated
@@ -62,15 +64,15 @@ def save_phrase_translation(conn, phrase: str, translation: str, model: str,
     cursor.execute(
         """
         INSERT OR REPLACE INTO phrase_translations
-        (phrase, english_translation, timestamp, model, input_tokens, output_tokens)
-        VALUES (?, ?, ?, ?, ?, ?)
+        (phrase, english_translation, is_proper_noun, timestamp, model, input_tokens, output_tokens)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         """,
-        (phrase, translation, timestamp, model, input_tokens, output_tokens)
+        (phrase, translation, is_proper_noun, timestamp, model, input_tokens, output_tokens)
     )
     conn.commit()
 
 
-def translate_phrase(client: OpenAI, model: str, phrase: str) -> tuple[str, int, int]:
+def translate_phrase(client: OpenAI, model: str, phrase: str) -> tuple[str, bool, int, int]:
     """Translate a Greek phrase to English using the OpenAI API.
 
     Args:
@@ -79,12 +81,15 @@ def translate_phrase(client: OpenAI, model: str, phrase: str) -> tuple[str, int,
         phrase: Greek phrase to translate
 
     Returns:
-        Tuple of (translation, input_tokens, output_tokens)
+        Tuple of (translation, is_proper_noun, input_tokens, output_tokens)
     """
     system_prompt = """You are an expert in Ancient Greek who specializes in translating classical Greek texts.
 Translate the provided Greek word or phrase into clear, accurate English.
-Provide only the translation itself, with no additional notes or commentary.
-For single words, provide the most common meaning. For phrases, provide a natural English translation."""
+Also determine if this is a proper noun (a name of a person, place, deity, or specific thing).
+
+Respond in exactly this format:
+Translation: [your translation here]
+Proper Noun: [yes or no]"""
 
     try:
         response = client.chat.completions.create(
@@ -97,17 +102,29 @@ For single words, provide the most common meaning. For phrases, provide a natura
 
         input_tokens = response.usage.prompt_tokens
         output_tokens = response.usage.completion_tokens
-        translation = response.choices[0].message.content.strip()
+        content = response.choices[0].message.content.strip()
 
-        return translation, input_tokens, output_tokens
+        # Parse the response
+        translation = ""
+        is_proper_noun = False
+
+        for line in content.split('\n'):
+            line = line.strip()
+            if line.startswith('Translation:'):
+                translation = line.replace('Translation:', '').strip()
+            elif line.startswith('Proper Noun:'):
+                proper_noun_str = line.replace('Proper Noun:', '').strip().lower()
+                is_proper_noun = proper_noun_str in ['yes', 'true', '1']
+
+        return translation, is_proper_noun, input_tokens, output_tokens
 
     except Exception as e:
         print(f"Error translating phrase '{phrase}': {str(e)}")
-        return "", 0, 0
+        return "", False, 0, 0
 
 
 def get_or_fetch_translation(conn, client: OpenAI, model: str, phrase: str,
-                             delay: float = 0.5) -> str:
+                             delay: float = 0.5) -> tuple[str, bool]:
     """Get translation from cache or fetch from LLM if not available.
 
     Args:
@@ -118,7 +135,7 @@ def get_or_fetch_translation(conn, client: OpenAI, model: str, phrase: str,
         delay: Delay in seconds after API call to avoid rate limits
 
     Returns:
-        English translation
+        Tuple of (english_translation, is_proper_noun)
     """
     # Check cache first
     cached = get_phrase_translation(conn, phrase)
@@ -126,19 +143,19 @@ def get_or_fetch_translation(conn, client: OpenAI, model: str, phrase: str,
         return cached
 
     # Fetch from LLM
-    translation, input_tokens, output_tokens = translate_phrase(client, model, phrase)
+    translation, is_proper_noun, input_tokens, output_tokens = translate_phrase(client, model, phrase)
 
     if translation:
         # Save to cache
-        save_phrase_translation(conn, phrase, translation, model, input_tokens, output_tokens)
+        save_phrase_translation(conn, phrase, translation, is_proper_noun, model, input_tokens, output_tokens)
         # Small delay to avoid rate limits
         time.sleep(delay)
 
-    return translation
+    return translation, is_proper_noun
 
 
 def get_translations_for_phrases(conn, client: Optional[OpenAI], model: str,
-                                 phrases: list[str], delay: float = 0.5) -> Dict[str, str]:
+                                 phrases: list[str], delay: float = 0.5) -> Dict[str, tuple[str, bool]]:
     """Get translations for a list of phrases, fetching from LLM only when needed.
 
     Args:
@@ -149,7 +166,7 @@ def get_translations_for_phrases(conn, client: Optional[OpenAI], model: str,
         delay: Delay in seconds after each API call
 
     Returns:
-        Dictionary mapping phrases to their English translations
+        Dictionary mapping phrases to tuples of (english_translation, is_proper_noun)
     """
     translations = {}
     phrases_to_fetch = []
@@ -163,14 +180,14 @@ def get_translations_for_phrases(conn, client: Optional[OpenAI], model: str,
             phrases_to_fetch.append(phrase)
         else:
             # No client provided, leave empty
-            translations[phrase] = ""
+            translations[phrase] = ("", False)
 
     # Fetch missing translations if client is available
     if client and phrases_to_fetch:
         print(f"Fetching {len(phrases_to_fetch)} new phrase translations from LLM...")
         for phrase in phrases_to_fetch:
-            translation = get_or_fetch_translation(conn, client, model, phrase, delay)
-            translations[phrase] = translation
+            translation_tuple = get_or_fetch_translation(conn, client, model, phrase, delay)
+            translations[phrase] = translation_tuple
 
     return translations
 
