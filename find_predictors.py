@@ -18,11 +18,15 @@ import joblib
 
 from stats_utils import compute_p_q_values
 
-TOKEN_PATTERN = re.compile(r"(?u)\\b\\w\\w+\\b")
+TOKEN_PATTERN = re.compile(r"(?u)\b\w\w+\b")
 
 
 def normalize_stopwords(stopwords):
-    """Normalize stopwords to match the vectorizer's preprocessing."""
+    """Normalize stopwords to match the vectorizer's preprocessing.
+
+    Uses casefold() for proper Unicode case-insensitive comparison,
+    which correctly handles Greek final sigma (ς → σ).
+    """
 
     normalized = []
     for word in stopwords:
@@ -31,6 +35,17 @@ def normalize_stopwords(stopwords):
 
     # Preserve insertion order while removing duplicates
     return list(dict.fromkeys(normalized))
+
+
+def casefold_preprocessor(text):
+    """Custom preprocessor using casefold() for proper Greek handling.
+
+    Python's casefold() correctly converts Greek final sigma (ς) to
+    regular sigma (σ), which is the proper Unicode behavior for
+    case-insensitive comparison. sklearn's default uses lower() which
+    does not handle this correctly.
+    """
+    return text.casefold()
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Create TF-IDF and logistic regression models for Pausanias passages")
@@ -343,7 +358,8 @@ if __name__ == '__main__':
         mythic_vectorizer_params = {
             'max_features': args.max_features,
             'ngram_range': (ngram_min, ngram_max),
-            'stop_words': all_stopwords
+            'stop_words': all_stopwords,
+            'preprocessor': casefold_preprocessor
         }
         
         mythic_model_params = {
@@ -370,7 +386,8 @@ if __name__ == '__main__':
         skeptic_vectorizer_params = {
             'max_features': args.max_features,
             'ngram_range': (ngram_min, ngram_max),
-            'stop_words': []  # No stopwords as requested
+            'stop_words': [],  # No stopwords as requested
+            'preprocessor': casefold_preprocessor
         }
         
         skeptic_model_params = {
