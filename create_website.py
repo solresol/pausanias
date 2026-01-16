@@ -24,5 +24,11 @@ def parse_arguments():
     return parser.parse_args()
 
 if __name__ == '__main__':
+    # Enable phrase translation by default unless explicitly disabled
+    if '--no-translate-phrases' in sys.argv:
+        sys.argv.remove('--no-translate-phrases')
+    elif '--translate-phrases' not in sys.argv:
+        sys.argv.append('--translate-phrases')
+
     # This script simply delegates to the refactored website module
     website_main()
