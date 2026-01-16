@@ -4,6 +4,7 @@ import argparse
 import sqlite3
 import sys
 import re
+import unicodedata
 import numpy as np
 import pandas as pd
 from collections import Counter
@@ -26,11 +27,16 @@ def normalize_stopwords(stopwords):
 
     Uses casefold() for proper Unicode case-insensitive comparison,
     which correctly handles Greek final sigma (ς → σ).
+
+    NFC normalization is applied after casefold to match the
+    casefold_preprocessor behavior and ensure stopwords match tokens.
     """
 
     normalized = []
     for word in stopwords:
-        tokens = TOKEN_PATTERN.findall(word.casefold())
+        # Must match casefold_preprocessor: casefold + NFC
+        normalized_word = unicodedata.normalize('NFC', word.casefold())
+        tokens = TOKEN_PATTERN.findall(normalized_word)
         normalized.extend(tokens)
 
     # Preserve insertion order while removing duplicates
@@ -44,8 +50,12 @@ def casefold_preprocessor(text):
     regular sigma (σ), which is the proper Unicode behavior for
     case-insensitive comparison. sklearn's default uses lower() which
     does not handle this correctly.
+
+    NFC normalization is applied after casefold to recompose characters.
+    casefold() can decompose precomposed Greek characters (e.g., ῆ → η + ͂),
+    and these combining marks break word boundaries in the tokenizer regex.
     """
-    return text.casefold()
+    return unicodedata.normalize('NFC', text.casefold())
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Create TF-IDF and logistic regression models for Pausanias passages")
