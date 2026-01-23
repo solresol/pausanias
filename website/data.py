@@ -187,6 +187,166 @@ def get_sentence_skepticism_metrics(conn):
     return df.iloc[0].to_dict()
 
 
+def get_map_data(conn):
+    """Get place coordinates with their associated passage IDs for the map."""
+    cursor = conn.cursor()
+
+    # Check if the place_coordinates table exists
+    cursor.execute("""
+        SELECT name FROM sqlite_master
+        WHERE type='table' AND name='place_coordinates'
+    """)
+    if not cursor.fetchone():
+        return []
+
+    # Get all places with coordinates
+    cursor.execute("""
+        SELECT pc.wikidata_qid, pc.reference_form, pc.english_transcription,
+               pc.latitude, pc.longitude, pc.pleiades_id
+        FROM place_coordinates pc
+        WHERE pc.latitude IS NOT NULL AND pc.longitude IS NOT NULL
+    """)
+    places = cursor.fetchall()
+
+    if not places:
+        return []
+
+    # For each place, find the passages where it appears
+    map_data = []
+    for qid, reference_form, english, lat, lon, pleiades_id in places:
+        cursor.execute("""
+            SELECT DISTINCT passage_id
+            FROM proper_nouns
+            WHERE reference_form = ? AND entity_type = 'place'
+            ORDER BY passage_id
+        """, (reference_form,))
+        passage_ids = [row[0] for row in cursor.fetchall()]
+
+        map_data.append({
+            "qid": qid,
+            "reference_form": reference_form,
+            "english": english,
+            "lat": lat,
+            "lon": lon,
+            "pleiades_id": pleiades_id,
+            "passages": passage_ids,
+        })
+
+    return map_data
+
+
+def get_translation_page_data(conn):
+    """Get all data needed for translation pages: passages, translations, proper nouns with Wikidata info."""
+    cursor = conn.cursor()
+
+    # Get all passages with translations and classification
+    cursor.execute("""
+        SELECT p.id, p.passage, t.english_translation,
+               p.references_mythic_era, p.expresses_scepticism
+        FROM passages p
+        LEFT JOIN translations t ON p.id = t.passage_id
+        ORDER BY p.id
+    """)
+    passages_raw = cursor.fetchall()
+
+    # Sort by numeric passage ID
+    passages_raw.sort(key=lambda r: passage_id_sort_key(r[0]))
+
+    # Build ordered passage list
+    passages = []
+    for pid, greek, english, is_mythic, is_skeptical in passages_raw:
+        passages.append({
+            "id": pid,
+            "greek": greek,
+            "english": english,
+            "is_mythic": is_mythic,
+            "is_skeptical": is_skeptical,
+        })
+
+    # Get proper nouns with Wikidata links and coordinates
+    # Check if wikidata_links table exists
+    cursor.execute("""
+        SELECT name FROM sqlite_master
+        WHERE type='table' AND name='wikidata_links'
+    """)
+    has_wikidata = cursor.fetchone() is not None
+
+    if has_wikidata:
+        cursor.execute("""
+            SELECT pn.passage_id, pn.reference_form, pn.english_transcription,
+                   pn.entity_type, w.wikidata_qid, pc.latitude, pc.longitude,
+                   pc.pleiades_id
+            FROM proper_nouns pn
+            LEFT JOIN wikidata_links w
+                ON pn.reference_form = w.reference_form
+                AND pn.entity_type = w.entity_type
+            LEFT JOIN place_coordinates pc
+                ON w.wikidata_qid = pc.wikidata_qid
+            ORDER BY pn.passage_id, pn.entity_type, pn.reference_form
+        """)
+    else:
+        cursor.execute("""
+            SELECT passage_id, reference_form, english_transcription,
+                   entity_type, NULL, NULL, NULL, NULL
+            FROM proper_nouns
+            ORDER BY passage_id, entity_type, reference_form
+        """)
+
+    noun_rows = cursor.fetchall()
+
+    # Group nouns by passage_id
+    nouns_by_passage = {}
+    # Also build cross-reference index: reference_form -> list of passage_ids
+    noun_passages = {}
+
+    for passage_id, ref_form, english, entity_type, qid, lat, lon, pleiades_id in noun_rows:
+        if passage_id not in nouns_by_passage:
+            nouns_by_passage[passage_id] = []
+
+        noun_entry = {
+            "reference_form": ref_form,
+            "english": english,
+            "entity_type": entity_type,
+            "qid": qid,
+            "lat": lat,
+            "lon": lon,
+            "pleiades_id": pleiades_id,
+        }
+
+        # Avoid duplicates within a passage
+        if not any(n["reference_form"] == ref_form and n["entity_type"] == entity_type
+                   for n in nouns_by_passage[passage_id]):
+            nouns_by_passage[passage_id].append(noun_entry)
+
+        # Build cross-reference
+        key = (ref_form, entity_type)
+        if key not in noun_passages:
+            noun_passages[key] = set()
+        noun_passages[key].add(passage_id)
+
+    # Convert cross-reference sets to sorted lists
+    noun_passages = {k: sorted(v, key=passage_id_sort_key)
+                     for k, v in noun_passages.items()}
+
+    return passages, nouns_by_passage, noun_passages
+
+
+def get_passage_summaries(conn):
+    """Get one-line summaries for passages (from passage_summaries table)."""
+    cursor = conn.cursor()
+
+    # Check if the table exists
+    cursor.execute("""
+        SELECT name FROM sqlite_master
+        WHERE type='table' AND name='passage_summaries'
+    """)
+    if not cursor.fetchone():
+        return {}
+
+    cursor.execute("SELECT passage_id, summary FROM passage_summaries")
+    return dict(cursor.fetchall())
+
+
 def add_phrase_translations(df: pd.DataFrame, conn, client: Optional[OpenAI] = None,
                            model: str = "gpt-5") -> pd.DataFrame:
     """Add English translations to a predictor dataframe.

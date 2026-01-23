@@ -20,6 +20,9 @@ from .data import (
     get_passage_skepticism_metrics,
     get_sentence_mythicness_metrics,
     get_sentence_skepticism_metrics,
+    get_map_data,
+    get_translation_page_data,
+    get_passage_summaries,
     add_phrase_translations,
 )
 from .structure import create_website_structure
@@ -33,6 +36,8 @@ from .generators import (
     generate_sentences_page,
     generate_sentence_mythic_words_page,
     generate_sentence_skeptic_words_page,
+    generate_map_page,
+    generate_translation_pages,
 )
 
 def parse_arguments():
@@ -133,7 +138,16 @@ def main():
         generate_sentences_page(sentences_df, output_dir, args.title)
         generate_sentence_mythic_words_page(sentence_mythic_predictors, output_dir, args.title, sentence_mythic_metrics)
         generate_sentence_skeptic_words_page(sentence_skeptic_predictors, output_dir, args.title, sentence_skeptic_metrics)
-        
+
+        # Generate place map
+        map_data = get_map_data(conn)
+        generate_map_page(map_data, output_dir, args.title)
+
+        # Generate translation pages
+        translation_passages, nouns_by_passage, noun_passages = get_translation_page_data(conn)
+        passage_summaries = get_passage_summaries(conn)
+        generate_translation_pages(translation_passages, nouns_by_passage, noun_passages, output_dir, args.title, passage_summaries)
+
         print(f"Website generated successfully in '{output_dir}'")
         print(f"Open '{os.path.join(output_dir, 'index.html')}' in a web browser to view it.")
     except Exception as e:
