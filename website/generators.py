@@ -1288,6 +1288,7 @@ def _translation_nav(prefix, active=None):
         ("translation/nouns/index.html", "Noun Index", "nouns"),
         ("network_viz/index.html", "Network Analysis", "network"),
         ("map/index.html", "Place Map", "map"),
+        ("progress/index.html", "Progress", "progress"),
     ]
     parts = []
     for href, label, key in links:
@@ -1931,3 +1932,165 @@ def generate_translation_pages(passages, nouns_by_passage, noun_passages, output
     total_passages = len(passage_order)
     print(f"Translation pages generated: {total_passages} passages across {len(books)} books.")
     print(f"Proper noun index generated: {total_nouns} nouns across {len(nouns_by_type)} types.")
+
+
+def generate_progress_page(progress_data, output_dir, title):
+    """Generate a progress tracking page showing pipeline status."""
+    from datetime import datetime
+
+    progress_dir = os.path.join(output_dir, 'progress')
+    os.makedirs(progress_dir, exist_ok=True)
+
+    timestamp = datetime.now().strftime("%Y-%m-%d at %H:%M:%S")
+
+    # Build task rows
+    task_rows = ""
+    for task in progress_data["tasks"]:
+        pct = task["percent"]
+        if pct >= 100:
+            row_class = ' class="complete"'
+            bar_class = "bar-complete"
+        elif pct >= 50:
+            row_class = ""
+            bar_class = "bar-progress"
+        else:
+            row_class = ""
+            bar_class = "bar-early"
+
+        task_rows += f"""            <tr{row_class}>
+                <td>{task["name"]}</td>
+                <td><code>{task["script"]}</code></td>
+                <td class="num">{task["batch_size"]}</td>
+                <td class="num">{task["done"]:,}</td>
+                <td class="num">{task["total"]:,}</td>
+                <td class="num"><div class="bar-container"><div class="{bar_class}" style="width:{min(pct,100):.0f}%"></div><span>{pct:.1f}%</span></div></td>
+                <td>{task["est_completion"]}</td>
+            </tr>
+"""
+
+    # Build token usage rows
+    token_rows = ""
+    total_input = 0
+    total_output = 0
+    for src in progress_data["token_usage"]:
+        total_input += src["input_tokens"]
+        total_output += src["output_tokens"]
+        token_rows += f"""            <tr>
+                <td>{src["name"]}</td>
+                <td class="num">{src["input_tokens"]:,}</td>
+                <td class="num">{src["output_tokens"]:,}</td>
+                <td class="num">{src["total_tokens"]:,}</td>
+            </tr>
+"""
+    token_rows += f"""            <tr class="total-row">
+                <td><strong>Total</strong></td>
+                <td class="num"><strong>{total_input:,}</strong></td>
+                <td class="num"><strong>{total_output:,}</strong></td>
+                <td class="num"><strong>{total_input + total_output:,}</strong></td>
+            </tr>
+"""
+
+    page_html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - Progress</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .progress-table {{
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+            margin-bottom: 2em;
+        }}
+        .progress-table th, .progress-table td {{
+            border: 1px solid #ddd;
+            padding: 6px 10px;
+            text-align: left;
+        }}
+        .progress-table th {{
+            background: #f5f0eb;
+        }}
+        .progress-table .num {{
+            text-align: right;
+        }}
+        .progress-table tr.complete td {{
+            background: #f0f9f0;
+        }}
+        .progress-table tr.total-row td {{
+            background: #f5f0eb;
+        }}
+        .progress-table code {{
+            font-size: 0.85em;
+            background: #f0ebe5;
+            padding: 1px 4px;
+            border-radius: 3px;
+        }}
+        .bar-container {{
+            position: relative;
+            background: #eee;
+            border-radius: 3px;
+            height: 20px;
+            min-width: 80px;
+        }}
+        .bar-container span {{
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.8em;
+            font-weight: bold;
+            color: #333;
+        }}
+        .bar-complete {{
+            background: #8bc78b;
+            height: 100%;
+            border-radius: 3px;
+        }}
+        .bar-progress {{
+            background: #c7c28b;
+            height: 100%;
+            border-radius: 3px;
+        }}
+        .bar-early {{
+            background: #c7a08b;
+            height: 100%;
+            border-radius: 3px;
+        }}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>{title}</h1>
+        <p>Pipeline Progress</p>
+    </header>
+    {_translation_nav("../", "progress")}
+    <div class="container">
+        <h2>Task Progress</h2>
+        <table class="progress-table">
+            <thead>
+                <tr><th>Task</th><th>Script</th><th>Batch/day</th><th>Done</th><th>Total</th><th>Progress</th><th>Est. completion</th></tr>
+            </thead>
+            <tbody>
+{task_rows}            </tbody>
+        </table>
+
+        <h2>Token Usage</h2>
+        <table class="progress-table">
+            <thead>
+                <tr><th>Source</th><th>Input tokens</th><th>Output tokens</th><th>Total</th></tr>
+            </thead>
+            <tbody>
+{token_rows}            </tbody>
+        </table>
+
+        <footer>Generated on {timestamp}</footer>
+    </div>
+</body>
+</html>
+"""
+    with open(os.path.join(progress_dir, 'index.html'), 'w', encoding='utf-8') as f:
+        f.write(page_html)
+
+    print("Progress page generated.")
