@@ -23,6 +23,7 @@ from .data import (
     get_map_data,
     get_translation_page_data,
     get_passage_summaries,
+    get_progress_data,
     add_phrase_translations,
 )
 from .structure import create_website_structure
@@ -38,6 +39,7 @@ from .generators import (
     generate_sentence_skeptic_words_page,
     generate_map_page,
     generate_translation_pages,
+    generate_progress_page,
 )
 
 def parse_arguments():
@@ -147,6 +149,10 @@ def main():
         translation_passages, nouns_by_passage, noun_passages = get_translation_page_data(conn)
         passage_summaries = get_passage_summaries(conn)
         generate_translation_pages(translation_passages, nouns_by_passage, noun_passages, output_dir, args.title, passage_summaries)
+
+        # Generate progress page
+        progress_data = get_progress_data(conn)
+        generate_progress_page(progress_data, output_dir, args.title)
 
         print(f"Website generated successfully in '{output_dir}'")
         print(f"Open '{os.path.join(output_dir, 'index.html')}' in a web browser to view it.")

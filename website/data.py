@@ -347,6 +347,103 @@ def get_passage_summaries(conn):
     return dict(cursor.fetchall())
 
 
+def get_progress_data(conn):
+    """Get progress data for all pipeline tasks."""
+    from math import ceil
+    from datetime import date, timedelta
+
+    cursor = conn.cursor()
+    today = date.today()
+
+    # Total passages
+    cursor.execute("SELECT COUNT(*) FROM passages")
+    total_passages = cursor.fetchone()[0]
+
+    # Total sentences
+    cursor.execute("SELECT COUNT(*) FROM greek_sentences")
+    total_sentences = cursor.fetchone()[0]
+
+    # Total unique proper nouns
+    cursor.execute("SELECT COUNT(DISTINCT reference_form || '|' || entity_type) FROM proper_nouns")
+    total_nouns = cursor.fetchone()[0]
+
+    # Task progress
+    tasks = []
+
+    # 1. Mythic/skeptic analysis
+    cursor.execute("SELECT COUNT(*) FROM passages WHERE references_mythic_era IS NOT NULL")
+    done = cursor.fetchone()[0]
+    tasks.append({"name": "Mythic/skeptic analysis", "script": "mythic_sceptic_analyser.py",
+                  "batch_size": 50, "total": total_passages, "done": done})
+
+    # 2. Proper noun extraction
+    cursor.execute("SELECT COUNT(*) FROM noun_extraction_status")
+    done = cursor.fetchone()[0]
+    tasks.append({"name": "Proper noun extraction", "script": "extract_proper_nouns.py",
+                  "batch_size": 50, "total": total_passages, "done": done})
+
+    # 3. Wikidata linking
+    cursor.execute("SELECT COUNT(*) FROM wikidata_links")
+    done = cursor.fetchone()[0]
+    tasks.append({"name": "Wikidata linking", "script": "link_wikidata.py",
+                  "batch_size": 100, "total": total_nouns, "done": done})
+
+    # 4. Translation
+    cursor.execute("SELECT COUNT(*) FROM translations")
+    done = cursor.fetchone()[0]
+    tasks.append({"name": "Translation", "script": "translate_pausanias.py",
+                  "batch_size": 50, "total": total_passages, "done": done})
+
+    # 5. Sentence splitting
+    cursor.execute("SELECT COUNT(DISTINCT passage_id) FROM greek_sentences")
+    done = cursor.fetchone()[0]
+    tasks.append({"name": "Sentence splitting", "script": "split_sentences.py",
+                  "batch_size": 5, "total": total_passages, "done": done})
+
+    # 6. Summarisation
+    cursor.execute("SELECT COUNT(*) FROM passage_summaries")
+    done = cursor.fetchone()[0]
+    tasks.append({"name": "Passage summarisation", "script": "summarise_passages.py",
+                  "batch_size": 50, "total": total_passages, "done": done})
+
+    # 7. Sentence classification
+    cursor.execute("SELECT COUNT(*) FROM greek_sentences WHERE references_mythic_era IS NOT NULL")
+    done = cursor.fetchone()[0]
+    tasks.append({"name": "Sentence classification", "script": "sentence_mythic_sceptic_analyser.py",
+                  "batch_size": 25, "total": total_sentences, "done": done})
+
+    # Calculate percentages and estimated completion
+    for task in tasks:
+        task["percent"] = round(100 * task["done"] / task["total"], 1) if task["total"] > 0 else 0
+        remaining = task["total"] - task["done"]
+        if remaining <= 0:
+            task["est_completion"] = "Done"
+        else:
+            days_needed = ceil(remaining / task["batch_size"])
+            est_date = today + timedelta(days=days_needed)
+            task["est_completion"] = est_date.isoformat()
+
+    # Token usage by source
+    token_sources = [
+        ("Passage analysis", "content_queries"),
+        ("Noun extraction", "noun_extraction_status"),
+        ("Translation", "translations"),
+        ("Summarisation", "passage_summaries"),
+        ("Phrase translation", "phrase_translations"),
+    ]
+    token_usage = []
+    for label, table in token_sources:
+        try:
+            cursor.execute(f"SELECT COALESCE(SUM(input_tokens),0), COALESCE(SUM(output_tokens),0) FROM {table}")
+            inp, out = cursor.fetchone()
+            token_usage.append({"name": label, "input_tokens": inp, "output_tokens": out,
+                                "total_tokens": inp + out})
+        except Exception:
+            pass
+
+    return {"tasks": tasks, "token_usage": token_usage}
+
+
 def add_phrase_translations(df: pd.DataFrame, conn, client: Optional[OpenAI] = None,
                            model: str = "gpt-5") -> pd.DataFrame:
     """Add English translations to a predictor dataframe.
