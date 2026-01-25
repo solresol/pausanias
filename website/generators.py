@@ -91,6 +91,7 @@ def generate_home_page(output_dir, title, timestamp):
             <a href="sentence_skeptic_words.html">Sentence Skeptic Words</a>
             <a href="network_viz/index.html">Network Analysis</a>
             <a href="map/index.html">Place Map</a>
+            <a href="progress/index.html">Progress</a>
         </nav>
 
         <div class="container">
@@ -133,6 +134,13 @@ def generate_home_page(output_dir, title, timestamp):
                 <p>View places mentioned by Pausanias on an interactive map. Click markers to see
                    which passages reference each location.</p>
                 <a href="map/index.html">View Place Map</a>
+            </div>
+
+            <div class="home-card">
+                <h2>Pipeline Progress</h2>
+                <p>Track the status of data processing tasks: completion percentages,
+                   estimated finish dates, and token usage.</p>
+                <a href="progress/index.html">View Progress</a>
             </div>
 
             <footer>
