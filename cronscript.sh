@@ -7,7 +7,7 @@ uv run mythic_sceptic_analyser.py --stop 50
 uv run extract_proper_nouns.py --stop 50
 uv run link_wikidata.py --stop-after 100
 uv run translate_pausanias.py --stop 50
-uv run split_sentences.py --stop 5
+uv run split_sentences.py --stop 20
 uv run summarise_passages.py --stop-after 50
 uv run find_predictors.py
 uv run find_sentence_predictors.py
