@@ -359,9 +359,18 @@ def get_progress_data(conn):
     cursor.execute("SELECT COUNT(*) FROM passages")
     total_passages = cursor.fetchone()[0]
 
-    # Total sentences
+    # Sentences: count and passages that have been split
     cursor.execute("SELECT COUNT(*) FROM greek_sentences")
     total_sentences = cursor.fetchone()[0]
+    cursor.execute("SELECT COUNT(DISTINCT passage_id) FROM greek_sentences")
+    passages_with_sentences = cursor.fetchone()[0]
+
+    # Estimate total sentences based on average per passage
+    if passages_with_sentences > 0:
+        avg_sentences_per_passage = total_sentences / passages_with_sentences
+        estimated_total_sentences = int(total_passages * avg_sentences_per_passage)
+    else:
+        estimated_total_sentences = total_passages  # fallback estimate
 
     # Total unique proper nouns
     cursor.execute("SELECT COUNT(DISTINCT reference_form || '|' || entity_type) FROM proper_nouns")
@@ -395,10 +404,8 @@ def get_progress_data(conn):
                   "batch_size": 50, "total": total_passages, "done": done})
 
     # 5. Sentence splitting
-    cursor.execute("SELECT COUNT(DISTINCT passage_id) FROM greek_sentences")
-    done = cursor.fetchone()[0]
     tasks.append({"name": "Sentence splitting", "script": "split_sentences.py",
-                  "batch_size": 5, "total": total_passages, "done": done})
+                  "batch_size": 20, "total": total_passages, "done": passages_with_sentences})
 
     # 6. Summarisation
     cursor.execute("SELECT COUNT(*) FROM passage_summaries")
@@ -406,11 +413,11 @@ def get_progress_data(conn):
     tasks.append({"name": "Passage summarisation", "script": "summarise_passages.py",
                   "batch_size": 50, "total": total_passages, "done": done})
 
-    # 7. Sentence classification
+    # 7. Sentence classification (total is estimated based on avg sentences per passage)
     cursor.execute("SELECT COUNT(*) FROM greek_sentences WHERE references_mythic_era IS NOT NULL")
     done = cursor.fetchone()[0]
     tasks.append({"name": "Sentence classification", "script": "sentence_mythic_sceptic_analyser.py",
-                  "batch_size": 25, "total": total_sentences, "done": done})
+                  "batch_size": 25, "total": estimated_total_sentences, "done": done})
 
     # Calculate percentages and estimated completion
     for task in tasks:
