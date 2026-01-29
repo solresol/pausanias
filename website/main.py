@@ -3,6 +3,7 @@
 """Main entry point for website generation."""
 
 import argparse
+import shutil
 import sqlite3
 import sys
 import os
@@ -153,6 +154,12 @@ def main():
         # Generate progress page
         progress_data = get_progress_data(conn)
         generate_progress_page(progress_data, output_dir, args.title)
+
+        # Copy PDF book if it exists
+        pdf_source = os.path.join(os.path.dirname(os.path.dirname(__file__)), "pausanias_book", "pausanias.pdf")
+        if os.path.exists(pdf_source):
+            shutil.copy2(pdf_source, os.path.join(output_dir, "pausanias.pdf"))
+            print("PDF book copied to website.")
 
         print(f"Website generated successfully in '{output_dir}'")
         print(f"Open '{os.path.join(output_dir, 'index.html')}' in a web browser to view it.")
