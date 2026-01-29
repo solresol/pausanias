@@ -143,6 +143,13 @@ def generate_home_page(output_dir, title, timestamp):
                 <a href="progress/index.html">View Progress</a>
             </div>
 
+            <div class="home-card">
+                <h2>Download PDF Book</h2>
+                <p>Download the complete English translation as a beautifully typeset PDF book
+                   with margin icons for mythic/skeptical content and indices of people, places, and deities.</p>
+                <a href="pausanias.pdf">Download PDF</a>
+            </div>
+
             <footer>
                 Site generated on {timestamp} from <a href="pausanias.sqlite">pausanias.sqlite</a>
             </footer>
