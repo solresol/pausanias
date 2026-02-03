@@ -91,6 +91,7 @@ def generate_home_page(output_dir, title, timestamp):
             <a href="sentence_skeptic_words.html">Sentence Skeptic Words</a>
             <a href="network_viz/index.html">Network Analysis</a>
             <a href="map/index.html">Place Map</a>
+            <a href="place_pairs/index.html">Place Pairs</a>
             <a href="progress/index.html">Progress</a>
         </nav>
 
@@ -134,6 +135,12 @@ def generate_home_page(output_dir, title, timestamp):
                 <p>View places mentioned by Pausanias on an interactive map. Click markers to see
                    which passages reference each location.</p>
                 <a href="map/index.html">View Place Map</a>
+            </div>
+
+            <div class="home-card">
+                <h2>Place Pairs</h2>
+                <p>Compare distances between geolocated places mentioned in the same passage.</p>
+                <a href="place_pairs/index.html">View Place Pairs</a>
             </div>
 
             <div class="home-card">
@@ -200,6 +207,7 @@ def generate_mythic_page(passages_df, mythic_color_map, mythic_class_map, proper
             <a href=\"../sentence_skeptic_words.html\">Sentence Skeptic Words</a>
             <a href=\"../network_viz/index.html\">Network Analysis</a>
             <a href=\"../map/index.html\">Place Map</a>
+            <a href=\"../place_pairs/index.html\">Place Pairs</a>
         </nav>
 
         <div class=\"container\">
@@ -313,6 +321,7 @@ def generate_mythic_page(passages_df, mythic_color_map, mythic_class_map, proper
             <a href=\"../sentence_skeptic_words.html\">Sentence Skeptic Words</a>
             <a href=\"../network_viz/index.html\">Network Analysis</a>
             <a href=\"../map/index.html\">Place Map</a>
+            <a href="../place_pairs/index.html">Place Pairs</a>
         </nav>
 
         <div class=\"container\">
@@ -375,6 +384,7 @@ def generate_skepticism_page(passages_df, skeptic_color_map, skeptic_class_map, 
             <a href=\"../sentence_skeptic_words.html\">Sentence Skeptic Words</a>
             <a href=\"../network_viz/index.html\">Network Analysis</a>
             <a href=\"../map/index.html\">Place Map</a>
+            <a href="../place_pairs/index.html">Place Pairs</a>
         </nav>
 
         <div class=\"container\">
@@ -489,6 +499,7 @@ def generate_skepticism_page(passages_df, skeptic_color_map, skeptic_class_map, 
             <a href=\"../sentence_skeptic_words.html\">Sentence Skeptic Words</a>
             <a href=\"../network_viz/index.html\">Network Analysis</a>
             <a href=\"../map/index.html\">Place Map</a>
+            <a href="../place_pairs/index.html">Place Pairs</a>
         </nav>
 
         <div class=\"container\">
@@ -546,6 +557,7 @@ def generate_mythic_words_page(mythic_predictors, output_dir, title, metrics=Non
             <a href="sentence_skeptic_words.html">Sentence Skeptic Words</a>
             <a href="network_viz/index.html">Network Analysis</a>
             <a href="map/index.html">Place Map</a>
+            <a href="place_pairs/index.html">Place Pairs</a>
         </nav>
 
         <div class="container">
@@ -670,6 +682,7 @@ def generate_skeptic_words_page(skeptic_predictors, output_dir, title, metrics=N
             <a href="sentence_skeptic_words.html">Sentence Skeptic Words</a>
             <a href="network_viz/index.html">Network Analysis</a>
             <a href="map/index.html">Place Map</a>
+            <a href="place_pairs/index.html">Place Pairs</a>
         </nav>
 
         <div class="container">
@@ -794,6 +807,7 @@ def generate_sentence_mythic_words_page(mythic_predictors, output_dir, title, me
             <a href="sentence_skeptic_words.html">Sentence Skeptic Words</a>
             <a href="network_viz/index.html">Network Analysis</a>
             <a href="map/index.html">Place Map</a>
+            <a href="place_pairs/index.html">Place Pairs</a>
         </nav>
 
         <div class="container">
@@ -911,6 +925,7 @@ def generate_sentence_skeptic_words_page(skeptic_predictors, output_dir, title, 
             <a href="sentence_skeptic_words.html" class="active">Sentence Skeptic Words</a>
             <a href="network_viz/index.html">Network Analysis</a>
             <a href="map/index.html">Place Map</a>
+            <a href="place_pairs/index.html">Place Pairs</a>
         </nav>
 
         <div class="container">
@@ -1218,6 +1233,7 @@ def generate_map_page(map_data, output_dir, title):
         <a href="../sentence_skeptic_words.html">Sentence Skeptic Words</a>
         <a href="../network_viz/index.html">Network Analysis</a>
         <a href="index.html" class="active">Place Map</a>
+        <a href="../place_pairs/index.html">Place Pairs</a>
     </nav>
 
     <div class="container" style="max-width: 1000px;">
@@ -1292,6 +1308,114 @@ def generate_map_page(map_data, output_dir, title):
     print(f"Map page generated with {len(map_data)} places.")
 
 
+def _format_place_label(place):
+    """Format a place label using English if available, with Greek reference in parentheses."""
+    english = place.get("english") or ""
+    ref_form = place.get("reference_form") or ""
+    if english and ref_form and english != ref_form:
+        return f"{html.escape(english)} ({html.escape(ref_form)})"
+    return html.escape(english or ref_form or "Unknown")
+
+
+def generate_place_pairs_page(place_pairs, output_dir, title):
+    """Generate a page listing place pairs mentioned in the same passage with distances."""
+    place_pairs_dir = os.path.join(output_dir, "place_pairs")
+    os.makedirs(place_pairs_dir, exist_ok=True)
+
+    timestamp = datetime.now().strftime("%Y-%m-%d at %H:%M:%S")
+    total_pairs = len(place_pairs)
+    total_passages = len({p["passage_id"] for p in place_pairs}) if place_pairs else 0
+
+    if not place_pairs:
+        rows_html = "<p>No place pairs with coordinates found yet. Run <code>python link_wikidata.py</code> to populate coordinates.</p>"
+    else:
+        rows = []
+        for pair in place_pairs:
+            passage_id = pair["passage_id"]
+            parts = passage_id.split(".")
+            passage_href = None
+            if len(parts) == 3:
+                passage_href = f"../translation/{parts[0]}/{parts[1]}/{parts[2]}.html"
+
+            distance = f"{pair['distance_km']:.1f} km"
+            place_a = _format_place_label(pair["place_a"])
+            place_b = _format_place_label(pair["place_b"])
+            passage_link = (
+                f'<a href="{passage_href}">{passage_id}</a>' if passage_href else html.escape(passage_id)
+            )
+            rows.append(f"""
+                <tr>
+                    <td>{distance}</td>
+                    <td>{place_a}</td>
+                    <td>{place_b}</td>
+                    <td>{passage_link}</td>
+                </tr>
+            """)
+
+        rows_html = f"""
+        <p>Found <strong>{total_pairs:,}</strong> place pairs across <strong>{total_passages:,}</strong> passages.</p>
+        <table class="predictor-table">
+            <thead>
+                <tr>
+                    <th>Distance</th>
+                    <th>Place A</th>
+                    <th>Place B</th>
+                    <th>Passage</th>
+                </tr>
+            </thead>
+            <tbody>
+                {''.join(rows)}
+            </tbody>
+        </table>
+        """
+
+    html_content = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - Place Pairs</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{title}</h1>
+        <p>Place pairs mentioned together in the same passage</p>
+    </header>
+
+    <nav>
+        <a href="../index.html">Home</a>
+        <a href="../translation/index.html">Translation</a>
+        <a href="../mythic/index.html">Mythic Analysis</a>
+        <a href="../skepticism/index.html">Skepticism Analysis</a>
+        <a href="../mythic_words.html">Mythic Words</a>
+        <a href="../skeptic_words.html">Skeptic Words</a>
+        <a href="../sentences/index.html">Sentences</a>
+        <a href="../sentence_mythic_words.html">Sentence Mythic Words</a>
+        <a href="../sentence_skeptic_words.html">Sentence Skeptic Words</a>
+        <a href="../network_viz/index.html">Network Analysis</a>
+        <a href="../map/index.html">Place Map</a>
+        <a href="index.html" class="active">Place Pairs</a>
+    </nav>
+
+    <div class="container" style="max-width: 1000px;">
+        <h2>Place Pairs</h2>
+        {rows_html}
+
+        <footer>
+            Generated on {timestamp} from <a href="../pausanias.sqlite">pausanias.sqlite</a>
+        </footer>
+    </div>
+</body>
+</html>
+"""
+
+    with open(os.path.join(place_pairs_dir, "index.html"), "w", encoding="utf-8") as f:
+        f.write(html_content)
+
+    print(f"Place pairs page generated with {total_pairs} pairs.")
+
+
 def _translation_nav(prefix, active=None):
     """Generate nav HTML for translation pages with correct relative paths."""
     links = [
@@ -1303,6 +1427,7 @@ def _translation_nav(prefix, active=None):
         ("translation/nouns/index.html", "Noun Index", "nouns"),
         ("network_viz/index.html", "Network Analysis", "network"),
         ("map/index.html", "Place Map", "map"),
+        ("place_pairs/index.html", "Place Pairs", "place_pairs"),
         ("progress/index.html", "Progress", "progress"),
     ]
     parts = []

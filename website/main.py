@@ -25,6 +25,7 @@ from .data import (
     get_translation_page_data,
     get_passage_summaries,
     get_progress_data,
+    get_place_pairs,
     add_phrase_translations,
 )
 from .structure import create_website_structure
@@ -39,6 +40,7 @@ from .generators import (
     generate_sentence_mythic_words_page,
     generate_sentence_skeptic_words_page,
     generate_map_page,
+    generate_place_pairs_page,
     generate_translation_pages,
     generate_progress_page,
 )
@@ -145,6 +147,10 @@ def main():
         # Generate place map
         map_data = get_map_data(conn)
         generate_map_page(map_data, output_dir, args.title)
+
+        # Generate place pairs page
+        place_pairs = get_place_pairs(conn)
+        generate_place_pairs_page(place_pairs, output_dir, args.title)
 
         # Generate translation pages
         translation_passages, nouns_by_passage, noun_passages = get_translation_page_data(conn)
