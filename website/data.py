@@ -1,5 +1,6 @@
 """Database operations and data retrieval functions."""
 
+import math
 import pandas as pd
 import sqlite3
 from typing import Optional
@@ -233,6 +234,94 @@ def get_map_data(conn):
         })
 
     return map_data
+
+
+def _haversine_km(lat1, lon1, lat2, lon2):
+    """Calculate the great-circle distance between two points in kilometers."""
+    r = 6371.0
+    phi1 = math.radians(lat1)
+    phi2 = math.radians(lat2)
+    dphi = math.radians(lat2 - lat1)
+    dlambda = math.radians(lon2 - lon1)
+
+    a = math.sin(dphi / 2.0) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2.0) ** 2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    return r * c
+
+
+def get_place_pairs(conn):
+    """Get place pairs that appear in the same passage, sorted by distance."""
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT name FROM sqlite_master
+        WHERE type='table' AND name='place_coordinates'
+    """)
+    if not cursor.fetchone():
+        return []
+
+    cursor.execute("""
+        SELECT name FROM sqlite_master
+        WHERE type='table' AND name='wikidata_links'
+    """)
+    if not cursor.fetchone():
+        return []
+
+    cursor.execute("""
+        SELECT pn.passage_id, pn.reference_form, pn.english_transcription,
+               pc.latitude, pc.longitude, pc.pleiades_id
+        FROM proper_nouns pn
+        JOIN wikidata_links w
+            ON pn.reference_form = w.reference_form
+            AND pn.entity_type = w.entity_type
+        JOIN place_coordinates pc
+            ON w.wikidata_qid = pc.wikidata_qid
+        WHERE pn.entity_type = 'place'
+          AND pc.latitude IS NOT NULL
+          AND pc.longitude IS NOT NULL
+        ORDER BY pn.passage_id, pn.reference_form
+    """)
+    rows = cursor.fetchall()
+
+    if not rows:
+        return []
+
+    places_by_passage = {}
+    for passage_id, ref_form, english, lat, lon, pleiades_id in rows:
+        if passage_id not in places_by_passage:
+            places_by_passage[passage_id] = {}
+        key = (ref_form, lat, lon)
+        if key not in places_by_passage[passage_id]:
+            places_by_passage[passage_id][key] = {
+                "reference_form": ref_form,
+                "english": english,
+                "lat": lat,
+                "lon": lon,
+                "pleiades_id": pleiades_id,
+            }
+
+    place_pairs = []
+    for passage_id, places_map in places_by_passage.items():
+        places = list(places_map.values())
+        if len(places) < 2:
+            continue
+        for i in range(len(places) - 1):
+            for j in range(i + 1, len(places)):
+                place_a = places[i]
+                place_b = places[j]
+                distance_km = _haversine_km(
+                    place_a["lat"], place_a["lon"],
+                    place_b["lat"], place_b["lon"]
+                )
+                place_pairs.append({
+                    "passage_id": passage_id,
+                    "place_a": place_a,
+                    "place_b": place_b,
+                    "distance_km": distance_km,
+                })
+
+    place_pairs.sort(key=lambda p: p["distance_km"], reverse=True)
+    return place_pairs
 
 
 def get_translation_page_data(conn):
