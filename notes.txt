@@ -1,0 +1,12 @@
+Should we compare against Strabo? Or Herodotus?
+
+
+----------------------------------------------------------------------
+
+Classify at the sentence level?
+Make a random sample of a hundred sentences and sent them to Greta for marking.
+
+----
+
+Fix the HTML so that it doesn't crash chrome.
+

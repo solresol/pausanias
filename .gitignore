@@ -4,3 +4,4 @@ pausanias_site
 pausanias.old
 __pycache__
 pausanias_book
+.env.raksasa.local
