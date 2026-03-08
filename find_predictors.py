@@ -213,6 +213,20 @@ def get_manual_stopwords(conn):
     df = pd.read_sql_query("SELECT word FROM manual_stopwords", conn)
     return df['word'].tolist()
 
+
+def get_manual_skepticism_stopwords(conn):
+    """Get manually specified stopwords for skepticism models only."""
+    conn.execute('''
+    CREATE TABLE IF NOT EXISTS manual_skepticism_stopwords (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        word TEXT UNIQUE NOT NULL
+    )
+    ''')
+    conn.commit()
+
+    df = pd.read_sql_query("SELECT word FROM manual_skepticism_stopwords", conn)
+    return df['word'].tolist()
+
 def save_predictors(conn, feature_names, coefficients, label, table_name, pos_counts, neg_counts, p_values, q_values):
     """Save predictive features to the database."""
     timestamp = datetime.now().isoformat()
@@ -392,11 +406,17 @@ if __name__ == '__main__':
             args.top_features
         )
         
-        # Build skepticism model (without proper noun stopwords)
+        # Build skepticism model (with skepticism-specific stopwords only)
+        manual_skepticism_stopwords = get_manual_skepticism_stopwords(conn)
+        skepticism_stopwords = normalize_stopwords(manual_skepticism_stopwords)
+        print(
+            f"Using {len(manual_skepticism_stopwords)} manual stopwords (normalized to {len(skepticism_stopwords)} unique tokens) as stopwords for skepticism model."
+        )
+
         skeptic_vectorizer_params = {
             'max_features': args.max_features,
             'ngram_range': (ngram_min, ngram_max),
-            'stop_words': [],  # No stopwords as requested
+            'stop_words': skepticism_stopwords,
             'preprocessor': casefold_preprocessor
         }
         

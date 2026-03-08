@@ -51,5 +51,12 @@ sqlite3 pausanias.sqlite "INSERT INTO manual_stopwords(word) VALUES ('Athens');"
 When `find_predictors.py` runs it combines these entries with the proper
 noun list and uses the union as stop words for the mythicness model.
 
+For skepticism-specific exclusions, use `manual_skepticism_stopwords`
+instead. These entries are applied only to the passage- and sentence-level
+skepticism models, so they will not affect mythicness:
+
+```bash
+sqlite3 pausanias.sqlite "INSERT INTO manual_skepticism_stopwords(word) VALUES ('δοκεῖν');"
+```
 
 
