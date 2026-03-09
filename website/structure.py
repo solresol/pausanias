@@ -214,6 +214,112 @@ def create_website_structure(output_dir):
         border-color: #5c5142;
         color: white;
     }
+
+    .simplified-model {
+        margin-top: 35px;
+        padding: 20px;
+        background-color: #f6f1ea;
+        border-left: 6px solid #5c5142;
+        border-radius: 6px;
+    }
+
+    .simplified-model h2 {
+        margin-top: 0;
+    }
+
+    .simplified-rule,
+    .simplified-comparison {
+        font-size: 1.05em;
+    }
+
+    .simplified-points-table {
+        margin-bottom: 0;
+    }
+
+    .points-value {
+        font-weight: bold;
+    }
+
+    .confusion-section {
+        margin: 18px 0 24px;
+    }
+
+    .confusion-intro {
+        margin-bottom: 12px;
+    }
+
+    .confusion-grid {
+        display: grid;
+        gap: 16px;
+        align-items: start;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .confusion-card {
+        background-color: #fffaf4;
+        border: 1px solid #d9cec0;
+        border-radius: 6px;
+        min-width: 0;
+        padding: 14px;
+    }
+
+    @media (max-width: 1000px) {
+        .confusion-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .confusion-card h3 {
+        margin-top: 0;
+        margin-bottom: 10px;
+        font-size: 1em;
+    }
+
+    .confusion-table {
+        table-layout: fixed;
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .confusion-table th,
+    .confusion-table td {
+        border: 1px solid #d9cec0;
+        padding: 8px;
+        text-align: center;
+    }
+
+    .confusion-table thead th,
+    .confusion-table tbody th {
+        background-color: #eee9e3;
+        font-weight: bold;
+    }
+
+    .confusion-corner {
+        background-color: transparent;
+        border-left: none;
+        border-top: none;
+    }
+
+    .confusion-axis {
+        background-color: #eee9e3;
+        font-weight: bold;
+    }
+
+    .confusion-axis-predicted {
+        text-align: right;
+        padding-right: 12px;
+    }
+
+    .confusion-axis-actual {
+        text-align: left;
+        vertical-align: middle;
+        padding-left: 8px;
+    }
+
+    .confusion-row-label {
+        text-align: left;
+        padding-left: 12px;
+    }
     
     .predictor-table th, .predictor-table td {
         padding: 8px;
