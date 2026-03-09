@@ -6,6 +6,19 @@ import sqlite3
 from typing import Optional
 from openai import OpenAI
 
+
+def table_exists(conn, table_name):
+    """Return True if a table exists in the SQLite database."""
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT name FROM sqlite_master
+        WHERE type='table' AND name=?
+        """,
+        (table_name,),
+    )
+    return cursor.fetchone() is not None
+
 def passage_id_sort_key(passage_id):
     """Create a sort key for passage IDs in the format X.Y.Z."""
     parts = passage_id.split('.')
@@ -115,6 +128,62 @@ def get_sentence_skepticism_predictors(conn):
     return df
 
 
+def get_simplified_mythicness_predictors(conn):
+    """Get reduced-model predictors for passage-level mythicness."""
+    if not table_exists(conn, "simplified_mythicness_predictors"):
+        return pd.DataFrame()
+
+    query = """
+    SELECT phrase, coefficient, idf, point_value, is_mythic, mythic_count,
+           non_mythic_count, p_value, q_value
+    FROM simplified_mythicness_predictors
+    ORDER BY ABS(point_value) DESC, q_value ASC
+    """
+    return pd.read_sql_query(query, conn)
+
+
+def get_simplified_skepticism_predictors(conn):
+    """Get reduced-model predictors for passage-level skepticism."""
+    if not table_exists(conn, "simplified_skepticism_predictors"):
+        return pd.DataFrame()
+
+    query = """
+    SELECT phrase, coefficient, idf, point_value, is_skeptical, skeptical_count,
+           non_skeptical_count, p_value, q_value
+    FROM simplified_skepticism_predictors
+    ORDER BY ABS(point_value) DESC, q_value ASC
+    """
+    return pd.read_sql_query(query, conn)
+
+
+def get_sentence_simplified_mythicness_predictors(conn):
+    """Get reduced-model predictors for sentence-level mythicness."""
+    if not table_exists(conn, "sentence_simplified_mythicness_predictors"):
+        return pd.DataFrame()
+
+    query = """
+    SELECT phrase, coefficient, idf, point_value, is_mythic, mythic_count,
+           non_mythic_count, p_value, q_value
+    FROM sentence_simplified_mythicness_predictors
+    ORDER BY ABS(point_value) DESC, q_value ASC
+    """
+    return pd.read_sql_query(query, conn)
+
+
+def get_sentence_simplified_skepticism_predictors(conn):
+    """Get reduced-model predictors for sentence-level skepticism."""
+    if not table_exists(conn, "sentence_simplified_skepticism_predictors"):
+        return pd.DataFrame()
+
+    query = """
+    SELECT phrase, coefficient, idf, point_value, is_skeptical, skeptical_count,
+           non_skeptical_count, p_value, q_value
+    FROM sentence_simplified_skepticism_predictors
+    ORDER BY ABS(point_value) DESC, q_value ASC
+    """
+    return pd.read_sql_query(query, conn)
+
+
 def get_all_sentences(conn):
     """Retrieve all Greek and English sentences with analysis flags."""
     query = """
@@ -131,8 +200,7 @@ def get_all_sentences(conn):
 def get_passage_mythicness_metrics(conn):
     """Get classification metrics for passage-level mythicness prediction."""
     query = """
-    SELECT accuracy, precision_0, recall_0, f1_0, support_0,
-           precision_1, recall_1, f1_1, support_1, timestamp
+    SELECT *
     FROM passage_mythicness_metrics
     ORDER BY id DESC
     LIMIT 1
@@ -146,8 +214,7 @@ def get_passage_mythicness_metrics(conn):
 def get_passage_skepticism_metrics(conn):
     """Get classification metrics for passage-level skepticism prediction."""
     query = """
-    SELECT accuracy, precision_0, recall_0, f1_0, support_0,
-           precision_1, recall_1, f1_1, support_1, timestamp
+    SELECT *
     FROM passage_skepticism_metrics
     ORDER BY id DESC
     LIMIT 1
@@ -161,8 +228,7 @@ def get_passage_skepticism_metrics(conn):
 def get_sentence_mythicness_metrics(conn):
     """Get classification metrics for sentence-level mythicness prediction."""
     query = """
-    SELECT accuracy, precision_0, recall_0, f1_0, support_0,
-           precision_1, recall_1, f1_1, support_1, timestamp
+    SELECT *
     FROM sentence_mythicness_metrics
     ORDER BY id DESC
     LIMIT 1
@@ -176,9 +242,76 @@ def get_sentence_mythicness_metrics(conn):
 def get_sentence_skepticism_metrics(conn):
     """Get classification metrics for sentence-level skepticism prediction."""
     query = """
-    SELECT accuracy, precision_0, recall_0, f1_0, support_0,
-           precision_1, recall_1, f1_1, support_1, timestamp
+    SELECT *
     FROM sentence_skepticism_metrics
+    ORDER BY id DESC
+    LIMIT 1
+    """
+    df = pd.read_sql_query(query, conn)
+    if len(df) == 0:
+        return None
+    return df.iloc[0].to_dict()
+
+
+def get_simplified_mythicness_metrics(conn):
+    """Get reduced-model metrics for passage-level mythicness."""
+    if not table_exists(conn, "simplified_mythicness_metrics"):
+        return None
+
+    query = """
+    SELECT *
+    FROM simplified_mythicness_metrics
+    ORDER BY id DESC
+    LIMIT 1
+    """
+    df = pd.read_sql_query(query, conn)
+    if len(df) == 0:
+        return None
+    return df.iloc[0].to_dict()
+
+
+def get_simplified_skepticism_metrics(conn):
+    """Get reduced-model metrics for passage-level skepticism."""
+    if not table_exists(conn, "simplified_skepticism_metrics"):
+        return None
+
+    query = """
+    SELECT *
+    FROM simplified_skepticism_metrics
+    ORDER BY id DESC
+    LIMIT 1
+    """
+    df = pd.read_sql_query(query, conn)
+    if len(df) == 0:
+        return None
+    return df.iloc[0].to_dict()
+
+
+def get_sentence_simplified_mythicness_metrics(conn):
+    """Get reduced-model metrics for sentence-level mythicness."""
+    if not table_exists(conn, "sentence_simplified_mythicness_metrics"):
+        return None
+
+    query = """
+    SELECT *
+    FROM sentence_simplified_mythicness_metrics
+    ORDER BY id DESC
+    LIMIT 1
+    """
+    df = pd.read_sql_query(query, conn)
+    if len(df) == 0:
+        return None
+    return df.iloc[0].to_dict()
+
+
+def get_sentence_simplified_skepticism_metrics(conn):
+    """Get reduced-model metrics for sentence-level skepticism."""
+    if not table_exists(conn, "sentence_simplified_skepticism_metrics"):
+        return None
+
+    query = """
+    SELECT *
+    FROM sentence_simplified_skepticism_metrics
     ORDER BY id DESC
     LIMIT 1
     """

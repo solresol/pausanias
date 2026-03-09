@@ -5,3 +5,15 @@ pausanias.old
 __pycache__
 pausanias_book
 .env.raksasa.local
+.playwright-cli
+output/playwright
+tmp/
+documentation/pausanias_project_presentation.aux
+documentation/pausanias_project_presentation.fdb_latexmk
+documentation/pausanias_project_presentation.fls
+documentation/pausanias_project_presentation.log
+documentation/pausanias_project_presentation.nav
+documentation/pausanias_project_presentation.out
+documentation/pausanias_project_presentation.pdf
+documentation/pausanias_project_presentation.snm
+documentation/pausanias_project_presentation.toc

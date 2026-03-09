@@ -172,6 +172,153 @@ def render_predictor_table(
     """
     return table_html
 
+
+def render_confusion_matrix_card(title, metrics, class_0_label, class_1_label, prefix=""):
+    """Render a 2x2 confusion matrix card when exact counts are available."""
+    keys = [
+        f"{prefix}actual_0_pred_0",
+        f"{prefix}actual_0_pred_1",
+        f"{prefix}actual_1_pred_0",
+        f"{prefix}actual_1_pred_1",
+    ]
+    if metrics is None or any(key not in metrics for key in keys):
+        return ""
+
+    return f"""
+            <section class="confusion-card">
+                <h3>{html.escape(title)}</h3>
+                <table class="confusion-table">
+                    <thead>
+                        <tr>
+                            <th class="confusion-corner" colspan="2" rowspan="2"></th>
+                            <th class="confusion-axis confusion-axis-predicted" colspan="2">Predicted</th>
+                        </tr>
+                        <tr>
+                            <th>{html.escape(class_0_label)}</th>
+                            <th>{html.escape(class_1_label)}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th class="confusion-axis confusion-axis-actual" rowspan="2">Actual</th>
+                            <th class="confusion-row-label">{html.escape(class_0_label)}</th>
+                            <td>{int(metrics[f"{prefix}actual_0_pred_0"])}</td>
+                            <td>{int(metrics[f"{prefix}actual_0_pred_1"])}</td>
+                        </tr>
+                        <tr>
+                            <th class="confusion-row-label">{html.escape(class_1_label)}</th>
+                            <td>{int(metrics[f"{prefix}actual_1_pred_0"])}</td>
+                            <td>{int(metrics[f"{prefix}actual_1_pred_1"])}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+    """
+
+
+def render_confusion_matrix_section(full_metrics, simplified_metrics, class_0_label, class_1_label, baseline_label):
+    """Render confusion matrices for the full, simplified, and baseline models."""
+    cards = [
+        render_confusion_matrix_card("Full Logistic Model", full_metrics, class_0_label, class_1_label),
+        render_confusion_matrix_card("Simplified Checklist", simplified_metrics, class_0_label, class_1_label),
+        render_confusion_matrix_card(
+            f"Always Guess {baseline_label}",
+            simplified_metrics,
+            class_0_label,
+            class_1_label,
+            prefix="baseline_",
+        ),
+    ]
+    cards = [card for card in cards if card]
+    if not cards:
+        return ""
+
+    return f"""
+            <div class="confusion-section">
+                <p class="confusion-intro">These confusion matrices show which texts each approach gets right and where it makes false alarms or misses.</p>
+                <div class="confusion-grid">
+{''.join(cards)}
+                </div>
+            </div>
+    """
+
+
+def render_simplified_model_section(simplified_predictors, simplified_metrics, full_metrics, class_0_label, class_1_label):
+    """Render a plain-language summary of the reduced points-based model."""
+    if simplified_metrics is None or simplified_predictors is None or len(simplified_predictors) == 0:
+        return f"""
+        <section class="simplified-model">
+            <h2>Simplified Checklist Version</h2>
+            <p>This page can also show a simpler points-based model, but it is not available in the current database yet. Re-run the predictor scripts to generate it.</p>
+        </section>
+        """
+
+    predictors = simplified_predictors.copy()
+    predictors["abs_point_value"] = predictors["point_value"].abs()
+    predictors = predictors.sort_values(["abs_point_value", "q_value"], ascending=[False, True])
+
+    baseline_label = class_1_label if int(simplified_metrics["baseline_label"]) == 1 else class_0_label
+    full_accuracy = full_metrics["accuracy"] if full_metrics is not None else None
+    simplified_accuracy = simplified_metrics["accuracy"]
+    baseline_accuracy = simplified_metrics["baseline_accuracy"]
+    intercept = simplified_metrics["intercept"]
+    threshold = simplified_metrics["threshold"]
+    feature_count = int(simplified_metrics["selected_feature_count"])
+    confusion_html = render_confusion_matrix_section(
+        full_metrics,
+        simplified_metrics,
+        class_0_label,
+        class_1_label,
+        baseline_label,
+    )
+
+    comparison_parts = [
+        f"<strong>Simplified checklist:</strong> {simplified_accuracy:.1%}",
+        f"<strong>Always guess {html.escape(baseline_label)}:</strong> {baseline_accuracy:.1%}",
+    ]
+    if full_accuracy is not None:
+        comparison_parts.insert(0, f"<strong>Full logistic model:</strong> {full_accuracy:.1%}")
+
+    table_rows = ""
+    for _, row in predictors.iterrows():
+        english = row.get("english_translation", "")
+        direction = class_1_label if row["point_value"] > 0 else class_0_label
+        table_rows += f"""
+                    <tr>
+                        <td>{html.escape(row['phrase'])}</td>
+                        <td>{html.escape(english)}</td>
+                        <td class="points-value">{row['point_value']:+.2f}</td>
+                        <td>{html.escape(direction)}</td>
+                        <td>{row['q_value']:.3g}</td>
+                    </tr>
+        """
+
+    return f"""
+        <section class="simplified-model">
+            <h2>Simplified Checklist Version</h2>
+            <p>This reduced model keeps only the words or phrases with q-value below 0.1, then turns them into a simple checklist.</p>
+            <p class="simplified-rule">Start at <strong>{intercept:+.2f}</strong> points. If one of the items below appears at least once, add its points once. If the final score ends above <strong>0</strong>, classify the text as <strong>{html.escape(class_1_label)}</strong>. That is the same as saying the listed word-points must add up past <strong>{threshold:+.2f}</strong>.</p>
+            <p class="simplified-comparison">{' | '.join(comparison_parts)}</p>
+            <p>This shorter model uses <strong>{feature_count}</strong> statistically strong vocabulary items.</p>
+{confusion_html}
+
+            <table class="predictor-table simplified-points-table">
+                <thead>
+                    <tr>
+                        <th>Word/Phrase</th>
+                        <th>English</th>
+                        <th>Points If Seen</th>
+                        <th>Pushes Toward</th>
+                        <th>q-value</th>
+                    </tr>
+                </thead>
+                <tbody>
+{table_rows}
+                </tbody>
+            </table>
+        </section>
+    """
+
 def generate_home_page(output_dir, title, timestamp):
     """Generate the home page with build timestamp and links to other pages."""
     html_content = f"""<!DOCTYPE html>
@@ -633,7 +780,7 @@ def generate_skepticism_page(passages_df, skeptic_color_map, skeptic_class_map, 
     with open(os.path.join(skeptic_dir, 'index.html'), 'w', encoding='utf-8') as f:
         f.write(index_content)
 
-def generate_mythic_words_page(mythic_predictors, output_dir, title, metrics=None):
+def generate_mythic_words_page(mythic_predictors, output_dir, title, metrics=None, simplified_predictors=None, simplified_metrics=None):
     """Generate a page showing words and phrases that predict mythic/historical content."""
 
     # Split into mythic and historical predictors
@@ -701,6 +848,13 @@ def generate_mythic_words_page(mythic_predictors, output_dir, title, metrics=Non
         "non_mythic_count",
         coefficient_direction="asc",
     )
+    html_content += render_simplified_model_section(
+        simplified_predictors,
+        simplified_metrics,
+        metrics,
+        "Historical",
+        "Mythic",
+    )
 
     html_content += """
             <footer>
@@ -716,7 +870,7 @@ def generate_mythic_words_page(mythic_predictors, output_dir, title, metrics=Non
     with open(os.path.join(output_dir, 'mythic_words.html'), 'w', encoding='utf-8') as f:
         f.write(html_content)
 
-def generate_skeptic_words_page(skeptic_predictors, output_dir, title, metrics=None):
+def generate_skeptic_words_page(skeptic_predictors, output_dir, title, metrics=None, simplified_predictors=None, simplified_metrics=None):
     """Generate a page showing words and phrases that predict skeptical/non-skeptical content."""
 
     # Split into skeptical and non-skeptical predictors
@@ -783,6 +937,13 @@ def generate_skeptic_words_page(skeptic_predictors, output_dir, title, metrics=N
         "non_skeptical_count",
         coefficient_direction="asc",
     )
+    html_content += render_simplified_model_section(
+        simplified_predictors,
+        simplified_metrics,
+        metrics,
+        "Non-skeptical",
+        "Skeptical",
+    )
 
     html_content += """
             <footer>
@@ -799,7 +960,7 @@ def generate_skeptic_words_page(skeptic_predictors, output_dir, title, metrics=N
         f.write(html_content)
 
 
-def generate_sentence_mythic_words_page(mythic_predictors, output_dir, title, metrics=None):
+def generate_sentence_mythic_words_page(mythic_predictors, output_dir, title, metrics=None, simplified_predictors=None, simplified_metrics=None):
     """Generate a page showing sentence-level predictors of mythic/historical content."""
 
     mythic_words = mythic_predictors[mythic_predictors['is_mythic'] == 1].sort_values('coefficient', ascending=False)
@@ -863,6 +1024,13 @@ def generate_sentence_mythic_words_page(mythic_predictors, output_dir, title, me
         "non_mythic_count",
         coefficient_direction="asc",
     )
+    html_content += render_simplified_model_section(
+        simplified_predictors,
+        simplified_metrics,
+        metrics,
+        "Historical",
+        "Mythic",
+    )
 
     html_content += """
             <footer>
@@ -878,7 +1046,7 @@ def generate_sentence_mythic_words_page(mythic_predictors, output_dir, title, me
         f.write(html_content)
 
 
-def generate_sentence_skeptic_words_page(skeptic_predictors, output_dir, title, metrics=None):
+def generate_sentence_skeptic_words_page(skeptic_predictors, output_dir, title, metrics=None, simplified_predictors=None, simplified_metrics=None):
     """Generate a page showing sentence-level predictors of skepticism."""
 
     skeptical_words = skeptic_predictors[skeptic_predictors['is_skeptical'] == 1].sort_values('coefficient', ascending=False)
@@ -941,6 +1109,13 @@ def generate_sentence_skeptic_words_page(skeptic_predictors, output_dir, title, 
         "skeptical_count",
         "non_skeptical_count",
         coefficient_direction="asc",
+    )
+    html_content += render_simplified_model_section(
+        simplified_predictors,
+        simplified_metrics,
+        metrics,
+        "Non-skeptical",
+        "Skeptical",
     )
 
     html_content += """

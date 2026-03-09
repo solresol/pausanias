@@ -220,9 +220,12 @@ def generate_preamble():
 \renewcommand{\parttitlefont}{\normalfont\Huge\scshape}
 
 % Running headers
+\nouppercaseheads
+\renewcommand{\chaptermark}[1]{\markright{#1}}
+\renewcommand{\partmark}[1]{}
 \makepagestyle{pausanias}
-\makeevenhead{pausanias}{\thepage}{}{\leftmark}
-\makeoddhead{pausanias}{\rightmark}{}{\thepage}
+\makeevenhead{pausanias}{\thepage}{}{\scshape Book \thepart}
+\makeoddhead{pausanias}{\itshape\rightmark}{}{\thepage}
 \makeevenfoot{pausanias}{}{}{}
 \makeoddfoot{pausanias}{}{}{}
 \pagestyle{pausanias}
@@ -296,6 +299,7 @@ def generate_book_content(book_num, passages, nouns_by_passage, map_file=None):
     # Generate LaTeX
     lines = []
     lines.append(f"\\part{{Book {book_num}: {title}}}")
+    lines.append("\\setcounter{chapter}{0}")
     lines.append("")
 
     # Include map if available

@@ -20,6 +20,7 @@ import joblib
 from stats_utils import compute_p_q_values
 
 TOKEN_PATTERN = re.compile(r"(?u)\b\w\w+\b")
+SIMPLIFIED_Q_VALUE_THRESHOLD = 0.1
 
 
 def normalize_stopwords(stopwords):
@@ -75,6 +76,74 @@ def parse_arguments():
     
     return parser.parse_args()
 
+
+def get_confusion_counts(y_true, y_pred):
+    """Return the 2x2 confusion-matrix counts for labels 0 and 1."""
+    actual_0_pred_0, actual_0_pred_1, actual_1_pred_0, actual_1_pred_1 = confusion_matrix(
+        y_true,
+        y_pred,
+        labels=[0, 1],
+    ).ravel()
+    return (
+        int(actual_0_pred_0),
+        int(actual_0_pred_1),
+        int(actual_1_pred_0),
+        int(actual_1_pred_1),
+    )
+
+
+def create_simplified_predictor_table(conn, table_name, label):
+    """Create a table for simplified-model feature scores."""
+    conn.execute(f"DROP TABLE IF EXISTS {table_name}")
+    conn.execute(f'''
+    CREATE TABLE {table_name} (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        phrase TEXT NOT NULL,
+        coefficient REAL NOT NULL,
+        idf REAL NOT NULL,
+        point_value REAL NOT NULL,
+        is_{label} INTEGER NOT NULL,
+        {label}_count INTEGER NOT NULL,
+        non_{label}_count INTEGER NOT NULL,
+        p_value REAL NOT NULL,
+        q_value REAL NOT NULL,
+        timestamp TEXT NOT NULL
+    )
+    ''')
+
+
+def create_simplified_metrics_table(conn, table_name):
+    """Create a table for simplified-model evaluation metrics."""
+    conn.execute(f"DROP TABLE IF EXISTS {table_name}")
+    conn.execute(f'''
+    CREATE TABLE {table_name} (
+        id INTEGER PRIMARY KEY,
+        accuracy REAL NOT NULL,
+        baseline_accuracy REAL NOT NULL,
+        baseline_label INTEGER NOT NULL,
+        intercept REAL NOT NULL,
+        threshold REAL NOT NULL,
+        selected_feature_count INTEGER NOT NULL,
+        precision_0 REAL NOT NULL,
+        recall_0 REAL NOT NULL,
+        f1_0 REAL NOT NULL,
+        support_0 INTEGER NOT NULL,
+        precision_1 REAL NOT NULL,
+        recall_1 REAL NOT NULL,
+        f1_1 REAL NOT NULL,
+        support_1 INTEGER NOT NULL,
+        actual_0_pred_0 INTEGER NOT NULL,
+        actual_0_pred_1 INTEGER NOT NULL,
+        actual_1_pred_0 INTEGER NOT NULL,
+        actual_1_pred_1 INTEGER NOT NULL,
+        baseline_actual_0_pred_0 INTEGER NOT NULL,
+        baseline_actual_0_pred_1 INTEGER NOT NULL,
+        baseline_actual_1_pred_0 INTEGER NOT NULL,
+        baseline_actual_1_pred_1 INTEGER NOT NULL,
+        timestamp TEXT NOT NULL
+    )
+    ''')
+
 def create_predictor_tables(conn):
     """Create tables for storing predictive words/phrases for sentences."""
     # Recreate mythicness predictors table with count columns
@@ -109,6 +178,9 @@ def create_predictor_tables(conn):
     )
     ''')
 
+    create_simplified_predictor_table(conn, "sentence_simplified_mythicness_predictors", "mythic")
+    create_simplified_predictor_table(conn, "sentence_simplified_skepticism_predictors", "skeptical")
+
     conn.commit()
 
 def create_classification_metrics_tables(conn):
@@ -126,6 +198,10 @@ def create_classification_metrics_tables(conn):
         recall_1 REAL NOT NULL,
         f1_1 REAL NOT NULL,
         support_1 INTEGER NOT NULL,
+        actual_0_pred_0 INTEGER NOT NULL,
+        actual_0_pred_1 INTEGER NOT NULL,
+        actual_1_pred_0 INTEGER NOT NULL,
+        actual_1_pred_1 INTEGER NOT NULL,
         timestamp TEXT NOT NULL
     )
     ''')
@@ -143,28 +219,78 @@ def create_classification_metrics_tables(conn):
         recall_1 REAL NOT NULL,
         f1_1 REAL NOT NULL,
         support_1 INTEGER NOT NULL,
+        actual_0_pred_0 INTEGER NOT NULL,
+        actual_0_pred_1 INTEGER NOT NULL,
+        actual_1_pred_0 INTEGER NOT NULL,
+        actual_1_pred_1 INTEGER NOT NULL,
         timestamp TEXT NOT NULL
     )
     ''')
+
+    create_simplified_metrics_table(conn, "sentence_simplified_mythicness_metrics")
+    create_simplified_metrics_table(conn, "sentence_simplified_skepticism_metrics")
     conn.commit()
 
 def save_classification_metrics(conn, table_name, y_true, y_pred):
     """Save classification metrics to the database."""
     precision, recall, f1, support = precision_recall_fscore_support(y_true, y_pred, average=None, zero_division=0)
     accuracy = accuracy_score(y_true, y_pred)
+    actual_0_pred_0, actual_0_pred_1, actual_1_pred_0, actual_1_pred_1 = get_confusion_counts(y_true, y_pred)
     timestamp = datetime.now().isoformat()
 
     cursor = conn.cursor()
     cursor.execute(
         f"""
         INSERT INTO {table_name}
-        (accuracy, precision_0, recall_0, f1_0, support_0, precision_1, recall_1, f1_1, support_1, timestamp)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (accuracy, precision_0, recall_0, f1_0, support_0, precision_1, recall_1, f1_1, support_1,
+         actual_0_pred_0, actual_0_pred_1, actual_1_pred_0, actual_1_pred_1, timestamp)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (float(accuracy),
          float(precision[0]), float(recall[0]), float(f1[0]), int(support[0]),
          float(precision[1]), float(recall[1]), float(f1[1]), int(support[1]),
+         actual_0_pred_0, actual_0_pred_1, actual_1_pred_0, actual_1_pred_1,
          timestamp)
+    )
+    conn.commit()
+
+
+def save_simplified_metrics(conn, table_name, y_true, y_pred, baseline_accuracy, baseline_label, intercept, threshold, selected_feature_count):
+    """Save simplified-model evaluation metrics to the database."""
+    precision, recall, f1, support = precision_recall_fscore_support(y_true, y_pred, average=None, zero_division=0)
+    accuracy = accuracy_score(y_true, y_pred)
+    actual_0_pred_0, actual_0_pred_1, actual_1_pred_0, actual_1_pred_1 = get_confusion_counts(y_true, y_pred)
+    baseline_pred = np.full(len(y_true), baseline_label)
+    baseline_actual_0_pred_0, baseline_actual_0_pred_1, baseline_actual_1_pred_0, baseline_actual_1_pred_1 = get_confusion_counts(
+        y_true,
+        baseline_pred,
+    )
+    timestamp = datetime.now().isoformat()
+
+    cursor = conn.cursor()
+    cursor.execute(
+        f"""
+        INSERT INTO {table_name}
+        (accuracy, baseline_accuracy, baseline_label, intercept, threshold, selected_feature_count,
+         precision_0, recall_0, f1_0, support_0, precision_1, recall_1, f1_1, support_1,
+         actual_0_pred_0, actual_0_pred_1, actual_1_pred_0, actual_1_pred_1,
+         baseline_actual_0_pred_0, baseline_actual_0_pred_1, baseline_actual_1_pred_0, baseline_actual_1_pred_1,
+         timestamp)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            float(accuracy),
+            float(baseline_accuracy),
+            int(baseline_label),
+            float(intercept),
+            float(threshold),
+            int(selected_feature_count),
+            float(precision[0]), float(recall[0]), float(f1[0]), int(support[0]),
+            float(precision[1]), float(recall[1]), float(f1[1]), int(support[1]),
+            actual_0_pred_0, actual_0_pred_1, actual_1_pred_0, actual_1_pred_1,
+            baseline_actual_0_pred_0, baseline_actual_0_pred_1, baseline_actual_1_pred_0, baseline_actual_1_pred_1,
+            timestamp,
+        )
     )
     conn.commit()
 
@@ -172,6 +298,8 @@ def clear_predictor_tables(conn):
     """Clear existing sentence-level predictor tables before inserting new values."""
     conn.execute("DELETE FROM sentence_mythicness_predictors")
     conn.execute("DELETE FROM sentence_skepticism_predictors")
+    conn.execute("DELETE FROM sentence_simplified_mythicness_predictors")
+    conn.execute("DELETE FROM sentence_simplified_skepticism_predictors")
     conn.commit()
     print("Cleared existing predictor tables.")
 
@@ -246,7 +374,152 @@ def save_predictors(conn, feature_names, coefficients, label, table_name, pos_co
 
     conn.commit()
 
-def build_and_evaluate_model(X, y, vectorizer_params, model_params, feature_label, conn, table_name, metrics_table_name, top_n=30):
+
+def save_simplified_predictors(conn, feature_names, coefficients, idf_values, point_values, label, table_name, pos_counts, neg_counts, p_values, q_values):
+    """Save simplified-model feature scores to the database."""
+    timestamp = datetime.now().isoformat()
+    cursor = conn.cursor()
+
+    pos_col = f"{label}_count"
+    neg_col = f"non_{label}_count"
+
+    for feature, coef, idf_value, point_value, pos, neg, p, q in zip(
+        feature_names, coefficients, idf_values, point_values, pos_counts, neg_counts, p_values, q_values
+    ):
+        is_positive = 1 if point_value > 0 else 0
+
+        cursor.execute(
+            f"""
+            INSERT INTO {table_name}
+            (phrase, coefficient, idf, point_value, is_{label}, {pos_col}, {neg_col}, p_value, q_value, timestamp)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                feature,
+                float(coef),
+                float(idf_value),
+                float(point_value),
+                is_positive,
+                int(pos),
+                int(neg),
+                float(p),
+                float(q),
+                timestamp,
+            ),
+        )
+
+    conn.commit()
+
+
+def build_and_evaluate_simplified_model(
+    X_train,
+    X_test,
+    y_train,
+    y_test,
+    vectorizer_params,
+    model_params,
+    feature_names,
+    pos_counts,
+    neg_counts,
+    p_values,
+    q_values,
+    feature_label,
+    conn,
+    predictor_table_name,
+    metrics_table_name,
+):
+    """Build a smaller points-based model using only features with q < threshold."""
+    selected_mask = q_values < SIMPLIFIED_Q_VALUE_THRESHOLD
+    selected_features = feature_names[selected_mask]
+
+    if len(selected_features) == 0:
+        print(
+            f"\nNo features with q < {SIMPLIFIED_Q_VALUE_THRESHOLD:.2f} for simplified {feature_label} model."
+        )
+        return None
+
+    simplified_vectorizer_params = dict(vectorizer_params)
+    simplified_vectorizer_params.pop("max_features", None)
+    simplified_vectorizer_params["vocabulary"] = selected_features.tolist()
+    simplified_vectorizer_params["binary"] = True
+    simplified_vectorizer_params["norm"] = None
+
+    pipeline = Pipeline([
+        ("tfidf", TfidfVectorizer(**simplified_vectorizer_params)),
+        ("logreg", LogisticRegression(**model_params)),
+    ])
+
+    pipeline.fit(X_train, y_train)
+    y_pred = pipeline.predict(X_test)
+
+    majority_label = Counter(y_train).most_common(1)[0][0]
+    baseline_pred = np.full(len(y_test), majority_label)
+    baseline_accuracy = accuracy_score(y_test, baseline_pred)
+
+    vectorizer = pipeline.named_steps["tfidf"]
+    model = pipeline.named_steps["logreg"]
+    simplified_feature_names = vectorizer.get_feature_names_out()
+    simplified_coefficients = model.coef_[0]
+    idf_lookup = dict(zip(simplified_feature_names, vectorizer.idf_))
+
+    q_lookup = {feature: idx for idx, feature in enumerate(feature_names)}
+    selected_indices = np.array([q_lookup[feature] for feature in simplified_feature_names])
+    simplified_idf = np.array([idf_lookup[feature] for feature in simplified_feature_names])
+    point_values = simplified_coefficients * simplified_idf
+
+    intercept = float(model.intercept_[0])
+    threshold = float(-intercept)
+
+    print(f"\n=== Simplified {feature_label.capitalize()} Model (q < {SIMPLIFIED_Q_VALUE_THRESHOLD:.2f}) ===")
+    print(classification_report(y_test, y_pred))
+    print(
+        f"Baseline accuracy (always guess class {majority_label}): {baseline_accuracy:.3f}"
+    )
+    print(
+        f"Start at {intercept:.3f}; if the word points add up past {threshold:.3f}, classify as {feature_label}."
+    )
+
+    save_simplified_metrics(
+        conn,
+        metrics_table_name,
+        y_test,
+        y_pred,
+        baseline_accuracy,
+        int(majority_label),
+        intercept,
+        threshold,
+        len(simplified_feature_names),
+    )
+
+    save_simplified_predictors(
+        conn,
+        simplified_feature_names,
+        simplified_coefficients,
+        simplified_idf,
+        point_values,
+        feature_label,
+        predictor_table_name,
+        pos_counts[selected_indices],
+        neg_counts[selected_indices],
+        p_values[selected_indices],
+        q_values[selected_indices],
+    )
+
+    return pipeline
+
+def build_and_evaluate_model(
+    X,
+    y,
+    vectorizer_params,
+    model_params,
+    feature_label,
+    conn,
+    table_name,
+    metrics_table_name,
+    simplified_predictor_table_name,
+    simplified_metrics_table_name,
+    top_n=30,
+):
     """Build a TF-IDF + LogReg model, evaluate it, and save top predictors."""
     # Split data
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=args.test_size, random_state=42)
@@ -335,6 +608,24 @@ def build_and_evaluate_model(X, y, vectorizer_params, model_params, feature_labe
         all_p_values,
         all_q_values,
     )
+
+    build_and_evaluate_simplified_model(
+        X_train,
+        X_test,
+        y_train,
+        y_test,
+        vectorizer_params,
+        model_params,
+        feature_names,
+        pos_counts,
+        neg_counts,
+        p_values,
+        q_values,
+        feature_label,
+        conn,
+        simplified_predictor_table_name,
+        simplified_metrics_table_name,
+    )
     
     return pipeline
 
@@ -401,6 +692,8 @@ if __name__ == '__main__':
             conn,
             'sentence_mythicness_predictors',
             'sentence_mythicness_metrics',
+            'sentence_simplified_mythicness_predictors',
+            'sentence_simplified_mythicness_metrics',
             args.top_features
         )
         
@@ -435,6 +728,8 @@ if __name__ == '__main__':
             conn,
             'sentence_skepticism_predictors',
             'sentence_skepticism_metrics',
+            'sentence_simplified_skepticism_predictors',
+            'sentence_simplified_skepticism_metrics',
             args.top_features
         )
         

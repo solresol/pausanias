@@ -17,10 +17,18 @@ from .data import (
     get_all_sentences,
     get_sentence_mythicness_predictors,
     get_sentence_skepticism_predictors,
+    get_simplified_mythicness_predictors,
+    get_simplified_skepticism_predictors,
+    get_sentence_simplified_mythicness_predictors,
+    get_sentence_simplified_skepticism_predictors,
     get_passage_mythicness_metrics,
     get_passage_skepticism_metrics,
     get_sentence_mythicness_metrics,
     get_sentence_skepticism_metrics,
+    get_simplified_mythicness_metrics,
+    get_simplified_skepticism_metrics,
+    get_sentence_simplified_mythicness_metrics,
+    get_sentence_simplified_skepticism_metrics,
     get_map_data,
     get_translation_page_data,
     get_passage_summaries,
@@ -91,12 +99,20 @@ def main():
         sentences_df = get_all_sentences(conn)
         sentence_mythic_predictors = get_sentence_mythicness_predictors(conn)
         sentence_skeptic_predictors = get_sentence_skepticism_predictors(conn)
+        simplified_mythic_predictors = get_simplified_mythicness_predictors(conn)
+        simplified_skeptic_predictors = get_simplified_skepticism_predictors(conn)
+        sentence_simplified_mythic_predictors = get_sentence_simplified_mythicness_predictors(conn)
+        sentence_simplified_skeptic_predictors = get_sentence_simplified_skepticism_predictors(conn)
 
         # Get classification metrics
         passage_mythic_metrics = get_passage_mythicness_metrics(conn)
         passage_skeptic_metrics = get_passage_skepticism_metrics(conn)
         sentence_mythic_metrics = get_sentence_mythicness_metrics(conn)
         sentence_skeptic_metrics = get_sentence_skepticism_metrics(conn)
+        simplified_mythic_metrics = get_simplified_mythicness_metrics(conn)
+        simplified_skeptic_metrics = get_simplified_skepticism_metrics(conn)
+        sentence_simplified_mythic_metrics = get_sentence_simplified_mythicness_metrics(conn)
+        sentence_simplified_skeptic_metrics = get_sentence_simplified_skepticism_metrics(conn)
         
         if len(passages_df) == 0:
             print("No analyzed passages found in the database.")
@@ -122,6 +138,14 @@ def main():
         skeptic_predictors = add_phrase_translations(skeptic_predictors, conn, client, args.model)
         sentence_mythic_predictors = add_phrase_translations(sentence_mythic_predictors, conn, client, args.model)
         sentence_skeptic_predictors = add_phrase_translations(sentence_skeptic_predictors, conn, client, args.model)
+        if len(simplified_mythic_predictors) > 0:
+            simplified_mythic_predictors = add_phrase_translations(simplified_mythic_predictors, conn, client, args.model)
+        if len(simplified_skeptic_predictors) > 0:
+            simplified_skeptic_predictors = add_phrase_translations(simplified_skeptic_predictors, conn, client, args.model)
+        if len(sentence_simplified_mythic_predictors) > 0:
+            sentence_simplified_mythic_predictors = add_phrase_translations(sentence_simplified_mythic_predictors, conn, client, args.model)
+        if len(sentence_simplified_skeptic_predictors) > 0:
+            sentence_simplified_skeptic_predictors = add_phrase_translations(sentence_simplified_skeptic_predictors, conn, client, args.model)
         
         # Create website structure
         output_dir, css_dir = create_website_structure(args.output_dir)
@@ -138,11 +162,39 @@ def main():
         generate_home_page(output_dir, args.title, timestamp)
         generate_mythic_page(passages_df, mythic_color_map, mythic_class_map, proper_nouns_dict, output_dir, args.title)
         generate_skepticism_page(passages_df, skeptic_color_map, skeptic_class_map, proper_nouns_dict, output_dir, args.title)
-        generate_mythic_words_page(mythic_predictors, output_dir, args.title, passage_mythic_metrics)
-        generate_skeptic_words_page(skeptic_predictors, output_dir, args.title, passage_skeptic_metrics)
+        generate_mythic_words_page(
+            mythic_predictors,
+            output_dir,
+            args.title,
+            passage_mythic_metrics,
+            simplified_predictors=simplified_mythic_predictors,
+            simplified_metrics=simplified_mythic_metrics,
+        )
+        generate_skeptic_words_page(
+            skeptic_predictors,
+            output_dir,
+            args.title,
+            passage_skeptic_metrics,
+            simplified_predictors=simplified_skeptic_predictors,
+            simplified_metrics=simplified_skeptic_metrics,
+        )
         generate_sentences_page(sentences_df, output_dir, args.title)
-        generate_sentence_mythic_words_page(sentence_mythic_predictors, output_dir, args.title, sentence_mythic_metrics)
-        generate_sentence_skeptic_words_page(sentence_skeptic_predictors, output_dir, args.title, sentence_skeptic_metrics)
+        generate_sentence_mythic_words_page(
+            sentence_mythic_predictors,
+            output_dir,
+            args.title,
+            sentence_mythic_metrics,
+            simplified_predictors=sentence_simplified_mythic_predictors,
+            simplified_metrics=sentence_simplified_mythic_metrics,
+        )
+        generate_sentence_skeptic_words_page(
+            sentence_skeptic_predictors,
+            output_dir,
+            args.title,
+            sentence_skeptic_metrics,
+            simplified_predictors=sentence_simplified_skeptic_predictors,
+            simplified_metrics=sentence_simplified_skeptic_metrics,
+        )
 
         # Generate place map
         map_data = get_map_data(conn)
