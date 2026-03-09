@@ -7,6 +7,61 @@ import pandas as pd
 from datetime import datetime
 from .highlighting import highlight_passage
 
+PREDICTOR_TABLE_SORT_SCRIPT = """
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll("[data-predictor-sort-controls]").forEach(function (controls) {
+            const table = document.getElementById(controls.dataset.tableId);
+            if (!table || !table.tBodies.length) {
+                return;
+            }
+
+            const tbody = table.tBodies[0];
+            const coefficientDirection = controls.dataset.coefficientDirection || "desc";
+
+            function compareNumbers(a, b, direction) {
+                return direction === "asc" ? a - b : b - a;
+            }
+
+            function sortTable(mode) {
+                const rows = Array.from(tbody.rows);
+                rows.sort(function (rowA, rowB) {
+                    const coeffA = parseFloat(rowA.querySelector('[data-sort-key="coefficient"]').dataset.sortValue);
+                    const coeffB = parseFloat(rowB.querySelector('[data-sort-key="coefficient"]').dataset.sortValue);
+                    const qA = parseFloat(rowA.querySelector('[data-sort-key="q_value"]').dataset.sortValue);
+                    const qB = parseFloat(rowB.querySelector('[data-sort-key="q_value"]').dataset.sortValue);
+
+                    if (mode === "q_value") {
+                        const qComparison = compareNumbers(qA, qB, "asc");
+                        if (qComparison !== 0) {
+                            return qComparison;
+                        }
+                    }
+
+                    return compareNumbers(coeffA, coeffB, coefficientDirection);
+                });
+
+                rows.forEach(function (row) {
+                    tbody.appendChild(row);
+                });
+
+                controls.querySelectorAll("[data-sort-mode]").forEach(function (button) {
+                    button.classList.toggle("is-active", button.dataset.sortMode === mode);
+                });
+            }
+
+            controls.querySelectorAll("[data-sort-mode]").forEach(function (button) {
+                button.addEventListener("click", function () {
+                    sortTable(button.dataset.sortMode);
+                });
+            });
+
+            sortTable(controls.dataset.defaultMode || "coefficient");
+        });
+    });
+    </script>
+"""
+
 
 def format_classification_metrics(metrics, class_0_label, class_1_label):
     """Format classification metrics into an HTML table.
@@ -62,6 +117,60 @@ def format_classification_metrics(metrics, class_0_label, class_1_label):
     </div>
     """
     return html_content
+
+
+def render_predictor_table(
+    table_id,
+    rows,
+    word_class,
+    positive_count_label,
+    negative_count_label,
+    positive_count_column,
+    negative_count_column,
+    coefficient_direction="desc",
+):
+    """Render a sortable predictor table."""
+    table_html = f"""
+            <div class="predictor-sort-controls" data-predictor-sort-controls data-table-id="{table_id}" data-default-mode="coefficient" data-coefficient-direction="{coefficient_direction}">
+                <span>Sort by:</span>
+                <button type="button" class="predictor-sort-button" data-sort-mode="coefficient">Coefficient</button>
+                <button type="button" class="predictor-sort-button" data-sort-mode="q_value">q-value</button>
+            </div>
+
+            <table class="predictor-table" id="{table_id}">
+                <thead>
+                    <tr>
+                        <th>Word/Phrase</th>
+                        <th>English</th>
+                        <th>Coefficient</th>
+                        <th>{positive_count_label}</th>
+                        <th>{negative_count_label}</th>
+                        <th>p-value</th>
+                        <th>q-value</th>
+                    </tr>
+                </thead>
+                <tbody>
+    """
+
+    for _, row in rows.iterrows():
+        english = row.get("english_translation", "")
+        table_html += f"""
+                    <tr>
+                        <td class="{word_class}">{html.escape(row['phrase'])}</td>
+                        <td>{html.escape(english)}</td>
+                        <td data-sort-key="coefficient" data-sort-value="{row['coefficient']:.16g}">{row['coefficient']:.4f}</td>
+                        <td>{row[positive_count_column]}</td>
+                        <td>{row[negative_count_column]}</td>
+                        <td>{row['p_value']:.3g}</td>
+                        <td data-sort-key="q_value" data-sort-value="{row['q_value']:.16g}">{row['q_value']:.3g}</td>
+                    </tr>
+        """
+
+    table_html += """
+                </tbody>
+            </table>
+    """
+    return table_html
 
 def generate_home_page(output_dir, title, timestamp):
     """Generate the home page with build timestamp and links to other pages."""
@@ -565,82 +674,40 @@ def generate_mythic_words_page(mythic_predictors, output_dir, title, metrics=Non
 
             <h2>Predictors of Mythic Content</h2>
             <p>These words and phrases are most strongly associated with mythic content in Pausanias.</p>
-            
-            <table class="predictor-table">
-                <thead>
-                    <tr>
-                        <th>Word/Phrase</th>
-                        <th>English</th>
-                        <th>Coefficient</th>
-                        <th>Mythic Count</th>
-                        <th>Non-mythic Count</th>
-                        <th>p-value</th>
-                        <th>q-value</th>
-                    </tr>
-                </thead>
-                <tbody>
     """
 
-    # Add mythic predictors
-    for _, row in mythic_words.iterrows():
-        english = row.get('english_translation', '')
-        html_content += f"""
-                    <tr>
-                        <td class="mythic-word">{html.escape(row['phrase'])}</td>
-                        <td>{html.escape(english)}</td>
-                        <td>{row['coefficient']:.4f}</td>
-                        <td>{row['mythic_count']}</td>
-                        <td>{row['non_mythic_count']}</td>
-                        <td>{row['p_value']:.3g}</td>
-                        <td>{row['q_value']:.3g}</td>
-                    </tr>
-        """
-    
+    html_content += render_predictor_table(
+        "mythic-positive-table",
+        mythic_words,
+        "mythic-word",
+        "Mythic Count",
+        "Non-mythic Count",
+        "mythic_count",
+        "non_mythic_count",
+        coefficient_direction="desc",
+    )
+
     html_content += """
-                </tbody>
-            </table>
-            
             <h2>Predictors of Historical Content</h2>
             <p>These words and phrases are most strongly associated with historical content in Pausanias.</p>
-            
-            <table class="predictor-table">
-                <thead>
-                    <tr>
-                        <th>Word/Phrase</th>
-                        <th>English</th>
-                        <th>Coefficient</th>
-                        <th>Mythic Count</th>
-                        <th>Non-mythic Count</th>
-                        <th>p-value</th>
-                        <th>q-value</th>
-                    </tr>
-                </thead>
-                <tbody>
     """
+    html_content += render_predictor_table(
+        "mythic-negative-table",
+        historical_words,
+        "historical-word",
+        "Mythic Count",
+        "Non-mythic Count",
+        "mythic_count",
+        "non_mythic_count",
+        coefficient_direction="asc",
+    )
 
-    # Add historical predictors
-    for _, row in historical_words.iterrows():
-        english = row.get('english_translation', '')
-        html_content += f"""
-                    <tr>
-                        <td class="historical-word">{html.escape(row['phrase'])}</td>
-                        <td>{html.escape(english)}</td>
-                        <td>{row['coefficient']:.4f}</td>
-                        <td>{row['mythic_count']}</td>
-                        <td>{row['non_mythic_count']}</td>
-                        <td>{row['p_value']:.3g}</td>
-                        <td>{row['q_value']:.3g}</td>
-                    </tr>
-        """
-    
     html_content += """
-                </tbody>
-            </table>
-
             <footer>
                 Generated on """ + datetime.now().strftime("%Y-%m-%d at %H:%M:%S") + """ from <a href=\"pausanias.sqlite\">pausanias.sqlite</a>
             </footer>
         </div>
+""" + PREDICTOR_TABLE_SORT_SCRIPT + """
     </body>
     </html>
     """
@@ -690,82 +757,39 @@ def generate_skeptic_words_page(skeptic_predictors, output_dir, title, metrics=N
 
             <h2>Predictors of Skeptical Content</h2>
             <p>These words and phrases are most strongly associated with skeptical content in Pausanias.</p>
-            
-            <table class="predictor-table">
-                <thead>
-                    <tr>
-                        <th>Word/Phrase</th>
-                        <th>English</th>
-                        <th>Coefficient</th>
-                        <th>Skeptical Count</th>
-                        <th>Non-skeptical Count</th>
-                        <th>p-value</th>
-                        <th>q-value</th>
-                    </tr>
-                </thead>
-                <tbody>
     """
+    html_content += render_predictor_table(
+        "skeptic-positive-table",
+        skeptical_words,
+        "skeptical-word",
+        "Skeptical Count",
+        "Non-skeptical Count",
+        "skeptical_count",
+        "non_skeptical_count",
+        coefficient_direction="desc",
+    )
 
-    # Add skeptical predictors
-    for _, row in skeptical_words.iterrows():
-        english = row.get('english_translation', '')
-        html_content += f"""
-                    <tr>
-                        <td class="skeptical-word">{html.escape(row['phrase'])}</td>
-                        <td>{html.escape(english)}</td>
-                        <td>{row['coefficient']:.4f}</td>
-                        <td>{row['skeptical_count']}</td>
-                        <td>{row['non_skeptical_count']}</td>
-                        <td>{row['p_value']:.3g}</td>
-                        <td>{row['q_value']:.3g}</td>
-                    </tr>
-        """
-    
     html_content += """
-                </tbody>
-            </table>
-            
             <h2>Predictors of Non-skeptical Content</h2>
             <p>These words and phrases are most strongly associated with non-skeptical content in Pausanias.</p>
-            
-            <table class="predictor-table">
-                <thead>
-                    <tr>
-                        <th>Word/Phrase</th>
-                        <th>English</th>
-                        <th>Coefficient</th>
-                        <th>Skeptical Count</th>
-                        <th>Non-skeptical Count</th>
-                        <th>p-value</th>
-                        <th>q-value</th>
-                    </tr>
-                </thead>
-                <tbody>
     """
+    html_content += render_predictor_table(
+        "skeptic-negative-table",
+        non_skeptical_words,
+        "non-skeptical-word",
+        "Skeptical Count",
+        "Non-skeptical Count",
+        "skeptical_count",
+        "non_skeptical_count",
+        coefficient_direction="asc",
+    )
 
-    # Add non-skeptical predictors
-    for _, row in non_skeptical_words.iterrows():
-        english = row.get('english_translation', '')
-        html_content += f"""
-                    <tr>
-                        <td class="non-skeptical-word">{html.escape(row['phrase'])}</td>
-                        <td>{html.escape(english)}</td>
-                        <td>{row['coefficient']:.4f}</td>
-                        <td>{row['skeptical_count']}</td>
-                        <td>{row['non_skeptical_count']}</td>
-                        <td>{row['p_value']:.3g}</td>
-                        <td>{row['q_value']:.3g}</td>
-                    </tr>
-        """
-    
     html_content += """
-                </tbody>
-            </table>
-            
             <footer>
                 Generated on """ + datetime.now().strftime("%Y-%m-%d at %H:%M:%S") + """ from <a href=\"pausanias.sqlite\">pausanias.sqlite</a>
             </footer>
         </div>
+""" + PREDICTOR_TABLE_SORT_SCRIPT + """
     </body>
     </html>
     """
@@ -814,77 +838,38 @@ def generate_sentence_mythic_words_page(mythic_predictors, output_dir, title, me
             {format_classification_metrics(metrics, 'Historical', 'Mythic')}
 
             <h2>Sentence Predictors of Mythic Content</h2>
-            <table class="predictor-table">
-                <thead>
-                    <tr>
-                        <th>Word/Phrase</th>
-                        <th>English</th>
-                        <th>Coefficient</th>
-                        <th>Mythic Count</th>
-                        <th>Non-mythic Count</th>
-                        <th>p-value</th>
-                        <th>q-value</th>
-                    </tr>
-                </thead>
-                <tbody>
     """
-
-    for _, row in mythic_words.iterrows():
-        english = row.get('english_translation', '')
-        html_content += f"""
-                    <tr>
-                        <td class="mythic-word">{html.escape(row['phrase'])}</td>
-                        <td>{html.escape(english)}</td>
-                        <td>{row['coefficient']:.4f}</td>
-                        <td>{row['mythic_count']}</td>
-                        <td>{row['non_mythic_count']}</td>
-                        <td>{row['p_value']:.3g}</td>
-                        <td>{row['q_value']:.3g}</td>
-                    </tr>
-        """
+    html_content += render_predictor_table(
+        "sentence-mythic-positive-table",
+        mythic_words,
+        "mythic-word",
+        "Mythic Count",
+        "Non-mythic Count",
+        "mythic_count",
+        "non_mythic_count",
+        coefficient_direction="desc",
+    )
 
     html_content += """
-                </tbody>
-            </table>
-
             <h2>Sentence Predictors of Historical Content</h2>
-            <table class="predictor-table">
-                <thead>
-                    <tr>
-                        <th>Word/Phrase</th>
-                        <th>English</th>
-                        <th>Coefficient</th>
-                        <th>Mythic Count</th>
-                        <th>Non-mythic Count</th>
-                        <th>p-value</th>
-                        <th>q-value</th>
-                    </tr>
-                </thead>
-                <tbody>
     """
-
-    for _, row in historical_words.iterrows():
-        english = row.get('english_translation', '')
-        html_content += f"""
-                    <tr>
-                        <td class="historical-word">{html.escape(row['phrase'])}</td>
-                        <td>{html.escape(english)}</td>
-                        <td>{row['coefficient']:.4f}</td>
-                        <td>{row['mythic_count']}</td>
-                        <td>{row['non_mythic_count']}</td>
-                        <td>{row['p_value']:.3g}</td>
-                        <td>{row['q_value']:.3g}</td>
-                    </tr>
-        """
+    html_content += render_predictor_table(
+        "sentence-mythic-negative-table",
+        historical_words,
+        "historical-word",
+        "Mythic Count",
+        "Non-mythic Count",
+        "mythic_count",
+        "non_mythic_count",
+        coefficient_direction="asc",
+    )
 
     html_content += """
-                </tbody>
-            </table>
-
             <footer>
                 Generated on """ + datetime.now().strftime("%Y-%m-%d at %H:%M:%S") + """ from <a href=\"pausanias.sqlite\">pausanias.sqlite</a>
             </footer>
         </div>
+""" + PREDICTOR_TABLE_SORT_SCRIPT + """
     </body>
     </html>
     """
@@ -932,77 +917,38 @@ def generate_sentence_skeptic_words_page(skeptic_predictors, output_dir, title, 
             {format_classification_metrics(metrics, 'Non-skeptical', 'Skeptical')}
 
             <h2>Sentence Predictors of Skeptical Content</h2>
-            <table class="predictor-table">
-                <thead>
-                    <tr>
-                        <th>Word/Phrase</th>
-                        <th>English</th>
-                        <th>Coefficient</th>
-                        <th>Skeptical Count</th>
-                        <th>Non-skeptical Count</th>
-                        <th>p-value</th>
-                        <th>q-value</th>
-                    </tr>
-                </thead>
-                <tbody>
     """
-
-    for _, row in skeptical_words.iterrows():
-        english = row.get('english_translation', '')
-        html_content += f"""
-                    <tr>
-                        <td class="skeptical-word">{html.escape(row['phrase'])}</td>
-                        <td>{html.escape(english)}</td>
-                        <td>{row['coefficient']:.4f}</td>
-                        <td>{row['skeptical_count']}</td>
-                        <td>{row['non_skeptical_count']}</td>
-                        <td>{row['p_value']:.3g}</td>
-                        <td>{row['q_value']:.3g}</td>
-                    </tr>
-        """
+    html_content += render_predictor_table(
+        "sentence-skeptic-positive-table",
+        skeptical_words,
+        "skeptical-word",
+        "Skeptical Count",
+        "Non-skeptical Count",
+        "skeptical_count",
+        "non_skeptical_count",
+        coefficient_direction="desc",
+    )
 
     html_content += """
-                </tbody>
-            </table>
-
             <h2>Sentence Predictors of Non-skeptical Content</h2>
-            <table class="predictor-table">
-                <thead>
-                    <tr>
-                        <th>Word/Phrase</th>
-                        <th>English</th>
-                        <th>Coefficient</th>
-                        <th>Skeptical Count</th>
-                        <th>Non-skeptical Count</th>
-                        <th>p-value</th>
-                        <th>q-value</th>
-                    </tr>
-                </thead>
-                <tbody>
     """
-
-    for _, row in non_skeptical_words.iterrows():
-        english = row.get('english_translation', '')
-        html_content += f"""
-                    <tr>
-                        <td class="non-skeptical-word">{html.escape(row['phrase'])}</td>
-                        <td>{html.escape(english)}</td>
-                        <td>{row['coefficient']:.4f}</td>
-                        <td>{row['skeptical_count']}</td>
-                        <td>{row['non_skeptical_count']}</td>
-                        <td>{row['p_value']:.3g}</td>
-                        <td>{row['q_value']:.3g}</td>
-                    </tr>
-        """
+    html_content += render_predictor_table(
+        "sentence-skeptic-negative-table",
+        non_skeptical_words,
+        "non-skeptical-word",
+        "Skeptical Count",
+        "Non-skeptical Count",
+        "skeptical_count",
+        "non_skeptical_count",
+        coefficient_direction="asc",
+    )
 
     html_content += """
-                </tbody>
-            </table>
-
             <footer>
                 Generated on """ + datetime.now().strftime("%Y-%m-%d at %H:%M:%S") + """ from <a href=\"pausanias.sqlite\">pausanias.sqlite</a>
             </footer>
         </div>
+""" + PREDICTOR_TABLE_SORT_SCRIPT + """
     </body>
     </html>
     """
