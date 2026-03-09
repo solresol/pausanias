@@ -191,6 +191,29 @@ def create_website_structure(output_dir):
         border-collapse: collapse;
         margin: 20px 0;
     }
+
+    .predictor-sort-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .predictor-sort-button {
+        border: 1px solid #b9afa4;
+        background-color: #f8f5f1;
+        border-radius: 999px;
+        color: #5c5142;
+        cursor: pointer;
+        font: inherit;
+        padding: 6px 12px;
+    }
+
+    .predictor-sort-button.is-active {
+        background-color: #5c5142;
+        border-color: #5c5142;
+        color: white;
+    }
     
     .predictor-table th, .predictor-table td {
         padding: 8px;
