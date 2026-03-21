@@ -27,7 +27,7 @@ from tqdm import tqdm
 WIKIDATA_ENDPOINT = "https://query.wikidata.org/sparql"
 
 # OpenAI model for disambiguation
-DISAMBIGUATION_MODEL = "gpt-5-mini"
+DISAMBIGUATION_MODEL = "gpt-5.4-mini"
 
 # User-Agent for Wikidata requests
 USER_AGENT = "PausaniasProject/1.0 (ancient geography research)"

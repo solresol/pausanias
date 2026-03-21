@@ -2,7 +2,7 @@
 """
 Generate one-line summaries of Pausanias passages using GPT.
 
-Takes the English translation of each passage and asks gpt-5-mini to produce
+Takes the English translation of each passage and asks gpt-5.4-mini to produce
 a brief one-line summary. Stores results in a passage_summaries table.
 
 Usage:
@@ -31,8 +31,8 @@ def parse_arguments():
                         help="Maximum number of passages to process")
     parser.add_argument("--progress-bar", action="store_true", default=False,
                         help="Show progress bar")
-    parser.add_argument("--model", default="gpt-5-mini",
-                        help="OpenAI model to use (default: gpt-5-mini)")
+    parser.add_argument("--model", default="gpt-5.4-mini",
+                        help="OpenAI model to use (default: gpt-5.4-mini)")
     parser.add_argument("--resummarise", action="store_true",
                         help="Re-process already summarised passages")
     return parser.parse_args()
