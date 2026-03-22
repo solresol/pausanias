@@ -3,8 +3,8 @@
 cd $(dirname $0)
 git pull -q
 
-uv run mythic_sceptic_analyser.py --stop 50
-uv run extract_proper_nouns.py --stop 50
+PAUSANIAS_QUIET_EMPTY=1 uv run mythic_sceptic_analyser.py --stop 50
+PAUSANIAS_QUIET_EMPTY=1 uv run extract_proper_nouns.py --stop 50
 uv run link_wikidata.py --stop-after 100
 uv run translate_pausanias.py --stop 50
 uv run split_sentences.py --stop 20

@@ -13,6 +13,13 @@ import openai
 from openai import OpenAI
 from tqdm import tqdm
 
+QUIET_EMPTY_ENV_VAR = "PAUSANIAS_QUIET_EMPTY"
+
+
+def should_suppress_empty_message():
+    return os.getenv(QUIET_EMPTY_ENV_VAR, "").lower() in {"1", "true", "yes"}
+
+
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Analyze Pausanias passages using OpenAI API")
     parser.add_argument("--database", default="pausanias.sqlite", 
@@ -175,7 +182,8 @@ if __name__ == '__main__':
         passages = get_unprocessed_passages(conn, args.stop_after)
         
         if not passages:
-            print("No unprocessed passages found in the database.")
+            if not should_suppress_empty_message():
+                print("No unprocessed passages found in the database.")
             sys.exit(0)
         
         print(f"Found {len(passages)} unprocessed passages.")
