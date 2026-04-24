@@ -8,7 +8,6 @@ import argparse
 import html
 import re
 import shutil
-import sqlite3
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -18,6 +17,8 @@ from PIL import Image
 
 PASSAGE_IMAGE_RE = re.compile(r"^(?P<section>\d+)\.(?:png|jpg|jpeg|webp)$", re.IGNORECASE)
 PASSAGE_ID_RE = re.compile(r"^(?P<book>\d+)\.(?P<chapter>\d+)\.(?P<section>\d+)$")
+DEFAULT_TITLE = "Time Traveller's Tourist Guides, Volume 23: 2nd Century Greece"
+DEFAULT_BYLINE = "by Pausanias the Geographer"
 
 
 @dataclass(frozen=True)
@@ -27,19 +28,18 @@ class GraphicPage:
     passage_id: str
     source_path: Path
     site_image_path: str
-    greek: str
-    english: str
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Build HTML and PDF outputs for the Pausanias graphic book."
     )
-    parser.add_argument("--database", default="pausanias.sqlite")
     parser.add_argument("--image-dir", default="graphic_book/images")
     parser.add_argument("--output-dir", default="pausanias_site/graphic-book")
-    parser.add_argument("--title", default="Pausanias Graphic Book")
+    parser.add_argument("--title", default=DEFAULT_TITLE)
+    parser.add_argument("--byline", default=DEFAULT_BYLINE)
     parser.add_argument("--pdf-name", default="pausanias-graphic-book.pdf")
+    parser.add_argument("--title-page", default="graphic_book/assets/pausanias-title-page.png")
     return parser.parse_args()
 
 
@@ -80,22 +80,7 @@ def discover_images(image_dir: Path) -> dict[str, Path]:
     return dict(sorted(images.items(), key=lambda item: passage_sort_key(item[0])))
 
 
-def load_passage_text(conn: sqlite3.Connection) -> dict[str, tuple[str, str]]:
-    cursor = conn.cursor()
-    cursor.execute(
-        """
-        SELECT t.passage_id, t.greek_text, t.english_translation
-        FROM translations AS t
-        ORDER BY t.passage_id
-        """
-    )
-    return {pid: (greek, english) for pid, greek, english in cursor.fetchall()}
-
-
-def build_pages(
-    conn: sqlite3.Connection, image_dir: Path, output_dir: Path
-) -> list[GraphicPage]:
-    text_by_passage = load_passage_text(conn)
+def build_pages(image_dir: Path, output_dir: Path) -> list[GraphicPage]:
     image_paths = discover_images(image_dir)
     pages: list[GraphicPage] = []
 
@@ -110,21 +95,20 @@ def build_pages(
         shutil.copy2(source_path, dest)
         dest.chmod(0o644)
 
-        greek, english = text_by_passage.get(passage_id, ("", ""))
         pages.append(
             GraphicPage(
                 passage_id=passage_id,
                 source_path=source_path,
                 site_image_path=site_rel.as_posix(),
-                greek=greek,
-                english=english,
             )
         )
 
     return pages
 
 
-def write_index(output_dir: Path, title: str, pages: list[GraphicPage], pdf_name: str) -> None:
+def write_index(
+    output_dir: Path, title: str, byline: str, pages: list[GraphicPage], pdf_name: str
+) -> None:
     timestamp = datetime.now().strftime("%Y-%m-%d at %H:%M:%S")
     page_cards = []
 
@@ -139,10 +123,6 @@ def write_index(output_dir: Path, title: str, pages: list[GraphicPage], pdf_name
                 <a href="{translation_href}">Translation page</a>
             </div>
             <img src="{html.escape(page.site_image_path)}" alt="Illustrated page for Pausanias {html.escape(page.passage_id)}">
-            <details>
-                <summary>English translation</summary>
-                <p>{html.escape(page.english)}</p>
-            </details>
         </article>
 """
         )
@@ -199,6 +179,7 @@ def write_index(output_dir: Path, title: str, pages: list[GraphicPage], pdf_name
         header p {{
             margin: 0;
             color: var(--muted);
+            font-size: 1.15rem;
         }}
         nav {{
             background: #5c5142;
@@ -257,16 +238,6 @@ def write_index(output_dir: Path, title: str, pages: list[GraphicPage], pdf_name
             height: auto;
             width: 100%;
         }}
-        details {{
-            background: #fff8e8;
-            border-left: 4px solid var(--rule);
-            margin-top: 14px;
-            padding: 10px 14px;
-        }}
-        summary {{
-            cursor: pointer;
-            font-weight: bold;
-        }}
         footer {{
             color: #eee2c8;
             margin-top: 30px;
@@ -274,7 +245,7 @@ def write_index(output_dir: Path, title: str, pages: list[GraphicPage], pdf_name
         }}
         @media print {{
             body {{ background: white; }}
-            header, nav, details, .book-actions, footer {{ display: none; }}
+            header, nav, .book-actions, footer {{ display: none; }}
             main {{ max-width: none; padding: 0; }}
             .graphic-page {{
                 border: 0;
@@ -288,7 +259,7 @@ def write_index(output_dir: Path, title: str, pages: list[GraphicPage], pdf_name
 <body>
     <header>
         <h1>{html.escape(title)}</h1>
-        <p>Illustrated passages from Pausanias' <em>Description of Greece</em></p>
+        <p>{html.escape(byline)}</p>
     </header>
     <nav>
         <a href="../index.html">Home</a>
@@ -309,26 +280,31 @@ def write_index(output_dir: Path, title: str, pages: list[GraphicPage], pdf_name
     (output_dir / "index.html").write_text(index_html, encoding="utf-8")
 
 
-def write_pdf(output_dir: Path, pages: list[GraphicPage], pdf_name: str) -> None:
-    if not pages:
+def write_pdf(output_dir: Path, pages: list[GraphicPage], pdf_name: str, title_page: Path) -> None:
+    if not pages and not title_page.exists():
         return
 
     pdf_images: list[Image.Image] = []
     try:
+        if title_page.exists():
+            with Image.open(title_page) as img:
+                pdf_images.append(img.convert("RGB").copy())
+
         for page in pages:
             image_path = output_dir / page.site_image_path
             with Image.open(image_path) as img:
                 rgb = img.convert("RGB")
                 pdf_images.append(rgb.copy())
 
-        first, rest = pdf_images[0], pdf_images[1:]
-        first.save(
-            output_dir / pdf_name,
-            "PDF",
-            resolution=150.0,
-            save_all=True,
-            append_images=rest,
-        )
+        if pdf_images:
+            first, rest = pdf_images[0], pdf_images[1:]
+            first.save(
+                output_dir / pdf_name,
+                "PDF",
+                resolution=150.0,
+                save_all=True,
+                append_images=rest,
+            )
     finally:
         for img in pdf_images:
             img.close()
@@ -336,17 +312,14 @@ def write_pdf(output_dir: Path, pages: list[GraphicPage], pdf_name: str) -> None
 
 def main() -> None:
     args = parse_args()
-    database = Path(args.database)
     image_dir = Path(args.image_dir)
     output_dir = Path(args.output_dir)
 
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    with sqlite3.connect(database) as conn:
-        pages = build_pages(conn, image_dir, output_dir)
-
-    write_index(output_dir, args.title, pages, args.pdf_name)
-    write_pdf(output_dir, pages, args.pdf_name)
+    pages = build_pages(image_dir, output_dir)
+    write_index(output_dir, args.title, args.byline, pages, args.pdf_name)
+    write_pdf(output_dir, pages, args.pdf_name, Path(args.title_page))
     print(f"Graphic book built in {output_dir} with {len(pages)} illustrated passages.")
 
 
