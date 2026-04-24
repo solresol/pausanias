@@ -348,6 +348,7 @@ def generate_home_page(output_dir, title, timestamp):
             <a href="network_viz/index.html">Network Analysis</a>
             <a href="map/index.html">Place Map</a>
             <a href="place_pairs/index.html">Place Pairs</a>
+            <a href="graphic-book/index.html">Graphic Book</a>
             <a href="progress/index.html">Progress</a>
         </nav>
 
@@ -397,6 +398,14 @@ def generate_home_page(output_dir, title, timestamp):
                 <h2>Place Pairs</h2>
                 <p>Compare distances between geolocated places mentioned in the same passage.</p>
                 <a href="place_pairs/index.html">View Place Pairs</a>
+            </div>
+
+            <div class="home-card">
+                <h2>Graphic Book</h2>
+                <p>Browse illustrated passage pages for a graphic-novel or digital coffee-table-book version
+                   of Pausanias' Description of Greece.</p>
+                <a href="graphic-book/index.html">View Graphic Book</a>
+                <a href="graphic-book/pausanias-graphic-book.pdf">Download Graphic PDF</a>
             </div>
 
             <div class="home-card">
@@ -1549,6 +1558,7 @@ def _translation_nav(prefix, active=None):
         ("network_viz/index.html", "Network Analysis", "network"),
         ("map/index.html", "Place Map", "map"),
         ("place_pairs/index.html", "Place Pairs", "place_pairs"),
+        ("graphic-book/index.html", "Graphic Book", "graphic_book"),
         ("progress/index.html", "Progress", "progress"),
     ]
     parts = []
