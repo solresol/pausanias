@@ -110,6 +110,7 @@ def write_index(
     output_dir: Path, title: str, byline: str, pages: list[GraphicPage], pdf_name: str
 ) -> None:
     timestamp = datetime.now().strftime("%Y-%m-%d at %H:%M:%S")
+    build_version = datetime.now().strftime("%Y%m%d%H%M%S")
     page_cards = []
 
     for page in pages:
@@ -138,7 +139,7 @@ def write_index(
 """
 
     pdf_link = (
-        f'<a class="download" href="{html.escape(pdf_name)}">Download PDF</a>'
+        f'<a class="download" href="{html.escape(pdf_name)}?v={build_version}">Download PDF</a>'
         if pages
         else ""
     )
