@@ -8,6 +8,8 @@ pausanias_book
 .playwright-cli
 output/playwright
 tmp/
+graphic_book/images/
+graphic_book/output/
 documentation/pausanias_project_presentation.aux
 documentation/pausanias_project_presentation.fdb_latexmk
 documentation/pausanias_project_presentation.fls
