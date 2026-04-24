@@ -19,8 +19,13 @@ graphic_book/images/1/1/1.png
 graphic_book/images/1/1/2.png
 ```
 
-`build_graphic_book.py` scans this tree, looks up the matching Greek and English
-passage text in `pausanias.sqlite`, and writes:
+The PDF title-page graphic is stored separately:
+
+```text
+graphic_book/assets/pausanias-title-page.png
+```
+
+`build_graphic_book.py` scans this tree and writes:
 
 ```text
 pausanias_site/graphic-book/index.html
