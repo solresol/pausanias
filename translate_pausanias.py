@@ -2,7 +2,6 @@
 
 import argparse
 import os
-import sqlite3
 import sys
 import time
 from datetime import datetime
@@ -10,10 +9,12 @@ from datetime import datetime
 from openai import OpenAI
 from tqdm import tqdm
 
+from pausanias_db import add_database_argument, connect
+
+
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Translate Pausanias passages from Greek to English using OpenAI API")
-    parser.add_argument("--database", default="pausanias.sqlite", 
-                        help="SQLite database file (default: pausanias.sqlite)")
+    add_database_argument(parser)
     parser.add_argument("--openai-api-key-file", default="~/.openai.key",
                         help="File containing OpenAI API key (default: ~/.openai.key)")
     parser.add_argument("--stop-after", type=int, default=None,
@@ -76,8 +77,15 @@ def save_translation(conn, passage_id, greek_text, english_translation, model, i
     cursor = conn.cursor()
     cursor.execute(
         """
-        INSERT OR REPLACE INTO translations (passage_id, greek_text, english_translation, timestamp, model, input_tokens, output_tokens)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO translations (passage_id, greek_text, english_translation, timestamp, model, input_tokens, output_tokens)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
+        ON CONFLICT (passage_id) DO UPDATE SET
+            greek_text = EXCLUDED.greek_text,
+            english_translation = EXCLUDED.english_translation,
+            timestamp = EXCLUDED.timestamp,
+            model = EXCLUDED.model,
+            input_tokens = EXCLUDED.input_tokens,
+            output_tokens = EXCLUDED.output_tokens
         """,
         (passage_id, greek_text, english_translation, timestamp, model, input_tokens, output_tokens)
     )
@@ -129,7 +137,7 @@ if __name__ == '__main__':
     client = OpenAI(api_key=api_key)
     
     # Connect to the database
-    conn = sqlite3.connect(args.database)
+    conn = connect(args.database_url)
     
     try:
         # Create the translation table if it doesn't exist

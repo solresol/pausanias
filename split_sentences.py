@@ -3,23 +3,20 @@
 import argparse
 import json
 import os
-import sqlite3
 import sys
 import time
 
 from openai import OpenAI
 from tqdm import tqdm
 
+from pausanias_db import add_database_argument, connect
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
         description="Split Greek passages into sentences using the OpenAI API"
     )
-    parser.add_argument(
-        "--database",
-        default="pausanias.sqlite",
-        help="SQLite database file (default: pausanias.sqlite)",
-    )
+    add_database_argument(parser)
     parser.add_argument(
         "--openai-api-key-file",
         default="~/.openai.key",
@@ -168,8 +165,11 @@ def save_sentences(conn, passage_id, greek_sentences, english_sentences):
     for idx, (gr, en) in enumerate(zip(greek_sentences, english_sentences), start=1):
         cursor.execute(
             """
-        INSERT OR REPLACE INTO greek_sentences (passage_id, sentence_number, sentence, english_sentence)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO greek_sentences (passage_id, sentence_number, sentence, english_sentence)
+        VALUES (%s, %s, %s, %s)
+        ON CONFLICT (passage_id, sentence_number) DO UPDATE SET
+            sentence = EXCLUDED.sentence,
+            english_sentence = EXCLUDED.english_sentence
             """,
             (passage_id, idx, gr, en),
         )
@@ -180,7 +180,7 @@ def main():
     args = parse_arguments()
     api_key = load_openai_api_key(args.openai_api_key_file)
     client = OpenAI(api_key=api_key)
-    conn = sqlite3.connect(args.database)
+    conn = connect(args.database_url)
     try:
         create_sentences_table(conn)
         passages = get_unsplit_passages(conn, args.stop_after)

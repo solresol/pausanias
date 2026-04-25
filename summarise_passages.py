@@ -13,18 +13,18 @@ Usage:
 import argparse
 import json
 import os
-import sqlite3
 import time
 from datetime import datetime
 
 from openai import OpenAI
 from tqdm import tqdm
 
+from pausanias_db import add_database_argument, connect
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Generate one-line summaries of Pausanias passages")
-    parser.add_argument("--database", default="pausanias.sqlite",
-                        help="SQLite database file (default: pausanias.sqlite)")
+    add_database_argument(parser)
     parser.add_argument("--openai-api-key-file", default="~/.openai.key",
                         help="File containing OpenAI API key (default: ~/.openai.key)")
     parser.add_argument("--stop-after", type=int, default=None,
@@ -119,9 +119,15 @@ def summarise_passage(client, model, passage_id, english_text):
 def save_summary(conn, passage_id, summary, model, input_tokens, output_tokens):
     """Save a summary to the database."""
     conn.execute("""
-        INSERT OR REPLACE INTO passage_summaries
+        INSERT INTO passage_summaries
         (passage_id, summary, model, timestamp, input_tokens, output_tokens)
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s, %s, %s)
+        ON CONFLICT (passage_id) DO UPDATE SET
+            summary = EXCLUDED.summary,
+            model = EXCLUDED.model,
+            timestamp = EXCLUDED.timestamp,
+            input_tokens = EXCLUDED.input_tokens,
+            output_tokens = EXCLUDED.output_tokens
     """, (passage_id, summary, model, datetime.now().isoformat(),
           input_tokens, output_tokens))
     conn.commit()
@@ -133,7 +139,7 @@ def main():
     api_key = load_openai_api_key(args.openai_api_key_file)
     client = OpenAI(api_key=api_key)
 
-    conn = sqlite3.connect(args.database)
+    conn = connect(args.database_url)
 
     try:
         create_table(conn)

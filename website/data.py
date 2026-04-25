@@ -2,22 +2,15 @@
 
 import math
 import pandas as pd
-import sqlite3
 from typing import Optional
 from openai import OpenAI
 
+from pausanias_db import read_sql_query, table_exists as pg_table_exists
+
 
 def table_exists(conn, table_name):
-    """Return True if a table exists in the SQLite database."""
-    cursor = conn.cursor()
-    cursor.execute(
-        """
-        SELECT name FROM sqlite_master
-        WHERE type='table' AND name=?
-        """,
-        (table_name,),
-    )
-    return cursor.fetchone() is not None
+    """Return True if a table exists in the PostgreSQL database."""
+    return pg_table_exists(conn, table_name)
 
 def passage_id_sort_key(passage_id):
     """Create a sort key for passage IDs in the format X.Y.Z."""
@@ -33,7 +26,7 @@ def get_proper_nouns_by_passage(conn):
     ORDER BY passage_id, reference_form
     """
     
-    df = pd.read_sql_query(query, conn)
+    df = read_sql_query(query, conn)
     
     # Group by passage_id
     proper_nouns_dict = {}
@@ -49,7 +42,7 @@ def get_translations(conn):
     FROM translations
     """
     
-    df = pd.read_sql_query(query, conn)
+    df = read_sql_query(query, conn)
     # Convert to dictionary for easy lookup
     translations_dict = dict(zip(df['passage_id'], df['english_translation']))
     return translations_dict
@@ -66,7 +59,7 @@ def get_analyzed_passages(conn, limit=None):
     ORDER BY p.id
     """
     
-    df = pd.read_sql_query(query, conn)
+    df = read_sql_query(query, conn)
     df['sort_key'] = df['id'].apply(passage_id_sort_key)
     df = df.sort_values('sort_key')
     
@@ -86,7 +79,7 @@ def get_mythicness_predictors(conn):
     ORDER BY coefficient DESC
     """
 
-    df = pd.read_sql_query(query, conn)
+    df = read_sql_query(query, conn)
     return df
 
 def get_skepticism_predictors(conn):
@@ -98,7 +91,7 @@ def get_skepticism_predictors(conn):
     ORDER BY coefficient DESC
     """
 
-    df = pd.read_sql_query(query, conn)
+    df = read_sql_query(query, conn)
     return df
 
 
@@ -111,7 +104,7 @@ def get_sentence_mythicness_predictors(conn):
     ORDER BY coefficient DESC
     """
 
-    df = pd.read_sql_query(query, conn)
+    df = read_sql_query(query, conn)
     return df
 
 
@@ -124,7 +117,7 @@ def get_sentence_skepticism_predictors(conn):
     ORDER BY coefficient DESC
     """
 
-    df = pd.read_sql_query(query, conn)
+    df = read_sql_query(query, conn)
     return df
 
 
@@ -139,7 +132,7 @@ def get_simplified_mythicness_predictors(conn):
     FROM simplified_mythicness_predictors
     ORDER BY ABS(point_value) DESC, q_value ASC
     """
-    return pd.read_sql_query(query, conn)
+    return read_sql_query(query, conn)
 
 
 def get_simplified_skepticism_predictors(conn):
@@ -153,7 +146,7 @@ def get_simplified_skepticism_predictors(conn):
     FROM simplified_skepticism_predictors
     ORDER BY ABS(point_value) DESC, q_value ASC
     """
-    return pd.read_sql_query(query, conn)
+    return read_sql_query(query, conn)
 
 
 def get_sentence_simplified_mythicness_predictors(conn):
@@ -167,7 +160,7 @@ def get_sentence_simplified_mythicness_predictors(conn):
     FROM sentence_simplified_mythicness_predictors
     ORDER BY ABS(point_value) DESC, q_value ASC
     """
-    return pd.read_sql_query(query, conn)
+    return read_sql_query(query, conn)
 
 
 def get_sentence_simplified_skepticism_predictors(conn):
@@ -181,7 +174,7 @@ def get_sentence_simplified_skepticism_predictors(conn):
     FROM sentence_simplified_skepticism_predictors
     ORDER BY ABS(point_value) DESC, q_value ASC
     """
-    return pd.read_sql_query(query, conn)
+    return read_sql_query(query, conn)
 
 
 def get_all_sentences(conn):
@@ -193,7 +186,7 @@ def get_all_sentences(conn):
     ORDER BY passage_id, sentence_number
     """
 
-    df = pd.read_sql_query(query, conn)
+    df = read_sql_query(query, conn)
     return df
 
 
@@ -205,7 +198,7 @@ def get_passage_mythicness_metrics(conn):
     ORDER BY id DESC
     LIMIT 1
     """
-    df = pd.read_sql_query(query, conn)
+    df = read_sql_query(query, conn)
     if len(df) == 0:
         return None
     return df.iloc[0].to_dict()
@@ -219,7 +212,7 @@ def get_passage_skepticism_metrics(conn):
     ORDER BY id DESC
     LIMIT 1
     """
-    df = pd.read_sql_query(query, conn)
+    df = read_sql_query(query, conn)
     if len(df) == 0:
         return None
     return df.iloc[0].to_dict()
@@ -233,7 +226,7 @@ def get_sentence_mythicness_metrics(conn):
     ORDER BY id DESC
     LIMIT 1
     """
-    df = pd.read_sql_query(query, conn)
+    df = read_sql_query(query, conn)
     if len(df) == 0:
         return None
     return df.iloc[0].to_dict()
@@ -247,7 +240,7 @@ def get_sentence_skepticism_metrics(conn):
     ORDER BY id DESC
     LIMIT 1
     """
-    df = pd.read_sql_query(query, conn)
+    df = read_sql_query(query, conn)
     if len(df) == 0:
         return None
     return df.iloc[0].to_dict()
@@ -264,7 +257,7 @@ def get_simplified_mythicness_metrics(conn):
     ORDER BY id DESC
     LIMIT 1
     """
-    df = pd.read_sql_query(query, conn)
+    df = read_sql_query(query, conn)
     if len(df) == 0:
         return None
     return df.iloc[0].to_dict()
@@ -281,7 +274,7 @@ def get_simplified_skepticism_metrics(conn):
     ORDER BY id DESC
     LIMIT 1
     """
-    df = pd.read_sql_query(query, conn)
+    df = read_sql_query(query, conn)
     if len(df) == 0:
         return None
     return df.iloc[0].to_dict()
@@ -298,7 +291,7 @@ def get_sentence_simplified_mythicness_metrics(conn):
     ORDER BY id DESC
     LIMIT 1
     """
-    df = pd.read_sql_query(query, conn)
+    df = read_sql_query(query, conn)
     if len(df) == 0:
         return None
     return df.iloc[0].to_dict()
@@ -315,7 +308,7 @@ def get_sentence_simplified_skepticism_metrics(conn):
     ORDER BY id DESC
     LIMIT 1
     """
-    df = pd.read_sql_query(query, conn)
+    df = read_sql_query(query, conn)
     if len(df) == 0:
         return None
     return df.iloc[0].to_dict()
@@ -325,20 +318,23 @@ def get_map_data(conn):
     """Get place coordinates with their associated passage IDs for the map."""
     cursor = conn.cursor()
 
-    # Check if the place_coordinates table exists
-    cursor.execute("""
-        SELECT name FROM sqlite_master
-        WHERE type='table' AND name='place_coordinates'
-    """)
-    if not cursor.fetchone():
+    if not table_exists(conn, "wikidata_entities"):
         return []
 
     # Get all places with coordinates
     cursor.execute("""
-        SELECT pc.wikidata_qid, pc.reference_form, pc.english_transcription,
-               pc.latitude, pc.longitude, pc.pleiades_id
-        FROM place_coordinates pc
-        WHERE pc.latitude IS NOT NULL AND pc.longitude IS NOT NULL
+        SELECT DISTINCT e.wikidata_qid, pn.reference_form, pn.english_transcription,
+               e.latitude, e.longitude, e.pleiades_id
+        FROM proper_nouns pn
+        JOIN wikidata_links w
+            ON pn.reference_form = w.reference_form
+            AND pn.entity_type = w.entity_type
+        JOIN wikidata_entities e
+            ON w.wikidata_qid = e.wikidata_qid
+        WHERE pn.entity_type = 'place'
+          AND e.latitude IS NOT NULL
+          AND e.longitude IS NOT NULL
+        ORDER BY pn.reference_form
     """)
     places = cursor.fetchall()
 
@@ -351,7 +347,7 @@ def get_map_data(conn):
         cursor.execute("""
             SELECT DISTINCT passage_id
             FROM proper_nouns
-            WHERE reference_form = ? AND entity_type = 'place'
+            WHERE reference_form = %s AND entity_type = 'place'
             ORDER BY passage_id
         """, (reference_form,))
         passage_ids = [row[0] for row in cursor.fetchall()]
@@ -386,32 +382,21 @@ def get_place_pairs(conn):
     """Get place pairs that appear in the same passage, sorted by distance."""
     cursor = conn.cursor()
 
-    cursor.execute("""
-        SELECT name FROM sqlite_master
-        WHERE type='table' AND name='place_coordinates'
-    """)
-    if not cursor.fetchone():
-        return []
-
-    cursor.execute("""
-        SELECT name FROM sqlite_master
-        WHERE type='table' AND name='wikidata_links'
-    """)
-    if not cursor.fetchone():
+    if not table_exists(conn, "wikidata_entities") or not table_exists(conn, "wikidata_links"):
         return []
 
     cursor.execute("""
         SELECT pn.passage_id, pn.reference_form, pn.english_transcription,
-               pc.latitude, pc.longitude, pc.pleiades_id
+               e.latitude, e.longitude, e.pleiades_id
         FROM proper_nouns pn
         JOIN wikidata_links w
             ON pn.reference_form = w.reference_form
             AND pn.entity_type = w.entity_type
-        JOIN place_coordinates pc
-            ON w.wikidata_qid = pc.wikidata_qid
+        JOIN wikidata_entities e
+            ON w.wikidata_qid = e.wikidata_qid
         WHERE pn.entity_type = 'place'
-          AND pc.latitude IS NOT NULL
-          AND pc.longitude IS NOT NULL
+          AND e.latitude IS NOT NULL
+          AND e.longitude IS NOT NULL
         ORDER BY pn.passage_id, pn.reference_form
     """)
     rows = cursor.fetchall()
@@ -486,24 +471,19 @@ def get_translation_page_data(conn):
         })
 
     # Get proper nouns with Wikidata links and coordinates
-    # Check if wikidata_links table exists
-    cursor.execute("""
-        SELECT name FROM sqlite_master
-        WHERE type='table' AND name='wikidata_links'
-    """)
-    has_wikidata = cursor.fetchone() is not None
+    has_wikidata = table_exists(conn, "wikidata_links") and table_exists(conn, "wikidata_entities")
 
     if has_wikidata:
         cursor.execute("""
             SELECT pn.passage_id, pn.reference_form, pn.english_transcription,
-                   pn.entity_type, w.wikidata_qid, pc.latitude, pc.longitude,
-                   pc.pleiades_id
+                   pn.entity_type, w.wikidata_qid, e.latitude, e.longitude,
+                   e.pleiades_id
             FROM proper_nouns pn
             LEFT JOIN wikidata_links w
                 ON pn.reference_form = w.reference_form
                 AND pn.entity_type = w.entity_type
-            LEFT JOIN place_coordinates pc
-                ON w.wikidata_qid = pc.wikidata_qid
+            LEFT JOIN wikidata_entities e
+                ON w.wikidata_qid = e.wikidata_qid
             ORDER BY pn.passage_id, pn.entity_type, pn.reference_form
         """)
     else:
@@ -557,12 +537,7 @@ def get_passage_summaries(conn):
     """Get one-line summaries for passages (from passage_summaries table)."""
     cursor = conn.cursor()
 
-    # Check if the table exists
-    cursor.execute("""
-        SELECT name FROM sqlite_master
-        WHERE type='table' AND name='passage_summaries'
-    """)
-    if not cursor.fetchone():
+    if not table_exists(conn, "passage_summaries"):
         return {}
 
     cursor.execute("SELECT passage_id, summary FROM passage_summaries")

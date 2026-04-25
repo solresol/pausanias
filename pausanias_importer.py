@@ -1,21 +1,16 @@
 #!/usr/bin/env python
 
-import sqlite3
+import argparse
 import sys
 import re
 import os.path
 
+from pausanias_db import add_database_argument, connect, initialize_schema
+
+
 def create_db_schema(conn):
     """Create the database schema if it doesn't exist."""
-    conn.execute('''
-    CREATE TABLE IF NOT EXISTS passages (
-        id TEXT PRIMARY KEY,
-        passage TEXT NOT NULL,
-        references_mythic_era BOOL,
-        expresses_scepticism BOOL
-    )
-    ''')
-    conn.commit()
+    initialize_schema(conn)
 
 def parse_pausanias_file(file_path):
     """Parse the Pausanias file and extract sections with their IDs."""
@@ -44,25 +39,32 @@ def import_passages(conn, passages):
     
     for section_id, passage_text in passages:
         cursor.execute(
-            "INSERT OR REPLACE INTO passages (id, passage) VALUES (?, ?)",
+            """
+            INSERT INTO passages (id, passage)
+            VALUES (%s, %s)
+            ON CONFLICT (id) DO UPDATE SET passage = EXCLUDED.passage
+            """,
             (section_id, passage_text)
         )
     
     conn.commit()
 
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="Import Pausanias passages into PostgreSQL")
+    parser.add_argument("input_file", help="Text file containing marked Pausanias passages")
+    add_database_argument(parser)
+    return parser.parse_args()
+
+
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print(f"Usage: {sys.argv[0]} <pausanias_file> [output_db]")
-        sys.exit(1)
-    
-    input_file = sys.argv[1]
-    output_db = sys.argv[2] if len(sys.argv) > 2 else "pausanias.sqlite"
+    args = parse_arguments()
+    input_file = args.input_file
     
     if not os.path.exists(input_file):
         print(f"Error: Input file '{input_file}' not found.")
         sys.exit(1)
     
-    conn = sqlite3.connect(output_db)
+    conn = connect(args.database_url)
     
     try:
         create_db_schema(conn)
@@ -73,7 +75,7 @@ if __name__ == '__main__':
             sys.exit(0)
         
         import_passages(conn, passages)
-        print(f"Successfully imported {len(passages)} passages into {output_db}")
+        print(f"Successfully imported {len(passages)} passages into PostgreSQL")
     
     except Exception as e:
         print(f"Error: {e}")

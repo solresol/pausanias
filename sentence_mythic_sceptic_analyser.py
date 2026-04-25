@@ -3,7 +3,6 @@
 import argparse
 import json
 import os
-import sqlite3
 import sys
 import time
 from datetime import datetime
@@ -11,16 +10,14 @@ from datetime import datetime
 from openai import OpenAI
 from tqdm import tqdm
 
+from pausanias_db import add_database_argument, column_exists, connect
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
         description="Analyze Pausanias sentences using the OpenAI API"
     )
-    parser.add_argument(
-        "--database",
-        default="pausanias.sqlite",
-        help="SQLite database file (default: pausanias.sqlite)",
-    )
+    add_database_argument(parser)
     parser.add_argument(
         "--openai-api-key-file",
         default="~/.openai.key",
@@ -58,13 +55,11 @@ def load_openai_api_key(key_file):
 def ensure_sentence_columns(conn):
     """Ensure analysis columns exist on the greek_sentences table."""
     cursor = conn.cursor()
-    cursor.execute("PRAGMA table_info(greek_sentences)")
-    cols = {row[1] for row in cursor.fetchall()}
-    if "references_mythic_era" not in cols:
+    if not column_exists(conn, "greek_sentences", "references_mythic_era"):
         cursor.execute(
             "ALTER TABLE greek_sentences ADD COLUMN references_mythic_era BOOLEAN"
         )
-    if "expresses_scepticism" not in cols:
+    if not column_exists(conn, "greek_sentences", "expresses_scepticism"):
         cursor.execute(
             "ALTER TABLE greek_sentences ADD COLUMN expresses_scepticism BOOLEAN"
         )
@@ -94,8 +89,8 @@ def save_analysis_results(
     cursor.execute(
         """
         UPDATE greek_sentences
-        SET references_mythic_era = ?, expresses_scepticism = ?
-        WHERE passage_id = ? AND sentence_number = ?
+        SET references_mythic_era = %s, expresses_scepticism = %s
+        WHERE passage_id = %s AND sentence_number = %s
         """,
         (references_mythic_era, expresses_scepticism, passage_id, sentence_number),
     )
@@ -186,7 +181,7 @@ def main():
     api_key = load_openai_api_key(args.openai_api_key_file)
     client = OpenAI(api_key=api_key)
 
-    conn = sqlite3.connect(args.database)
+    conn = connect(args.database_url)
     try:
         ensure_sentence_columns(conn)
         sentences = get_unprocessed_sentences(conn, args.stop_after)

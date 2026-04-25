@@ -423,7 +423,7 @@ def generate_home_page(output_dir, title, timestamp):
             </div>
 
             <footer>
-                Site generated on {timestamp} from <a href="pausanias.sqlite">pausanias.sqlite</a>
+                Site generated on {timestamp} from the PostgreSQL database
             </footer>
         </div>
     </body>
@@ -549,7 +549,7 @@ def generate_mythic_page(passages_df, mythic_color_map, mythic_class_map, proper
 
         html_content += f"""
             <footer>
-                Generated on {datetime.now().strftime("%Y-%m-%d at %H:%M:%S")} from <a href=\"../pausanias.sqlite\">pausanias.sqlite</a>
+                Generated on {datetime.now().strftime("%Y-%m-%d at %H:%M:%S")} from the PostgreSQL database
             </footer>
         </div>
     </body>
@@ -601,7 +601,7 @@ def generate_mythic_page(passages_df, mythic_color_map, mythic_class_map, proper
     index_content += """
             </ul>
             <footer>
-                Generated on """ + datetime.now().strftime("%Y-%m-%d at %H:%M:%S") + """ from <a href=\"../pausanias.sqlite\">pausanias.sqlite</a>
+                Generated on """ + datetime.now().strftime("%Y-%m-%d at %H:%M:%S") + """ from the PostgreSQL database
             </footer>
         </div>
     </body>
@@ -726,7 +726,7 @@ def generate_skepticism_page(passages_df, skeptic_color_map, skeptic_class_map, 
 
         html_content += f"""
             <footer>
-                Generated on {datetime.now().strftime("%Y-%m-%d at %H:%M:%S")} from <a href=\"../pausanias.sqlite\">pausanias.sqlite</a>
+                Generated on {datetime.now().strftime("%Y-%m-%d at %H:%M:%S")} from the PostgreSQL database
             </footer>
         </div>
     </body>
@@ -779,7 +779,7 @@ def generate_skepticism_page(passages_df, skeptic_color_map, skeptic_class_map, 
     index_content += """
             </ul>
             <footer>
-                Generated on """ + datetime.now().strftime("%Y-%m-%d at %H:%M:%S") + """ from <a href=\"../pausanias.sqlite\">pausanias.sqlite</a>
+                Generated on """ + datetime.now().strftime("%Y-%m-%d at %H:%M:%S") + """ from the PostgreSQL database
             </footer>
         </div>
     </body>
@@ -867,7 +867,7 @@ def generate_mythic_words_page(mythic_predictors, output_dir, title, metrics=Non
 
     html_content += """
             <footer>
-                Generated on """ + datetime.now().strftime("%Y-%m-%d at %H:%M:%S") + """ from <a href=\"pausanias.sqlite\">pausanias.sqlite</a>
+                Generated on """ + datetime.now().strftime("%Y-%m-%d at %H:%M:%S") + """ from the PostgreSQL database
             </footer>
         </div>
 """ + PREDICTOR_TABLE_SORT_SCRIPT + """
@@ -956,7 +956,7 @@ def generate_skeptic_words_page(skeptic_predictors, output_dir, title, metrics=N
 
     html_content += """
             <footer>
-                Generated on """ + datetime.now().strftime("%Y-%m-%d at %H:%M:%S") + """ from <a href=\"pausanias.sqlite\">pausanias.sqlite</a>
+                Generated on """ + datetime.now().strftime("%Y-%m-%d at %H:%M:%S") + """ from the PostgreSQL database
             </footer>
         </div>
 """ + PREDICTOR_TABLE_SORT_SCRIPT + """
@@ -1043,7 +1043,7 @@ def generate_sentence_mythic_words_page(mythic_predictors, output_dir, title, me
 
     html_content += """
             <footer>
-                Generated on """ + datetime.now().strftime("%Y-%m-%d at %H:%M:%S") + """ from <a href=\"pausanias.sqlite\">pausanias.sqlite</a>
+                Generated on """ + datetime.now().strftime("%Y-%m-%d at %H:%M:%S") + """ from the PostgreSQL database
             </footer>
         </div>
 """ + PREDICTOR_TABLE_SORT_SCRIPT + """
@@ -1129,7 +1129,7 @@ def generate_sentence_skeptic_words_page(skeptic_predictors, output_dir, title, 
 
     html_content += """
             <footer>
-                Generated on """ + datetime.now().strftime("%Y-%m-%d at %H:%M:%S") + """ from <a href=\"pausanias.sqlite\">pausanias.sqlite</a>
+                Generated on """ + datetime.now().strftime("%Y-%m-%d at %H:%M:%S") + """ from the PostgreSQL database
             </footer>
         </div>
 """ + PREDICTOR_TABLE_SORT_SCRIPT + """
@@ -1228,7 +1228,7 @@ def generate_sentences_page(sentences_df, output_dir, title):
         </table>
 
         <footer>
-            Generated on {datetime.now().strftime("%Y-%m-%d at %H:%M:%S")} from <a href=\"../pausanias.sqlite\">pausanias.sqlite</a>
+            Generated on {datetime.now().strftime("%Y-%m-%d at %H:%M:%S")} from the PostgreSQL database
         </footer>
     </div>
 </body>
@@ -1278,7 +1278,7 @@ def generate_sentences_page(sentences_df, output_dir, title):
     index_content += f"""
         </ul>
         <footer>
-            Generated on {datetime.now().strftime("%Y-%m-%d at %H:%M:%S")} from <a href=\"../pausanias.sqlite\">pausanias.sqlite</a>
+            Generated on {datetime.now().strftime("%Y-%m-%d at %H:%M:%S")} from the PostgreSQL database
         </footer>
     </div>
 </body>
@@ -1372,7 +1372,7 @@ def generate_map_page(map_data, output_dir, title):
         <div id="map"></div>
 
         <footer>
-            Generated on {datetime.now().strftime("%Y-%m-%d at %H:%M:%S")} from <a href="../pausanias.sqlite">pausanias.sqlite</a>
+            Generated on {datetime.now().strftime("%Y-%m-%d at %H:%M:%S")} from the PostgreSQL database
         </footer>
     </div>
 
@@ -1533,7 +1533,7 @@ def generate_place_pairs_page(place_pairs, output_dir, title):
         {rows_html}
 
         <footer>
-            Generated on {timestamp} from <a href="../pausanias.sqlite">pausanias.sqlite</a>
+            Generated on {timestamp} from the PostgreSQL database
         </footer>
     </div>
 </body>

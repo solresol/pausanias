@@ -9,19 +9,16 @@ earlier in the analysis pipeline.
 """
 
 import argparse
-import sqlite3
 import sys
+
+from pausanias_db import add_database_argument, connect
 
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
         description="Add proper nouns from predictors to manual stopwords"
     )
-    parser.add_argument(
-        "--database",
-        default="pausanias.sqlite",
-        help="SQLite database file (default: pausanias.sqlite)"
-    )
+    add_database_argument(parser)
     parser.add_argument(
         "--dry-run",
         action="store_true",
@@ -55,7 +52,7 @@ def get_proper_nouns_in_predictors(conn):
         SELECT DISTINCT p.phrase
         FROM {table} p
         JOIN phrase_translations pt ON p.phrase = pt.phrase
-        WHERE pt.is_proper_noun = 1
+        WHERE pt.is_proper_noun IS TRUE
         """
         cursor.execute(query)
         results = cursor.fetchall()
@@ -90,7 +87,7 @@ def add_to_stopwords(conn, phrases):
     cursor = conn.cursor()
     for phrase in phrases:
         cursor.execute(
-            "INSERT OR IGNORE INTO manual_stopwords (word) VALUES (?)",
+            "INSERT INTO manual_stopwords (word) VALUES (%s) ON CONFLICT (word) DO NOTHING",
             (phrase,)
         )
     conn.commit()
@@ -99,7 +96,7 @@ def add_to_stopwords(conn, phrases):
 def main():
     args = parse_arguments()
 
-    conn = sqlite3.connect(args.database)
+    conn = connect(args.database_url)
 
     try:
         # Find proper nouns in predictors

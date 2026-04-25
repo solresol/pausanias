@@ -3,7 +3,6 @@
 
 import os
 import re
-import sqlite3
 from collections import defaultdict
 
 import matplotlib.pyplot as plt
@@ -12,6 +11,7 @@ from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 import numpy as np
 
 from website.data import get_translation_page_data, passage_id_sort_key
+from pausanias_db import connect
 
 
 # Book titles (traditional names for each book of Pausanias)
@@ -82,16 +82,16 @@ def get_places_for_book(conn, book_num):
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT DISTINCT pc.reference_form, pc.english_transcription,
-               pc.latitude, pc.longitude
+        SELECT DISTINCT pn.reference_form, pn.english_transcription,
+               e.latitude, e.longitude
         FROM proper_nouns pn
         JOIN wikidata_links w ON pn.reference_form = w.reference_form
             AND pn.entity_type = w.entity_type
-        JOIN place_coordinates pc ON w.wikidata_qid = pc.wikidata_qid
+        JOIN wikidata_entities e ON w.wikidata_qid = e.wikidata_qid
         WHERE pn.entity_type = 'place'
-        AND pn.passage_id LIKE ?
-        AND pc.latitude IS NOT NULL
-        AND pc.longitude IS NOT NULL
+        AND pn.passage_id LIKE %s
+        AND e.latitude IS NOT NULL
+        AND e.longitude IS NOT NULL
     """, (f"{book_num}.%",))
 
     places = []
@@ -438,7 +438,7 @@ def main():
     """Generate all LaTeX files."""
 
     # Connect to database
-    conn = sqlite3.connect("pausanias.sqlite")
+    conn = connect()
 
     # Get data
     print("Fetching translation data...")
