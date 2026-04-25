@@ -9,11 +9,11 @@ import argparse
 import sys
 import os
 from website.main import main as website_main
+from pausanias_db import add_database_argument
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Create a static website to visualize mythic and skeptical aspects of Pausanias passages")
-    parser.add_argument("--database", default="pausanias.sqlite", 
-                        help="SQLite database file (default: pausanias.sqlite)")
+    add_database_argument(parser)
     parser.add_argument("--output-dir", default="pausanias_site",
                         help="Output directory for the static website (default: pausanias_site)")
     parser.add_argument("--max-passages", type=int, default=None,

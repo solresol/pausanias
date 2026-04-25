@@ -12,5 +12,5 @@ Original monolithic script has been split into specialized modules:
 ## Usage
 ```python
 # From the parent directory
-python -m website.main --database pausanias.sqlite --output-dir pausanias_site
+python -m website.main --output-dir pausanias_site
 ```

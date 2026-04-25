@@ -21,7 +21,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Structure
 - Data flow: import → extract → analyze → visualize → generate website
-- Database: SQLite (pausanias.sqlite)
+- Database: PostgreSQL (`PAUSANIAS_DATABASE_URL`, default `dbname=pausanias`)
 - Network analysis outputs feed into website generation
 
 ## Testing

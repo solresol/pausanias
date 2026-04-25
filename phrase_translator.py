@@ -3,7 +3,6 @@
 """Module for translating Greek phrases to English using LLM caching."""
 
 import os
-import sqlite3
 import time
 from datetime import datetime
 from typing import Optional, Dict
@@ -39,7 +38,7 @@ def get_phrase_translation(conn, phrase: str) -> Optional[tuple[str, bool]]:
     """
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT english_translation, is_proper_noun FROM phrase_translations WHERE phrase = ?",
+        "SELECT english_translation, is_proper_noun FROM phrase_translations WHERE phrase = %s",
         (phrase,)
     )
     result = cursor.fetchone()
@@ -63,9 +62,16 @@ def save_phrase_translation(conn, phrase: str, translation: str, is_proper_noun:
     cursor = conn.cursor()
     cursor.execute(
         """
-        INSERT OR REPLACE INTO phrase_translations
+        INSERT INTO phrase_translations
         (phrase, english_translation, is_proper_noun, timestamp, model, input_tokens, output_tokens)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
+        ON CONFLICT (phrase) DO UPDATE SET
+            english_translation = EXCLUDED.english_translation,
+            is_proper_noun = EXCLUDED.is_proper_noun,
+            timestamp = EXCLUDED.timestamp,
+            model = EXCLUDED.model,
+            input_tokens = EXCLUDED.input_tokens,
+            output_tokens = EXCLUDED.output_tokens
         """,
         (phrase, translation, is_proper_noun, timestamp, model, input_tokens, output_tokens)
     )

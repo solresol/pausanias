@@ -4,11 +4,11 @@
 
 import argparse
 import shutil
-import sqlite3
 import sys
 import os
 from datetime import datetime
 
+from pausanias_db import add_database_argument, connect
 from .data import (
     get_analyzed_passages,
     get_mythicness_predictors,
@@ -55,8 +55,7 @@ from .generators import (
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Create a static website to visualize mythic and skeptical aspects of Pausanias passages")
-    parser.add_argument("--database", default="pausanias.sqlite",
-                        help="SQLite database file (default: pausanias.sqlite)")
+    add_database_argument(parser)
     parser.add_argument("--output-dir", default="pausanias_site",
                         help="Output directory for the static website (default: pausanias_site)")
     parser.add_argument("--max-passages", type=int, default=None,
@@ -76,7 +75,7 @@ def main():
     args = parse_arguments()
 
     # Connect to the database
-    conn = sqlite3.connect(args.database)
+    conn = connect(args.database_url)
 
     # Initialize OpenAI client if translation is requested
     client = None

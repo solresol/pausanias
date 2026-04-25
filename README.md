@@ -26,7 +26,7 @@ Creating virtual environment at: .venv
 This should respond with 
 
 ```
-Successfully imported 3170 passages into pausanias.sqlite
+Successfully imported 3170 passages into PostgreSQL
 ```
 
 # Daily
@@ -41,11 +41,10 @@ it if you don't mind spending money).
 
 Some words that are really proper nouns might slip past the automated
 extractor. To make sure they don't influence the TF‑IDF model, you can add
-them to a `manual_stopwords` table in the database. Create or view the table
-with any SQLite tool:
+them to a `manual_stopwords` table in the database:
 
 ```bash
-sqlite3 pausanias.sqlite "INSERT INTO manual_stopwords(word) VALUES ('Athens');"
+psql "$PAUSANIAS_DATABASE_URL" -c "INSERT INTO manual_stopwords(word) VALUES ('Athens') ON CONFLICT DO NOTHING;"
 ```
 
 When `find_predictors.py` runs it combines these entries with the proper
@@ -56,7 +55,6 @@ instead. These entries are applied only to the passage- and sentence-level
 skepticism models, so they will not affect mythicness:
 
 ```bash
-sqlite3 pausanias.sqlite "INSERT INTO manual_skepticism_stopwords(word) VALUES ('δοκεῖν');"
+psql "$PAUSANIAS_DATABASE_URL" -c "INSERT INTO manual_skepticism_stopwords(word) VALUES ('δοκεῖν') ON CONFLICT DO NOTHING;"
 ```
-
 

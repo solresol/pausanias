@@ -1,5 +1,6 @@
 *~
 pausanias.sqlite
+pausanias.sqlite.pre-postgres-*
 pausanias_site
 pausanias.old
 __pycache__
