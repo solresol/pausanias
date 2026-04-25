@@ -63,6 +63,24 @@ PREDICTOR_TABLE_SORT_SCRIPT = """
 """
 
 
+def write_redirect_page(output_dir, filename, target, title):
+    """Write a lightweight compatibility redirect for older flat URLs."""
+    redirect_html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="0; url={html.escape(target)}">
+    <title>{html.escape(title)}</title>
+</head>
+<body>
+    <p><a href="{html.escape(target)}">{html.escape(title)}</a></p>
+</body>
+</html>
+"""
+    with open(os.path.join(output_dir, filename), "w", encoding="utf-8") as f:
+        f.write(redirect_html)
+
+
 def format_classification_metrics(metrics, class_0_label, class_1_label):
     """Format classification metrics into an HTML table.
 
@@ -611,6 +629,8 @@ def generate_mythic_page(passages_df, mythic_color_map, mythic_class_map, proper
     with open(os.path.join(mythic_dir, 'index.html'), 'w', encoding='utf-8') as f:
         f.write(index_content)
 
+    write_redirect_page(output_dir, "mythic.html", "mythic/index.html", "Mythic Analysis")
+
 def generate_skepticism_page(passages_df, skeptic_color_map, skeptic_class_map, proper_nouns_dict, output_dir, title):
     """Generate pages showing skeptical aspects of passages grouped by chapter."""
 
@@ -788,6 +808,8 @@ def generate_skepticism_page(passages_df, skeptic_color_map, skeptic_class_map, 
 
     with open(os.path.join(skeptic_dir, 'index.html'), 'w', encoding='utf-8') as f:
         f.write(index_content)
+
+    write_redirect_page(output_dir, "skepticism.html", "skepticism/index.html", "Skepticism Analysis")
 
 def generate_mythic_words_page(mythic_predictors, output_dir, title, metrics=None, simplified_predictors=None, simplified_metrics=None):
     """Generate a page showing words and phrases that predict mythic/historical content."""
@@ -1287,6 +1309,8 @@ def generate_sentences_page(sentences_df, output_dir, title):
 
     with open(os.path.join(sentences_dir, "index.html"), "w", encoding="utf-8") as f:
         f.write(index_content)
+
+    write_redirect_page(output_dir, "sentences.html", "sentences/index.html", "Sentences")
 
 
 def generate_map_page(map_data, output_dir, title):

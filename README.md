@@ -58,3 +58,39 @@ skepticism models, so they will not affect mythicness:
 psql "$PAUSANIAS_DATABASE_URL" -c "INSERT INTO manual_skepticism_stopwords(word) VALUES ('δοκεῖν') ON CONFLICT DO NOTHING;"
 ```
 
+## Proper noun spelling checks
+
+The live PostgreSQL database is on `raksasa`, so local checking usually needs an
+SSH tunnel:
+
+```bash
+ssh -N -L 6543:/var/run/postgresql/.s.PGSQL.5432 raksasa
+```
+
+Then run the spelling checker against the tunnel:
+
+```bash
+uv run check_proper_noun_spellings.py \
+  --database-url "host=127.0.0.1 port=6543 dbname=pausanias user=gregb"
+```
+
+The checker stores reviewed spelling policies in
+`proper_noun_spelling_policies` and scan results in
+`proper_noun_spelling_findings`. Use `--apply` to replace deprecated variants in
+completed translation text, sentence text, and passage summaries.
+
+To import the review report as policies, apply corrections, and keep the proper
+noun registry in step with the selected spellings:
+
+```bash
+uv run check_proper_noun_spellings.py \
+  --database-url "host=127.0.0.1 port=6543 dbname=pausanias user=gregb" \
+  --import-review-tsv tmp/proper_noun_spelling_review.tsv \
+  --apply \
+  --sync-registry \
+  --sync-derived-name-spellings
+```
+
+The review importer chooses the dominant completed-prose spelling for each
+entity, with a small set of explicit overrides where a base name and compound
+name would otherwise fight each other.

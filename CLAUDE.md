@@ -21,7 +21,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Structure
 - Data flow: import → extract → analyze → visualize → generate website
-- Database: PostgreSQL (`PAUSANIAS_DATABASE_URL`, default `dbname=pausanias`)
+- Database: PostgreSQL. The live database is on `raksasa` (`dbname=pausanias`,
+  user `gregb`); the local default `dbname=pausanias` only works if a local
+  server is running. For local scripts, use an SSH tunnel to raksasa's Postgres
+  socket, for example `ssh -N -L 6543:/var/run/postgresql/.s.PGSQL.5432
+  raksasa`, then run with `--database-url "host=127.0.0.1 port=6543
+  dbname=pausanias user=gregb"`.
 - Network analysis outputs feed into website generation
 
 ## Testing
