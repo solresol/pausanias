@@ -123,7 +123,7 @@ def write_index(
                 <h2>Passage {html.escape(page.passage_id)}</h2>
                 <a href="{translation_href}">Translation page</a>
             </div>
-            <img src="{html.escape(page.site_image_path)}" alt="Illustrated page for Pausanias {html.escape(page.passage_id)}">
+            <img src="{html.escape(page.site_image_path)}?v={build_version}" alt="Illustrated page for Pausanias {html.escape(page.passage_id)}">
         </article>
 """
         )
