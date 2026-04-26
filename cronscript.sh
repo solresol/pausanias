@@ -4,6 +4,10 @@ cd $(dirname $0)
 git pull -q
 
 export PAUSANIAS_DATABASE_URL="${PAUSANIAS_DATABASE_URL:-dbname=pausanias}"
+GRAPHIC_BOOK_IMAGE_DIR="${GRAPHIC_BOOK_IMAGE_DIR:-$HOME/pausanias-graphic-book/images}"
+if [ ! -d "$GRAPHIC_BOOK_IMAGE_DIR" ]; then
+  GRAPHIC_BOOK_IMAGE_DIR="graphic_book/images"
+fi
 
 PAUSANIAS_QUIET_EMPTY=1 uv run mythic_sceptic_analyser.py --stop 50
 PAUSANIAS_QUIET_EMPTY=1 uv run extract_proper_nouns.py --stop 50
@@ -15,10 +19,6 @@ uv run find_predictors.py
 uv run find_sentence_predictors.py
 uv run analyse_noun_network.py 
 uv run sentence_mythic_sceptic_analyser.py --stop 25
-uv run create_website.py
-GRAPHIC_BOOK_IMAGE_DIR="${GRAPHIC_BOOK_IMAGE_DIR:-$HOME/pausanias-graphic-book/images}"
-if [ ! -d "$GRAPHIC_BOOK_IMAGE_DIR" ]; then
-  GRAPHIC_BOOK_IMAGE_DIR="graphic_book/images"
-fi
+uv run create_website.py --graphic-book-image-dir "$GRAPHIC_BOOK_IMAGE_DIR"
 uv run build_graphic_book.py --image-dir "$GRAPHIC_BOOK_IMAGE_DIR" --output-dir pausanias_site/graphic-book
 rsync -az pausanias_site/ merah:/var/www/vhosts/pausanias.symmachus.org/htdocs/

@@ -29,9 +29,19 @@ graphic_book/assets/pausanias-title-page.png
 
 ```text
 pausanias_site/graphic-book/index.html
+pausanias_site/graphic-book/<book>/<chapter>/<section>.html
 pausanias_site/graphic-book/pausanias-graphic-book.pdf
 pausanias_site/graphic-book/images/...
 ```
+
+Each illustrated passage has a stable reader URL, for example:
+
+```text
+pausanias_site/graphic-book/1/1/3.html
+```
+
+The formal translation generator links to those reader pages when it sees a
+matching image in the configured graphic-book image directory.
 
 The existing daily script then publishes `pausanias_site/` to
 `pausanias.symmachus.org`.

@@ -3,9 +3,48 @@
 import json
 import os
 import html
+import re
 import pandas as pd
 from datetime import datetime
+from pathlib import Path
 from .highlighting import highlight_passage
+
+GRAPHIC_PASSAGE_IMAGE_RE = re.compile(
+    r"^(?P<section>\d+)\.(?:png|jpg|jpeg|webp)$", re.IGNORECASE
+)
+
+
+def _graphic_book_image_dir(image_dir=None):
+    if image_dir:
+        return Path(image_dir).expanduser()
+    env_image_dir = os.environ.get("GRAPHIC_BOOK_IMAGE_DIR")
+    if env_image_dir:
+        return Path(env_image_dir).expanduser()
+    return Path(__file__).resolve().parent.parent / "graphic_book" / "images"
+
+
+def discover_graphic_book_passage_ids(image_dir=None):
+    """Return passage IDs that have a generated graphic-book image."""
+    root = _graphic_book_image_dir(image_dir)
+    passage_ids = set()
+    if not root.exists():
+        return passage_ids
+
+    for path in root.rglob("*"):
+        if not path.is_file():
+            continue
+        match = GRAPHIC_PASSAGE_IMAGE_RE.match(path.name)
+        if not match:
+            continue
+        try:
+            chapter = path.parent.name
+            book = path.parent.parent.name
+            int(book)
+            int(chapter)
+        except (ValueError, IndexError):
+            continue
+        passage_ids.add(f"{book}.{chapter}.{match.group('section')}")
+    return passage_ids
 
 PREDICTOR_TABLE_SORT_SCRIPT = """
     <script>
@@ -1592,13 +1631,22 @@ def _translation_nav(prefix, active=None):
     return "<nav>\n            " + "\n            ".join(parts) + "\n        </nav>"
 
 
-def generate_translation_pages(passages, nouns_by_passage, noun_passages, output_dir, title, summaries=None):
+def generate_translation_pages(
+    passages,
+    nouns_by_passage,
+    noun_passages,
+    output_dir,
+    title,
+    summaries=None,
+    graphic_book_image_dir=None,
+):
     """Generate hierarchical translation pages: book > chapter > passage."""
 
     from .data import passage_id_sort_key
 
     translation_dir = os.path.join(output_dir, 'translation')
     os.makedirs(translation_dir, exist_ok=True)
+    graphic_book_passage_ids = discover_graphic_book_passage_ids(graphic_book_image_dir)
 
     # Parse all passage IDs into (book, chapter, section) tuples
     parsed = []
@@ -1739,6 +1787,7 @@ def generate_translation_pages(passages, nouns_by_passage, noun_passages, output
                 f.write(passage_list)
 
     # --- Individual passage pages ---
+    linked_graphic_passages = 0
     for idx, (book, chapter, section, passage) in enumerate(passage_order):
         chapter_dir = os.path.join(translation_dir, str(book), str(chapter))
         pid = passage["id"]
@@ -1841,6 +1890,14 @@ def generate_translation_pages(passages, nouns_by_passage, noun_passages, output
 
         # Sentence analysis link
         sentence_link = f'<a href="{prefix}sentences/{book}_{chapter}.html">View sentence analysis for this chapter</a>'
+        graphic_book_link_html = ""
+        if pid in graphic_book_passage_ids:
+            linked_graphic_passages += 1
+            graphic_href = f"{prefix}graphic-book/{book}/{chapter}/{section}.html"
+            graphic_book_link_html = (
+                f'\n            <p><a class="graphic-book-link" href="{graphic_href}">'
+                "Open graphic version of this passage</a></p>"
+            )
 
         # English translation
         english_html = ""
@@ -1892,6 +1949,7 @@ def generate_translation_pages(passages, nouns_by_passage, noun_passages, output
 {english_html}{nouns_html}{map_html}
         <div class="passage-links">
             <p>{sentence_link}</p>
+            {graphic_book_link_html}
         </div>
 
         <div class="passage-nav-bottom">
@@ -2015,6 +2073,18 @@ def generate_translation_pages(passages, nouns_by_passage, noun_passages, output
 }
 .passage-links a {
     color: #5c5142;
+}
+.passage-links a.graphic-book-link {
+    background-color: #2c5f78;
+    border-radius: 4px;
+    color: white;
+    display: inline-block;
+    font-weight: bold;
+    padding: 7px 11px;
+    text-decoration: none;
+}
+.passage-links a.graphic-book-link:hover {
+    background-color: #39758f;
 }
 .passage-list li {
     margin-bottom: 6px;
@@ -2226,6 +2296,8 @@ def generate_translation_pages(passages, nouns_by_passage, noun_passages, output
     total_nouns = sum(len(v) for v in nouns_by_type.values())
     total_passages = len(passage_order)
     print(f"Translation pages generated: {total_passages} passages across {len(books)} books.")
+    if linked_graphic_passages:
+        print(f"Graphic-book links added for {linked_graphic_passages} translated passages.")
     print(f"Proper noun index generated: {total_nouns} nouns across {len(nouns_by_type)} types.")
 
 
