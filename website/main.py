@@ -62,6 +62,8 @@ def parse_arguments():
                         help="Maximum number of passages to include (default: all)")
     parser.add_argument("--title", default="Pausanias Analysis",
                         help="Title for the website (default: 'Pausanias Analysis')")
+    parser.add_argument("--graphic-book-image-dir", default=None,
+                        help="Image directory used to decide which translation pages link to graphic-book reader pages")
     parser.add_argument("--translate-phrases", action="store_true",
                         help="Fetch missing phrase translations using LLM (requires OpenAI API key)")
     parser.add_argument("--openai-api-key-file", default="~/.openai.key",
@@ -206,7 +208,15 @@ def main():
         # Generate translation pages
         translation_passages, nouns_by_passage, noun_passages = get_translation_page_data(conn)
         passage_summaries = get_passage_summaries(conn)
-        generate_translation_pages(translation_passages, nouns_by_passage, noun_passages, output_dir, args.title, passage_summaries)
+        generate_translation_pages(
+            translation_passages,
+            nouns_by_passage,
+            noun_passages,
+            output_dir,
+            args.title,
+            passage_summaries,
+            graphic_book_image_dir=args.graphic_book_image_dir,
+        )
 
         # Generate progress page
         progress_data = get_progress_data(conn)
