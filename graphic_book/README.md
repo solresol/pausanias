@@ -70,6 +70,12 @@ PAUSANIAS_GRAPHIC_BOOK_S3_URI=s3://bucket-or-prefix
 
 and `sync_graphic_book_images.sh push` will also sync the image tree to S3.
 
+The renderer source files and the smaller generated component artwork under
+`graphic_book/assets/generated/` are tracked in Git because they are needed to
+rebuild a passage page. The completed passage pages under `graphic_book/images/`
+remain ignored and externally mirrored because the final image corpus is the
+bulk output.
+
 ## Daily Image Generation Checklist
 
 For each new passage image:

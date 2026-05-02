@@ -1,0 +1,74 @@
+[
+  {
+    "file": "graphic_book/assets/generated/1_2_1/main_athens_approach.png",
+    "size": "1536x1024",
+    "attempt": 1,
+    "usage": {
+      "input_tokens": 174,
+      "input_tokens_details": {
+        "image_tokens": 0,
+        "text_tokens": 174
+      },
+      "output_tokens": 6208,
+      "total_tokens": 6382,
+      "output_tokens_details": {
+        "image_tokens": 6208,
+        "text_tokens": 0
+      }
+    }
+  },
+  {
+    "file": "graphic_book/assets/generated/1_2_1/antiope_tomb.png",
+    "size": "1536x1024",
+    "attempt": 1,
+    "usage": {
+      "input_tokens": 123,
+      "input_tokens_details": {
+        "image_tokens": 0,
+        "text_tokens": 123
+      },
+      "output_tokens": 6208,
+      "total_tokens": 6331,
+      "output_tokens_details": {
+        "image_tokens": 6208,
+        "text_tokens": 0
+      }
+    }
+  },
+  {
+    "file": "graphic_book/assets/generated/1_2_1/amazon_battle.png",
+    "size": "1536x1024",
+    "attempt": 1,
+    "usage": {
+      "input_tokens": 163,
+      "input_tokens_details": {
+        "image_tokens": 0,
+        "text_tokens": 163
+      },
+      "output_tokens": 6208,
+      "total_tokens": 6371,
+      "output_tokens_details": {
+        "image_tokens": 6208,
+        "text_tokens": 0
+      }
+    }
+  },
+  {
+    "file": "graphic_book/assets/generated/1_2_1/themiskyra_thermodon.png",
+    "size": "1536x1024",
+    "attempt": 1,
+    "usage": {
+      "input_tokens": 130,
+      "input_tokens_details": {
+        "image_tokens": 0,
+        "text_tokens": 130
+      },
+      "output_tokens": 6208,
+      "total_tokens": 6338,
+      "output_tokens_details": {
+        "image_tokens": 6208,
+        "text_tokens": 0
+      }
+    }
+  }
+]
