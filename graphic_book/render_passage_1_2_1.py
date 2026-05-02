@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -13,19 +14,18 @@ if str(ROOT_DIR) not in sys.path:
 
 from pausanias_db import connect
 
-from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont, ImageOps
+from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageOps
 
 
 WIDTH = 1402
 HEIGHT = 1122
-PASSAGE_ID = "1.1.4"
+PASSAGE_ID = "1.2.1"
 
 PARCHMENT = "#efd9ab"
 PARCHMENT_LIGHT = "#f7e8c8"
 PARCHMENT_DEEP = "#d8bb86"
 INK = "#2a1e13"
 RULE = "#6f5130"
-SEA = "#315f79"
 
 TITLE_FONT = "/System/Library/Fonts/Supplemental/Georgia Bold.ttf"
 BODY_FONT = "/System/Library/Fonts/Supplemental/Georgia.ttf"
@@ -71,7 +71,6 @@ def make_parchment(size: tuple[int, int]) -> Image.Image:
     vignette = vignette.filter(ImageFilter.GaussianBlur(24))
     shadow = Image.new("RGB", size, "#8f7344")
     base = Image.composite(shadow, base, vignette)
-
     return base
 
 
@@ -88,9 +87,13 @@ def paste_with_shadow(canvas: Image.Image, panel: Image.Image, xy: tuple[int, in
     canvas.alpha_composite(panel, xy)
 
 
-def crop_to_fill(path: Path, size: tuple[int, int]) -> Image.Image:
+def crop_to_fill(
+    path: Path,
+    size: tuple[int, int],
+    centering: tuple[float, float] = (0.5, 0.5),
+) -> Image.Image:
     image = Image.open(path).convert("RGB")
-    return ImageOps.fit(image, size, method=Image.Resampling.LANCZOS, centering=(0.5, 0.5))
+    return ImageOps.fit(image, size, method=Image.Resampling.LANCZOS, centering=centering)
 
 
 def wrap_text(draw: ImageDraw.ImageDraw, text: str, font: ImageFont.FreeTypeFont, max_width: int) -> str:
@@ -168,7 +171,6 @@ def draw_fitted_text(
     fill: str = INK,
     spacing_ratio: float = 0.2,
     align: str = "left",
-    anchor_offset: tuple[int, int] = (0, 0),
 ) -> FitRecord:
     font, wrapped, bbox, record = fit_text_block(
         draw,
@@ -182,8 +184,8 @@ def draw_fitted_text(
         spacing_ratio=spacing_ratio,
     )
     spacing = max(2, round(record.font_size * spacing_ratio))
-    x = rect[0] + padding + anchor_offset[0]
-    y = rect[1] + padding + anchor_offset[1]
+    x = rect[0] + padding
+    y = rect[1] + padding
     if align == "center":
         text_width = bbox[2] - bbox[0]
         x = rect[0] + ((rect[2] - rect[0]) - text_width) // 2
@@ -254,7 +256,7 @@ def make_label(
             (8, 5, size[0] - 8, size[1] - 5),
             text,
             font_path,
-            max_size=30,
+            max_size=28,
             min_size=14,
             padding=4,
             name=f"label:{text}",
@@ -270,6 +272,42 @@ def draw_leader(draw: ImageDraw.ImageDraw, start: tuple[int, int], end: tuple[in
     draw.ellipse((start[0] - 5, start[1] - 5, start[0] + 5, start[1] + 5), fill=RULE)
 
 
+def draw_polyline_leader(draw: ImageDraw.ImageDraw, points: list[tuple[int, int]]) -> None:
+    if len(points) < 2:
+        return
+    draw.line(points, fill=RULE, width=3)
+    start = points[0]
+    draw.ellipse((start[0] - 5, start[1] - 5, start[0] + 5, start[1] + 5), fill=RULE)
+
+
+def draw_dashed_route(
+    draw: ImageDraw.ImageDraw,
+    start: tuple[int, int],
+    end: tuple[int, int],
+    dash: int = 14,
+    gap: int = 10,
+    fill: str = "#f4ede3",
+    width: int = 4,
+) -> None:
+    dx = end[0] - start[0]
+    dy = end[1] - start[1]
+    length = math.hypot(dx, dy)
+    if length == 0:
+        return
+    step = dash + gap
+    ux = dx / length
+    uy = dy / length
+    pos = 0.0
+    while pos < length:
+        seg_end = min(length, pos + dash)
+        x1 = start[0] + ux * pos
+        y1 = start[1] + uy * pos
+        x2 = start[0] + ux * seg_end
+        y2 = start[1] + uy * seg_end
+        draw.line((x1, y1, x2, y2), fill=fill, width=width)
+        pos += step
+
+
 def add_border(draw: ImageDraw.ImageDraw) -> None:
     draw.rectangle((10, 10, WIDTH - 10, HEIGHT - 10), outline=RULE, width=3)
     draw.rectangle((24, 24, WIDTH - 24, HEIGHT - 24), outline="#9d7d4e", width=1)
@@ -282,14 +320,18 @@ def render_page(output_path: Path) -> dict[str, object]:
     page = make_parchment((WIDTH, HEIGHT)).convert("RGBA")
     draw = ImageDraw.Draw(page)
 
-    map_rect = (454, 44, 1374, 768)
-    map_art = crop_to_fill(root_dir() / "graphic_book/assets/generated/1_1_4/map.png", (map_rect[2] - map_rect[0], map_rect[3] - map_rect[1]))
-    map_panel = framed_panel((map_art.width + 26, map_art.height + 26), fill=PARCHMENT_DEEP)
-    map_panel.paste(map_art, (13, 13))
-    ImageDraw.Draw(map_panel).rectangle((13, 13, 13 + map_art.width, 13 + map_art.height), outline=RULE, width=2)
-    paste_with_shadow(page, map_panel, (map_rect[0] - 13, map_rect[1] - 13))
+    main_rect = (454, 44, 1372, 690)
+    main_art = crop_to_fill(
+        root_dir() / "graphic_book/assets/generated/1_2_1/main_athens_approach.png",
+        (main_rect[2] - main_rect[0], main_rect[3] - main_rect[1]),
+        centering=(0.54, 0.48),
+    )
+    main_panel = framed_panel((main_art.width + 26, main_art.height + 26), fill=PARCHMENT_DEEP)
+    main_panel.paste(main_art, (13, 13))
+    ImageDraw.Draw(main_panel).rectangle((13, 13, 13 + main_art.width, 13 + main_art.height), outline=RULE, width=2)
+    paste_with_shadow(page, main_panel, (main_rect[0] - 13, main_rect[1] - 13))
 
-    left_panel_rect = (32, 36, 430, 522)
+    left_panel_rect = (32, 36, 430, 608)
     left_panel = framed_panel((left_panel_rect[2] - left_panel_rect[0], left_panel_rect[3] - left_panel_rect[1]))
     left_draw = ImageDraw.Draw(left_panel)
     title_band = (18, 14, left_panel.width - 18, 70)
@@ -298,9 +340,9 @@ def render_page(output_path: Path) -> dict[str, object]:
         draw_fitted_text(
             left_draw,
             title_band,
-            "PASSAGE 1.1.4",
+            "PASSAGE 1.2.1",
             TITLE_FONT,
-            max_size=32,
+            max_size=31,
             min_size=18,
             padding=10,
             name="panel:title",
@@ -314,7 +356,7 @@ def render_page(output_path: Path) -> dict[str, object]:
             (24, 88, left_panel.width - 24, left_panel.height - 22),
             translation,
             BODY_FONT,
-            max_size=27,
+            max_size=26,
             min_size=15,
             padding=8,
             name="panel:translation",
@@ -323,116 +365,123 @@ def render_page(output_path: Path) -> dict[str, object]:
     )
     paste_with_shadow(page, left_panel, (left_panel_rect[0], left_panel_rect[1]))
 
-    title_rect = (540, 44, 902, 118)
-    title_panel = make_label("MUNYCHIA AND PHALERUM", title_rect, records, font_path=TITLE_FONT)
+    title_rect = (586, 42, 1040, 118)
+    title_panel = make_label("ANTIOPE AND MOLPADIA", title_rect, records, font_path=TITLE_FONT)
     paste_with_shadow(page, title_panel, (title_rect[0], title_rect[1]))
 
-    small_callout_rect = (742, 194, 986, 292)
-    mid_callout_rect = (606, 774, 912, 906)
-    lower_callout_rect = (518, 934, 930, 1046)
-
-    munychia_art = crop_to_fill(root_dir() / "graphic_book/assets/generated/1_1_4/munychia.png", (348, 236))
-    munychia_panel = make_inset_panel(
-        munychia_art,
-        "Munychia's harbor beneath the sanctuary of Artemis Munychia.",
-        72,
-        "caption:munychia",
+    tomb_art = crop_to_fill(
+        root_dir() / "graphic_book/assets/generated/1_2_1/antiope_tomb.png",
+        (388, 230),
+        centering=(0.5, 0.48),
+    )
+    tomb_panel = make_inset_panel(
+        tomb_art,
+        "Pausanias marks Antiope's tomb on the approach into Athens.",
+        78,
+        "caption:antiope_tomb",
         records,
     )
-    munychia_xy = (988, 82)
-    paste_with_shadow(page, munychia_panel, munychia_xy)
+    tomb_xy = (34, 742)
+    paste_with_shadow(page, tomb_panel, tomb_xy)
 
-    phalerus_art = crop_to_fill(root_dir() / "graphic_book/assets/generated/1_1_4/phalerus_jason.png", (388, 224))
-    phalerus_panel = make_inset_panel(
-        phalerus_art,
-        "Athenians said Phalerus sailed with Jason to Colchis.",
-        70,
-        "caption:phalerus_jason",
+    thermodon_art = crop_to_fill(
+        root_dir() / "graphic_book/assets/generated/1_2_1/themiskyra_thermodon.png",
+        (430, 206),
+        centering=(0.52, 0.5),
+    )
+    thermodon_panel = make_inset_panel(
+        thermodon_art,
+        "Hegias says Antiope surrendered Themiskyra on the Thermodon when Theseus campaigned with Heracles.",
+        86,
+        "caption:themiskyra",
         records,
     )
-    phalerus_xy = (34, 770)
-    paste_with_shadow(page, phalerus_panel, phalerus_xy)
+    thermodon_xy = (472, 780)
+    paste_with_shadow(page, thermodon_panel, thermodon_xy)
 
-    phalerum_art = crop_to_fill(root_dir() / "graphic_book/assets/generated/1_1_4/phalerum.png", (404, 236))
-    phalerum_panel = make_inset_panel(
-        phalerum_art,
-        "Phalerum's sacred shore: Demeter, Athena Sciras, Zeus, heroes, and the Hero altar.",
-        80,
-        "caption:phalerum_shore",
+    battle_art = crop_to_fill(
+        root_dir() / "graphic_book/assets/generated/1_2_1/amazon_battle.png",
+        (390, 234),
+        centering=(0.52, 0.48),
+    )
+    battle_panel = make_inset_panel(
+        battle_art,
+        "Athenians said Molpadia shot Antiope, and Theseus then killed Molpadia.",
+        84,
+        "caption:amazon_battle",
         records,
     )
-    phalerum_xy = (934, 694)
+    battle_xy = (944, 736)
+    paste_with_shadow(page, battle_panel, battle_xy)
+
+    callout_a_rect = (1008, 438, 1282, 534)
+    callout_b_rect = (1038, 566, 1314, 654)
+
+    athens_point = (1038, 148)
+    acropolis_point = (1126, 222)
+    road_start = (538, 618)
+    road_end = (1020, 248)
+    antiope_point = (708, 596)
+    molpadia_point = (912, 542)
 
     draw = ImageDraw.Draw(page)
-    draw_leader(draw, (600, 372), (small_callout_rect[0], small_callout_rect[1] + 48))
-    draw_leader(draw, (589, 412), (munychia_xy[0], munychia_xy[1] + 160))
-    draw_leader(draw, (1118, 344), (phalerus_xy[0] + 428, phalerus_xy[1] + 92))
-    draw_leader(draw, (1114, 346), (mid_callout_rect[0] + 34, mid_callout_rect[1] + 28))
-    draw_leader(draw, (1116, 352), (phalerum_xy[0], phalerum_xy[1] + 122))
-    draw_leader(draw, (1114, 360), (lower_callout_rect[2], lower_callout_rect[1] + 40))
+    draw_dashed_route(draw, road_start, road_end, dash=16, gap=10, width=4)
+    draw_leader(draw, antiope_point, (callout_a_rect[0], callout_a_rect[1] + 46))
+    draw_leader(draw, antiope_point, (tomb_xy[0] + tomb_panel.width, tomb_xy[1] + 118))
+    draw_leader(draw, molpadia_point, (callout_b_rect[0], callout_b_rect[1] + 40))
+    draw_leader(draw, molpadia_point, (battle_xy[0], battle_xy[1] + 132))
+    draw_polyline_leader(
+        draw,
+        [
+            (760, 304),
+            (760, 714),
+            (760, thermodon_xy[1] - 18),
+            (thermodon_xy[0] + thermodon_panel.width // 2, thermodon_xy[1]),
+        ],
+    )
 
-    paste_with_shadow(page, phalerum_panel, phalerum_xy)
-
-    small_callout = framed_panel((small_callout_rect[2] - small_callout_rect[0], small_callout_rect[3] - small_callout_rect[1]))
-    small_draw = ImageDraw.Draw(small_callout)
+    callout_a = framed_panel((callout_a_rect[2] - callout_a_rect[0], callout_a_rect[3] - callout_a_rect[1]))
+    callout_a_draw = ImageDraw.Draw(callout_a)
     records.append(
         draw_fitted_text(
-            small_draw,
-            (14, 12, small_callout.width - 14, small_callout.height - 12),
-            "One harbor lay at Munychia, beside the sanctuary of Artemis Munychia.",
+            callout_a_draw,
+            (14, 10, callout_a.width - 14, callout_a.height - 10),
+            "On the way into Athens, Pausanias points out Antiope's tomb.",
             BODY_FONT,
-            max_size=19,
+            max_size=18,
             min_size=13,
             padding=4,
-            name="callout:munychia",
+            name="callout:antiope",
             align="center",
             spacing_ratio=0.16,
         )
     )
-    paste_with_shadow(page, small_callout, (small_callout_rect[0], small_callout_rect[1]))
+    paste_with_shadow(page, callout_a, (callout_a_rect[0], callout_a_rect[1]))
 
-    mid_callout = framed_panel((mid_callout_rect[2] - mid_callout_rect[0], mid_callout_rect[3] - mid_callout_rect[1]))
-    mid_draw = ImageDraw.Draw(mid_callout)
+    callout_b = framed_panel((callout_b_rect[2] - callout_b_rect[0], callout_b_rect[3] - callout_b_rect[1]))
+    callout_b_draw = ImageDraw.Draw(callout_b)
     records.append(
         draw_fitted_text(
-            mid_draw,
-            (16, 12, mid_callout.width - 16, mid_callout.height - 12),
-            "At Phalerum Pausanias notes Demeter, Athena Sciras, Zeus, and altars to Unknown Gods, heroes, the sons of Theseus, and Phalerus.",
+            callout_b_draw,
+            (14, 10, callout_b.width - 14, callout_b.height - 10),
+            "Athenians also showed the tomb of Molpadia nearby.",
             BODY_FONT,
-            max_size=20,
+            max_size=18,
             min_size=13,
             padding=4,
-            name="callout:phalerum",
+            name="callout:molpadia",
             align="center",
             spacing_ratio=0.16,
         )
     )
-    paste_with_shadow(page, mid_callout, (mid_callout_rect[0], mid_callout_rect[1]))
-
-    lower_callout = framed_panel((lower_callout_rect[2] - lower_callout_rect[0], lower_callout_rect[3] - lower_callout_rect[1]))
-    lower_draw = ImageDraw.Draw(lower_callout)
-    records.append(
-        draw_fitted_text(
-            lower_draw,
-            (18, 12, lower_callout.width - 18, lower_callout.height - 12),
-            "Local experts said the altar of the Hero belonged to Androgeus, son of Minos.",
-            BODY_FONT,
-            max_size=21,
-            min_size=13,
-            padding=4,
-            name="callout:androgeus",
-            align="center",
-            spacing_ratio=0.16,
-        )
-    )
-    paste_with_shadow(page, lower_callout, (lower_callout_rect[0], lower_callout_rect[1]))
+    paste_with_shadow(page, callout_b, (callout_b_rect[0], callout_b_rect[1]))
 
     labels = [
-        ("ATHENS", (776, 126, 956, 178)),
-        ("PHALERUM", (1028, 424, 1232, 476)),
-        ("MUNYCHIA", (522, 252, 724, 308)),
-        ("PIRAEUS", (724, 470, 924, 528)),
-        ("SARONIC GULF", (1110, 604, 1336, 666)),
+        ("ATHENS", (920, 118, 1120, 172)),
+        ("ACROPOLIS", (986, 184, 1216, 238)),
+        ("ROAD FROM PIRAEUS", (556, 398, 904, 454)),
+        ("ANTIOPE", (566, 536, 760, 586)),
+        ("MOLPADIA", (806, 490, 1018, 544)),
     ]
     for text, rect in labels:
         label = make_label(text, rect, records)
@@ -449,13 +498,14 @@ def render_page(output_path: Path) -> dict[str, object]:
         "text_blocks_checked": len(records),
         "fit_records": [asdict(record) for record in records],
     }
-    report_path = root_dir() / "tmp" / "passage_1_1_4_layout_report.json"
+    report_path = root_dir() / "tmp" / "passage_1_2_1_layout_report.json"
+    report_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.write_text(json.dumps(report, indent=2))
     return report
 
 
 def main() -> None:
-    output_path = root_dir() / "graphic_book" / "images" / "1" / "1" / "4.png"
+    output_path = root_dir() / "graphic_book" / "images" / "1" / "2" / "1.png"
     report = render_page(output_path)
     print(json.dumps(report, indent=2))
 
