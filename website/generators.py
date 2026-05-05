@@ -405,6 +405,7 @@ def generate_home_page(output_dir, title, timestamp):
             <a href="network_viz/index.html">Network Analysis</a>
             <a href="map/index.html">Place Map</a>
             <a href="place_pairs/index.html">Place Pairs</a>
+            <a href="translation_length/index.html">Translation Length</a>
             <a href="graphic-book/index.html">Graphic Book</a>
             <a href="progress/index.html">Progress</a>
         </nav>
@@ -455,6 +456,12 @@ def generate_home_page(output_dir, title, timestamp):
                 <h2>Place Pairs</h2>
                 <p>Compare distances between geolocated places mentioned in the same passage.</p>
                 <a href="place_pairs/index.html">View Place Pairs</a>
+            </div>
+
+            <div class="home-card">
+                <h2>Translation Length</h2>
+                <p>Find Greek words and phrases associated with unexpectedly long or short English translations after controlling for Greek passage length.</p>
+                <a href="translation_length/index.html">View Translation Length</a>
             </div>
 
             <div class="home-card">
@@ -1621,6 +1628,7 @@ def _translation_nav(prefix, active=None):
         ("network_viz/index.html", "Network Analysis", "network"),
         ("map/index.html", "Place Map", "map"),
         ("place_pairs/index.html", "Place Pairs", "place_pairs"),
+        ("translation_length/index.html", "Translation Length", "translation_length"),
         ("graphic-book/index.html", "Graphic Book", "graphic_book"),
         ("progress/index.html", "Progress", "progress"),
     ]
@@ -1629,6 +1637,207 @@ def _translation_nav(prefix, active=None):
         cls = ' class="active"' if key == active else ""
         parts.append(f'<a href="{prefix}{href}"{cls}>{label}</a>')
     return "<nav>\n            " + "\n            ".join(parts) + "\n        </nav>"
+
+
+def _format_residual(value):
+    return f"{float(value):+.1f}"
+
+
+def _translation_passage_link(passage_id):
+    parts = str(passage_id).split(".")
+    if len(parts) != 3:
+        return html.escape(str(passage_id))
+    href = f"../translation/{parts[0]}/{parts[1]}/{parts[2]}.html"
+    return f'<a href="{href}">{html.escape(str(passage_id))}</a>'
+
+
+def _short_text(text, limit=180):
+    text = re.sub(r"\s+", " ", str(text or "")).strip()
+    if len(text) <= limit:
+        return text
+    return text[: limit - 1].rstrip() + "..."
+
+
+def _render_translation_length_predictor_table(rows, empty_message):
+    if rows is None or len(rows) == 0:
+        return f"<p>{html.escape(empty_message)}</p>"
+
+    body = []
+    for _, row in rows.iterrows():
+        english = row.get("english_translation", "")
+        body.append(f"""
+            <tr>
+                <td>{html.escape(str(row["phrase"]))}</td>
+                <td>{html.escape(str(english or ""))}</td>
+                <td class="num">{float(row["coefficient"]):+.3f}</td>
+                <td class="num">{int(row["passage_count"])}</td>
+                <td class="num">{_format_residual(row["mean_residual_with_term"])}</td>
+                <td class="num">{_format_residual(row["mean_residual_without_term"])}</td>
+            </tr>
+        """)
+
+    return f"""
+        <table class="predictor-table translation-length-table">
+            <thead>
+                <tr>
+                    <th>Greek Word/Phrase</th>
+                    <th>English</th>
+                    <th>Coefficient</th>
+                    <th>Passages</th>
+                    <th>Mean Residual With Term</th>
+                    <th>Mean Residual Without Term</th>
+                </tr>
+            </thead>
+            <tbody>
+                {''.join(body)}
+            </tbody>
+        </table>
+    """
+
+
+def _render_translation_length_passage_table(rows):
+    if rows is None or len(rows) == 0:
+        return "<p>No passage residuals available.</p>"
+
+    body = []
+    for _, row in rows.iterrows():
+        body.append(f"""
+            <tr>
+                <td>{_translation_passage_link(row["id"])}</td>
+                <td class="num">{int(row["greek_word_count"])}</td>
+                <td class="num">{int(row["english_word_count"])}</td>
+                <td class="num">{float(row["expected_english_word_count"]):.1f}</td>
+                <td class="num">{_format_residual(row["length_residual"])}</td>
+                <td>{html.escape(_short_text(row["english_translation"]))}</td>
+            </tr>
+        """)
+
+    return f"""
+        <table class="predictor-table translation-length-table">
+            <thead>
+                <tr>
+                    <th>Passage</th>
+                    <th>Greek Words</th>
+                    <th>English Words</th>
+                    <th>Expected English</th>
+                    <th>Residual</th>
+                    <th>English Snippet</th>
+                </tr>
+            </thead>
+            <tbody>
+                {''.join(body)}
+            </tbody>
+        </table>
+    """
+
+
+def generate_translation_length_page(analysis, output_dir, title):
+    """Generate a page for translation length residual predictors."""
+    translation_length_dir = os.path.join(output_dir, "translation_length")
+    os.makedirs(translation_length_dir, exist_ok=True)
+    timestamp = datetime.now().strftime("%Y-%m-%d at %H:%M:%S")
+
+    if not analysis or not analysis.get("available"):
+        message = analysis.get("message", "Translation length analysis is not available.") if analysis else "Translation length analysis is not available."
+        body = f"""
+            <h2>Translation Length Residuals</h2>
+            <p>{html.escape(message)}</p>
+        """
+    else:
+        metrics = analysis["metrics"]
+        longer_table = _render_translation_length_predictor_table(
+            analysis["longer_predictors"],
+            "No vocabulary terms had positive residual coefficients.",
+        )
+        shorter_table = _render_translation_length_predictor_table(
+            analysis["shorter_predictors"],
+            "No vocabulary terms had negative residual coefficients.",
+        )
+        longest_table = _render_translation_length_passage_table(analysis["longest_passages"])
+        shortest_table = _render_translation_length_passage_table(analysis["shortest_passages"])
+
+        body = f"""
+            <h2>Translation Length Residuals</h2>
+            <p>English word count is first predicted from Greek word count. The residual is actual English length minus expected English length; positive values mark translations that are longer than expected for the Greek passage length.</p>
+
+            <div class="translation-length-metrics">
+                <div><strong>{metrics["passage_count"]:,}</strong><span>translated passages</span></div>
+                <div><strong>{metrics["feature_count"]:,}</strong><span>Greek terms modeled</span></div>
+                <div><strong>{metrics["length_slope"]:.2f}</strong><span>English words per Greek word</span></div>
+                <div><strong>{metrics["length_r2"]:.3f}</strong><span>length model R2</span></div>
+                <div><strong>{metrics["residual_std"]:.1f}</strong><span>residual std. dev.</span></div>
+                <div><strong>{metrics["vocabulary_residual_r2"]:.3f}</strong><span>vocabulary residual R2</span></div>
+            </div>
+
+            <h2>Predictors of Longer English</h2>
+            <p>These Greek words and phrases are associated with translations that run longer than expected after the length adjustment.</p>
+            {longer_table}
+
+            <h2>Predictors of Shorter English</h2>
+            <p>These Greek words and phrases are associated with translations that run shorter than expected after the length adjustment.</p>
+            {shorter_table}
+
+            <h2>Longest Positive Residuals</h2>
+            {longest_table}
+
+            <h2>Largest Negative Residuals</h2>
+            {shortest_table}
+        """
+
+    page_html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - Translation Length</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .translation-length-metrics {{
+            display: grid;
+            gap: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            margin: 22px 0 30px;
+        }}
+        .translation-length-metrics div {{
+            background: #eee9e3;
+            border-radius: 5px;
+            padding: 12px;
+        }}
+        .translation-length-metrics strong {{
+            display: block;
+            color: #5c5142;
+            font-size: 1.4em;
+        }}
+        .translation-length-metrics span {{
+            display: block;
+            font-size: 0.9em;
+        }}
+        .translation-length-table .num {{
+            text-align: right;
+            white-space: nowrap;
+        }}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>{title}</h1>
+        <p>Greek vocabulary and unexpectedly long or short English translations</p>
+    </header>
+    {_translation_nav("../", "translation_length")}
+    <div class="container" style="max-width: 1100px;">
+        {body}
+        <footer>
+            Generated on {timestamp} from the PostgreSQL database
+        </footer>
+    </div>
+</body>
+</html>
+"""
+
+    with open(os.path.join(translation_length_dir, "index.html"), "w", encoding="utf-8") as f:
+        f.write(page_html)
+
+    print("Translation length page generated.")
 
 
 def generate_translation_pages(
