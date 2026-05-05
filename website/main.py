@@ -32,6 +32,7 @@ from .data import (
     get_map_data,
     get_translation_page_data,
     get_passage_summaries,
+    get_translation_length_analysis,
     get_progress_data,
     get_place_pairs,
     add_phrase_translations,
@@ -50,6 +51,7 @@ from .generators import (
     generate_map_page,
     generate_place_pairs_page,
     generate_translation_pages,
+    generate_translation_length_page,
     generate_progress_page,
 )
 
@@ -148,6 +150,14 @@ def main():
         if len(sentence_simplified_skeptic_predictors) > 0:
             sentence_simplified_skeptic_predictors = add_phrase_translations(sentence_simplified_skeptic_predictors, conn, client, args.model)
         
+        # Analyze translation length residuals
+        translation_length_analysis = get_translation_length_analysis(conn)
+        if translation_length_analysis["available"]:
+            for key in ("longer_predictors", "shorter_predictors"):
+                predictors = translation_length_analysis[key]
+                if len(predictors) > 0:
+                    translation_length_analysis[key] = add_phrase_translations(predictors, conn, client, args.model)
+
         # Create website structure
         output_dir, css_dir = create_website_structure(args.output_dir)
         
@@ -204,6 +214,9 @@ def main():
         # Generate place pairs page
         place_pairs = get_place_pairs(conn)
         generate_place_pairs_page(place_pairs, output_dir, args.title)
+
+        # Generate translation-length residual page
+        generate_translation_length_page(translation_length_analysis, output_dir, args.title)
 
         # Generate translation pages
         translation_passages, nouns_by_passage, noun_passages = get_translation_page_data(conn)

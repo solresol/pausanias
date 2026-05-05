@@ -1,11 +1,20 @@
 """Database operations and data retrieval functions."""
 
 import math
+import re
+import unicodedata
 import pandas as pd
 from typing import Optional
 from openai import OpenAI
+import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LinearRegression, Ridge
+from sklearn.metrics import r2_score
 
 from pausanias_db import read_sql_query, table_exists as pg_table_exists
+
+WORD_PATTERN = re.compile(r"(?u)\b\w+\b")
+TFIDF_TOKEN_PATTERN = r"(?u)\b\w\w+\b"
 
 
 def table_exists(conn, table_name):
@@ -542,6 +551,183 @@ def get_passage_summaries(conn):
 
     cursor.execute("SELECT passage_id, summary FROM passage_summaries")
     return dict(cursor.fetchall())
+
+
+def count_words(text):
+    """Count word-like tokens in Greek or English text."""
+    if text is None:
+        return 0
+    return len(WORD_PATTERN.findall(str(text)))
+
+
+def tfidf_casefold_preprocessor(text):
+    """Casefold and normalize text before Greek TF-IDF tokenization."""
+    return unicodedata.normalize("NFC", str(text).casefold())
+
+
+def calculate_translation_length_analysis(
+    passages_df,
+    max_features=1200,
+    top_features=30,
+    min_df=2,
+):
+    """Model English translation length residuals from Greek vocabulary.
+
+    First fit English word count from Greek word count. Then regress the
+    resulting residuals against Greek vocabulary to identify words and phrases
+    associated with unexpectedly long or short English translations.
+    """
+    empty_result = {
+        "available": False,
+        "message": "No completed translations found.",
+        "metrics": {},
+        "longer_predictors": pd.DataFrame(),
+        "shorter_predictors": pd.DataFrame(),
+        "longest_passages": pd.DataFrame(),
+        "shortest_passages": pd.DataFrame(),
+    }
+
+    if passages_df is None or len(passages_df) == 0:
+        return empty_result
+
+    df = passages_df.copy()
+    df = df.dropna(subset=["passage", "english_translation"])
+    df["passage"] = df["passage"].astype(str)
+    df["english_translation"] = df["english_translation"].astype(str)
+    df = df[(df["passage"].str.strip() != "") & (df["english_translation"].str.strip() != "")]
+    if len(df) < 5:
+        result = empty_result.copy()
+        result["message"] = "At least five completed translations are needed for the length model."
+        return result
+
+    df["greek_word_count"] = df["passage"].map(count_words)
+    df["english_word_count"] = df["english_translation"].map(count_words)
+    df = df[(df["greek_word_count"] > 0) & (df["english_word_count"] > 0)].copy()
+    if len(df) < 5:
+        result = empty_result.copy()
+        result["message"] = "At least five translations with non-empty Greek and English word counts are needed."
+        return result
+
+    greek_lengths = df[["greek_word_count"]].to_numpy(dtype=float)
+    english_lengths = df["english_word_count"].to_numpy(dtype=float)
+
+    length_model = LinearRegression()
+    length_model.fit(greek_lengths, english_lengths)
+    expected_lengths = length_model.predict(greek_lengths)
+    residuals = english_lengths - expected_lengths
+
+    df["expected_english_word_count"] = expected_lengths
+    df["length_residual"] = residuals
+
+    vectorizer = TfidfVectorizer(
+        max_features=max_features,
+        min_df=min_df,
+        ngram_range=(1, 2),
+        token_pattern=TFIDF_TOKEN_PATTERN,
+        preprocessor=tfidf_casefold_preprocessor,
+    )
+
+    try:
+        feature_matrix = vectorizer.fit_transform(df["passage"])
+    except ValueError as exc:
+        result = empty_result.copy()
+        result["message"] = f"Could not build vocabulary model: {exc}"
+        return result
+
+    feature_names = vectorizer.get_feature_names_out()
+    if len(feature_names) == 0:
+        result = empty_result.copy()
+        result["message"] = "No repeated Greek vocabulary was available for the residual model."
+        return result
+
+    residual_model = Ridge(alpha=10.0)
+    residual_model.fit(feature_matrix, residuals)
+    predicted_residuals = residual_model.predict(feature_matrix)
+    coefficients = residual_model.coef_
+
+    analyzer = vectorizer.build_analyzer()
+    vocab = set(feature_names)
+    present_counts = {feature: 0 for feature in feature_names}
+    residual_sums = {feature: 0.0 for feature in feature_names}
+
+    for text, residual in zip(df["passage"], residuals):
+        terms = {term for term in analyzer(text) if term in vocab}
+        for term in terms:
+            present_counts[term] += 1
+            residual_sums[term] += float(residual)
+
+    overall_mean_residual = float(np.mean(residuals))
+    predictor_rows = []
+    sample_count = len(df)
+    for feature, coefficient in zip(feature_names, coefficients):
+        count = present_counts[feature]
+        if count == 0:
+            continue
+        absent_count = sample_count - count
+        present_mean = residual_sums[feature] / count
+        absent_sum = float(np.sum(residuals)) - residual_sums[feature]
+        absent_mean = absent_sum / absent_count if absent_count > 0 else overall_mean_residual
+        predictor_rows.append(
+            {
+                "phrase": feature,
+                "coefficient": float(coefficient),
+                "passage_count": int(count),
+                "mean_residual_with_term": float(present_mean),
+                "mean_residual_without_term": float(absent_mean),
+            }
+        )
+
+    predictors = pd.DataFrame(predictor_rows)
+    if len(predictors) == 0:
+        longer_predictors = pd.DataFrame()
+        shorter_predictors = pd.DataFrame()
+    else:
+        longer_predictors = predictors[predictors["coefficient"] > 0].sort_values(
+            "coefficient", ascending=False
+        ).head(top_features)
+        shorter_predictors = predictors[predictors["coefficient"] < 0].sort_values(
+            "coefficient", ascending=True
+        ).head(top_features)
+
+    longest_passages = df.sort_values("length_residual", ascending=False).head(20)
+    shortest_passages = df.sort_values("length_residual", ascending=True).head(20)
+
+    return {
+        "available": True,
+        "message": "",
+        "metrics": {
+            "passage_count": int(sample_count),
+            "feature_count": int(len(feature_names)),
+            "length_intercept": float(length_model.intercept_),
+            "length_slope": float(length_model.coef_[0]),
+            "length_r2": float(r2_score(english_lengths, expected_lengths)),
+            "residual_std": float(np.std(residuals)),
+            "vocabulary_residual_r2": float(r2_score(residuals, predicted_residuals)),
+            "min_df": int(min_df),
+            "max_features": int(max_features),
+        },
+        "longer_predictors": longer_predictors.reset_index(drop=True),
+        "shorter_predictors": shorter_predictors.reset_index(drop=True),
+        "longest_passages": longest_passages.reset_index(drop=True),
+        "shortest_passages": shortest_passages.reset_index(drop=True),
+    }
+
+
+def get_translation_length_analysis(conn):
+    """Get translation-length residual model output for the website."""
+    query = """
+    SELECT p.id, p.passage, t.english_translation
+    FROM passages p
+    JOIN translations t ON p.id = t.passage_id
+    WHERE t.english_translation IS NOT NULL
+      AND btrim(t.english_translation) <> ''
+    ORDER BY p.id
+    """
+    df = read_sql_query(query, conn)
+    if len(df) > 0:
+        df["sort_key"] = df["id"].apply(passage_id_sort_key)
+        df = df.sort_values("sort_key").drop(columns=["sort_key"])
+    return calculate_translation_length_analysis(df)
 
 
 def get_progress_data(conn):
