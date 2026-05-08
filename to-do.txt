@@ -12,6 +12,11 @@ Source anchors:
   gpt-5.4-mini, list discrepancies, and judge which model did better on each
   disagreement. If gpt-5.4-mini wins or is close enough that it does not matter,
   switch the sentence-tagging pipeline to gpt-5.4-mini.
+  - Completed 2026-05-08 as run
+    8a6f736f-2f44-48a4-a3b9-0b8d49222473 in the live database:
+    17/50 discrepancies, judged 14 for the existing gpt-5 label and 3 for
+    gpt-5.4-mini. Do not switch production sentence tagging to gpt-5.4-mini
+    on this evidence.
 - Reframe the core tagging from a binary mythical/non-mythical distinction to
   three buckets:
   - mythic events or mythic impact on the landscape;
