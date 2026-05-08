@@ -9,6 +9,7 @@ pausanias_book
 .playwright-cli
 output/playwright
 tmp/
+transcripts/
 graphic_book/images/
 graphic_book/output/
 documentation/pausanias_project_presentation.aux
