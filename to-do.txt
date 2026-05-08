@@ -1,2 +1,119 @@
-We have the predictors of mythic and historic vocabulary. Let's also ask:
-- where does that vocabulary exist on Mobbs' 2020 Atlas of dominance vs affiliance?
+# Pausanias To-Do List
+
+Source anchors:
+- Raw call transcript: /Users/gregb/Downloads/Greg and Greta_transcript.txt
+- Pausanias excerpts: transcripts/2026-05-08-greg-and-greta-pausanias-excerpts.md
+- Main Pausanias block in raw transcript: lines 694-856, 900-1049, 1167-1194
+
+## Conference paper first pass
+
+- Run a 50-item sentence-tagging comparison before changing the production
+  model: take 50 existing gpt-5 sentence tags, re-run the same sentences with
+  gpt-5.4-mini, list discrepancies, and judge which model did better on each
+  disagreement. If gpt-5.4-mini wins or is close enough that it does not matter,
+  switch the sentence-tagging pipeline to gpt-5.4-mini.
+- Reframe the core tagging from a binary mythical/non-mythical distinction to
+  three buckets:
+  - mythic events or mythic impact on the landscape;
+  - historical events after roughly 500 BC or their impact on the landscape;
+  - other/geographical/descriptive material that should not be forced into
+    either bucket.
+- For the first paper pass, run the classification with books 4 and 8 excluded,
+  while keeping a full-corpus comparison as a later robustness check.
+- Produce a passage-level classification table for Pausanias minus books 4 and
+  8, then give Greta a review sample so she can catch obviously wrong labels.
+- Run enough basic statistics to support a 15-minute paper: show both rhetorical
+  differences and content-based differences between mythic and historical
+  passages.
+- Target: first week of June, because the conference paper needs to be recorded
+  before the 20-23 July event.
+
+## Tagging definitions and model variants
+
+- Update the passage and sentence prompts/schema so "historical" no longer means
+  every non-mythic passage; geographical description belongs in the third bucket.
+- Revisit the scepticism definition at the same time, since the call explicitly
+  tied the new mythic/historical/other definitions to the current scepticism
+  interpretation.
+- Keep proper nouns excluded from predictor models where they are just label
+  leakage.
+- Build two predictor runs for rhetorical/distancing markers:
+  - with forms such as "they say", legousi, phasis, and related saying/observing
+    language included;
+  - with those markers removed so content words can surface.
+- Identify whether distancing forms have explicit subjects, such as "the
+  Athenians say", or are bare narrator-distancing formulae.
+- Compare form-level and lemma-level predictors. Lemmatization should be useful
+  for content terms such as daughter/children/tombs, but rhetorical forms may
+  need form-level analysis because tense/person/form can matter.
+- Preserve the simplified points/checklist output, but regenerate it after the
+  new buckets, stopword choices, marker-removal runs, and lemma runs.
+
+## Sentence tagging throughput
+
+- Current code diagnosis:
+  - sentence_mythic_sceptic_analyser.py defaults to non-mini gpt-5.
+  - Each request sends both the Greek sentence and the English sentence.
+  - It makes one API call per sentence, runs sequentially, commits per sentence,
+    and sleeps for 0.5 seconds after every call.
+  - cronscript.sh currently asks for only 25 sentence classifications per run.
+  - The sentence script does not persist token usage, so historical cost/rate
+    cannot be audited from the database.
+- Live raksasa snapshot on 2026-05-08:
+  - 9,715 total sentence rows.
+  - 5,442 tagged sentence rows.
+  - 4,273 untagged sentence rows.
+  - 2,753 untagged sentence rows if books 4 and 8 are excluded.
+  - All 9,715 sentence rows have English sentence text.
+- Switch the sentence classifier to gpt-5.4-mini for this backlog unless a
+  validation sample shows unacceptable drift.
+- Add persistent sentence-classification run metadata: model, prompt version,
+  input tokens, output tokens, timestamp, and failure status.
+- Add a daily budget mode set for 250,000 tokens/day and stop because the budget
+  is reached, not because a hard-coded batch of 25 rows is reached.
+- Raise the daily batch size substantially after the model switch. If the
+  average request stays small, the remaining non-4/non-8 backlog should be a
+  few thousand calls, not a long-running trickle.
+- Consider modest concurrency or async dispatch once token accounting and retry
+  handling are in place; the current 0.5 second sleep is not the main limiter
+  if the cron is capped at 25 rows.
+- Add a dry-run or sample validation mode so a small gpt-5.4-mini sample can be
+  compared against existing gpt-5 labels before retagging everything.
+
+## Translation-length residuals and wordiness
+
+- Make visible the question: which Greek words cause English translations to be
+  longer or shorter than expected from Greek length?
+- Also add the dual view: which English words are disproportionately found in
+  longer-than-expected or shorter-than-expected passages?
+- Current code already has a Greek-vocabulary residual model and website page
+  generator in website/data.py and website/generators.py, with tests in
+  tests/test_translation_length_analysis.py.
+- Current visibility gap: pausanias_site/translation_length/index.html is not
+  present in this checkout, and the live
+  https://pausanias.symmachus.org/translation_length/index.html currently
+  returns 404. Rebuild and redeploy the site after confirming the page output.
+- Extend the residual model beyond word counts if useful:
+  - compare Greek and English word counts first;
+  - then consider syllables, letter length, phoneme length, word rarity, or
+    Scrabble-like complexity as alternative metrics.
+- Use repeated AI translations, where practical, to reduce the objection that a
+  residual is just one translator's style or obsession with a particular term.
+- Treat Pausanias as the better first corpus than Stephanus for this experiment,
+  because Stephanus is already so compressed that compression may dominate the
+  result.
+- Keep the geography/landscape hypothesis explicit: the likely interesting
+  signal is about how ancient and modern language handle landscape, springs,
+  cities, built features, and experiential geography.
+- Compare against Strabo or Herodotus as possible next corpora once the
+  Pausanias pipeline produces useful residual outputs.
+
+## Optional exploratory threads
+
+- We have the predictors of mythic and historic vocabulary. Also ask where that
+  vocabulary exists on Mobbs' 2020 Atlas of dominance vs affiliance.
+- Keep the graphic-history / graphic-book angle as exploratory rather than a
+  blocker for the June paper.
+- Keep the Herodian/interactive Greek-game-gadget idea separate from the
+  Pausanias paper backlog unless it becomes an explicit teaching or outreach
+  deliverable.
