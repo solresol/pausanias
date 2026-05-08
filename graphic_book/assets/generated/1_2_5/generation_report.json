@@ -1,0 +1,65 @@
+[
+  {
+    "file": "graphic_book/assets/generated/1_2_5/main_inner_kerameikos.png",
+    "size": "1536x1024",
+    "attempt": 1,
+    "quality": "high",
+    "elapsed_seconds": 58.9,
+    "usage": {
+      "input_tokens": 225,
+      "input_tokens_details": {
+        "image_tokens": 0,
+        "text_tokens": 225
+      },
+      "output_tokens": 6208,
+      "total_tokens": 6433,
+      "output_tokens_details": {
+        "image_tokens": 6208,
+        "text_tokens": 0
+      }
+    },
+    "revised_prompt": null
+  },
+  {
+    "file": "graphic_book/assets/generated/1_2_5/akratos_wallface.png",
+    "size": "1536x1024",
+    "attempt": 1,
+    "quality": "high",
+    "elapsed_seconds": 52.51,
+    "usage": {
+      "input_tokens": 138,
+      "input_tokens_details": {
+        "image_tokens": 0,
+        "text_tokens": 138
+      },
+      "output_tokens": 6208,
+      "total_tokens": 6346,
+      "output_tokens_details": {
+        "image_tokens": 6208,
+        "text_tokens": 0
+      }
+    },
+    "revised_prompt": null
+  },
+  {
+    "file": "graphic_book/assets/generated/1_2_5/amphictyon_dionysus.png",
+    "size": "1536x1024",
+    "attempt": 1,
+    "quality": "high",
+    "elapsed_seconds": 82.72,
+    "usage": {
+      "input_tokens": 163,
+      "input_tokens_details": {
+        "image_tokens": 0,
+        "text_tokens": 163
+      },
+      "output_tokens": 6208,
+      "total_tokens": 6371,
+      "output_tokens_details": {
+        "image_tokens": 6208,
+        "text_tokens": 0
+      }
+    },
+    "revised_prompt": null
+  }
+]

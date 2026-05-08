@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: illustrated Pausanias graphic-book inset panel
+Primary request: Create a high-quality close study of the baked-clay roof sculpture group on the Royal Stoa for Pausanias passage 1.3.1: Theseus casting Sciron into the sea.
+Scene/backdrop: the sculpture group sits atop a terracotta roofline in classical Athens, with a hint of distant sea and rocky coast far below or beyond, but the focus is the sculptural drama.
+Subject: Theseus in vigorous motion hurling the bandit Sciron downward; both figures rendered as painted or sun-warmed terracotta rooftop statuary, not as living flesh-and-blood combatants. The material should feel ceramic, weathered, and monumental.
+Composition: horizontal inset-friendly composition, close enough to show clay texture, ridge tiles, and sculptural energy, but still readable as an architectural ornament crowning a civic stoa.
+Style: refined painterly archaeological reconstruction, warm parchment-compatible palette, strong material realism, subtle atmospheric depth, same family as the high-quality reference pages already in context.
+Lighting/color: golden Mediterranean sunlight, amber terracotta, pale stone, blue distance.
+Avoid: text, labels, flat diagram look, modern restoration scaffolds, cartoon action, fantasy monsters, living actors instead of sculpture.
