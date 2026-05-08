@@ -59,6 +59,8 @@ class TranslationLengthAnalysisTests(unittest.TestCase):
         self.assertEqual(analysis["metrics"]["passage_count"], 6)
         self.assertIn("μακρον", set(analysis["longer_predictors"]["phrase"]))
         self.assertIn("βραχυ", set(analysis["shorter_predictors"]["phrase"]))
+        self.assertGreater(len(analysis["english_longer_predictors"]), 0)
+        self.assertGreater(len(analysis["english_shorter_predictors"]), 0)
         self.assertGreater(analysis["longest_passages"].iloc[0]["length_residual"], 0)
         self.assertLess(analysis["shortest_passages"].iloc[0]["length_residual"], 0)
 
@@ -90,6 +92,18 @@ class TranslationLengthAnalysisTests(unittest.TestCase):
                 ]
             ),
             "shorter_predictors": pd.DataFrame(),
+            "english_longer_predictors": pd.DataFrame(
+                [
+                    {
+                        "phrase": "five",
+                        "coefficient": 0.7,
+                        "passage_count": 1,
+                        "mean_residual_with_term": 2.0,
+                        "mean_residual_without_term": -0.2,
+                    }
+                ]
+            ),
+            "english_shorter_predictors": pd.DataFrame(),
             "longest_passages": pd.DataFrame(
                 [
                     {
@@ -113,6 +127,8 @@ class TranslationLengthAnalysisTests(unittest.TestCase):
 
         self.assertIn("Translation Length Residuals", html)
         self.assertIn("μακρον", html)
+        self.assertIn("English Terms in Longer Passages", html)
+        self.assertIn("five", html)
         self.assertIn("../translation/1/1/1.html", html)
 
 

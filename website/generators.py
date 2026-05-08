@@ -1658,17 +1658,26 @@ def _short_text(text, limit=180):
     return text[: limit - 1].rstrip() + "..."
 
 
-def _render_translation_length_predictor_table(rows, empty_message):
+def _render_translation_length_predictor_table(
+    rows,
+    empty_message,
+    phrase_label="Greek Word/Phrase",
+    translation_label="English",
+    show_translation=True,
+):
     if rows is None or len(rows) == 0:
         return f"<p>{html.escape(empty_message)}</p>"
 
     body = []
     for _, row in rows.iterrows():
         english = row.get("english_translation", "")
+        translation_cell = (
+            f"<td>{html.escape(str(english or ''))}</td>" if show_translation else ""
+        )
         body.append(f"""
             <tr>
                 <td>{html.escape(str(row["phrase"]))}</td>
-                <td>{html.escape(str(english or ""))}</td>
+                {translation_cell}
                 <td class="num">{float(row["coefficient"]):+.3f}</td>
                 <td class="num">{int(row["passage_count"])}</td>
                 <td class="num">{_format_residual(row["mean_residual_with_term"])}</td>
@@ -1680,8 +1689,8 @@ def _render_translation_length_predictor_table(rows, empty_message):
         <table class="predictor-table translation-length-table">
             <thead>
                 <tr>
-                    <th>Greek Word/Phrase</th>
-                    <th>English</th>
+                    <th>{html.escape(phrase_label)}</th>
+                    {f"<th>{html.escape(translation_label)}</th>" if show_translation else ""}
                     <th>Coefficient</th>
                     <th>Passages</th>
                     <th>Mean Residual With Term</th>
@@ -1748,10 +1757,24 @@ def generate_translation_length_page(analysis, output_dir, title):
         longer_table = _render_translation_length_predictor_table(
             analysis["longer_predictors"],
             "No vocabulary terms had positive residual coefficients.",
+            phrase_label="Greek Word/Phrase",
         )
         shorter_table = _render_translation_length_predictor_table(
             analysis["shorter_predictors"],
             "No vocabulary terms had negative residual coefficients.",
+            phrase_label="Greek Word/Phrase",
+        )
+        english_longer_table = _render_translation_length_predictor_table(
+            analysis.get("english_longer_predictors"),
+            "No English terms had positive residual coefficients.",
+            phrase_label="English Word/Phrase",
+            show_translation=False,
+        )
+        english_shorter_table = _render_translation_length_predictor_table(
+            analysis.get("english_shorter_predictors"),
+            "No English terms had negative residual coefficients.",
+            phrase_label="English Word/Phrase",
+            show_translation=False,
         )
         longest_table = _render_translation_length_passage_table(analysis["longest_passages"])
         shortest_table = _render_translation_length_passage_table(analysis["shortest_passages"])
@@ -1763,19 +1786,29 @@ def generate_translation_length_page(analysis, output_dir, title):
             <div class="translation-length-metrics">
                 <div><strong>{metrics["passage_count"]:,}</strong><span>translated passages</span></div>
                 <div><strong>{metrics["feature_count"]:,}</strong><span>Greek terms modeled</span></div>
+                <div><strong>{metrics.get("english_feature_count", 0):,}</strong><span>English terms modeled</span></div>
                 <div><strong>{metrics["length_slope"]:.2f}</strong><span>English words per Greek word</span></div>
                 <div><strong>{metrics["length_r2"]:.3f}</strong><span>length model R2</span></div>
                 <div><strong>{metrics["residual_std"]:.1f}</strong><span>residual std. dev.</span></div>
                 <div><strong>{metrics["vocabulary_residual_r2"]:.3f}</strong><span>vocabulary residual R2</span></div>
+                <div><strong>{metrics.get("english_vocabulary_residual_r2", 0.0):.3f}</strong><span>English residual R2</span></div>
             </div>
 
-            <h2>Predictors of Longer English</h2>
+            <h2>Greek Predictors of Longer English</h2>
             <p>These Greek words and phrases are associated with translations that run longer than expected after the length adjustment.</p>
             {longer_table}
 
-            <h2>Predictors of Shorter English</h2>
+            <h2>Greek Predictors of Shorter English</h2>
             <p>These Greek words and phrases are associated with translations that run shorter than expected after the length adjustment.</p>
             {shorter_table}
+
+            <h2>English Terms in Longer Passages</h2>
+            <p>These English words and phrases are disproportionately found in passages whose translations are longer than expected.</p>
+            {english_longer_table}
+
+            <h2>English Terms in Shorter Passages</h2>
+            <p>These English words and phrases are disproportionately found in passages whose translations are shorter than expected.</p>
+            {english_shorter_table}
 
             <h2>Longest Positive Residuals</h2>
             {longest_table}
