@@ -1,0 +1,27 @@
+{
+  "passage_id": "1.2.6",
+  "approved_style_references": [
+    "graphic_book/images/1/1/4.png",
+    "graphic_book/images/1/1/5.png"
+  ],
+  "selected_assets": [
+    {
+      "role": "main",
+      "output": "graphic_book/assets/generated/1_2_6/main_attica_panorama.png",
+      "prompt_file": "graphic_book/assets/generated/1_2_6/main_attica_panorama.prompt.txt",
+      "source_image": "/Users/gregb/.codex/generated_images/019dfe72-a3a2-7ef2-ade2-6d068e8327be/ig_0936a27decf481620169fb826e2e54819190a1a2a5b7d45f81.png"
+    },
+    {
+      "role": "inset",
+      "output": "graphic_book/assets/generated/1_2_6/atthis_cranaus.png",
+      "prompt_file": "graphic_book/assets/generated/1_2_6/atthis_cranaus.prompt.txt",
+      "source_image": "/Users/gregb/.codex/generated_images/019dfe72-a3a2-7ef2-ade2-6d068e8327be/ig_0936a27decf481620169fb82c2b8f8819197413584a35e95f2.png"
+    },
+    {
+      "role": "inset",
+      "output": "graphic_book/assets/generated/1_2_6/erichthonius_birth.png",
+      "prompt_file": "graphic_book/assets/generated/1_2_6/erichthonius_birth.prompt.txt",
+      "source_image": "/Users/gregb/.codex/generated_images/019dfe72-a3a2-7ef2-ade2-6d068e8327be/ig_0936a27decf481620169fb837a82a88191a5423280545be9fc.png"
+    }
+  ]
+}
