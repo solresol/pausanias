@@ -137,6 +137,142 @@ CREATE TABLE IF NOT EXISTS sentence_greta_tags (
     PRIMARY KEY (passage_id, sentence_number, prompt_version)
 );
 
+CREATE TABLE IF NOT EXISTS sentence_lemmatization_runs (
+    run_id TEXT PRIMARY KEY,
+    started_at TEXT NOT NULL,
+    completed_at TEXT,
+    model TEXT NOT NULL,
+    prompt_version TEXT NOT NULL,
+    status TEXT NOT NULL,
+    token_budget INTEGER,
+    input_tokens INTEGER NOT NULL DEFAULT 0,
+    output_tokens INTEGER NOT NULL DEFAULT 0,
+    processed_count INTEGER NOT NULL DEFAULT 0,
+    token_count INTEGER NOT NULL DEFAULT 0,
+    failure_count INTEGER NOT NULL DEFAULT 0,
+    notes TEXT
+);
+
+CREATE TABLE IF NOT EXISTS sentence_lemmatizations (
+    passage_id TEXT NOT NULL,
+    sentence_number INTEGER NOT NULL,
+    prompt_version TEXT NOT NULL,
+    model TEXT NOT NULL,
+    run_id TEXT NOT NULL REFERENCES sentence_lemmatization_runs(run_id)
+        ON DELETE CASCADE,
+    greek_sentence TEXT NOT NULL,
+    token_count INTEGER NOT NULL,
+    input_tokens INTEGER NOT NULL,
+    output_tokens INTEGER NOT NULL,
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (passage_id, sentence_number, prompt_version),
+    FOREIGN KEY (passage_id, sentence_number)
+        REFERENCES greek_sentences(passage_id, sentence_number)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS sentence_lemma_tokens (
+    passage_id TEXT NOT NULL,
+    sentence_number INTEGER NOT NULL,
+    prompt_version TEXT NOT NULL,
+    token_index INTEGER NOT NULL,
+    surface_form TEXT NOT NULL,
+    lemma TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (passage_id, sentence_number, prompt_version, token_index),
+    FOREIGN KEY (passage_id, sentence_number, prompt_version)
+        REFERENCES sentence_lemmatizations(passage_id, sentence_number, prompt_version)
+        ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_sentence_lemma_tokens_lemma
+    ON sentence_lemma_tokens (lemma);
+
+CREATE TABLE IF NOT EXISTS word_lemmatization_runs (
+    run_id TEXT PRIMARY KEY,
+    started_at TEXT NOT NULL,
+    completed_at TEXT,
+    model TEXT NOT NULL,
+    prompt_version TEXT NOT NULL,
+    status TEXT NOT NULL,
+    source_scope TEXT NOT NULL,
+    batch_size INTEGER NOT NULL,
+    surface_form_count INTEGER NOT NULL DEFAULT 0,
+    occurrence_count INTEGER NOT NULL DEFAULT 0,
+    input_tokens INTEGER NOT NULL DEFAULT 0,
+    output_tokens INTEGER NOT NULL DEFAULT 0,
+    failure_count INTEGER NOT NULL DEFAULT 0,
+    api_mode TEXT NOT NULL DEFAULT 'direct',
+    request_count INTEGER NOT NULL DEFAULT 0,
+    openai_batch_id TEXT,
+    openai_input_file_id TEXT,
+    openai_output_file_id TEXT,
+    openai_error_file_id TEXT,
+    submitted_at TEXT,
+    retrieved_at TEXT,
+    notes TEXT
+);
+
+ALTER TABLE word_lemmatization_runs
+    ADD COLUMN IF NOT EXISTS api_mode TEXT NOT NULL DEFAULT 'direct';
+ALTER TABLE word_lemmatization_runs
+    ADD COLUMN IF NOT EXISTS request_count INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE word_lemmatization_runs
+    ADD COLUMN IF NOT EXISTS openai_batch_id TEXT;
+ALTER TABLE word_lemmatization_runs
+    ADD COLUMN IF NOT EXISTS openai_input_file_id TEXT;
+ALTER TABLE word_lemmatization_runs
+    ADD COLUMN IF NOT EXISTS openai_output_file_id TEXT;
+ALTER TABLE word_lemmatization_runs
+    ADD COLUMN IF NOT EXISTS openai_error_file_id TEXT;
+ALTER TABLE word_lemmatization_runs
+    ADD COLUMN IF NOT EXISTS submitted_at TEXT;
+ALTER TABLE word_lemmatization_runs
+    ADD COLUMN IF NOT EXISTS retrieved_at TEXT;
+
+CREATE TABLE IF NOT EXISTS word_lemmatization_batches (
+    run_id TEXT NOT NULL REFERENCES word_lemmatization_runs(run_id)
+        ON DELETE CASCADE,
+    batch_number INTEGER NOT NULL,
+    item_count INTEGER NOT NULL,
+    input_tokens INTEGER NOT NULL,
+    output_tokens INTEGER NOT NULL,
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (run_id, batch_number)
+);
+
+CREATE TABLE IF NOT EXISTS word_lemmatization_batch_items (
+    run_id TEXT NOT NULL,
+    batch_number INTEGER NOT NULL,
+    word_index INTEGER NOT NULL,
+    surface_form TEXT NOT NULL,
+    example_form TEXT NOT NULL,
+    occurrence_count INTEGER NOT NULL,
+    PRIMARY KEY (run_id, batch_number, word_index),
+    FOREIGN KEY (run_id, batch_number)
+        REFERENCES word_lemmatization_batches(run_id, batch_number)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS greek_word_lemmas (
+    surface_form TEXT NOT NULL,
+    prompt_version TEXT NOT NULL,
+    model TEXT NOT NULL,
+    run_id TEXT NOT NULL REFERENCES word_lemmatization_runs(run_id)
+        ON DELETE CASCADE,
+    example_form TEXT NOT NULL,
+    occurrence_count INTEGER NOT NULL,
+    lemma TEXT NOT NULL,
+    confidence TEXT NOT NULL CHECK (confidence IN ('high', 'medium', 'low')),
+    is_ambiguous BOOLEAN NOT NULL DEFAULT FALSE,
+    alternatives TEXT[] NOT NULL DEFAULT '{}'::TEXT[],
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (surface_form, prompt_version)
+);
+
+CREATE INDEX IF NOT EXISTS idx_greek_word_lemmas_lemma
+    ON greek_word_lemmas (lemma);
+
 CREATE TABLE IF NOT EXISTS phrase_translations (
     phrase TEXT PRIMARY KEY,
     english_translation TEXT NOT NULL,
