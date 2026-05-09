@@ -2,8 +2,6 @@
 
 import argparse
 import sys
-import re
-import unicodedata
 import numpy as np
 import pandas as pd
 from collections import Counter
@@ -16,46 +14,17 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, precision_recall_fscore_support, accuracy_score, confusion_matrix
 import joblib
 
+from lemma_text import (
+    build_lemma_texts,
+    casefold_preprocessor,
+    expand_stopwords_with_lemma_forms,
+    load_word_lemma_lookup,
+)
 from pausanias_db import add_database_argument, connect, read_sql_query
 from stats_utils import compute_p_q_values
 
-TOKEN_PATTERN = re.compile(r"(?u)\b\w\w+\b")
 SIMPLIFIED_Q_VALUE_THRESHOLD = 0.1
 
-
-def normalize_stopwords(stopwords):
-    """Normalize stopwords to match the vectorizer's preprocessing.
-
-    Uses casefold() for proper Unicode case-insensitive comparison,
-    which correctly handles Greek final sigma (ς → σ).
-
-    NFC normalization is applied after casefold to match the
-    casefold_preprocessor behavior and ensure stopwords match tokens.
-    """
-
-    normalized = []
-    for word in stopwords:
-        # Must match casefold_preprocessor: casefold + NFC
-        normalized_word = unicodedata.normalize('NFC', word.casefold())
-        tokens = TOKEN_PATTERN.findall(normalized_word)
-        normalized.extend(tokens)
-
-    return list(dict.fromkeys(normalized))
-
-
-def casefold_preprocessor(text):
-    """Custom preprocessor using casefold() for proper Greek handling.
-
-    Python's casefold() correctly converts Greek final sigma (ς) to
-    regular sigma (σ), which is the proper Unicode behavior for
-    case-insensitive comparison. sklearn's default uses lower() which
-    does not handle this correctly.
-
-    NFC normalization is applied after casefold to recompose characters.
-    casefold() can decompose precomposed Greek characters (e.g., ῆ → η + ͂),
-    and these combining marks break word boundaries in the tokenizer regex.
-    """
-    return unicodedata.normalize('NFC', text.casefold())
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Create TF-IDF and logistic regression models for Pausanias sentences")
@@ -317,12 +286,12 @@ def get_analyzed_sentences(conn):
 def get_proper_nouns(conn):
     """Get all proper nouns to use as stopwords."""
     query = """
-    SELECT DISTINCT exact_form
+    SELECT DISTINCT exact_form, reference_form
     FROM proper_nouns
     """
 
     df = read_sql_query(query, conn)
-    return df['exact_form'].tolist()
+    return list(dict.fromkeys(df['exact_form'].tolist() + df['reference_form'].tolist()))
 
 def get_manual_stopwords(conn):
     """Get manually specified stopwords from the database."""
@@ -657,13 +626,30 @@ if __name__ == '__main__':
         print(f"Found {len(sentences_df)} analyzed sentences.")
         print(f"References mythic era: {sentences_df['references_mythic_era'].sum()} sentences")
         print(f"Expresses skepticism: {sentences_df['expresses_scepticism'].sum()} sentences")
+
+        lemma_lookup = load_word_lemma_lookup(conn)
+        if not lemma_lookup:
+            print("No cached Greek word lemmas found. Run word_lemmatizer.py before predictor analysis.")
+            sys.exit(1)
+        lemma_texts, lemma_stats = build_lemma_texts(sentences_df['sentence'], lemma_lookup)
+        sentences_df = sentences_df.copy()
+        sentences_df['lemma_sentence'] = lemma_texts
+        print(
+            "Using lemma-token sentence documents: "
+            f"{lemma_stats.lemmatized_token_count}/{lemma_stats.token_count} tokens lemmatized; "
+            f"{lemma_stats.missing_token_count} raw-token fallbacks "
+            f"({lemma_stats.unique_missing_count} unique)."
+        )
         
         # Get stopwords: proper nouns plus any manually specified additions
         proper_nouns = get_proper_nouns(conn)
         manual_stopwords = get_manual_stopwords(conn)
-        all_stopwords = normalize_stopwords(proper_nouns + manual_stopwords)
+        all_stopwords = expand_stopwords_with_lemma_forms(
+            proper_nouns + manual_stopwords,
+            lemma_lookup,
+        )
         print(
-            f"Using {len(proper_nouns)} proper nouns and {len(manual_stopwords)} manual stopwords (normalized to {len(all_stopwords)} unique tokens) as stopwords for mythicness model."
+            f"Using {len(proper_nouns)} proper nouns and {len(manual_stopwords)} manual stopwords (expanded to {len(all_stopwords)} lemma-aware tokens) as stopwords for mythicness model."
         )
 
         # Build mythicness model (with stopwords)
@@ -683,7 +669,7 @@ if __name__ == '__main__':
         
         print("\nBuilding mythicness prediction model...")
         mythic_model = build_and_evaluate_model(
-            sentences_df['sentence'],
+            sentences_df['lemma_sentence'],
             sentences_df['references_mythic_era'],
             mythic_vectorizer_params,
             mythic_model_params,
@@ -698,9 +684,12 @@ if __name__ == '__main__':
         
         # Build skepticism model (with skepticism-specific stopwords only)
         manual_skepticism_stopwords = get_manual_skepticism_stopwords(conn)
-        skepticism_stopwords = normalize_stopwords(manual_skepticism_stopwords)
+        skepticism_stopwords = expand_stopwords_with_lemma_forms(
+            manual_skepticism_stopwords,
+            lemma_lookup,
+        )
         print(
-            f"Using {len(manual_skepticism_stopwords)} manual stopwords (normalized to {len(skepticism_stopwords)} unique tokens) as stopwords for skepticism model."
+            f"Using {len(manual_skepticism_stopwords)} manual stopwords (expanded to {len(skepticism_stopwords)} lemma-aware tokens) as stopwords for skepticism model."
         )
 
         skeptic_vectorizer_params = {
@@ -719,7 +708,7 @@ if __name__ == '__main__':
         
         print("\nBuilding skepticism prediction model...")
         skeptic_model = build_and_evaluate_model(
-            sentences_df['sentence'],
+            sentences_df['lemma_sentence'],
             sentences_df['expresses_scepticism'],
             skeptic_vectorizer_params,
             skeptic_model_params,
