@@ -84,6 +84,17 @@ Source anchors:
   if the cron is capped at 25 rows.
 - Add a dry-run or sample validation mode so a small gpt-5.4-mini sample can be
   compared against existing gpt-5 labels before retagging everything.
+- 2026-05-09 update: sentence-level Greta tagging now runs through the OpenAI
+  Batch API via sentence_tag_batch.py / sentence_tagging_daily.sh. The daily
+  target is about 500,000 API tokens on gpt-5.4-mini, with books 4 and 8 held
+  until the rest of the corpus has been submitted. The first batch completed as
+  run 32020a70-65ca-42ba-a7bc-6b4e2458a243, OpenAI batch
+  batch_69ff06b751b08190901b5096553cdf0c, with 917 sentences and 0 failures.
+  Ongoing submission/fetching belongs to the existing raksasa crontab for the
+  pausanias user: /home/pausanias/pausanias/cronscript.sh at 05:15 AEST.
+- Legacy sentence tagging now uses the same Batch API wrapper at 5 sentences per
+  day, with the first legacy batch submitted as run
+  619c254b-b19c-42d9-b72e-96d65fd54e01.
 
 ## Translation-length residuals and wordiness
 

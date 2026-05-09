@@ -1,5 +1,7 @@
 #!/bin/sh
 
+export PATH="$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
+
 cd $(dirname $0)
 git pull -q
 
@@ -18,7 +20,7 @@ uv run summarise_passages.py --stop-after 50
 uv run find_predictors.py
 uv run find_sentence_predictors.py
 uv run analyse_noun_network.py 
-uv run sentence_mythic_sceptic_analyser.py --stop 25
+./sentence_tagging_daily.sh
 uv run create_website.py --graphic-book-image-dir "$GRAPHIC_BOOK_IMAGE_DIR"
 uv run build_graphic_book.py --image-dir "$GRAPHIC_BOOK_IMAGE_DIR" --output-dir pausanias_site/graphic-book
 rsync -az pausanias_site/ merah:/var/www/vhosts/pausanias.symmachus.org/htdocs/
