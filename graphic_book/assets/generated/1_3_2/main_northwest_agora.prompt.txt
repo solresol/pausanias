@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: illustrated Pausanias graphic-book main panel
+Primary request: Create a rich coffee-table-book historical reconstruction for Pausanias passage 1.3.2, centered on the statues near the Royal Stoa in ancient Athens.
+Scene/backdrop: oblique elevated view across the north-west corner of the Athenian Agora in warm clear light, with the Royal Stoa toward the north side, the nearby Stoa of Zeus Eleutherios and western road visible, and the Acropolis in the distance.
+Subject: a civic forecourt with statue monuments associated with Conon, Timotheus, Evagoras of Cyprus, Zeus Eleutherios, and Hadrian. The architecture should feel like a real urban setting rather than isolated ruins: stoas, paving, altar zone, passing Athenians, and clear spatial depth.
+Composition: broad landscape-oriented main panel with strong topographic legibility at first glance. The viewer should understand how the Royal Stoa, the adjacent stoa, the western road, and the statue court relate to one another. Keep the statuary visible enough for callouts, but do not turn the image into a museum lineup.
+Historical details: classical-to-Roman-period Athens, stone and plaster stoas, tiled roofs, marble or bronze civic monuments, scattered olive trees, busy but dignified public movement. The scene should suggest political memory and public gratitude.
+Style: highly finished painterly archaeological reconstruction, warm parchment-compatible palette, rich texture, sophisticated atmosphere, visual ambition consistent with the strongest atlas-like reference pages already in context, especially 1.1.4 and 1.1.5.
+Lighting/color: late-afternoon Mediterranean gold, pale marble, warm terracotta, dusty stone paving, muted Aegean blue distance, subtle haze around the Acropolis.
+Avoid: text, labels, flat vector graphics, schematic map look, empty plazas, cartoon figures, fantasy temple excess, crude brushwork, low-detail placeholders, isolated statue close-up without urban context.
