@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: illustrated Pausanias graphic-book inset panel
+Primary request: Create a high-quality civic-sculptural inset for Pausanias passage 1.3.2 showing Zeus Eleutherios and Emperor Hadrian honored near the Agora.
+Scene/backdrop: a dignified open area before a classical stoa, with an altar or statue base nearby and the civic architecture of Athens receding behind.
+Subject: monumental statuary or honorific monuments associated with Zeus Eleutherios and Hadrian, rendered as convincing ancient public sculpture in place rather than modern museum objects. The feeling should be of civic gratitude, liberation, and benefaction.
+Composition: horizontal inset-friendly scene with the sculptural pair clearly legible, enough surrounding stonework and colonnade to anchor them in the Agora, and a few scale figures if useful.
+Historical details: marble or bronze statuary appropriate to imperial Athens, worn but still prestigious surfaces, no Christian or medieval additions, no modern restoration framing.
+Style: refined painterly archaeological reconstruction, warm parchment-compatible palette, textured stone and metal, visually rich enough to stand beside the strongest reference pages.
+Lighting/color: clear warm light, pale marble, honey-colored paving, muted blue distance, restrained bronze accents.
+Avoid: text, labels, museum pedestal isolation, fantasy throne imagery, crude frontal lineup, empty background, low-detail placeholder sculpture.

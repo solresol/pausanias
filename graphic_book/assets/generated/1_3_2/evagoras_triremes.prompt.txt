@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: illustrated Pausanias graphic-book inset panel
+Primary request: Create a high-quality historical inset for Pausanias passage 1.3.2 showing Evagoras of Cyprus helping Conon obtain Phoenician triremes from Artaxerxes.
+Scene/backdrop: an eastern Mediterranean harbor at dawn or early morning, with ship sheds, stone quays, and long warships being readied for departure.
+Subject: Phoenician triremes with elegant prows and banks of oars, diplomats or commanders in dignified classical dress, and a sense of maritime aid being arranged rather than a battle. The emphasis is on strategic naval support and alliance.
+Composition: horizontal inset-friendly scene with one or two triremes dominant, enough harbor architecture to place the event in a real port, and human figures scaled to support rather than clutter the ships.
+Historical details: fourth-century BCE eastern Mediterranean seafaring, painted hull details kept tasteful, rigging and oar banks plausible, no Roman galleys, no fireworks or combat spectacle.
+Style: refined painterly archaeological-historical illustration, detailed and luminous, consistent with the strongest Pausanias atlas pages already in context.
+Lighting/color: warm gold on timber and sailcloth, blue-green harbor water, pale limestone quays, soft morning haze.
+Avoid: text, labels, full battle chaos, fantasy fleets, modern harbor equipment, crude diagrammatic ships, empty water, melodramatic storm effects.
