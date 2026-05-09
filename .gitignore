@@ -7,7 +7,7 @@ __pycache__
 pausanias_book
 .env.raksasa.local
 .playwright-cli
-output/playwright
+output/
 tmp/
 transcripts/
 graphic_book/images/
