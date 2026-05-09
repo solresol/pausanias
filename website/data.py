@@ -11,6 +11,11 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LinearRegression, Ridge
 from sklearn.metrics import r2_score
 
+from lemma_text import (
+    build_lemma_texts,
+    expand_stopwords_with_lemma_forms,
+    load_word_lemma_lookup,
+)
 from pausanias_db import read_sql_query, table_exists as pg_table_exists
 
 WORD_PATTERN = re.compile(r"(?u)\b\w+\b")
@@ -572,6 +577,7 @@ def calculate_residual_predictors(
     max_features,
     top_features,
     min_df,
+    stop_words=None,
 ):
     """Find terms associated with positive or negative length residuals."""
     vectorizer = TfidfVectorizer(
@@ -580,6 +586,7 @@ def calculate_residual_predictors(
         ngram_range=(1, 2),
         token_pattern=TFIDF_TOKEN_PATTERN,
         preprocessor=tfidf_casefold_preprocessor,
+        stop_words=stop_words,
     )
 
     feature_matrix = vectorizer.fit_transform(texts)
@@ -650,6 +657,7 @@ def calculate_translation_length_analysis(
     max_features=1200,
     top_features=30,
     min_df=2,
+    greek_stop_words=None,
 ):
     """Model English translation length residuals from Greek vocabulary.
 
@@ -702,6 +710,7 @@ def calculate_translation_length_analysis(
     df["expected_english_word_count"] = expected_lengths
     df["length_residual"] = residuals
 
+    greek_vocabulary_column = "lemma_passage" if "lemma_passage" in df.columns else "passage"
     try:
         (
             longer_predictors,
@@ -709,11 +718,12 @@ def calculate_translation_length_analysis(
             greek_feature_count,
             greek_residual_r2,
         ) = calculate_residual_predictors(
-            df["passage"],
+            df[greek_vocabulary_column],
             residuals,
             max_features=max_features,
             top_features=top_features,
             min_df=min_df,
+            stop_words=greek_stop_words,
         )
     except ValueError as exc:
         result = empty_result.copy()
@@ -760,6 +770,7 @@ def calculate_translation_length_analysis(
             "residual_std": float(np.std(residuals)),
             "vocabulary_residual_r2": float(greek_residual_r2),
             "english_vocabulary_residual_r2": float(english_residual_r2),
+            "greek_vocabulary_source": "lemma" if greek_vocabulary_column == "lemma_passage" else "surface",
             "min_df": int(min_df),
             "max_features": int(max_features),
         },
@@ -786,6 +797,28 @@ def get_translation_length_analysis(conn):
     if len(df) > 0:
         df["sort_key"] = df["id"].apply(passage_id_sort_key)
         df = df.sort_values("sort_key").drop(columns=["sort_key"])
+        if table_exists(conn, "greek_word_lemmas"):
+            lemma_lookup = load_word_lemma_lookup(conn)
+            if lemma_lookup:
+                lemma_texts, _ = build_lemma_texts(df["passage"], lemma_lookup)
+                df = df.copy()
+                df["lemma_passage"] = lemma_texts
+                stopword_query = """
+                SELECT exact_form AS word FROM proper_nouns
+                UNION
+                SELECT reference_form AS word FROM proper_nouns
+                UNION
+                SELECT word FROM manual_stopwords
+                """
+                stopword_df = read_sql_query(stopword_query, conn)
+                greek_stop_words = expand_stopwords_with_lemma_forms(
+                    stopword_df["word"].tolist(),
+                    lemma_lookup,
+                )
+                return calculate_translation_length_analysis(
+                    df,
+                    greek_stop_words=greek_stop_words,
+                )
     return calculate_translation_length_analysis(df)
 
 
