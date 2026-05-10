@@ -3,6 +3,7 @@
 import argparse
 import sys
 import os
+import hashlib
 import pandas as pd
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -11,6 +12,9 @@ from collections import defaultdict
 import json
 
 from pausanias_db import add_database_argument, connect, read_sql_query
+
+NETWORK_CACHE_VERSION = 3
+NETWORK_CACHE_FILENAME = "network_analysis_manifest.json"
 
 
 def parse_arguments():
@@ -22,6 +26,8 @@ def parse_arguments():
                         help="Number of top nodes to include in visualization (default: 100)")
     parser.add_argument("--output-dir", default="pausanias_site/network_viz",
                         help="Output directory for network visualizations (default: pausanias_site/network_viz)")
+    parser.add_argument("--force", action="store_true",
+                        help="Regenerate network outputs even if inputs and expected files are unchanged")
     
     return parser.parse_args()
 
@@ -77,6 +83,118 @@ def get_cooccurrences(conn):
     
     df = read_sql_query(query, conn)
     return df
+
+
+def network_cache_path(output_dir):
+    return os.path.join(output_dir, NETWORK_CACHE_FILENAME)
+
+
+def get_network_input_signature(conn, min_cooccurrence, top_nodes):
+    """Return a stable fingerprint for the data and parameters used here."""
+    query = """
+    SELECT COUNT(*) AS row_count,
+           COALESCE(
+               md5(
+                   string_agg(
+                       concat_ws(
+                           E'\\x1f',
+                           passage_id,
+                           reference_form,
+                           entity_type,
+                           COALESCE(english_transcription, '')
+                       ),
+                       E'\\x1e'
+                       ORDER BY passage_id, reference_form, entity_type, COALESCE(english_transcription, '')
+                   )
+               ),
+               ''
+           ) AS proper_noun_digest
+    FROM proper_nouns
+    """
+    df = read_sql_query(query, conn)
+    row = df.iloc[0].to_dict()
+    signature_payload = {
+        "cache_version": NETWORK_CACHE_VERSION,
+        "min_cooccurrence": int(min_cooccurrence),
+        "top_nodes": int(top_nodes),
+        "proper_noun_row_count": int(row["row_count"]),
+        "proper_noun_digest": row["proper_noun_digest"],
+    }
+    signature = hashlib.sha256(
+        json.dumps(signature_payload, sort_keys=True).encode("utf-8")
+    ).hexdigest()
+    signature_payload["signature"] = signature
+    return signature_payload
+
+
+def load_network_cache(output_dir):
+    path = network_cache_path(output_dir)
+    if not os.path.exists(path):
+        return None
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+def centrality_row_count(conn):
+    df = read_sql_query("SELECT COUNT(*) AS count FROM noun_centrality", conn)
+    return int(df.iloc[0]["count"])
+
+
+def expected_network_outputs_exist(output_dir, rendered_component_ids):
+    expected = [
+        "index.html",
+        "network_data.json",
+        "component_map.png",
+    ]
+    for component_id in rendered_component_ids:
+        component_prefix = f"component_{component_id}"
+        expected.extend(
+            [
+                f"{component_prefix}.html",
+                f"{component_prefix}/network_data.json",
+                f"{component_prefix}/network_by_degree.png",
+                f"{component_prefix}/network_by_betweenness.png",
+                f"{component_prefix}/network_by_eigenvector.png",
+                f"{component_prefix}/network_by_pagerank.png",
+            ]
+        )
+    return all(os.path.exists(os.path.join(output_dir, path)) for path in expected)
+
+
+def network_cache_is_current(conn, output_dir, signature_payload):
+    manifest = load_network_cache(output_dir)
+    if not manifest:
+        return False
+    if manifest.get("signature") != signature_payload["signature"]:
+        return False
+    rendered_component_ids = manifest.get("rendered_component_ids", [])
+    if not expected_network_outputs_exist(output_dir, rendered_component_ids):
+        return False
+    if centrality_row_count(conn) != int(manifest.get("centrality_row_count", -1)):
+        return False
+    return True
+
+
+def write_network_cache(output_dir, signature_payload, centrality_df, component_graphs):
+    rendered_component_ids = [
+        int(component_id)
+        for component_id, subgraph in component_graphs
+        if subgraph.number_of_nodes() > 2
+    ]
+    manifest = {
+        **signature_payload,
+        "generated_at": datetime.now().isoformat(),
+        "centrality_row_count": int(len(centrality_df)),
+        "component_count": int(len(component_graphs)),
+        "rendered_component_ids": rendered_component_ids,
+    }
+    os.makedirs(output_dir, exist_ok=True)
+    with open(network_cache_path(output_dir), "w", encoding="utf-8") as f:
+        json.dump(manifest, f, ensure_ascii=False, indent=2, sort_keys=True)
+    print(f"Wrote network cache manifest to {network_cache_path(output_dir)}")
 
 def build_graph(nodes_df, cooccurrences_df, min_cooccurrence=1):
     """Build a network graph where nodes are proper nouns and edges represent co-occurrences."""
@@ -559,23 +677,14 @@ def create_d3_html_template(output_dir):
                     );
                 }
                 
-                // Get centrality values for sizing nodes
-                let centralityValues = [];
-                if (centralityType === 'degree') {
-                    // Calculate degree from links
-                    const degreeCount = {};
-                    filteredLinks.forEach(l => {
-                        const s = getId(l.source);
-                        const t = getId(l.target);
-                        degreeCount[s] = (degreeCount[s] || 0) + 1;
-                        degreeCount[t] = (degreeCount[t] || 0) + 1;
-                    });
-                    centralityValues = filteredNodes.map(n => degreeCount[n.id] || 0);
-                } else {
-                    // For other centrality measures, use API to fetch values
-                    // TODO: Add database connection to get actual centrality values
-                    centralityValues = filteredNodes.map(() => Math.random());
-                }
+                // Get centrality values for sizing nodes from the exported network data
+                const centralityField = {
+                    degree: 'degree_centrality',
+                    betweenness: 'betweenness_centrality',
+                    eigenvector: 'eigenvector_centrality',
+                    pagerank: 'pagerank'
+                }[centralityType] || 'degree_centrality';
+                let centralityValues = filteredNodes.map(n => n[centralityField] || 0);
                 
                 // Calculate node sizes based on centrality
                 const sizeScale = d3.scaleLinear()
@@ -978,23 +1087,14 @@ def create_d3_html_template(output_dir):
                 // Filter nodes to include only those in the filtered links
                 const filteredNodes = data.nodes.filter(n => connectedNodeIds.has(n.id));
                 
-                // Get centrality values for sizing nodes
-                let centralityValues = [];
-                if (centralityType === 'degree') {
-                    // Calculate degree from links
-                    const degreeCount = {};
-                    filteredLinks.forEach(l => {
-                        const s = getId(l.source);
-                        const t = getId(l.target);
-                        degreeCount[s] = (degreeCount[s] || 0) + 1;
-                        degreeCount[t] = (degreeCount[t] || 0) + 1;
-                    });
-                    centralityValues = filteredNodes.map(n => degreeCount[n.id] || 0);
-                } else {
-                    // For other centrality measures, use API to fetch values
-                    // TODO: Add database connection to get actual centrality values
-                    centralityValues = filteredNodes.map(() => Math.random());
-                }
+                // Get centrality values for sizing nodes from the exported network data
+                const centralityField = {
+                    degree: 'degree_centrality',
+                    betweenness: 'betweenness_centrality',
+                    eigenvector: 'eigenvector_centrality',
+                    pagerank: 'pagerank'
+                }[centralityType] || 'degree_centrality';
+                let centralityValues = filteredNodes.map(n => n[centralityField] || 0);
                 
                 // Calculate node sizes based on centrality
                 const sizeScale = d3.scaleLinear()
@@ -1438,48 +1538,13 @@ def export_for_d3(G, component_graphs, all_centrality_df, filename):
     print(f"Exported full network data for D3 visualization to {filename}")
 
 def modify_website_for_network_viz(output_dir):
-    """Modify the main website's navigation to include network visualization."""
-    # Define the path to the site's home page
-    index_path = os.path.join(output_dir, '..', 'index.html')
-    
-    # Check if file exists
-    if not os.path.exists(index_path):
-        print(f"Warning: Cannot find main website index at {index_path}")
-        return
-    
-    try:
-        # Read the current content
-        with open(index_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-        
-        # Find the navigation section
-        nav_start = content.find('<nav>')
-        nav_end = content.find('</nav>', nav_start)
-        
-        if nav_start >= 0 and nav_end > nav_start:
-            # Extract the navigation
-            nav_content = content[nav_start + 5:nav_end].strip()
-            
-            # Check if network analysis link already exists
-            if 'Network Analysis' not in nav_content:
-                # Add the new link
-                new_nav = nav_content + '\n            <a href="network_viz/index.html">Network Analysis</a>'
-                
-                # Replace the old navigation with the new one
-                content = content[:nav_start + 5] + new_nav + content[nav_end:]
-                
-                # Write the updated content
-                with open(index_path, 'w', encoding='utf-8') as f:
-                    f.write(content)
-                
-                print(f"Updated main website navigation to include Network Analysis link")
-            else:
-                print("Network Analysis link already exists in the navigation")
-        else:
-            print("Could not find navigation section in the main website index")
-    
-    except Exception as e:
-        print(f"Error updating main website navigation: {e}")
+    """Keep the historical call site harmless.
+
+    The main site navigation is now generated centrally, and the Places hub
+    links to the network pages. Mutating the homepage here would reintroduce
+    stale navigation.
+    """
+    print("Main website navigation is handled by the Places hub; no nav mutation needed.")
 
 if __name__ == '__main__':
     args = parse_arguments()
@@ -1490,9 +1555,22 @@ if __name__ == '__main__':
     try:
         # Create the centrality table if it doesn't exist
         create_centrality_table(conn)
-        
-        # Clear existing centrality data
-        clear_centrality_table(conn)
+
+        signature_payload = get_network_input_signature(
+            conn,
+            args.min_cooccurrence,
+            args.top_nodes,
+        )
+        if not args.force and network_cache_is_current(
+            conn,
+            args.output_dir,
+            signature_payload,
+        ):
+            print(
+                "Network inputs and expected outputs are unchanged; "
+                "skipping centrality and map regeneration."
+            )
+            sys.exit(0)
         
         # Get nodes and co-occurrences
         print("Fetching proper noun data...")
@@ -1525,11 +1603,18 @@ if __name__ == '__main__':
             
             # Save to database
             print("Saving centrality measures to database...")
+            clear_centrality_table(conn)
             save_centrality_measures(conn, all_centrality_df)
             
             # Visualize the network
             print("Generating network visualizations...")
             visualize_network(full_graph, all_centrality_df, component_graphs, args.output_dir, args.top_nodes)
+            write_network_cache(
+                args.output_dir,
+                signature_payload,
+                all_centrality_df,
+                component_graphs,
+            )
             
             # Modify main website to include network visualization link
             print("Updating main website navigation...")

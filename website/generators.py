@@ -980,11 +980,18 @@ def generate_analysis_pages(greta_analysis, output_dir, title):
         </section>
 
         <h2>Place and Network Analyses</h2>
-        <section class="hub-card">
-            <h3>Maps and Proper-Noun Networks</h3>
-            <p>Geographic map, place-pair distances, and proper-noun co-occurrence network pages.</p>
-            <a href="../places/index.html">Open Place and Network Pages</a>
-        </section>
+        <div class="hub-grid">
+            <section class="hub-card">
+                <h3>Maps and Proper-Noun Networks</h3>
+                <p>Geographic map, place-pair distances, and proper-noun co-occurrence network pages.</p>
+                <a href="../places/index.html">Open Place and Network Pages</a>
+            </section>
+            <section class="hub-card">
+                <h3>Paper Network Analyses</h3>
+                <p>Mythic/historical subgraphs, bridge nouns, book-level drift, and place-person/deity networks.</p>
+                <a href="../network_analysis/index.html">Open Network Analyses</a>
+            </section>
+        </div>
 
         <h2>Deprecated Predictor Pages</h2>
         <div class="hub-grid">
@@ -1061,8 +1068,8 @@ def generate_places_index(output_dir, title):
                 <a href="../map/index.html">Open Map</a>
             </section>
             <section class="hub-card">
-                <h3>Place Pairs</h3>
-                <p>Distances between geolocated places mentioned in the same passage.</p>
+                <h3>Geographic Surprise / Place Pairs</h3>
+                <p>Distances between geolocated places mentioned in the same passage, sorted by largest separation.</p>
                 <a href="../place_pairs/index.html">Open Place Pairs</a>
             </section>
             <section class="hub-card">
@@ -1078,6 +1085,11 @@ def generate_places_index(output_dir, title):
                 <h3>Interactive Network</h3>
                 <p>Full proper-noun co-occurrence network with component, centrality, link, and node filters.</p>
                 <a href="../network_viz/index.html">Open Full Network</a>
+            </section>
+            <section class="hub-card">
+                <h3>Paper Network Analyses</h3>
+                <p>Mythic/historical subgraphs, bridge nouns, book-level drift, and place-person/deity networks.</p>
+                <a href="../network_analysis/index.html">Open Network Analyses</a>
             </section>
             <section class="hub-card">
                 <h3>Network Components</h3>
@@ -1126,6 +1138,450 @@ def generate_places_index(output_dir, title):
 """
     with open(os.path.join(places_dir, "index.html"), "w", encoding="utf-8") as f:
         f.write(html_content)
+
+
+def _format_network_float(value, places=3):
+    if value is None:
+        return ""
+    return f"{float(value):.{places}f}"
+
+
+def _entity_count_text(counts):
+    if not counts:
+        return ""
+    order = ["place", "person", "deity", "other"]
+    parts = []
+    for key in order:
+        if counts.get(key):
+            parts.append(f"{html.escape(key)} {int(counts[key]):,}")
+    for key, value in sorted(counts.items()):
+        if key not in order and value:
+            parts.append(f"{html.escape(str(key))} {int(value):,}")
+    return ", ".join(parts)
+
+
+def _network_metric_strip(metrics):
+    return f"""
+        <div class="metric-strip">
+            <div><strong>{metrics.get("node_count", 0):,}</strong><span>nodes</span></div>
+            <div><strong>{metrics.get("edge_count", 0):,}</strong><span>edges</span></div>
+            <div><strong>{metrics.get("component_count", 0):,}</strong><span>components</span></div>
+            <div><strong>{metrics.get("largest_component_size", 0):,}</strong><span>largest component</span></div>
+            <div><strong>{_format_network_float(metrics.get("density", 0), 4)}</strong><span>density</span></div>
+        </div>
+    """
+
+
+def _render_network_node_rows(rows, include_bridge=False):
+    if not rows:
+        return "<tr><td colspan=\"9\">No rows available yet.</td></tr>"
+
+    output = []
+    for row in rows:
+        if include_bridge:
+            output.append(f"""
+                <tr>
+                    <td>{html.escape(str(row["label"]))}</td>
+                    <td>{html.escape(str(row["entity_type"]))}</td>
+                    <td class="num">{int(row["mythic_count"]):,}</td>
+                    <td class="num">{int(row["historical_count"]):,}</td>
+                    <td class="num">{int(row["other_count"]):,}</td>
+                    <td class="num">{int(row["neighbor_count"]):,}</td>
+                    <td class="num">{int(row["strength"]):,}</td>
+                    <td class="num">{_format_network_float(row["betweenness_centrality"], 4)}</td>
+                    <td class="num">{_format_network_float(row["bridge_score"], 4)}</td>
+                </tr>
+            """)
+        else:
+            output.append(f"""
+                <tr>
+                    <td>{html.escape(str(row["label"]))}</td>
+                    <td>{html.escape(str(row["entity_type"]))}</td>
+                    <td class="num">{int(row.get("context_count", 0)):,}</td>
+                    <td class="num">{int(row["neighbor_count"]):,}</td>
+                    <td class="num">{int(row["strength"]):,}</td>
+                    <td class="num">{_format_network_float(row["degree_centrality"], 4)}</td>
+                    <td class="num">{_format_network_float(row["betweenness_centrality"], 4)}</td>
+                </tr>
+            """)
+    return "".join(output)
+
+
+def _render_network_strength_rows(rows):
+    if not rows:
+        return "<tr><td colspan=\"5\">No rows available yet.</td></tr>"
+
+    output = []
+    for row in rows:
+        output.append(f"""
+            <tr>
+                <td>{html.escape(str(row["label"]))}</td>
+                <td>{html.escape(str(row["entity_type"]))}</td>
+                <td class="num">{int(row.get("context_count", 0)):,}</td>
+                <td class="num">{int(row["neighbor_count"]):,}</td>
+                <td class="num">{int(row["strength"]):,}</td>
+            </tr>
+        """)
+    return "".join(output)
+
+
+def _render_community_rows(rows):
+    if not rows:
+        return "<tr><td colspan=\"5\">No community rows available yet.</td></tr>"
+
+    output = []
+    for row in rows:
+        output.append(f"""
+            <tr>
+                <td class="num">{int(row["community"])}</td>
+                <td class="num">{int(row["size"]):,}</td>
+                <td class="num">{int(row["edge_count"]):,}</td>
+                <td>{html.escape(_entity_count_text(row.get("entity_counts", {})))}</td>
+                <td>{html.escape(", ".join(row.get("top_nodes", [])))}</td>
+            </tr>
+        """)
+    return "".join(output)
+
+
+def generate_network_analysis_pages(network_analysis, output_dir, title):
+    """Generate paper-facing network analysis pages."""
+    analysis_dir = os.path.join(output_dir, "network_analysis")
+    os.makedirs(analysis_dir, exist_ok=True)
+
+    if not network_analysis or not network_analysis.get("available"):
+        message = html.escape(
+            network_analysis.get("message", "No network analysis data is available.")
+            if network_analysis
+            else "No network analysis data is available."
+        )
+        index_page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - Network Analyses</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{title}</h1>
+        <p>Paper-facing proper-noun network analyses</p>
+    </header>
+    {_site_nav("../", "places")}
+    <div class="container">
+        <h2>Network Analyses</h2>
+        <p>{message}</p>
+        <footer>{_generated_footer()}</footer>
+    </div>
+</body>
+</html>
+"""
+        with open(os.path.join(analysis_dir, "index.html"), "w", encoding="utf-8") as f:
+            f.write(index_page)
+        return
+
+    sentence_stats = network_analysis.get("sentence_matching", {})
+    class_subgraphs = network_analysis.get("class_subgraphs", {})
+
+    class_sections = []
+    for bucket, label in [("mythic", "Mythic"), ("historical", "Historical")]:
+        subgraph = class_subgraphs.get(bucket)
+        if not subgraph:
+            class_sections.append(f"<h2>{label}</h2><p>No {bucket} noun network is available yet.</p>")
+            continue
+        class_sections.append(f"""
+            <h2>{label} Sentence Subgraph</h2>
+            {_network_metric_strip(subgraph["metrics"])}
+            <h3>Central Nouns</h3>
+            <table class="predictor-table">
+                <thead>
+                    <tr><th>Noun</th><th>Type</th><th>Sentences</th><th>Neighbors</th><th>Weighted Links</th><th>Degree</th><th>Betweenness</th></tr>
+                </thead>
+                <tbody>{_render_network_node_rows(subgraph.get("top_nodes", []))}</tbody>
+            </table>
+
+            <h3>Communities</h3>
+            <table class="predictor-table">
+                <thead>
+                    <tr><th>#</th><th>Nodes</th><th>Edges</th><th>Types</th><th>Leading Nouns</th></tr>
+                </thead>
+                <tbody>{_render_community_rows(subgraph.get("communities", []))}</tbody>
+            </table>
+        """)
+
+    class_page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - Mythic and Historical Subgraphs</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{title}</h1>
+        <p>Proper-noun networks inside current Greta sentence classes</p>
+    </header>
+    {_site_nav("../", "places")}
+    <div class="container wide-container">
+        <div class="breadcrumb"><a href="index.html">Network Analyses</a> &rsaquo; Mythic and Historical Subgraphs</div>
+        <p class="note">These subgraphs use proper nouns whose extracted exact form appears inside an active Greta-tagged sentence. Betweenness is sampled on larger graphs, so it is for ranking rather than exact reporting.</p>
+        {''.join(class_sections)}
+        <footer>{_generated_footer()}</footer>
+    </div>
+</body>
+</html>
+"""
+    with open(os.path.join(analysis_dir, "class_subgraphs.html"), "w", encoding="utf-8") as f:
+        f.write(class_page)
+
+    bridge_rows = _render_network_node_rows(
+        network_analysis.get("bridge_nouns", []),
+        include_bridge=True,
+    )
+    bridge_page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - Bridge Nouns</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{title}</h1>
+        <p>Names and places connecting mythic and historical sentence networks</p>
+    </header>
+    {_site_nav("../", "places")}
+    <div class="container wide-container">
+        <div class="breadcrumb"><a href="index.html">Network Analyses</a> &rsaquo; Bridge Nouns</div>
+        <h2>Bridge Nouns</h2>
+        <p class="note">Bridge score combines approximate betweenness with how evenly a noun appears in mythic and historical tagged sentences.</p>
+        <table class="predictor-table">
+            <thead>
+                <tr><th>Noun</th><th>Type</th><th>Mythic</th><th>Historical</th><th>Other</th><th>Neighbors</th><th>Weighted Links</th><th>Betweenness</th><th>Bridge Score</th></tr>
+            </thead>
+            <tbody>{bridge_rows}</tbody>
+        </table>
+        <footer>{_generated_footer()}</footer>
+    </div>
+</body>
+</html>
+"""
+    with open(os.path.join(analysis_dir, "bridge_nouns.html"), "w", encoding="utf-8") as f:
+        f.write(bridge_page)
+
+    book_rows = []
+    for book in network_analysis["book_drift"].get("books", []):
+        metrics = book["metrics"]
+        top = ", ".join(row["label"] for row in book.get("top_nodes", [])[:5])
+        node_jaccard = book.get("node_jaccard_previous")
+        edge_jaccard = book.get("edge_jaccard_previous")
+        book_rows.append(f"""
+            <tr>
+                <td class="num">{html.escape(str(book["book"]))}</td>
+                <td class="num">{metrics.get("node_count", 0):,}</td>
+                <td class="num">{metrics.get("edge_count", 0):,}</td>
+                <td class="num">{metrics.get("component_count", 0):,}</td>
+                <td class="num">{metrics.get("largest_component_size", 0):,}</td>
+                <td class="num">{_format_network_float(metrics.get("density", 0), 4)}</td>
+                <td class="num">{_format_network_float(node_jaccard, 3)}</td>
+                <td class="num">{_format_network_float(edge_jaccard, 3)}</td>
+                <td>{html.escape(top)}</td>
+            </tr>
+        """)
+
+    scope_sections = []
+    for scope in network_analysis["book_drift"].get("scopes", []):
+        scope_sections.append(f"""
+            <h3>{html.escape(scope["label"])}</h3>
+            {_network_metric_strip(scope["metrics"])}
+            <table class="predictor-table">
+                <thead>
+                    <tr><th>Noun</th><th>Type</th><th>Passages</th><th>Neighbors</th><th>Weighted Links</th></tr>
+                </thead>
+                <tbody>{_render_network_strength_rows(scope.get("top_nodes", []))}</tbody>
+            </table>
+        """)
+
+    book_page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - Book-Level Network Drift</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{title}</h1>
+        <p>Book-level proper-noun network drift</p>
+    </header>
+    {_site_nav("../", "places")}
+    <div class="container wide-container">
+        <div class="breadcrumb"><a href="index.html">Network Analyses</a> &rsaquo; Book-Level Drift</div>
+        <h2>Per-Book Networks</h2>
+        <table class="predictor-table">
+            <thead>
+                <tr><th>Book</th><th>Nodes</th><th>Edges</th><th>Components</th><th>Largest Component</th><th>Density</th><th>Node Jaccard vs Previous</th><th>Edge Jaccard vs Previous</th><th>Leading Nouns</th></tr>
+            </thead>
+            <tbody>{''.join(book_rows)}</tbody>
+        </table>
+
+        <h2>Book 4 and 8 Sensitivity</h2>
+        {''.join(scope_sections)}
+        <footer>{_generated_footer()}</footer>
+    </div>
+</body>
+</html>
+"""
+    with open(os.path.join(analysis_dir, "book_drift.html"), "w", encoding="utf-8") as f:
+        f.write(book_page)
+
+    bipartite = network_analysis.get("bipartite", {})
+    pair_rows = []
+    for row in bipartite.get("top_pairs", []):
+        pair_rows.append(f"""
+            <tr>
+                <td>{html.escape(str(row["place"]))}</td>
+                <td>{html.escape(str(row["counterpart"]))}</td>
+                <td>{html.escape(str(row["counterpart_type"]))}</td>
+                <td class="num">{int(row["weight"]):,}</td>
+                <td class="num">{int(row["passage_count"]):,}</td>
+            </tr>
+        """)
+
+    top_place_rows = _render_network_strength_rows(
+        [
+            {
+                "label": row["label"],
+                "entity_type": "place",
+                "context_count": 0,
+                "neighbor_count": row["neighbor_count"],
+                "strength": row["strength"],
+                "degree_centrality": 0.0,
+                "betweenness_centrality": 0.0,
+            }
+            for row in bipartite.get("top_places", [])
+        ],
+    )
+    top_actor_rows = _render_network_strength_rows(
+        [
+            {
+                "label": row["label"],
+                "entity_type": row["entity_type"],
+                "context_count": 0,
+                "neighbor_count": row["neighbor_count"],
+                "strength": row["strength"],
+                "degree_centrality": 0.0,
+                "betweenness_centrality": 0.0,
+            }
+            for row in bipartite.get("top_people_deities", [])
+        ],
+    )
+    bipartite_page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - Place-Person and Place-Deity Networks</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{title}</h1>
+        <p>Place-to-person and place-to-deity co-mention networks</p>
+    </header>
+    {_site_nav("../", "places")}
+    <div class="container wide-container">
+        <div class="breadcrumb"><a href="index.html">Network Analyses</a> &rsaquo; Bipartite Networks</div>
+        <div class="metric-strip">
+            <div><strong>{bipartite.get("pair_count", 0):,}</strong><span>place-counterpart pairs</span></div>
+            <div><strong>{bipartite.get("passage_count", 0):,}</strong><span>passages</span></div>
+        </div>
+
+        <h2>Top Place-Person/Deity Pairs</h2>
+        <table class="predictor-table">
+            <thead>
+                <tr><th>Place</th><th>Person/Deity</th><th>Type</th><th>Weighted Links</th><th>Passages</th></tr>
+            </thead>
+            <tbody>{''.join(pair_rows) if pair_rows else '<tr><td colspan="5">No bipartite pairs available yet.</td></tr>'}</tbody>
+        </table>
+
+        <h2>Top Places</h2>
+        <table class="predictor-table">
+            <thead>
+                <tr><th>Place</th><th>Type</th><th>Passages</th><th>Counterparts</th><th>Weighted Links</th></tr>
+            </thead>
+            <tbody>{top_place_rows}</tbody>
+        </table>
+
+        <h2>Top People and Deities</h2>
+        <table class="predictor-table">
+            <thead>
+                <tr><th>Name</th><th>Type</th><th>Passages</th><th>Places</th><th>Weighted Links</th></tr>
+            </thead>
+            <tbody>{top_actor_rows}</tbody>
+        </table>
+        <footer>{_generated_footer()}</footer>
+    </div>
+</body>
+</html>
+"""
+    with open(os.path.join(analysis_dir, "bipartite.html"), "w", encoding="utf-8") as f:
+        f.write(bipartite_page)
+
+    index_page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - Network Analyses</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{title}</h1>
+        <p>Paper-facing proper-noun network analyses</p>
+    </header>
+    {_site_nav("../", "places")}
+    <div class="container wide-container">
+        <h2>Network Analyses</h2>
+        <p class="note">The Greta-class pages are preliminary until sentence splitting and tagging finish. Current exact-form matching found nouns in <strong>{sentence_stats.get("sentences_with_matched_nouns", 0):,}</strong> of <strong>{sentence_stats.get("tagged_sentence_count", 0):,}</strong> active tagged sentences.</p>
+        <div class="hub-grid">
+            <section class="hub-card">
+                <h3>Mythic vs Historical Subgraphs</h3>
+                <p>Central nouns and communities inside the current Greta mythic and historical sentence classes.</p>
+                <a href="class_subgraphs.html">Open Subgraphs</a>
+            </section>
+            <section class="hub-card">
+                <h3>Bridge Nouns</h3>
+                <p>Names and places with high bridge scores between mythic and historical sentence networks.</p>
+                <a href="bridge_nouns.html">Open Bridge Nouns</a>
+            </section>
+            <section class="hub-card">
+                <h3>Book-Level Drift</h3>
+                <p>Per-book proper-noun network shape, adjacent-book overlap, and Book 4/8 sensitivity.</p>
+                <a href="book_drift.html">Open Book Drift</a>
+            </section>
+            <section class="hub-card">
+                <h3>Place-Person/Deity Networks</h3>
+                <p>Bipartite co-mention views that suppress same-type proper-noun noise.</p>
+                <a href="bipartite.html">Open Bipartite Networks</a>
+            </section>
+            <section class="hub-card">
+                <h3>Geographic Surprise</h3>
+                <p>Co-mentioned places sorted by geographic distance. This is the existing place-pair separation view.</p>
+                <a href="../place_pairs/index.html">Open Place Pairs</a>
+            </section>
+        </div>
+        <footer>{_generated_footer()}</footer>
+    </div>
+</body>
+</html>
+"""
+    with open(os.path.join(analysis_dir, "index.html"), "w", encoding="utf-8") as f:
+        f.write(index_page)
 
 
 def generate_mythic_page(passages_df, mythic_color_map, mythic_class_map, proper_nouns_dict, output_dir, title):
@@ -2069,19 +2525,19 @@ def generate_place_pairs_page(place_pairs, output_dir, title):
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{title} - Place Pairs</title>
+    <title>{title} - Geographic Surprise</title>
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
     <header>
         <h1>{title}</h1>
-        <p>Place pairs mentioned together in the same passage</p>
+        <p>Geographic surprise: distant places mentioned together in the same passage</p>
     </header>
 
     {_site_nav("../", "places")}
 
     <div class="container" style="max-width: 1000px;">
-        <h2>Place Pairs</h2>
+        <h2>Geographic Surprise / Place Pairs</h2>
         {rows_html}
 
         <footer>

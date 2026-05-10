@@ -38,8 +38,8 @@ def parse_arguments():
     )
     parser.add_argument(
         "--model",
-        default="gpt-5",
-        help="OpenAI model to use (default: gpt-5)",
+        default="gpt-5.4-mini",
+        help="OpenAI model to use (default: gpt-5.4-mini)",
     )
     parser.add_argument(
         "--debug",
