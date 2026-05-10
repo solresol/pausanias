@@ -38,6 +38,7 @@ from .data import (
     get_translation_length_analysis,
     get_progress_data,
     get_place_pairs,
+    get_extended_network_analysis,
     add_phrase_translations,
 )
 from .structure import create_website_structure
@@ -62,6 +63,7 @@ from .generators import (
     generate_translation_pages,
     generate_translation_length_page,
     generate_progress_page,
+    generate_network_analysis_pages,
 )
 
 def parse_arguments():
@@ -112,6 +114,7 @@ def main():
         greta_sentences_df = get_greta_sentence_annotations(conn)
         sentence_lemmas_df = get_sentence_lemma_view(conn)
         greta_analysis = get_greta_sentence_analysis_variants(conn)
+        extended_network_analysis = get_extended_network_analysis(conn)
         sentence_mythic_predictors = get_sentence_mythicness_predictors(conn)
         sentence_skeptic_predictors = get_sentence_skepticism_predictors(conn)
         simplified_mythic_predictors = get_simplified_mythicness_predictors(conn)
@@ -189,6 +192,7 @@ def main():
         generate_lemma_pages(sentence_lemmas_df, output_dir, args.title)
         generate_analysis_pages(greta_analysis, output_dir, args.title)
         generate_places_index(output_dir, args.title)
+        generate_network_analysis_pages(extended_network_analysis, output_dir, args.title)
         generate_mythic_page(passages_df, mythic_color_map, mythic_class_map, proper_nouns_dict, output_dir, args.title)
         generate_skepticism_page(passages_df, skeptic_color_map, skeptic_class_map, proper_nouns_dict, output_dir, args.title)
         generate_mythic_words_page(

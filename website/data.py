@@ -3,9 +3,11 @@
 import math
 import re
 import unicodedata
-from collections import Counter
+from collections import Counter, defaultdict
+from itertools import combinations
 import pandas as pd
 from typing import Optional
+import networkx as nx
 from openai import OpenAI
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -49,6 +51,9 @@ RHETORIC_MARKER_WORDS = [
     "φάσις",
     "φάσκω",
 ]
+
+NETWORK_BETWEENNESS_EXACT_LIMIT = 250
+NETWORK_BETWEENNESS_SAMPLE_SIZE = 120
 
 
 def table_exists(conn, table_name):
@@ -841,6 +846,548 @@ def get_place_pairs(conn):
 
     place_pairs.sort(key=lambda p: p["distance_km"], reverse=True)
     return place_pairs
+
+
+def _network_entity_type(entity_type):
+    """Normalize the few historical proper-noun type variants in the database."""
+    value = str(entity_type or "").strip().lower()
+    if value.startswith("place"):
+        return "place"
+    if value.startswith("deity"):
+        return "deity"
+    if value.startswith("person") or value in {"people", "people group"}:
+        return "person"
+    return "other"
+
+
+def _network_node_key(row):
+    return (str(row["reference_form"]), _network_entity_type(row["entity_type"]))
+
+
+def _network_node_id(node):
+    return f"{node[0]}|{node[1]}"
+
+
+def _network_node_label(attrs, node=None):
+    english = attrs.get("english") or attrs.get("english_transcription") or ""
+    reference_form = attrs.get("reference_form") or (node[0] if node else "")
+    if english and reference_form and english != reference_form:
+        return f"{english} ({reference_form})"
+    return english or reference_form or "Unknown"
+
+
+def _graph_from_context_rows(rows_df):
+    """Build a co-occurrence graph from rows with a context_id and proper noun columns."""
+    graph = nx.Graph()
+    if rows_df is None or len(rows_df) == 0:
+        return graph, {}
+
+    context_nodes = defaultdict(dict)
+    context_counts = defaultdict(int)
+    node_attrs = {}
+
+    for _, row in rows_df.iterrows():
+        reference_form = str(row["reference_form"])
+        entity_type = _network_entity_type(row["entity_type"])
+        key = (reference_form, entity_type)
+        english = row.get("english_transcription") or reference_form
+        context_id = row["context_id"]
+
+        node_attrs.setdefault(
+            key,
+            {
+                "reference_form": reference_form,
+                "entity_type": entity_type,
+                "english": english,
+            },
+        )
+        context_nodes[context_id][key] = True
+
+    edge_weights = Counter()
+    for nodes_map in context_nodes.values():
+        nodes = sorted(nodes_map)
+        for node in nodes:
+            context_counts[node] += 1
+        for source, target in combinations(nodes, 2):
+            edge_weights[(source, target)] += 1
+
+    for node, attrs in node_attrs.items():
+        graph.add_node(node, **attrs)
+
+    for (source, target), weight in edge_weights.items():
+        graph.add_edge(source, target, weight=int(weight), distance=1.0 / float(weight))
+
+    return graph, context_counts
+
+
+def _graph_metrics(graph):
+    node_count = graph.number_of_nodes()
+    edge_count = graph.number_of_edges()
+    component_sizes = (
+        sorted((len(component) for component in nx.connected_components(graph)), reverse=True)
+        if node_count
+        else []
+    )
+    entity_counts = Counter(
+        attrs.get("entity_type", "other") for _, attrs in graph.nodes(data=True)
+    )
+    return {
+        "node_count": int(node_count),
+        "edge_count": int(edge_count),
+        "component_count": int(len(component_sizes)),
+        "largest_component_size": int(component_sizes[0]) if component_sizes else 0,
+        "density": float(nx.density(graph)) if node_count > 1 else 0.0,
+        "total_edge_weight": int(
+            sum(attrs.get("weight", 1) for _, _, attrs in graph.edges(data=True))
+        ),
+        "entity_counts": dict(entity_counts),
+    }
+
+
+def _weighted_strengths(graph):
+    return {
+        node: sum(attrs.get("weight", 1) for _, _, attrs in graph.edges(node, data=True))
+        for node in graph.nodes()
+    }
+
+
+def _betweenness_centrality(graph):
+    node_count = graph.number_of_nodes()
+    if node_count <= 2 or graph.number_of_edges() == 0:
+        return {node: 0.0 for node in graph.nodes()}
+    if node_count <= NETWORK_BETWEENNESS_EXACT_LIMIT:
+        return nx.betweenness_centrality(graph, weight="distance")
+    return nx.betweenness_centrality(
+        graph,
+        k=min(NETWORK_BETWEENNESS_SAMPLE_SIZE, node_count),
+        weight="distance",
+        seed=42,
+    )
+
+
+def _centrality_rows(graph, context_counts=None, limit=30, include_betweenness=True):
+    if graph.number_of_nodes() == 0:
+        return []
+
+    context_counts = context_counts or {}
+    strengths = _weighted_strengths(graph)
+    degree_centrality = nx.degree_centrality(graph) if graph.number_of_nodes() > 1 else {
+        node: 0.0 for node in graph.nodes()
+    }
+    betweenness = _betweenness_centrality(graph) if include_betweenness else {
+        node: 0.0 for node in graph.nodes()
+    }
+
+    rows = []
+    for node, attrs in graph.nodes(data=True):
+        rows.append(
+            {
+                "node_id": _network_node_id(node),
+                "reference_form": attrs.get("reference_form", node[0]),
+                "english": attrs.get("english", node[0]),
+                "label": _network_node_label(attrs, node),
+                "entity_type": attrs.get("entity_type", node[1]),
+                "context_count": int(context_counts.get(node, 0)),
+                "neighbor_count": int(graph.degree(node)),
+                "strength": int(strengths.get(node, 0)),
+                "degree_centrality": float(degree_centrality.get(node, 0.0)),
+                "betweenness_centrality": float(betweenness.get(node, 0.0)),
+            }
+        )
+
+    rows.sort(
+        key=lambda row: (
+            row["betweenness_centrality"],
+            row["strength"],
+            row["neighbor_count"],
+            row["label"],
+        ),
+        reverse=True,
+    )
+    return rows[:limit]
+
+
+def _community_rows(graph, limit=10):
+    if graph.number_of_nodes() == 0 or graph.number_of_edges() == 0:
+        return []
+
+    try:
+        if graph.number_of_nodes() <= 800:
+            communities = nx.community.greedy_modularity_communities(graph, weight="weight")
+        else:
+            communities = list(
+                nx.community.asyn_lpa_communities(graph, weight="weight", seed=42)
+            )
+    except (nx.NetworkXException, ZeroDivisionError):
+        return []
+
+    strengths = _weighted_strengths(graph)
+    rows = []
+    for idx, community in enumerate(sorted(communities, key=len, reverse=True)[:limit], start=1):
+        subgraph = graph.subgraph(community)
+        entity_counts = Counter(
+            graph.nodes[node].get("entity_type", "other") for node in community
+        )
+        top_nodes = sorted(
+            community,
+            key=lambda node: (strengths.get(node, 0), graph.degree(node), node[0]),
+            reverse=True,
+        )[:8]
+        rows.append(
+            {
+                "community": idx,
+                "size": int(len(community)),
+                "edge_count": int(subgraph.number_of_edges()),
+                "entity_counts": dict(entity_counts),
+                "top_nodes": [
+                    _network_node_label(graph.nodes[node], node) for node in top_nodes
+                ],
+            }
+        )
+    return rows
+
+
+def _get_sentence_noun_matches(conn):
+    """Return proper nouns matched into active Greta-tagged sentences by exact form."""
+    if not table_exists(conn, "sentence_greta_tags"):
+        return pd.DataFrame(), {
+            "tagged_sentence_count": 0,
+            "sentences_with_matched_nouns": 0,
+            "noun_mentions": 0,
+            "distinct_nodes": 0,
+        }
+
+    rows = read_sql_query(
+        """
+        SELECT gs.passage_id,
+               gs.sentence_number,
+               gs.sentence,
+               t.myth_history_bucket,
+               pn.exact_form,
+               pn.reference_form,
+               pn.entity_type,
+               pn.english_transcription
+        FROM greek_sentences gs
+        JOIN sentence_greta_tags t
+          ON t.passage_id = gs.passage_id
+         AND t.sentence_number = gs.sentence_number
+        JOIN proper_nouns pn
+          ON pn.passage_id = gs.passage_id
+        WHERE t.prompt_version = %s
+        ORDER BY gs.passage_id, gs.sentence_number, pn.reference_form
+        """,
+        conn,
+        (GRETA_SENTENCE_PROMPT_VERSION,),
+    )
+    if len(rows) == 0:
+        return rows, {
+            "tagged_sentence_count": 0,
+            "sentences_with_matched_nouns": 0,
+            "noun_mentions": 0,
+            "distinct_nodes": 0,
+        }
+
+    tagged_sentence_count = int(
+        rows[["passage_id", "sentence_number"]].drop_duplicates().shape[0]
+    )
+    matches = rows[
+        rows.apply(lambda row: str(row["exact_form"]) in str(row["sentence"]), axis=1)
+    ].copy()
+    if len(matches) > 0:
+        matches["book"] = matches["passage_id"].apply(lambda pid: str(pid).split(".")[0])
+        matches["context_id"] = matches.apply(
+            lambda row: f"{row['passage_id']}:{int(row['sentence_number'])}",
+            axis=1,
+        )
+        distinct_nodes = int(
+            matches[["reference_form", "entity_type"]].drop_duplicates().shape[0]
+        )
+        sentences_with_nouns = int(
+            matches[["passage_id", "sentence_number"]].drop_duplicates().shape[0]
+        )
+    else:
+        distinct_nodes = 0
+        sentences_with_nouns = 0
+
+    return matches, {
+        "tagged_sentence_count": tagged_sentence_count,
+        "sentences_with_matched_nouns": sentences_with_nouns,
+        "noun_mentions": int(len(matches)),
+        "distinct_nodes": distinct_nodes,
+    }
+
+
+def _get_passage_noun_rows(conn):
+    rows = read_sql_query(
+        """
+        SELECT passage_id,
+               reference_form,
+               entity_type,
+               english_transcription
+        FROM proper_nouns
+        ORDER BY passage_id, reference_form
+        """,
+        conn,
+    )
+    if len(rows) == 0:
+        return rows
+    rows["book"] = rows["passage_id"].apply(lambda pid: str(pid).split(".")[0])
+    rows["context_id"] = rows["passage_id"]
+    rows["entity_type"] = rows["entity_type"].apply(_network_entity_type)
+    return rows
+
+
+def _class_subgraph_analysis(sentence_nouns):
+    subgraphs = {}
+    for bucket in ["mythic", "historical"]:
+        bucket_rows = sentence_nouns[sentence_nouns["myth_history_bucket"] == bucket]
+        graph, context_counts = _graph_from_context_rows(bucket_rows)
+        subgraphs[bucket] = {
+            "bucket": bucket,
+            "metrics": _graph_metrics(graph),
+            "top_nodes": _centrality_rows(graph, context_counts, limit=35),
+            "communities": _community_rows(graph, limit=10),
+        }
+    return subgraphs
+
+
+def _bridge_noun_rows(sentence_nouns, limit=60):
+    relevant = sentence_nouns[
+        sentence_nouns["myth_history_bucket"].isin(["mythic", "historical"])
+    ].copy()
+    graph, _ = _graph_from_context_rows(relevant)
+    if graph.number_of_nodes() == 0:
+        return []
+
+    bucket_contexts = defaultdict(lambda: defaultdict(set))
+    for _, row in sentence_nouns.iterrows():
+        node = _network_node_key(row)
+        bucket_contexts[node][row["myth_history_bucket"]].add(row["context_id"])
+
+    betweenness = _betweenness_centrality(graph)
+    strengths = _weighted_strengths(graph)
+    rows = []
+    for node, attrs in graph.nodes(data=True):
+        mythic_count = len(bucket_contexts[node].get("mythic", set()))
+        historical_count = len(bucket_contexts[node].get("historical", set()))
+        if mythic_count == 0 or historical_count == 0:
+            continue
+        total = mythic_count + historical_count
+        balance = (2.0 * min(mythic_count, historical_count) / total) if total else 0.0
+        bridge_score = float(betweenness.get(node, 0.0)) * (1.0 + math.log1p(total)) * balance
+        rows.append(
+            {
+                "label": _network_node_label(attrs, node),
+                "reference_form": attrs.get("reference_form", node[0]),
+                "english": attrs.get("english", node[0]),
+                "entity_type": attrs.get("entity_type", node[1]),
+                "mythic_count": int(mythic_count),
+                "historical_count": int(historical_count),
+                "other_count": int(len(bucket_contexts[node].get("other", set()))),
+                "neighbor_count": int(graph.degree(node)),
+                "strength": int(strengths.get(node, 0)),
+                "betweenness_centrality": float(betweenness.get(node, 0.0)),
+                "bridge_score": bridge_score,
+            }
+        )
+
+    rows.sort(
+        key=lambda row: (
+            row["bridge_score"],
+            row["betweenness_centrality"],
+            row["strength"],
+            row["label"],
+        ),
+        reverse=True,
+    )
+    return rows[:limit]
+
+
+def _node_set(graph):
+    return set(graph.nodes())
+
+
+def _edge_set(graph):
+    return {tuple(sorted(edge)) for edge in graph.edges()}
+
+
+def _jaccard(left, right):
+    if not left and not right:
+        return 1.0
+    return len(left & right) / len(left | right)
+
+
+def _book_drift_analysis(passage_nouns):
+    book_rows = []
+    previous_nodes = None
+    previous_edges = None
+    for book in sorted(passage_nouns["book"].unique(), key=lambda value: int(value)):
+        rows = passage_nouns[passage_nouns["book"] == book]
+        graph, context_counts = _graph_from_context_rows(rows)
+        top_nodes = _centrality_rows(
+            graph,
+            context_counts,
+            limit=8,
+            include_betweenness=False,
+        )
+        nodes = _node_set(graph)
+        edges = _edge_set(graph)
+        book_rows.append(
+            {
+                "book": book,
+                "metrics": _graph_metrics(graph),
+                "top_nodes": top_nodes,
+                "node_jaccard_previous": None
+                if previous_nodes is None
+                else _jaccard(nodes, previous_nodes),
+                "edge_jaccard_previous": None
+                if previous_edges is None
+                else _jaccard(edges, previous_edges),
+            }
+        )
+        previous_nodes = nodes
+        previous_edges = edges
+
+    scopes = []
+    for label, rows in [
+        ("All books", passage_nouns),
+        ("Excluding books 4 and 8", passage_nouns[~passage_nouns["book"].isin(["4", "8"])])
+    ]:
+        graph, context_counts = _graph_from_context_rows(rows)
+        scopes.append(
+            {
+                "label": label,
+                "metrics": _graph_metrics(graph),
+                "top_nodes": _centrality_rows(
+                    graph,
+                    context_counts,
+                    limit=15,
+                    include_betweenness=False,
+                ),
+            }
+        )
+
+    return {"books": book_rows, "scopes": scopes}
+
+
+def _bipartite_analysis(passage_nouns, limit=60):
+    if len(passage_nouns) == 0:
+        return {
+            "pair_count": 0,
+            "passage_count": 0,
+            "top_pairs": [],
+            "top_places": [],
+            "top_people_deities": [],
+        }
+
+    context_nodes = defaultdict(dict)
+    node_attrs = {}
+    for _, row in passage_nouns.iterrows():
+        node = _network_node_key(row)
+        node_attrs.setdefault(
+            node,
+            {
+                "reference_form": node[0],
+                "entity_type": node[1],
+                "english": row.get("english_transcription") or node[0],
+            },
+        )
+        context_nodes[row["passage_id"]][node] = True
+
+    pair_weights = Counter()
+    pair_passages = defaultdict(set)
+    for passage_id, nodes_map in context_nodes.items():
+        nodes = set(nodes_map)
+        places = sorted(node for node in nodes if node[1] == "place")
+        actors = sorted(node for node in nodes if node[1] in {"person", "deity"})
+        for place in places:
+            for actor in actors:
+                pair_weights[(place, actor)] += 1
+                pair_passages[(place, actor)].add(passage_id)
+
+    place_strength = Counter()
+    actor_strength = Counter()
+    for (place, actor), weight in pair_weights.items():
+        place_strength[place] += weight
+        actor_strength[actor] += weight
+
+    top_pairs = []
+    for (place, actor), weight in pair_weights.most_common(limit):
+        top_pairs.append(
+            {
+                "place": _network_node_label(node_attrs[place], place),
+                "counterpart": _network_node_label(node_attrs[actor], actor),
+                "counterpart_type": actor[1],
+                "weight": int(weight),
+                "passage_count": int(len(pair_passages[(place, actor)])),
+            }
+        )
+
+    def strength_rows(counter, row_limit):
+        rows = []
+        for node, strength in counter.most_common(row_limit):
+            rows.append(
+                {
+                    "label": _network_node_label(node_attrs[node], node),
+                    "entity_type": node[1],
+                    "strength": int(strength),
+                    "neighbor_count": int(
+                        sum(1 for pair in pair_weights if node in pair)
+                    ),
+                }
+            )
+        return rows
+
+    return {
+        "pair_count": int(len(pair_weights)),
+        "passage_count": int(
+            len(
+                {
+                    passage_id
+                    for passages in pair_passages.values()
+                    for passage_id in passages
+                }
+            )
+        ),
+        "top_pairs": top_pairs,
+        "top_places": strength_rows(place_strength, 30),
+        "top_people_deities": strength_rows(actor_strength, 30),
+    }
+
+
+def get_extended_network_analysis(conn):
+    """Build paper-facing network summaries beyond the full proper-noun map."""
+    if not table_exists(conn, "proper_nouns"):
+        return {
+            "available": False,
+            "message": "No proper-noun table is available.",
+        }
+
+    sentence_nouns, sentence_stats = _get_sentence_noun_matches(conn)
+    passage_nouns = _get_passage_noun_rows(conn)
+    if len(passage_nouns) == 0:
+        return {
+            "available": False,
+            "message": "No proper-noun rows are available.",
+            "sentence_matching": sentence_stats,
+        }
+
+    if len(sentence_nouns) == 0:
+        class_subgraphs = {}
+        bridge_nouns = []
+    else:
+        class_subgraphs = _class_subgraph_analysis(sentence_nouns)
+        bridge_nouns = _bridge_noun_rows(sentence_nouns)
+
+    return {
+        "available": True,
+        "message": "",
+        "sentence_matching": sentence_stats,
+        "class_subgraphs": class_subgraphs,
+        "bridge_nouns": bridge_nouns,
+        "book_drift": _book_drift_analysis(passage_nouns),
+        "bipartite": _bipartite_analysis(passage_nouns),
+    }
 
 
 def get_translation_page_data(conn):
