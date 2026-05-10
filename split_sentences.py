@@ -3,6 +3,7 @@
 import argparse
 import json
 import os
+import re
 import sys
 import time
 
@@ -40,6 +41,11 @@ def parse_arguments():
         "--model",
         default="gpt-5.4-mini",
         help="OpenAI model to use (default: gpt-5.4-mini)",
+    )
+    parser.add_argument(
+        "--fallback-model",
+        default="gpt-5",
+        help="Model to retry with if the primary model returns an invalid alignment (default: gpt-5)",
     )
     parser.add_argument(
         "--debug",
@@ -99,7 +105,16 @@ def split_passage(client, model, passage_id, passage_text, translation, debug=Fa
     """Use the OpenAI API to split a passage and its translation into sentences."""
     system_prompt = (
         "You are an expert in Ancient Greek punctuation and a skilled English editor. "
-        "Split both the original Greek passage and its English translation into corresponding sentences."
+        "Split the original Greek passage and its English translation into aligned "
+        "sentence-level pairs. The Greek and English arrays must have exactly the "
+        "same number of items, and all text must appear exactly once in order. "
+        "Prefer the English translation's full-sentence boundaries: when the "
+        "English has separate full sentences, split the Greek at the closest Greek "
+        "sentence punctuation or strong internal punctuation so the pairs align. "
+        "Do not split English into fragments; avoid output items that end with a "
+        "dash or that cannot stand as a sentence. Greek middle dot, semicolon, and "
+        "colon may be a sentence boundary when both sides are complete clauses or "
+        "when needed to align with a full English sentence; otherwise keep them internal."
     )
     tools = [
         {
@@ -159,8 +174,38 @@ def split_passage(client, model, passage_id, passage_text, translation, debug=Fa
         return [], []
 
 
+def validate_sentence_split(greek_sentences, english_sentences):
+    """Return (is_valid, reason) for an aligned Greek/English sentence split."""
+    if not greek_sentences or not english_sentences:
+        return False, "empty sentence array"
+    if len(greek_sentences) != len(english_sentences):
+        return (
+            False,
+            f"Greek/English count mismatch: {len(greek_sentences)} vs {len(english_sentences)}",
+        )
+
+    fragment_starters = re.compile(
+        r"^(and|but|or|nor|for|so|yet|while|that|which|who|whom|whose|from|to|of|by)\b",
+        re.IGNORECASE,
+    )
+    for index, sentence in enumerate(english_sentences):
+        cleaned = sentence.strip()
+        if not cleaned:
+            return False, f"empty English sentence at index {index + 1}"
+        if cleaned.endswith(("—", "–", "-")):
+            return False, f"English fragment ends with dash at index {index + 1}"
+        if index > 0 and sentence[:1].islower() and fragment_starters.match(cleaned):
+            return False, f"English continuation fragment at index {index + 1}: {cleaned[:40]}"
+
+    return True, ""
+
+
 def save_sentences(conn, passage_id, greek_sentences, english_sentences):
     """Save the list of Greek and English sentences for a passage."""
+    is_valid, reason = validate_sentence_split(greek_sentences, english_sentences)
+    if not is_valid:
+        raise ValueError(f"Refusing to save invalid sentence split for {passage_id}: {reason}")
+
     cursor = conn.cursor()
     for idx, (gr, en) in enumerate(zip(greek_sentences, english_sentences), start=1):
         cursor.execute(
@@ -193,14 +238,34 @@ def main():
             greek_sentences, english_sentences = split_passage(
                 client, args.model, passage_id, passage_text, translation, args.debug
             )
-            if greek_sentences:
+            is_valid, reason = validate_sentence_split(greek_sentences, english_sentences)
+            if (
+                not is_valid
+                and args.fallback_model
+                and args.fallback_model != args.model
+            ):
+                print(
+                    f"Primary split for passage {passage_id} using {args.model} was invalid "
+                    f"({reason}); retrying with {args.fallback_model}."
+                )
+                greek_sentences, english_sentences = split_passage(
+                    client,
+                    args.fallback_model,
+                    passage_id,
+                    passage_text,
+                    translation,
+                    args.debug,
+                )
+                is_valid, reason = validate_sentence_split(greek_sentences, english_sentences)
+
+            if is_valid:
                 save_sentences(conn, passage_id, greek_sentences, english_sentences)
                 if not args.progress_bar:
                     print(
                         f"Processed passage {passage_id}, extracted {len(greek_sentences)} sentences."
                     )
             else:
-                print(f"Failed to split passage {passage_id}")
+                print(f"Failed to split passage {passage_id}: {reason}")
             time.sleep(0.5)
     except Exception as e:
         print(f"Error: {e}")
