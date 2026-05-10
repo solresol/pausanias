@@ -364,49 +364,23 @@ def make_locator_map(records: list[FitRecord]) -> Image.Image:
     )
 
     map_rect = (22, 70, panel.width - 22, 240)
-    draw.rounded_rectangle(map_rect, radius=16, fill="#efe0ba", outline="#aa8651", width=2)
-
-    wall_points = [
-        (map_rect[0] + 56, map_rect[1] + 22),
-        (map_rect[0] + 48, map_rect[1] + 70),
-        (map_rect[0] + 44, map_rect[1] + 150),
-    ]
-    draw.line(wall_points, fill=WALL, width=10)
-    draw.line([(p[0] + 8, p[1] + 8) for p in wall_points], fill="#ccb07a", width=2)
-
-    dipylon_gate = (map_rect[0] + 32, map_rect[1] + 48, map_rect[0] + 68, map_rect[1] + 80)
-    sacred_gate = (map_rect[0] + 30, map_rect[1] + 132, map_rect[0] + 66, map_rect[1] + 164)
-    for rect in [dipylon_gate, sacred_gate]:
-        draw.rounded_rectangle(rect, radius=6, fill="#b68c55", outline=RULE, width=2)
-
-    processional = [(dipylon_gate[2], dipylon_gate[1] + 8), (map_rect[0] + 146, map_rect[1] + 82), (map_rect[0] + 278, map_rect[1] + 116)]
-    market_street = [(dipylon_gate[2], dipylon_gate[3] + 10), (map_rect[0] + 136, map_rect[1] + 120), (map_rect[0] + 260, map_rect[1] + 154)]
-    draw.line(processional, fill=ROAD, width=10)
-    draw.line(market_street, fill=ROAD, width=8)
-    draw.line(processional, fill=ROAD_LIGHT, width=3)
-    draw.line(market_street, fill=ROAD_LIGHT, width=2)
-
-    cerameicus = (map_rect[0] + 86, map_rect[1] + 68, map_rect[0] + 166, map_rect[1] + 166)
-    royal_stoa = (map_rect[0] + 174, map_rect[1] + 66, map_rect[0] + 306, map_rect[1] + 96)
-    agora = (map_rect[0] + 176, map_rect[1] + 110, map_rect[0] + 308, map_rect[1] + 164)
-    acropolis = [(map_rect[0] + 288, map_rect[1] + 34), (map_rect[0] + 324, map_rect[1] + 10), (map_rect[0] + 342, map_rect[1] + 42)]
-
-    draw.rounded_rectangle(cerameicus, radius=8, fill=CITY, outline=RULE, width=2)
-    draw.rounded_rectangle(royal_stoa, radius=8, fill=CITY, outline=RULE, width=2)
-    draw.rounded_rectangle(agora, radius=8, fill=CITY, outline=RULE, width=2)
-    draw.polygon(acropolis, fill="#a77e49", outline=RULE)
-    draw.line((acropolis[0][0], acropolis[1][1], acropolis[2][0], acropolis[1][1]), fill="#d8bb86", width=2)
-
-    for x, y in [(126, 96), (140, 112), (152, 134), (202, 80), (222, 80), (242, 80), (228, 138), (248, 138)]:
-        draw.ellipse((map_rect[0] + x - 3, map_rect[1] + y - 3, map_rect[0] + x + 3, map_rect[1] + y + 3), fill=BRONZE)
+    base_art = crop_to_fill(
+        root_dir() / "graphic_book/assets/generated/1_3_1/cerameicus_locator_base.png",
+        (map_rect[2] - map_rect[0], map_rect[3] - map_rect[1]),
+        centering=(0.5, 0.54),
+    ).convert("RGBA")
+    shade = Image.new("RGBA", base_art.size, (246, 226, 184, 34))
+    base_art = Image.alpha_composite(base_art, shade)
+    panel.alpha_composite(base_art, (map_rect[0], map_rect[1]))
+    draw.rounded_rectangle(map_rect, radius=16, outline="#6f5130", width=2)
 
     label_specs = [
-        ("DIPYLON", (map_rect[0] + 4, map_rect[1] + 40, map_rect[0] + 84, map_rect[1] + 68), "map:dipylon"),
-        ("SACRED GATE", (map_rect[0] + 0, map_rect[1] + 164, map_rect[0] + 98, map_rect[1] + 198), "map:sacred"),
-        ("CERAMEICUS", (map_rect[0] + 86, map_rect[1] + 28, map_rect[0] + 190, map_rect[1] + 56), "map:cerameicus"),
-        ("ROYAL STOA", (map_rect[0] + 194, map_rect[1] + 28, map_rect[0] + 314, map_rect[1] + 56), "map:stoa"),
-        ("AGORA", (map_rect[0] + 218, map_rect[1] + 166, map_rect[0] + 290, map_rect[1] + 194), "map:agora"),
-        ("ACROPOLIS", (map_rect[0] + 258, map_rect[1] + 48, map_rect[0] + 348, map_rect[1] + 76), "map:acropolis"),
+        ("DIPYLON", (map_rect[0] + 8, map_rect[1] + 100, map_rect[0] + 84, map_rect[1] + 128), "map:dipylon"),
+        ("SACRED GATE", (map_rect[0] + 8, map_rect[1] + 136, map_rect[0] + 110, map_rect[1] + 164), "map:sacred"),
+        ("CERAMEICUS", (map_rect[0] + 114, map_rect[1] + 58, map_rect[0] + 226, map_rect[1] + 86), "map:cerameicus"),
+        ("ROYAL STOA", (map_rect[0] + 218, map_rect[1] + 86, map_rect[0] + 342, map_rect[1] + 114), "map:stoa"),
+        ("AGORA", (map_rect[0] + 214, map_rect[1] + 124, map_rect[0] + 286, map_rect[1] + 152), "map:agora"),
+        ("ACROPOLIS", (map_rect[0] + 260, map_rect[1] + 16, map_rect[0] + 350, map_rect[1] + 44), "map:acropolis"),
     ]
     for text, rect, name in label_specs:
         draw.rounded_rectangle(rect, radius=8, fill=CITY_LIGHT, outline="#b8945a", width=1)

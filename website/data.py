@@ -3,23 +3,52 @@
 import math
 import re
 import unicodedata
+from collections import Counter
 import pandas as pd
 from typing import Optional
 from openai import OpenAI
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.linear_model import LinearRegression, Ridge
-from sklearn.metrics import r2_score
+from sklearn.linear_model import LinearRegression, LogisticRegression, Ridge
+from sklearn.metrics import (
+    accuracy_score,
+    confusion_matrix,
+    precision_recall_fscore_support,
+    r2_score,
+)
+from sklearn.model_selection import train_test_split
 
 from lemma_text import (
     build_lemma_texts,
+    casefold_preprocessor,
     expand_stopwords_with_lemma_forms,
     load_word_lemma_lookup,
+    normalize_stopwords,
+    surface_lookup_key,
+    tokenize_greek,
 )
 from pausanias_db import read_sql_query, table_exists as pg_table_exists
+from stats_utils import compute_p_q_values
 
 WORD_PATTERN = re.compile(r"(?u)\b\w+\b")
 TFIDF_TOKEN_PATTERN = r"(?u)\b\w\w+\b"
+GRETA_SENTENCE_PROMPT_VERSION = "greta-myth-history-other-no-scepticism-v1"
+RHETORIC_MARKER_WORDS = [
+    "λέγω",
+    "λέγεται",
+    "λέγουσι",
+    "λέγουσιν",
+    "λέγει",
+    "λέγειν",
+    "φημί",
+    "φησί",
+    "φησίν",
+    "φασί",
+    "φασίν",
+    "φάσι",
+    "φάσις",
+    "φάσκω",
+]
 
 
 def table_exists(conn, table_name):
@@ -202,6 +231,364 @@ def get_all_sentences(conn):
 
     df = read_sql_query(query, conn)
     return df
+
+
+def _add_sentence_sort_columns(df):
+    """Add chapter/book sorting columns to a sentence-level dataframe."""
+    if len(df) == 0 or "passage_id" not in df.columns:
+        return df
+    result = df.copy()
+    result["book"] = result["passage_id"].apply(lambda pid: str(pid).split(".")[0])
+    result["chapter"] = result["passage_id"].apply(
+        lambda pid: ".".join(str(pid).split(".")[:2])
+    )
+    result["sort_key"] = result["passage_id"].apply(passage_id_sort_key)
+    result = result.sort_values(["sort_key", "sentence_number"])
+    return result.drop(columns=["sort_key"])
+
+
+def _active_greta_prompt_version(conn, prompt_version=None):
+    """Return the active Greta sentence-tag prompt version, if present."""
+    if not table_exists(conn, "sentence_greta_tags"):
+        return None
+    if prompt_version:
+        return prompt_version
+
+    versions = read_sql_query(
+        """
+        SELECT prompt_version, COUNT(*) AS count
+        FROM sentence_greta_tags
+        GROUP BY prompt_version
+        ORDER BY
+            CASE WHEN prompt_version = %s THEN 0 ELSE 1 END,
+            count DESC,
+            prompt_version
+        """,
+        conn,
+        (GRETA_SENTENCE_PROMPT_VERSION,),
+    )
+    if len(versions) == 0:
+        return None
+    return versions.iloc[0]["prompt_version"]
+
+
+def get_greta_sentence_annotations(conn, prompt_version=None):
+    """Return active three-bucket Greta sentence annotations."""
+    active_prompt = _active_greta_prompt_version(conn, prompt_version)
+    if not active_prompt:
+        return pd.DataFrame()
+
+    query = """
+    SELECT gs.passage_id,
+           gs.sentence_number,
+           gs.sentence,
+           gs.english_sentence,
+           t.prompt_version,
+           COALESCE(NULLIF(t.model, ''), NULLIF(r.model, ''), t.model) AS model,
+           t.myth_history_bucket,
+           t.confidence,
+           t.rationale,
+           t.input_tokens,
+           t.output_tokens,
+           t.run_id,
+           t.created_at
+    FROM sentence_greta_tags t
+    JOIN greek_sentences gs
+      ON gs.passage_id = t.passage_id
+     AND gs.sentence_number = t.sentence_number
+    LEFT JOIN sentence_tagging_runs r
+      ON r.run_id = t.run_id
+    WHERE t.prompt_version = %s
+    ORDER BY gs.passage_id, gs.sentence_number
+    """
+    df = read_sql_query(query, conn, (active_prompt,))
+    return _add_sentence_sort_columns(df)
+
+
+def get_sentence_lemma_view(conn):
+    """Return each sentence with the word-level lemma stream used by analyses."""
+    if not table_exists(conn, "greek_word_lemmas"):
+        return pd.DataFrame()
+    lemma_lookup = load_word_lemma_lookup(conn)
+    if not lemma_lookup:
+        return pd.DataFrame()
+
+    sentences = read_sql_query(
+        """
+        SELECT passage_id, sentence_number, sentence, english_sentence
+        FROM greek_sentences
+        ORDER BY passage_id, sentence_number
+        """,
+        conn,
+    )
+    rows = []
+    for _, row in sentences.iterrows():
+        tokens = tokenize_greek(row["sentence"])
+        lemmas = []
+        missing = 0
+        for token in tokens:
+            lemma = lemma_lookup.get(surface_lookup_key(token))
+            if lemma is None:
+                lemma = token
+                missing += 1
+            lemmas.append(lemma)
+        rows.append(
+            {
+                "passage_id": row["passage_id"],
+                "sentence_number": row["sentence_number"],
+                "sentence": row["sentence"],
+                "english_sentence": row["english_sentence"],
+                "lemma_text": " ".join(lemmas),
+                "token_count": len(tokens),
+                "missing_lemma_count": missing,
+            }
+        )
+
+    return _add_sentence_sort_columns(pd.DataFrame(rows))
+
+
+def _stopword_rows(conn):
+    parts = [
+        "SELECT exact_form AS word FROM proper_nouns",
+        "SELECT reference_form AS word FROM proper_nouns",
+    ]
+    if table_exists(conn, "manual_stopwords"):
+        parts.append("SELECT word FROM manual_stopwords")
+    return read_sql_query("\nUNION\n".join(parts), conn)["word"].dropna().tolist()
+
+
+def _fit_greta_sentence_variant(
+    df,
+    *,
+    label,
+    token_source,
+    include_books_4_8,
+    remove_rhetoric_markers,
+    proper_stopwords,
+    lemma_lookup,
+    max_features=1000,
+    top_features=30,
+    min_df=2,
+):
+    """Fit one Greta mythic-vs-historical sentence analysis variant."""
+    variant_df = df[df["myth_history_bucket"].isin(["mythic", "historical"])].copy()
+    if not include_books_4_8:
+        variant_df = variant_df[~variant_df["book"].isin(["4", "8"])].copy()
+
+    bucket_counts = (
+        variant_df["myth_history_bucket"].value_counts().sort_index().to_dict()
+        if len(variant_df) > 0
+        else {}
+    )
+    y = (variant_df["myth_history_bucket"] == "mythic").astype(int).to_numpy()
+    min_class_count = min(bucket_counts.values()) if bucket_counts else 0
+
+    result = {
+        "id": label,
+        "token_source": token_source,
+        "include_books_4_8": include_books_4_8,
+        "remove_rhetoric_markers": remove_rhetoric_markers,
+        "sample_count": int(len(variant_df)),
+        "bucket_counts": bucket_counts,
+        "feature_count": 0,
+        "predictors": pd.DataFrame(),
+        "metrics": None,
+        "available": False,
+        "message": "",
+    }
+
+    if len(variant_df) < 20 or min_class_count < 5:
+        result["message"] = "Not enough mythic and historical sentences are tagged yet."
+        return result
+
+    extra_stopwords = RHETORIC_MARKER_WORDS if remove_rhetoric_markers else []
+    if token_source == "lemma":
+        if not lemma_lookup:
+            result["message"] = "No cached word-level lemmas are available."
+            return result
+        texts, lemma_stats = build_lemma_texts(variant_df["sentence"], lemma_lookup)
+        stopwords = expand_stopwords_with_lemma_forms(
+            proper_stopwords + extra_stopwords,
+            lemma_lookup,
+        )
+        result["lemma_stats"] = {
+            "token_count": lemma_stats.token_count,
+            "lemmatized_token_count": lemma_stats.lemmatized_token_count,
+            "missing_token_count": lemma_stats.missing_token_count,
+            "unique_missing_count": lemma_stats.unique_missing_count,
+        }
+    else:
+        texts = variant_df["sentence"].tolist()
+        stopwords = normalize_stopwords(proper_stopwords + extra_stopwords)
+
+    vectorizer = TfidfVectorizer(
+        max_features=max_features,
+        min_df=min_df,
+        ngram_range=(1, 2),
+        token_pattern=TFIDF_TOKEN_PATTERN,
+        preprocessor=casefold_preprocessor,
+        stop_words=stopwords,
+    )
+    model = LogisticRegression(
+        C=1.0,
+        max_iter=1000,
+        class_weight="balanced",
+        random_state=42,
+    )
+
+    test_size = 0.25
+    try:
+        X_train, X_test, y_train, y_test = train_test_split(
+            texts,
+            y,
+            test_size=test_size,
+            random_state=42,
+            stratify=y,
+        )
+        train_matrix = vectorizer.fit_transform(X_train)
+        if train_matrix.shape[1] == 0:
+            result["message"] = "No repeated vocabulary survived filtering."
+            return result
+        model.fit(train_matrix, y_train)
+        test_matrix = vectorizer.transform(X_test)
+        y_pred = model.predict(test_matrix)
+    except ValueError as exc:
+        result["message"] = f"Could not fit model: {exc}"
+        return result
+
+    feature_names = vectorizer.get_feature_names_out()
+    coefficients = model.coef_[0]
+    analyzer = vectorizer.build_analyzer()
+    vocab = set(feature_names)
+    mythic_counter = Counter()
+    historical_counter = Counter()
+    total_mythic = int(np.sum(y))
+    total_historical = len(y) - total_mythic
+
+    for text, label_value in zip(texts, y):
+        terms = {term for term in analyzer(text) if term in vocab}
+        if label_value:
+            mythic_counter.update(terms)
+        else:
+            historical_counter.update(terms)
+
+    mythic_counts = np.array([mythic_counter.get(feature, 0) for feature in feature_names])
+    historical_counts = np.array(
+        [historical_counter.get(feature, 0) for feature in feature_names]
+    )
+    p_values, q_values = compute_p_q_values(
+        mythic_counts,
+        historical_counts,
+        total_mythic,
+        total_historical,
+    )
+
+    predictor_rows = pd.DataFrame(
+        {
+            "phrase": feature_names,
+            "english_translation": "",
+            "coefficient": coefficients,
+            "is_mythic": (coefficients > 0).astype(int),
+            "mythic_count": mythic_counts,
+            "historical_count": historical_counts,
+            "p_value": p_values,
+            "q_value": q_values,
+        }
+    )
+    top_positive = predictor_rows.sort_values("coefficient", ascending=False).head(
+        top_features
+    )
+    top_negative = predictor_rows.sort_values("coefficient", ascending=True).head(
+        top_features
+    )
+
+    precision, recall, f1, support = precision_recall_fscore_support(
+        y_test,
+        y_pred,
+        labels=[0, 1],
+        zero_division=0,
+    )
+    actual_0_pred_0, actual_0_pred_1, actual_1_pred_0, actual_1_pred_1 = confusion_matrix(
+        y_test,
+        y_pred,
+        labels=[0, 1],
+    ).ravel()
+
+    result.update(
+        {
+            "available": True,
+            "feature_count": int(len(feature_names)),
+            "predictors": pd.concat([top_negative, top_positive]).reset_index(drop=True),
+            "metrics": {
+                "accuracy": float(accuracy_score(y_test, y_pred)),
+                "precision_0": float(precision[0]),
+                "recall_0": float(recall[0]),
+                "f1_0": float(f1[0]),
+                "support_0": int(support[0]),
+                "precision_1": float(precision[1]),
+                "recall_1": float(recall[1]),
+                "f1_1": float(f1[1]),
+                "support_1": int(support[1]),
+                "actual_0_pred_0": int(actual_0_pred_0),
+                "actual_0_pred_1": int(actual_0_pred_1),
+                "actual_1_pred_0": int(actual_1_pred_0),
+                "actual_1_pred_1": int(actual_1_pred_1),
+            },
+        }
+    )
+    return result
+
+
+def get_greta_sentence_analysis_variants(conn):
+    """Build current Greta mythic-vs-historical logistic-regression variants."""
+    annotations = get_greta_sentence_annotations(conn)
+    if len(annotations) == 0:
+        return {
+            "available": False,
+            "message": "No active Greta sentence tags are available.",
+            "prompt_version": None,
+            "variants": [],
+            "bucket_counts": {},
+        }
+
+    lemma_lookup = load_word_lemma_lookup(conn) if table_exists(conn, "greek_word_lemmas") else {}
+    proper_stopwords = _stopword_rows(conn)
+    bucket_counts = annotations["myth_history_bucket"].value_counts().sort_index().to_dict()
+    book_counts = annotations["book"].value_counts().sort_index().to_dict()
+    variants = []
+    for token_source in ["lemma", "surface"]:
+        for include_books in [False, True]:
+            for remove_rhetoric in [False, True]:
+                label = "-".join(
+                    [
+                        "greta-sentence",
+                        token_source,
+                        "all-books" if include_books else "excluding-4-8",
+                        "without-rhetoric" if remove_rhetoric else "with-rhetoric",
+                    ]
+                )
+                variants.append(
+                    _fit_greta_sentence_variant(
+                        annotations,
+                        label=label,
+                        token_source=token_source,
+                        include_books_4_8=include_books,
+                        remove_rhetoric_markers=remove_rhetoric,
+                        proper_stopwords=proper_stopwords,
+                        lemma_lookup=lemma_lookup,
+                    )
+                )
+
+    return {
+        "available": True,
+        "message": "",
+        "prompt_version": annotations.iloc[0]["prompt_version"],
+        "model": annotations.iloc[0].get("model", ""),
+        "variants": variants,
+        "bucket_counts": bucket_counts,
+        "book_counts": book_counts,
+        "tagged_sentence_count": int(len(annotations)),
+    }
 
 
 def get_passage_mythicness_metrics(conn):

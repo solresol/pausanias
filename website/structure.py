@@ -29,6 +29,10 @@ def create_website_structure(output_dir):
         margin: 0 auto;
         padding: 20px;
     }
+
+    .wide-container {
+        max-width: 1200px;
+    }
     
     header {
         background-color: #5c5142;
@@ -56,6 +60,18 @@ def create_website_structure(output_dir):
     
     nav a.active {
         text-decoration: underline;
+    }
+
+    .site-nav {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 22px;
+        justify-content: center;
+    }
+
+    .site-nav a {
+        margin: 0;
     }
     
     h1, h2, h3 {
@@ -379,6 +395,119 @@ def create_website_structure(output_dir):
     
     .home-card a:hover {
         background-color: #776b5d;
+    }
+
+    .hub-grid {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        margin: 20px 0;
+    }
+
+    .hub-card {
+        background-color: #eee9e3;
+        border-radius: 5px;
+        padding: 18px;
+    }
+
+    .hub-card h3 {
+        margin-top: 0;
+    }
+
+    .hub-card a {
+        display: inline-block;
+        margin-top: 8px;
+        background-color: #5c5142;
+        color: white;
+        padding: 8px 14px;
+        text-decoration: none;
+        border-radius: 5px;
+    }
+
+    .hub-card a:hover {
+        background-color: #776b5d;
+    }
+
+    .deprecated {
+        border-left: 5px solid #9d8771;
+    }
+
+    .compact-list {
+        margin: 10px 0;
+        padding-left: 18px;
+    }
+
+    .note {
+        background-color: #f6f1ea;
+        border-left: 5px solid #9d8771;
+        padding: 10px 12px;
+    }
+
+    .status-pill {
+        border-radius: 999px;
+        display: inline-block;
+        font-size: 0.82em;
+        font-weight: bold;
+        padding: 2px 9px;
+        white-space: nowrap;
+    }
+
+    .bucket-mythic {
+        background-color: #fde8e4;
+        color: #a63a22;
+    }
+
+    .bucket-historical {
+        background-color: #e4eefb;
+        color: #245f9f;
+    }
+
+    .bucket-other {
+        background-color: #e8ece8;
+        color: #4f604f;
+    }
+
+    .metric-strip {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        margin: 16px 0 24px;
+    }
+
+    .metric-strip div {
+        background-color: #eee9e3;
+        border-radius: 5px;
+        padding: 12px;
+    }
+
+    .metric-strip strong {
+        display: block;
+        color: #5c5142;
+        font-size: 1.35em;
+    }
+
+    .metric-strip span {
+        display: block;
+        font-size: 0.9em;
+    }
+
+    .sentence-detail-table {
+        font-size: 0.9em;
+    }
+
+    .sentence-detail-table .num,
+    .predictor-table .num {
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    .greek-cell {
+        font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+        line-height: 1.55;
+    }
+
+    .lemma-cell {
+        color: #4b4338;
     }
     
     footer {

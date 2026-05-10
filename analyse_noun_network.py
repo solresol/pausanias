@@ -271,13 +271,17 @@ def create_d3_html_template(output_dir):
         
         nav {
             background-color: #776b5d;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 22px;
+            justify-content: center;
             padding: 0.5em;
             text-align: center;
         }
         
         nav a {
             color: white;
-            margin: 0 15px;
+            margin: 0;
             text-decoration: none;
             font-weight: bold;
         }
@@ -374,13 +378,14 @@ def create_d3_html_template(output_dir):
         <p>Interactive visualization of proper noun connections in Pausanias' Description of Greece</p>
     </header>
     
-    <nav>
+    <nav class="site-nav">
         <a href="../index.html">Home</a>
-        <a href="../mythic/index.html">Mythic Analysis</a>
-        <a href="../skepticism/index.html">Skepticism Analysis</a>
-        <a href="../mythic_words.html">Mythic Words</a>
-        <a href="../skeptic_words.html">Skeptic Words</a>
-        <a href="index.html" class="active">Network Analysis</a>
+        <a href="../texts/index.html">Texts</a>
+        <a href="../annotations/index.html">Annotations</a>
+        <a href="../lemmas/index.html">Lemmas</a>
+        <a href="../analysis/index.html">Analysis</a>
+        <a href="../places/index.html" class="active">Places</a>
+        <a href="../progress/index.html">Progress</a>
     </nav>
     
     <div class="container">
@@ -744,13 +749,17 @@ def create_d3_html_template(output_dir):
         
         nav {
             background-color: #776b5d;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 22px;
+            justify-content: center;
             padding: 0.5em;
             text-align: center;
         }
         
         nav a {
             color: white;
-            margin: 0 15px;
+            margin: 0;
             text-decoration: none;
             font-weight: bold;
         }
@@ -847,14 +856,14 @@ def create_d3_html_template(output_dir):
         <p>Interactive visualization of proper noun connections in component {component_id}</p>
     </header>
     
-    <nav>
+    <nav class="site-nav">
         <a href="../index.html">Home</a>
-        <a href="../mythic/index.html">Mythic Analysis</a>
-        <a href="../skepticism/index.html">Skepticism Analysis</a>
-        <a href="../mythic_words.html">Mythic Words</a>
-        <a href="../skeptic_words.html">Skeptic Words</a>
-        <a href="index.html">Network Analysis</a>
-        <a href="component_{component_id}.html" class="active">Component {component_id}</a>
+        <a href="../texts/index.html">Texts</a>
+        <a href="../annotations/index.html">Annotations</a>
+        <a href="../lemmas/index.html">Lemmas</a>
+        <a href="../analysis/index.html">Analysis</a>
+        <a href="../places/index.html" class="active">Places</a>
+        <a href="../progress/index.html">Progress</a>
     </nav>
     
     <div class="container">

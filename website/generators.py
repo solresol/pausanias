@@ -13,6 +13,40 @@ GRAPHIC_PASSAGE_IMAGE_RE = re.compile(
     r"^(?P<section>\d+)\.(?:png|jpg|jpeg|webp)$", re.IGNORECASE
 )
 
+SITE_NAV_LINKS = [
+    ("index.html", "Home", "home"),
+    ("texts/index.html", "Texts", "texts"),
+    ("annotations/index.html", "Annotations", "annotations"),
+    ("lemmas/index.html", "Lemmas", "lemmas"),
+    ("analysis/index.html", "Analysis", "analysis"),
+    ("places/index.html", "Places", "places"),
+    ("progress/index.html", "Progress", "progress"),
+]
+
+LEGACY_NAV_ACTIVE_MAP = {
+    "translation": "texts",
+    "graphic_book": "texts",
+    "nouns": "texts",
+    "mythic": "annotations",
+    "skepticism": "annotations",
+    "sentences": "annotations",
+    "translation_length": "analysis",
+    "network": "places",
+    "map": "places",
+    "place_pairs": "places",
+    "progress": "progress",
+}
+
+
+def _site_nav(prefix="", active=None):
+    """Generate the compact site-wide nav with links relative to the root."""
+    active_key = LEGACY_NAV_ACTIVE_MAP.get(active, active)
+    parts = []
+    for href, label, key in SITE_NAV_LINKS:
+        cls = ' class="active"' if key == active_key else ""
+        parts.append(f'<a href="{prefix}{href}"{cls}>{label}</a>')
+    return '<nav class="site-nav">\n            ' + "\n            ".join(parts) + "\n        </nav>"
+
 
 def _graphic_book_image_dir(image_dir=None):
     if image_dir:
@@ -392,84 +426,41 @@ def generate_home_page(output_dir, title, timestamp):
             <p>Analysis of Pausanias' Description of Greece</p>
         </header>
         
-        <nav>
-            <a href="index.html" class="active">Home</a>
-            <a href="translation/index.html">Translation</a>
-            <a href="mythic/index.html">Mythic Analysis</a>
-            <a href="skepticism/index.html">Skepticism Analysis</a>
-            <a href="mythic_words.html">Mythic Words</a>
-            <a href="skeptic_words.html">Skeptic Words</a>
-            <a href="sentences/index.html">Sentences</a>
-            <a href="sentence_mythic_words.html">Sentence Mythic Words</a>
-            <a href="sentence_skeptic_words.html">Sentence Skeptic Words</a>
-            <a href="network_viz/index.html">Network Analysis</a>
-            <a href="map/index.html">Place Map</a>
-            <a href="place_pairs/index.html">Place Pairs</a>
-            <a href="translation_length/index.html">Translation Length</a>
-            <a href="graphic-book/index.html">Graphic Book</a>
-            <a href="progress/index.html">Progress</a>
-        </nav>
+        {_site_nav("", "home")}
 
         <div class="container">
             <h2>Welcome to the Pausanias Analysis Project</h2>
             
-            <p>This site presents an analysis of Pausanias' "Description of Greece", focusing on two key aspects:</p>
+            <p>This site collects the Pausanias translation, annotation data, lemma views, and analysis outputs.</p>
             
             <div class="home-card">
-                <h2>Translation</h2>
-                <p>Browse Pausanias' text with Greek and English side by side,
-                   proper nouns linked to Wikidata, and places shown on maps.</p>
-                <a href="translation/index.html">View Translation</a>
+                <h2>Texts</h2>
+                <p>Browse the HTML translation, the illustrated graphic-book version, and the typeset PDFs.</p>
+                <a href="texts/index.html">Open Texts</a>
             </div>
 
             <div class="home-card">
-                <h2>Mythic vs. Historical Content</h2>
-                <p>Explore passages with mythical content highlighted in warm colors and italics, 
-                   while historical content appears in cool colors.</p>
-                <a href="mythic/index.html">View Mythic Analysis</a>
-            </div>
-            
-            <div class="home-card">
-                <h2>Expression of Skepticism</h2>
-                <p>Discover how Pausanias expresses skepticism (or credulity) through his writing. 
-                   Skeptical content is highlighted in green, while non-skeptical appears in orange and bold.</p>
-                <a href="skepticism/index.html">View Skepticism Analysis</a>
+                <h2>Annotations</h2>
+                <p>Review current sentence-level mythic, historical, and other tags, with legacy classifiers kept separately.</p>
+                <a href="annotations/index.html">Open Annotations</a>
             </div>
             
             <div class="home-card">
-                <h2>Predictive Words and Phrases</h2>
-                <p>Examine the specific words and phrases that are most strongly associated with mythic content and skepticism.</p>
-                <a href="mythic_words.html">Mythic Predictors</a>
-                <a href="skeptic_words.html">Skepticism Predictors</a>
-                <a href="sentence_mythic_words.html">Sentence Mythic Predictors</a>
-                <a href="sentence_skeptic_words.html">Sentence Skepticism Predictors</a>
+                <h2>Lemmas</h2>
+                <p>See the lemma stream extracted for each Greek sentence and track missing word-level lemmatizations.</p>
+                <a href="lemmas/index.html">Open Lemmas</a>
+            </div>
+            
+            <div class="home-card">
+                <h2>Analyses</h2>
+                <p>Compare lemma-based and surface-form models, translation-length residuals, and deprecated predictor pages.</p>
+                <a href="analysis/index.html">Open Analyses</a>
             </div>
 
             <div class="home-card">
-                <h2>Place Map</h2>
-                <p>View places mentioned by Pausanias on an interactive map. Click markers to see
-                   which passages reference each location.</p>
-                <a href="map/index.html">View Place Map</a>
-            </div>
-
-            <div class="home-card">
-                <h2>Place Pairs</h2>
-                <p>Compare distances between geolocated places mentioned in the same passage.</p>
-                <a href="place_pairs/index.html">View Place Pairs</a>
-            </div>
-
-            <div class="home-card">
-                <h2>Translation Length</h2>
-                <p>Find Greek words and phrases associated with unexpectedly long or short English translations after controlling for Greek passage length.</p>
-                <a href="translation_length/index.html">View Translation Length</a>
-            </div>
-
-            <div class="home-card">
-                <h2>Graphic Book</h2>
-                <p>Browse illustrated passage pages for a graphic-novel or digital coffee-table-book version
-                   of Pausanias' Description of Greece.</p>
-                <a href="graphic-book/index.html">View Graphic Book</a>
-                <a href="graphic-book/pausanias-graphic-book.pdf">Download Graphic PDF</a>
+                <h2>Places</h2>
+                <p>Use the map, place-pair distances, noun index, and noun network views.</p>
+                <a href="places/index.html">Open Places</a>
             </div>
 
             <div class="home-card">
@@ -477,13 +468,6 @@ def generate_home_page(output_dir, title, timestamp):
                 <p>Track the status of data processing tasks: completion percentages,
                    estimated finish dates, and token usage.</p>
                 <a href="progress/index.html">View Progress</a>
-            </div>
-
-            <div class="home-card">
-                <h2>Download PDF Book</h2>
-                <p>Download the complete English translation as a beautifully typeset PDF book
-                   with margin icons for mythic/skeptical content and indices of people, places, and deities.</p>
-                <a href="pausanias.pdf">Download PDF</a>
             </div>
 
             <footer>
@@ -497,6 +481,652 @@ def generate_home_page(output_dir, title, timestamp):
     # Write the file
     with open(os.path.join(output_dir, 'index.html'), 'w', encoding='utf-8') as f:
         f.write(html_content)
+
+
+def _sentence_passage_link(passage_id, prefix="../"):
+    parts = str(passage_id).split(".")
+    if len(parts) != 3:
+        return html.escape(str(passage_id))
+    href = f"{prefix}translation/{parts[0]}/{parts[1]}/{parts[2]}.html"
+    return f'<a href="{href}">{html.escape(str(passage_id))}</a>'
+
+
+def _generated_footer():
+    return f"Generated on {datetime.now().strftime('%Y-%m-%d at %H:%M:%S')} from the PostgreSQL database"
+
+
+def generate_texts_index(output_dir, title):
+    """Generate a hub page for text and graphic-book formats."""
+    texts_dir = os.path.join(output_dir, "texts")
+    os.makedirs(texts_dir, exist_ok=True)
+
+    html_content = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - Texts</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{title}</h1>
+        <p>Translation and graphic-book formats</p>
+    </header>
+    {_site_nav("../", "texts")}
+    <div class="container">
+        <h2>Texts</h2>
+        <div class="hub-grid">
+            <section class="hub-card">
+                <h3>Text HTML</h3>
+                <p>Greek and English passage pages with proper nouns, maps, and passage navigation.</p>
+                <a href="../translation/index.html">Open HTML Translation</a>
+            </section>
+            <section class="hub-card">
+                <h3>Text PDF</h3>
+                <p>Typeset PDF version of the English translation.</p>
+                <a href="../pausanias.pdf">Open Text PDF</a>
+            </section>
+            <section class="hub-card">
+                <h3>Graphic Book HTML</h3>
+                <p>Illustrated passage-by-passage graphic-book reader.</p>
+                <a href="../graphic-book/index.html">Open Graphic Book</a>
+            </section>
+            <section class="hub-card">
+                <h3>Graphic Book PDF</h3>
+                <p>PDF export of the illustrated graphic-book pages.</p>
+                <a href="../graphic-book/pausanias-graphic-book.pdf">Open Graphic PDF</a>
+            </section>
+            <section class="hub-card">
+                <h3>Proper Noun Index</h3>
+                <p>People, places, deities, and other named entities from the translation pages.</p>
+                <a href="../translation/nouns/index.html">Open Noun Index</a>
+            </section>
+        </div>
+        <footer>{_generated_footer()}</footer>
+    </div>
+</body>
+</html>
+"""
+    with open(os.path.join(texts_dir, "index.html"), "w", encoding="utf-8") as f:
+        f.write(html_content)
+
+
+def generate_annotations_index(greta_sentences_df, output_dir, title):
+    """Generate a hub page for active and deprecated annotation views."""
+    annotations_dir = os.path.join(output_dir, "annotations")
+    os.makedirs(annotations_dir, exist_ok=True)
+
+    if greta_sentences_df is None or len(greta_sentences_df) == 0:
+        active_summary = "No active three-bucket sentence tags are available yet."
+        bucket_rows = ""
+    else:
+        counts = greta_sentences_df["myth_history_bucket"].value_counts().sort_index()
+        active_summary = f"{len(greta_sentences_df):,} sentences tagged with the active three-bucket scheme."
+        bucket_rows = "".join(
+            f"<li><span class=\"status-pill bucket-{html.escape(str(bucket))}\">{html.escape(str(bucket))}</span> {int(count):,}</li>"
+            for bucket, count in counts.items()
+        )
+
+    html_content = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - Annotations</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{title}</h1>
+        <p>Sentence and passage annotation views</p>
+    </header>
+    {_site_nav("../", "annotations")}
+    <div class="container">
+        <h2>Current Annotation Scheme</h2>
+        <section class="hub-card">
+            <h3>Sentence Level: Mythic, Historical, Other</h3>
+            <p>{active_summary}</p>
+            <ul class="compact-list">{bucket_rows}</ul>
+            <a href="sentences/index.html">Open Current Sentence Tags</a>
+        </section>
+
+        <h2>Deprecated Annotation Schemes</h2>
+        <div class="hub-grid">
+            <section class="hub-card deprecated">
+                <h3>Passage Level: Mythic vs. Non-mythic</h3>
+                <p>Legacy passage classifier retained for comparison only.</p>
+                <a href="../mythic/index.html">Open Deprecated Passage Tags</a>
+            </section>
+            <section class="hub-card deprecated">
+                <h3>Passage Level: Skeptical vs. Non-skeptical</h3>
+                <p>Legacy skepticism classifier retained for comparison only.</p>
+                <a href="../skepticism/index.html">Open Deprecated Skepticism Tags</a>
+            </section>
+            <section class="hub-card deprecated">
+                <h3>Sentence Level: Legacy Booleans</h3>
+                <p>Sentence splits with the older mythic and skepticism boolean labels.</p>
+                <a href="../sentences/index.html">Open Deprecated Sentence Tags</a>
+            </section>
+        </div>
+        <footer>{_generated_footer()}</footer>
+    </div>
+</body>
+</html>
+"""
+    with open(os.path.join(annotations_dir, "index.html"), "w", encoding="utf-8") as f:
+        f.write(html_content)
+
+
+def generate_greta_sentence_annotation_pages(greta_sentences_df, output_dir, title):
+    """Generate chapter pages for active Greta three-bucket sentence tags."""
+    sentences_dir = os.path.join(output_dir, "annotations", "sentences")
+    os.makedirs(sentences_dir, exist_ok=True)
+
+    if greta_sentences_df is None or len(greta_sentences_df) == 0:
+        chapters = []
+    else:
+        chapters = sorted(
+            greta_sentences_df["chapter"].unique(),
+            key=lambda c: [int(p) for p in str(c).split(".")],
+        )
+
+    for chapter in chapters:
+        chapter_df = greta_sentences_df[greta_sentences_df["chapter"] == chapter]
+        rows = []
+        for _, row in chapter_df.iterrows():
+            bucket = str(row["myth_history_bucket"])
+            rows.append(f"""
+                <tr>
+                    <td>{_sentence_passage_link(row["passage_id"], "../../")}</td>
+                    <td class="num">{int(row["sentence_number"])}</td>
+                    <td><span class="status-pill bucket-{html.escape(bucket)}">{html.escape(bucket)}</span></td>
+                    <td>{html.escape(str(row.get("confidence", "")))}</td>
+                    <td class="greek-cell">{html.escape(str(row["sentence"]))}</td>
+                    <td>{html.escape(str(row["english_sentence"]))}</td>
+                    <td>{html.escape(str(row.get("rationale", "")))}</td>
+                </tr>
+            """)
+
+        page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - Current Sentence Tags {chapter}</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{title}</h1>
+        <p>Current sentence-level mythic, historical, and other tags</p>
+    </header>
+    {_site_nav("../../", "annotations")}
+    <div class="container wide-container">
+        <div class="breadcrumb"><a href="../index.html">Annotations</a> &rsaquo; <a href="index.html">Current Sentence Tags</a> &rsaquo; Chapter {html.escape(str(chapter))}</div>
+        <h2>Chapter {html.escape(str(chapter))}</h2>
+        <table class="predictor-table sentence-detail-table">
+            <thead>
+                <tr><th>Passage</th><th>Sentence</th><th>Bucket</th><th>Confidence</th><th>Greek</th><th>English</th><th>Rationale</th></tr>
+            </thead>
+            <tbody>{''.join(rows)}</tbody>
+        </table>
+        <footer>{_generated_footer()}</footer>
+    </div>
+</body>
+</html>
+"""
+        with open(os.path.join(sentences_dir, f"{chapter.replace('.', '_')}.html"), "w", encoding="utf-8") as f:
+            f.write(page)
+
+    chapter_links = ""
+    for chapter in chapters:
+        count = len(greta_sentences_df[greta_sentences_df["chapter"] == chapter])
+        chapter_links += f'<li><a href="{chapter.replace(".", "_")}.html">Chapter {html.escape(str(chapter))}</a> ({count:,} sentences)</li>\n'
+    if not chapter_links:
+        chapter_links = "<li>No active sentence tags are available yet.</li>"
+
+    index_page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - Current Sentence Tags</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{title}</h1>
+        <p>Current sentence-level mythic, historical, and other tags</p>
+    </header>
+    {_site_nav("../../", "annotations")}
+    <div class="container">
+        <div class="breadcrumb"><a href="../index.html">Annotations</a> &rsaquo; Current Sentence Tags</div>
+        <h2>Chapters</h2>
+        <ul>{chapter_links}</ul>
+        <footer>{_generated_footer()}</footer>
+    </div>
+</body>
+</html>
+"""
+    with open(os.path.join(sentences_dir, "index.html"), "w", encoding="utf-8") as f:
+        f.write(index_page)
+
+
+def generate_lemma_pages(sentence_lemmas_df, output_dir, title):
+    """Generate sentence-level lemma view pages."""
+    lemmas_dir = os.path.join(output_dir, "lemmas")
+    os.makedirs(lemmas_dir, exist_ok=True)
+
+    if sentence_lemmas_df is None or len(sentence_lemmas_df) == 0:
+        chapters = []
+        total_tokens = 0
+        missing_tokens = 0
+    else:
+        chapters = sorted(
+            sentence_lemmas_df["chapter"].unique(),
+            key=lambda c: [int(p) for p in str(c).split(".")],
+        )
+        total_tokens = int(sentence_lemmas_df["token_count"].sum())
+        missing_tokens = int(sentence_lemmas_df["missing_lemma_count"].sum())
+
+    for chapter in chapters:
+        chapter_df = sentence_lemmas_df[sentence_lemmas_df["chapter"] == chapter]
+        rows = []
+        for _, row in chapter_df.iterrows():
+            rows.append(f"""
+                <tr>
+                    <td>{_sentence_passage_link(row["passage_id"], "../")}</td>
+                    <td class="num">{int(row["sentence_number"])}</td>
+                    <td class="greek-cell">{html.escape(str(row["sentence"]))}</td>
+                    <td>{html.escape(str(row["english_sentence"]))}</td>
+                    <td class="greek-cell lemma-cell">{html.escape(str(row["lemma_text"]))}</td>
+                    <td class="num">{int(row["missing_lemma_count"])}</td>
+                </tr>
+            """)
+
+        page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - Lemmas {chapter}</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{title}</h1>
+        <p>Word-level lemma forms extracted for each sentence</p>
+    </header>
+    {_site_nav("../", "lemmas")}
+    <div class="container wide-container">
+        <div class="breadcrumb"><a href="index.html">Lemmas</a> &rsaquo; Chapter {html.escape(str(chapter))}</div>
+        <h2>Chapter {html.escape(str(chapter))}</h2>
+        <table class="predictor-table sentence-detail-table">
+            <thead>
+                <tr><th>Passage</th><th>Sentence</th><th>Greek</th><th>English</th><th>Lemma Forms</th><th>Missing</th></tr>
+            </thead>
+            <tbody>{''.join(rows)}</tbody>
+        </table>
+        <footer>{_generated_footer()}</footer>
+    </div>
+</body>
+</html>
+"""
+        with open(os.path.join(lemmas_dir, f"{chapter.replace('.', '_')}.html"), "w", encoding="utf-8") as f:
+            f.write(page)
+
+    chapter_links = ""
+    for chapter in chapters:
+        count = len(sentence_lemmas_df[sentence_lemmas_df["chapter"] == chapter])
+        chapter_links += f'<li><a href="{chapter.replace(".", "_")}.html">Chapter {html.escape(str(chapter))}</a> ({count:,} sentences)</li>\n'
+    if not chapter_links:
+        chapter_links = "<li>No word-level lemma cache is available yet.</li>"
+
+    index_page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - Lemmas</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{title}</h1>
+        <p>Word-level lemma forms extracted for each sentence</p>
+    </header>
+    {_site_nav("../", "lemmas")}
+    <div class="container">
+        <h2>Lemma View</h2>
+        <div class="metric-strip">
+            <div><strong>{0 if sentence_lemmas_df is None else len(sentence_lemmas_df):,}</strong><span>sentences</span></div>
+            <div><strong>{total_tokens:,}</strong><span>Greek tokens</span></div>
+            <div><strong>{missing_tokens:,}</strong><span>raw fallbacks</span></div>
+        </div>
+        <ul>{chapter_links}</ul>
+        <footer>{_generated_footer()}</footer>
+    </div>
+</body>
+</html>
+"""
+    with open(os.path.join(lemmas_dir, "index.html"), "w", encoding="utf-8") as f:
+        f.write(index_page)
+
+
+def _variant_display_name(variant):
+    source = "Lemma" if variant["token_source"] == "lemma" else "Surface"
+    books = "including books 4 and 8" if variant["include_books_4_8"] else "excluding books 4 and 8"
+    rhetoric = "without rhetoric markers" if variant["remove_rhetoric_markers"] else "with rhetoric markers"
+    return f"{source}, {books}, {rhetoric}"
+
+
+def _variant_href(variant):
+    return f"{variant['id']}.html"
+
+
+def generate_analysis_pages(greta_analysis, output_dir, title):
+    """Generate the analysis hub and current Greta logistic-regression variants."""
+    analysis_dir = os.path.join(output_dir, "analysis")
+    os.makedirs(analysis_dir, exist_ok=True)
+
+    variants = greta_analysis.get("variants", []) if greta_analysis else []
+    for variant in variants:
+        predictors = variant.get("predictors")
+        metrics = variant.get("metrics")
+        if predictors is None or len(predictors) == 0:
+            body = f"<p>{html.escape(variant.get('message') or 'No predictor table is available for this variant.')}</p>"
+        else:
+            mythic_words = predictors[predictors["is_mythic"] == 1].sort_values("coefficient", ascending=False)
+            historical_words = predictors[predictors["is_mythic"] == 0].sort_values("coefficient", ascending=True)
+            body = f"""
+                {format_classification_metrics(metrics, "Historical", "Mythic")}
+                {render_confusion_matrix_card("Confusion Matrix", metrics, "Historical", "Mythic")}
+                <h2>Counts</h2>
+                <div class="metric-strip">
+                    <div><strong>{variant["sample_count"]:,}</strong><span>mythic/historical sentences</span></div>
+                    <div><strong>{variant["bucket_counts"].get("mythic", 0):,}</strong><span>mythic</span></div>
+                    <div><strong>{variant["bucket_counts"].get("historical", 0):,}</strong><span>historical</span></div>
+                    <div><strong>{variant["feature_count"]:,}</strong><span>features</span></div>
+                </div>
+
+                <h2>Predictors of Mythic Sentences</h2>
+                {render_predictor_table(
+                    f"{variant['id']}-mythic",
+                    mythic_words,
+                    "mythic-word",
+                    "Mythic Count",
+                    "Historical Count",
+                    "mythic_count",
+                    "historical_count",
+                    coefficient_direction="desc",
+                )}
+
+                <h2>Predictors of Historical Sentences</h2>
+                {render_predictor_table(
+                    f"{variant['id']}-historical",
+                    historical_words,
+                    "historical-word",
+                    "Mythic Count",
+                    "Historical Count",
+                    "mythic_count",
+                    "historical_count",
+                    coefficient_direction="asc",
+                )}
+            """
+
+        page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - {_variant_display_name(variant)}</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{title}</h1>
+        <p>Greta sentence-level mythic vs. historical analysis</p>
+    </header>
+    {_site_nav("../", "analysis")}
+    <div class="container wide-container">
+        <div class="breadcrumb"><a href="index.html">Analyses</a> &rsaquo; {_variant_display_name(variant)}</div>
+        <h2>{_variant_display_name(variant)}</h2>
+        <p>This model drops sentences tagged <code>other</code> and fits a balanced TF-IDF logistic regression to the remaining mythic and historical tags.</p>
+        {body}
+        <footer>{_generated_footer()}</footer>
+    </div>
+{PREDICTOR_TABLE_SORT_SCRIPT}
+</body>
+</html>
+"""
+        with open(os.path.join(analysis_dir, _variant_href(variant)), "w", encoding="utf-8") as f:
+            f.write(page)
+
+    if greta_analysis and greta_analysis.get("available"):
+        bucket_counts = greta_analysis.get("bucket_counts", {})
+        book_counts = greta_analysis.get("book_counts", {})
+        book_scope_note = ""
+        if not any(str(book) in book_counts for book in ("4", "8")):
+            book_scope_note = (
+                "<p class=\"note\">The active tag batch currently has no book 4 or book 8 sentences, "
+                "so the all-books and excluding-books-4-and-8 variants use the same sample for now.</p>"
+            )
+        bucket_html = "".join(
+            f"<li><span class=\"status-pill bucket-{html.escape(str(bucket))}\">{html.escape(str(bucket))}</span> {int(count):,}</li>"
+            for bucket, count in sorted(bucket_counts.items())
+        )
+        variant_rows = []
+        for variant in variants:
+            accuracy = ""
+            if variant.get("metrics"):
+                accuracy = f"{variant['metrics']['accuracy']:.3f}"
+            status = (
+                f'<a href="{_variant_href(variant)}">Open</a>'
+                if variant.get("available")
+                else html.escape(variant.get("message", "Unavailable"))
+            )
+            variant_rows.append(f"""
+                <tr>
+                    <td>{html.escape("Lemma" if variant["token_source"] == "lemma" else "Surface")}</td>
+                    <td>{'All books' if variant["include_books_4_8"] else 'Excluding 4 and 8'}</td>
+                    <td>{'Removed' if variant["remove_rhetoric_markers"] else 'Included'}</td>
+                    <td class="num">{variant["sample_count"]:,}</td>
+                    <td class="num">{variant["feature_count"]:,}</td>
+                    <td class="num">{accuracy}</td>
+                    <td>{status}</td>
+                </tr>
+            """)
+        greta_section = f"""
+            <h2>Current Sentence-Level Analyses</h2>
+            <p>The current paper-facing analysis uses the active three-bucket tags, then restricts the model to mythic vs. historical sentences.</p>
+            {book_scope_note}
+            <ul class="compact-list">{bucket_html}</ul>
+            <table class="predictor-table">
+                <thead>
+                    <tr><th>Vocabulary</th><th>Book Scope</th><th>Rhetoric Markers</th><th>Sample</th><th>Features</th><th>Accuracy</th><th>Page</th></tr>
+                </thead>
+                <tbody>{''.join(variant_rows)}</tbody>
+            </table>
+        """
+    else:
+        greta_section = f"""
+            <h2>Current Sentence-Level Analyses</h2>
+            <p>{html.escape(greta_analysis.get("message", "No Greta analysis data is available.") if greta_analysis else "No Greta analysis data is available.")}</p>
+        """
+
+    index_page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - Analyses</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{title}</h1>
+        <p>Analysis outputs and model variants</p>
+    </header>
+    {_site_nav("../", "analysis")}
+    <div class="container wide-container">
+        {greta_section}
+
+        <h2>Translation Length</h2>
+        <section class="hub-card">
+            <h3>Unexpectedly Long or Short Translations</h3>
+            <p>Greek predictors of length residuals, plus the dual view of English terms found in longer or shorter-than-expected passages.</p>
+            <a href="../translation_length/index.html">Open Translation Length Analysis</a>
+        </section>
+
+        <h2>Place and Network Analyses</h2>
+        <section class="hub-card">
+            <h3>Maps and Proper-Noun Networks</h3>
+            <p>Geographic map, place-pair distances, and proper-noun co-occurrence network pages.</p>
+            <a href="../places/index.html">Open Place and Network Pages</a>
+        </section>
+
+        <h2>Deprecated Predictor Pages</h2>
+        <div class="hub-grid">
+            <section class="hub-card deprecated">
+                <h3>Passage Mythic Predictors</h3>
+                <a href="../mythic_words.html">Open Page</a>
+            </section>
+            <section class="hub-card deprecated">
+                <h3>Passage Skepticism Predictors</h3>
+                <a href="../skeptic_words.html">Open Page</a>
+            </section>
+            <section class="hub-card deprecated">
+                <h3>Sentence Mythic Predictors</h3>
+                <a href="../sentence_mythic_words.html">Open Page</a>
+            </section>
+            <section class="hub-card deprecated">
+                <h3>Sentence Skepticism Predictors</h3>
+                <a href="../sentence_skeptic_words.html">Open Page</a>
+            </section>
+        </div>
+        <footer>{_generated_footer()}</footer>
+    </div>
+</body>
+</html>
+"""
+    with open(os.path.join(analysis_dir, "index.html"), "w", encoding="utf-8") as f:
+        f.write(index_page)
+
+
+def generate_places_index(output_dir, title):
+    """Generate a hub page for geographic and noun-network views."""
+    places_dir = os.path.join(output_dir, "places")
+    os.makedirs(places_dir, exist_ok=True)
+
+    network_dir = Path(output_dir) / "network_viz"
+    component_pages = []
+    if network_dir.exists():
+        component_pages = sorted(
+            network_dir.glob("component_*.html"),
+            key=lambda path: int(path.stem.split("_")[1])
+            if path.stem.split("_")[1].isdigit()
+            else path.stem,
+        )
+    component_links = ""
+    if component_pages:
+        component_links = "<ul class=\"compact-list\">" + "".join(
+            f'<li><a href="../network_viz/{path.name}">Component {html.escape(path.stem.split("_")[1])}</a></li>'
+            for path in component_pages
+        ) + "</ul>"
+    component_map_link = ""
+    if (network_dir / "component_map.png").exists():
+        component_map_link = '<a href="../network_viz/component_map.png">Open Component Map</a>'
+
+    html_content = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - Places</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{title}</h1>
+        <p>Places, proper nouns, and networks</p>
+    </header>
+    {_site_nav("../", "places")}
+    <div class="container wide-container">
+        <h2>Maps</h2>
+        <div class="hub-grid">
+            <section class="hub-card">
+                <h3>Global Place Map</h3>
+                <p>Interactive map of geolocated places mentioned by Pausanias.</p>
+                <a href="../map/index.html">Open Map</a>
+            </section>
+            <section class="hub-card">
+                <h3>Place Pairs</h3>
+                <p>Distances between geolocated places mentioned in the same passage.</p>
+                <a href="../place_pairs/index.html">Open Place Pairs</a>
+            </section>
+            <section class="hub-card">
+                <h3>Passage Mini-maps</h3>
+                <p>Individual translation pages include mini-maps when a passage has geolocated places.</p>
+                <a href="../translation/index.html">Open Translation</a>
+            </section>
+        </div>
+
+        <h2>Network Analysis</h2>
+        <div class="hub-grid">
+            <section class="hub-card">
+                <h3>Interactive Network</h3>
+                <p>Full proper-noun co-occurrence network with component, centrality, link, and node filters.</p>
+                <a href="../network_viz/index.html">Open Full Network</a>
+            </section>
+            <section class="hub-card">
+                <h3>Network Components</h3>
+                <p>Separate pages for the largest connected components in the proper-noun network.</p>
+                {component_links or '<p>No component pages are present in this build yet.</p>'}
+            </section>
+            <section class="hub-card">
+                <h3>Static Network Exports</h3>
+                <p>Generated network images, including the component map when available.</p>
+                {component_map_link or '<p>No static component map is present in this build yet.</p>'}
+            </section>
+        </div>
+
+        <h2>Proper Noun Indices</h2>
+        <div class="hub-grid">
+            <section class="hub-card">
+                <h3>All Proper Nouns</h3>
+                <p>Index of people, places, deities, and other named entities.</p>
+                <a href="../translation/nouns/index.html">Open Noun Index</a>
+            </section>
+            <section class="hub-card">
+                <h3>Places</h3>
+                <p>Named places extracted from the text.</p>
+                <a href="../translation/nouns/places.html">Open Places Index</a>
+            </section>
+            <section class="hub-card">
+                <h3>People</h3>
+                <p>Named people and groups extracted from the text.</p>
+                <a href="../translation/nouns/people.html">Open People Index</a>
+            </section>
+            <section class="hub-card">
+                <h3>Deities</h3>
+                <p>Named deities extracted from the text.</p>
+                <a href="../translation/nouns/deities.html">Open Deities Index</a>
+            </section>
+            <section class="hub-card">
+                <h3>Other Entities</h3>
+                <p>Named entities that are not currently grouped as people, places, or deities.</p>
+                <a href="../translation/nouns/other.html">Open Other Index</a>
+            </section>
+        </div>
+        <footer>{_generated_footer()}</footer>
+    </div>
+</body>
+</html>
+"""
+    with open(os.path.join(places_dir, "index.html"), "w", encoding="utf-8") as f:
+        f.write(html_content)
+
 
 def generate_mythic_page(passages_df, mythic_color_map, mythic_class_map, proper_nouns_dict, output_dir, title):
     """Generate pages showing mythic aspects of passages grouped by chapter."""
@@ -525,19 +1155,7 @@ def generate_mythic_page(passages_df, mythic_color_map, mythic_class_map, proper
             <p>Analysis of Mythic vs. Historical Elements in Pausanias</p>
         </header>
 
-        <nav>
-            <a href=\"../index.html\">Home</a>
-            <a href=\"index.html\" class=\"active\">Mythic Analysis</a>
-            <a href=\"../skepticism/index.html\">Skepticism Analysis</a>
-            <a href=\"../mythic_words.html\">Mythic Words</a>
-            <a href=\"../skeptic_words.html\">Skeptic Words</a>
-            <a href=\"../sentences/index.html\">Sentences</a>
-            <a href=\"../sentence_mythic_words.html\">Sentence Mythic Words</a>
-            <a href=\"../sentence_skeptic_words.html\">Sentence Skeptic Words</a>
-            <a href=\"../network_viz/index.html\">Network Analysis</a>
-            <a href=\"../map/index.html\">Place Map</a>
-            <a href=\"../place_pairs/index.html\">Place Pairs</a>
-        </nav>
+        {_site_nav("../", "annotations")}
 
         <div class=\"container\">
             <div class=\"legend\">
@@ -639,19 +1257,7 @@ def generate_mythic_page(passages_df, mythic_color_map, mythic_class_map, proper
             <p>Analysis of Mythic vs. Historical Elements in Pausanias</p>
         </header>
 
-        <nav>
-            <a href=\"../index.html\">Home</a>
-            <a href=\"index.html\" class=\"active\">Mythic Analysis</a>
-            <a href=\"../skepticism/index.html\">Skepticism Analysis</a>
-            <a href=\"../mythic_words.html\">Mythic Words</a>
-            <a href=\"../skeptic_words.html\">Skeptic Words</a>
-            <a href=\"../sentences/index.html\">Sentences</a>
-            <a href=\"../sentence_mythic_words.html\">Sentence Mythic Words</a>
-            <a href=\"../sentence_skeptic_words.html\">Sentence Skeptic Words</a>
-            <a href=\"../network_viz/index.html\">Network Analysis</a>
-            <a href=\"../map/index.html\">Place Map</a>
-            <a href="../place_pairs/index.html">Place Pairs</a>
-        </nav>
+        {_site_nav("../", "annotations")}
 
         <div class=\"container\">
             <h2>Chapters</h2>
@@ -703,20 +1309,7 @@ def generate_skepticism_page(passages_df, skeptic_color_map, skeptic_class_map, 
             <p>Analysis of Skepticism in Pausanias</p>
         </header>
 
-        <nav>
-            <a href=\"../index.html\">Home</a>
-            <a href=\"../translation/index.html\">Translation</a>
-            <a href=\"../mythic/index.html\">Mythic Analysis</a>
-            <a href=\"index.html\" class=\"active\">Skepticism Analysis</a>
-            <a href=\"../mythic_words.html\">Mythic Words</a>
-            <a href=\"../skeptic_words.html\">Skeptic Words</a>
-            <a href=\"../sentences/index.html\">Sentences</a>
-            <a href=\"../sentence_mythic_words.html\">Sentence Mythic Words</a>
-            <a href=\"../sentence_skeptic_words.html\">Sentence Skeptic Words</a>
-            <a href=\"../network_viz/index.html\">Network Analysis</a>
-            <a href=\"../map/index.html\">Place Map</a>
-            <a href="../place_pairs/index.html">Place Pairs</a>
-        </nav>
+        {_site_nav("../", "annotations")}
 
         <div class=\"container\">
             <div class=\"legend\">
@@ -818,20 +1411,7 @@ def generate_skepticism_page(passages_df, skeptic_color_map, skeptic_class_map, 
             <p>Analysis of Skepticism in Pausanias</p>
         </header>
 
-        <nav>
-            <a href=\"../index.html\">Home</a>
-            <a href=\"../translation/index.html\">Translation</a>
-            <a href=\"../mythic/index.html\">Mythic Analysis</a>
-            <a href=\"index.html\" class=\"active\">Skepticism Analysis</a>
-            <a href=\"../mythic_words.html\">Mythic Words</a>
-            <a href=\"../skeptic_words.html\">Skeptic Words</a>
-            <a href=\"../sentences/index.html\">Sentences</a>
-            <a href=\"../sentence_mythic_words.html\">Sentence Mythic Words</a>
-            <a href=\"../sentence_skeptic_words.html\">Sentence Skeptic Words</a>
-            <a href=\"../network_viz/index.html\">Network Analysis</a>
-            <a href=\"../map/index.html\">Place Map</a>
-            <a href="../place_pairs/index.html">Place Pairs</a>
-        </nav>
+        {_site_nav("../", "annotations")}
 
         <div class=\"container\">
             <h2>Chapters</h2>
@@ -878,20 +1458,7 @@ def generate_mythic_words_page(mythic_predictors, output_dir, title, metrics=Non
             <p>Words and Phrases that Predict Mythic vs. Historical Content</p>
         </header>
 
-        <nav>
-            <a href="index.html">Home</a>
-            <a href="translation/index.html">Translation</a>
-            <a href="mythic/index.html">Mythic Analysis</a>
-            <a href="skepticism/index.html">Skepticism Analysis</a>
-            <a href="mythic_words.html" class="active">Mythic Words</a>
-            <a href="skeptic_words.html">Skeptic Words</a>
-            <a href="sentences/index.html">Sentences</a>
-            <a href="sentence_mythic_words.html">Sentence Mythic Words</a>
-            <a href="sentence_skeptic_words.html">Sentence Skeptic Words</a>
-            <a href="network_viz/index.html">Network Analysis</a>
-            <a href="map/index.html">Place Map</a>
-            <a href="place_pairs/index.html">Place Pairs</a>
-        </nav>
+        {_site_nav("", "analysis")}
 
         <div class="container">
             {format_classification_metrics(metrics, 'Historical', 'Mythic')}
@@ -968,20 +1535,7 @@ def generate_skeptic_words_page(skeptic_predictors, output_dir, title, metrics=N
             <p>Words and Phrases that Predict Skeptical vs. Non-skeptical Content</p>
         </header>
 
-        <nav>
-            <a href="index.html">Home</a>
-            <a href="translation/index.html">Translation</a>
-            <a href="mythic/index.html">Mythic Analysis</a>
-            <a href="skepticism/index.html">Skepticism Analysis</a>
-            <a href="mythic_words.html">Mythic Words</a>
-            <a href="skeptic_words.html" class="active">Skeptic Words</a>
-            <a href="sentences/index.html">Sentences</a>
-            <a href="sentence_mythic_words.html">Sentence Mythic Words</a>
-            <a href="sentence_skeptic_words.html">Sentence Skeptic Words</a>
-            <a href="network_viz/index.html">Network Analysis</a>
-            <a href="map/index.html">Place Map</a>
-            <a href="place_pairs/index.html">Place Pairs</a>
-        </nav>
+        {_site_nav("", "analysis")}
 
         <div class="container">
             {format_classification_metrics(metrics, 'Non-skeptical', 'Skeptical')}
@@ -1057,20 +1611,7 @@ def generate_sentence_mythic_words_page(mythic_predictors, output_dir, title, me
             <p>Sentence-level words and phrases that predict mythic vs. historical content</p>
         </header>
 
-        <nav>
-            <a href="index.html">Home</a>
-            <a href="translation/index.html">Translation</a>
-            <a href="mythic/index.html">Mythic Analysis</a>
-            <a href="skepticism/index.html">Skepticism Analysis</a>
-            <a href="mythic_words.html">Mythic Words</a>
-            <a href="skeptic_words.html">Skeptic Words</a>
-            <a href="sentences/index.html">Sentences</a>
-            <a href="sentence_mythic_words.html" class="active">Sentence Mythic Words</a>
-            <a href="sentence_skeptic_words.html">Sentence Skeptic Words</a>
-            <a href="network_viz/index.html">Network Analysis</a>
-            <a href="map/index.html">Place Map</a>
-            <a href="place_pairs/index.html">Place Pairs</a>
-        </nav>
+        {_site_nav("", "analysis")}
 
         <div class="container">
             {format_classification_metrics(metrics, 'Historical', 'Mythic')}
@@ -1143,20 +1684,7 @@ def generate_sentence_skeptic_words_page(skeptic_predictors, output_dir, title, 
             <p>Sentence-level words and phrases that predict skepticism vs. non-skepticism</p>
         </header>
 
-        <nav>
-            <a href="index.html">Home</a>
-            <a href="translation/index.html">Translation</a>
-            <a href="mythic/index.html">Mythic Analysis</a>
-            <a href="skepticism/index.html">Skepticism Analysis</a>
-            <a href="mythic_words.html">Mythic Words</a>
-            <a href="skeptic_words.html">Skeptic Words</a>
-            <a href="sentences/index.html">Sentences</a>
-            <a href="sentence_mythic_words.html">Sentence Mythic Words</a>
-            <a href="sentence_skeptic_words.html" class="active">Sentence Skeptic Words</a>
-            <a href="network_viz/index.html">Network Analysis</a>
-            <a href="map/index.html">Place Map</a>
-            <a href="place_pairs/index.html">Place Pairs</a>
-        </nav>
+        {_site_nav("", "analysis")}
 
         <div class="container">
             {format_classification_metrics(metrics, 'Non-skeptical', 'Skeptical')}
@@ -1239,17 +1767,7 @@ def generate_sentences_page(sentences_df, output_dir, title):
         <p>Greek passages split into sentences with English translation</p>
     </header>
 
-    <nav>
-        <a href=\"../index.html\">Home</a>
-        <a href=\"../mythic/index.html\">Mythic Analysis</a>
-        <a href=\"../skepticism/index.html\">Skepticism Analysis</a>
-        <a href=\"../mythic_words.html\">Mythic Words</a>
-        <a href=\"../skeptic_words.html\">Skeptic Words</a>
-        <a href=\"index.html\" class=\"active\">Sentences</a>
-        <a href=\"../sentence_mythic_words.html\">Sentence Mythic Words</a>
-        <a href=\"../sentence_skeptic_words.html\">Sentence Skeptic Words</a>
-        <a href=\"../network_viz/index.html\">Network Analysis</a>
-    </nav>
+    {_site_nav("../", "annotations")}
 
     <div class=\"container\">
         <h2>Chapter {chapter}</h2>
@@ -1322,17 +1840,7 @@ def generate_sentences_page(sentences_df, output_dir, title):
         <p>Greek passages split into sentences with English translation</p>
     </header>
 
-    <nav>
-        <a href=\"../index.html\">Home</a>
-        <a href=\"../mythic/index.html\">Mythic Analysis</a>
-        <a href=\"../skepticism/index.html\">Skepticism Analysis</a>
-        <a href=\"../mythic_words.html\">Mythic Words</a>
-        <a href=\"../skeptic_words.html\">Skeptic Words</a>
-        <a href=\"index.html\" class=\"active\">Sentences</a>
-        <a href=\"../sentence_mythic_words.html\">Sentence Mythic Words</a>
-        <a href=\"../sentence_skeptic_words.html\">Sentence Skeptic Words</a>
-        <a href=\"../network_viz/index.html\">Network Analysis</a>
-    </nav>
+    {_site_nav("../", "annotations")}
 
     <div class=\"container\">
         <h2>Chapters</h2>
@@ -1421,20 +1929,7 @@ def generate_map_page(map_data, output_dir, title):
         <p>Places mentioned in Pausanias' Description of Greece</p>
     </header>
 
-    <nav>
-        <a href="../index.html">Home</a>
-        <a href="../translation/index.html">Translation</a>
-        <a href="../mythic/index.html">Mythic Analysis</a>
-        <a href="../skepticism/index.html">Skepticism Analysis</a>
-        <a href="../mythic_words.html">Mythic Words</a>
-        <a href="../skeptic_words.html">Skeptic Words</a>
-        <a href="../sentences/index.html">Sentences</a>
-        <a href="../sentence_mythic_words.html">Sentence Mythic Words</a>
-        <a href="../sentence_skeptic_words.html">Sentence Skeptic Words</a>
-        <a href="../network_viz/index.html">Network Analysis</a>
-        <a href="index.html" class="active">Place Map</a>
-        <a href="../place_pairs/index.html">Place Pairs</a>
-    </nav>
+    {_site_nav("../", "places")}
 
     <div class="container" style="max-width: 1000px;">
         <h2>Place Map</h2>
@@ -1583,20 +2078,7 @@ def generate_place_pairs_page(place_pairs, output_dir, title):
         <p>Place pairs mentioned together in the same passage</p>
     </header>
 
-    <nav>
-        <a href="../index.html">Home</a>
-        <a href="../translation/index.html">Translation</a>
-        <a href="../mythic/index.html">Mythic Analysis</a>
-        <a href="../skepticism/index.html">Skepticism Analysis</a>
-        <a href="../mythic_words.html">Mythic Words</a>
-        <a href="../skeptic_words.html">Skeptic Words</a>
-        <a href="../sentences/index.html">Sentences</a>
-        <a href="../sentence_mythic_words.html">Sentence Mythic Words</a>
-        <a href="../sentence_skeptic_words.html">Sentence Skeptic Words</a>
-        <a href="../network_viz/index.html">Network Analysis</a>
-        <a href="../map/index.html">Place Map</a>
-        <a href="index.html" class="active">Place Pairs</a>
-    </nav>
+    {_site_nav("../", "places")}
 
     <div class="container" style="max-width: 1000px;">
         <h2>Place Pairs</h2>
@@ -1617,26 +2099,8 @@ def generate_place_pairs_page(place_pairs, output_dir, title):
 
 
 def _translation_nav(prefix, active=None):
-    """Generate nav HTML for translation pages with correct relative paths."""
-    links = [
-        ("index.html", "Home", "home"),
-        ("translation/index.html", "Translation", "translation"),
-        ("mythic/index.html", "Mythic Analysis", "mythic"),
-        ("skepticism/index.html", "Skepticism Analysis", "skepticism"),
-        ("sentences/index.html", "Sentences", "sentences"),
-        ("translation/nouns/index.html", "Noun Index", "nouns"),
-        ("network_viz/index.html", "Network Analysis", "network"),
-        ("map/index.html", "Place Map", "map"),
-        ("place_pairs/index.html", "Place Pairs", "place_pairs"),
-        ("translation_length/index.html", "Translation Length", "translation_length"),
-        ("graphic-book/index.html", "Graphic Book", "graphic_book"),
-        ("progress/index.html", "Progress", "progress"),
-    ]
-    parts = []
-    for href, label, key in links:
-        cls = ' class="active"' if key == active else ""
-        parts.append(f'<a href="{prefix}{href}"{cls}>{label}</a>')
-    return "<nav>\n            " + "\n            ".join(parts) + "\n        </nav>"
+    """Generate compact nav HTML for pages that historically used translation nav."""
+    return _site_nav(prefix, active)
 
 
 def _format_residual(value):
