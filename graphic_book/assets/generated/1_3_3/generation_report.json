@@ -1,0 +1,27 @@
+{
+  "passage_id": "1.3.3",
+  "approved_style_references": [
+    "graphic_book/images/1/1/4.png",
+    "graphic_book/images/1/1/5.png"
+  ],
+  "selected_assets": [
+    {
+      "role": "main",
+      "output": "graphic_book/assets/generated/1_3_3/main_stoa_zeus_twelve_gods.png",
+      "prompt_file": "graphic_book/assets/generated/1_3_3/main_stoa_zeus_twelve_gods.prompt.txt",
+      "source_image": "/Users/gregb/.codex/generated_images/019e0de7-2eb5-7e42-9c6c-b09d423494cb/ig_049f1aaf0d5069b90169ff77571df08191bb01a854ed12c9e9.png"
+    },
+    {
+      "role": "inset",
+      "output": "graphic_book/assets/generated/1_3_3/twelve_gods_portico.png",
+      "prompt_file": "graphic_book/assets/generated/1_3_3/twelve_gods_portico.prompt.txt",
+      "source_image": "/Users/gregb/.codex/generated_images/019e0de7-2eb5-7e42-9c6c-b09d423494cb/ig_049f1aaf0d5069b90169ff78096b248191b0baa2d787bdeaa4.png"
+    },
+    {
+      "role": "inset",
+      "output": "graphic_book/assets/generated/1_3_3/theseus_democracy_demos.png",
+      "prompt_file": "graphic_book/assets/generated/1_3_3/theseus_democracy_demos.prompt.txt",
+      "source_image": "/Users/gregb/.codex/generated_images/019e0de7-2eb5-7e42-9c6c-b09d423494cb/ig_049f1aaf0d5069b90169ff785a39f48191964c0e7c1ab7bf69.png"
+    }
+  ]
+}

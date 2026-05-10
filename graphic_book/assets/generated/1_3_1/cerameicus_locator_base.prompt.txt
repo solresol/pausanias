@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: small illustrated locator-map base for a Pausanias graphic-book page, no text
+Primary request: Create a refined parchment-atlas inset map base for Pausanias passage 1.3.1, showing the Cerameicus approach into the north-west Agora of ancient Athens. This is only the artwork underneath labels; do not include any words, letters, numbers, symbols, captions, or label boxes.
+Scene/backdrop: antique parchment map viewed from an oblique overhead angle, with the north-west city wall and gates on the left, a processional road entering toward the Agora, the Royal Stoa on the right side, clusters of small stone civic buildings, and a stylized Acropolis ridge in the upper right.
+Subject: a richly drawn miniature historical atlas plan with believable terrain shading, paved roads, wall stones, gates, roofed stoas, city blocks, sparse olive trees, and soft shadows. It should read as a premium coffee-table historical atlas inset, not a simple classroom diagram.
+Composition: horizontal rectangular inset composition with clear empty breathing room for later label boxes. Keep the main road and Royal Stoa spatially legible. The city wall should run vertically on the left; the Royal Stoa and Agora should sit on the right; the Acropolis ridge should be small in the upper right.
+Style: painterly archaeological atlas illustration, warm parchment-compatible palette, fine ink-and-watercolor texture, sophisticated linework, aged map wash, consistent with premium illustrated Pausanias pages.
+Lighting/color: warm tan parchment, muted ochre roads, pale stone, terracotta roofs, olive green accents, sepia ink outlines, subtle blue-grey distance.
+Avoid: any text or fake writing, labels, arrows, icon symbols, modern roads, flat vector shapes, childish drawing, crude boxes, simple diagram look, blank areas, fantasy elements, compass roses, cartouches, decorative lettering.

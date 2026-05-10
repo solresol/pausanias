@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: illustrated Pausanias graphic-book inset panel
+Primary request: Create a refined inset image for Pausanias passage 1.3.3 showing the painted program of the Twelve Gods within an Athenian stoa.
+Scene/backdrop: the interior wall zone of a classical Athenian portico, seen obliquely so the painted figures feel embedded in architecture rather than floating icons.
+Subject: a sequence of monumental painted Olympian gods on plaster wall panels between columns, with enough surrounding architecture, floor, and light to make the scene feel like a real civic colonnade. The gods should read as a dignified sacred ensemble, not as a fantasy poster.
+Composition: horizontal inset-friendly composition, close enough to register the twelve-god program clearly, but still atmospheric and architectural. A few small viewers or attendants are acceptable for scale.
+Historical details: classical Greek painted wall imagery in a civic-religious setting, restrained color, weathered yet still vivid plaster, Doric or mixed stoa architecture, no modern museum framing.
+Style: highly finished painterly archaeological reconstruction, sophisticated and luminous, consistent with the strongest Pausanias atlas pages already in context, especially 1.1.4 and 1.1.5.
+Lighting/color: warm angled daylight entering the portico, cream plaster, muted reds and blues, soft gold highlights, subtle age and texture.
+Avoid: text, labels, crude tableau, poster-like symmetry, cartoon gods, fantasy armor excess, isolated single deity close-up, modern gallery look, flat vector treatment.

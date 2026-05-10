@@ -15,6 +15,9 @@ from .data import (
     get_skepticism_predictors,
     get_proper_nouns_by_passage,
     get_all_sentences,
+    get_greta_sentence_annotations,
+    get_sentence_lemma_view,
+    get_greta_sentence_analysis_variants,
     get_sentence_mythicness_predictors,
     get_sentence_skepticism_predictors,
     get_simplified_mythicness_predictors,
@@ -41,6 +44,12 @@ from .structure import create_website_structure
 from .highlighting import create_predictor_maps
 from .generators import (
     generate_home_page,
+    generate_texts_index,
+    generate_annotations_index,
+    generate_greta_sentence_annotation_pages,
+    generate_lemma_pages,
+    generate_analysis_pages,
+    generate_places_index,
     generate_mythic_page,
     generate_skepticism_page,
     generate_mythic_words_page,
@@ -100,6 +109,9 @@ def main():
         skeptic_predictors = get_skepticism_predictors(conn)
         proper_nouns_dict = get_proper_nouns_by_passage(conn)
         sentences_df = get_all_sentences(conn)
+        greta_sentences_df = get_greta_sentence_annotations(conn)
+        sentence_lemmas_df = get_sentence_lemma_view(conn)
+        greta_analysis = get_greta_sentence_analysis_variants(conn)
         sentence_mythic_predictors = get_sentence_mythicness_predictors(conn)
         sentence_skeptic_predictors = get_sentence_skepticism_predictors(conn)
         simplified_mythic_predictors = get_simplified_mythicness_predictors(conn)
@@ -171,6 +183,12 @@ def main():
         
         # Generate all pages
         generate_home_page(output_dir, args.title, timestamp)
+        generate_texts_index(output_dir, args.title)
+        generate_annotations_index(greta_sentences_df, output_dir, args.title)
+        generate_greta_sentence_annotation_pages(greta_sentences_df, output_dir, args.title)
+        generate_lemma_pages(sentence_lemmas_df, output_dir, args.title)
+        generate_analysis_pages(greta_analysis, output_dir, args.title)
+        generate_places_index(output_dir, args.title)
         generate_mythic_page(passages_df, mythic_color_map, mythic_class_map, proper_nouns_dict, output_dir, args.title)
         generate_skepticism_page(passages_df, skeptic_color_map, skeptic_class_map, proper_nouns_dict, output_dir, args.title)
         generate_mythic_words_page(

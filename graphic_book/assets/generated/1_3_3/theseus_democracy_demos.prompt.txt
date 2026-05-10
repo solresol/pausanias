@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: illustrated Pausanias graphic-book inset panel
+Primary request: Create a refined inset image for Pausanias passage 1.3.3 showing the civic painted tableau of Theseus, Democracy, and Demos in an Athenian stoa.
+Scene/backdrop: a painted wall or shallow civic portico setting within the Athenian Agora, framed architecturally so the figures feel part of a real public monument.
+Subject: Theseus presented as a heroic king and civic founder, alongside allegorical female Democracy and male Demos, composed as a dignified classical public painting. The image should suggest political memory and civic identity rather than modern propaganda.
+Composition: horizontal inset-friendly scene with the three principal figures clearly legible, enough architectural setting to place them within a stoa or wall painting, and subtle human scale or offerings if useful. Theseus should not look like a generic Roman emperor; the allegorical figures should feel Greek and monumental.
+Historical details: classical Athenian painted imagery, restrained palette, weathered but preserved plaster, civic symbolism, no medieval or fantasy costume.
+Style: highly finished painterly archaeological reconstruction, warm and parchment-compatible, visually ambitious and consistent with the strongest Pausanias atlas pages already in context, especially 1.1.4 and 1.1.5.
+Lighting/color: warm raking daylight, soft cream plaster, muted cinnabar, blue-grey, and bronze accents, noble but not theatrical.
+Avoid: text, labels, modern flags, poster layout, flat iconography, cartoon heroism, modern democracy symbolism, fantasy throne room, crude wall-diagram look.
