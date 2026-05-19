@@ -1,9 +1,7 @@
 # Pausanias To-Do List
 
-Source anchors:
-- Raw call transcript: /Users/gregb/Downloads/Greg and Greta_transcript.txt
-- Pausanias excerpts: transcripts/2026-05-08-greg-and-greta-pausanias-excerpts.md
-- Main Pausanias block in raw transcript: lines 694-856, 900-1049, 1167-1194
+Source anchors are in the private ignored transcript notes, not in this public
+repository.
 
 ## Conference paper first pass
 

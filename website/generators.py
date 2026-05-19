@@ -3,6 +3,7 @@
 import json
 import os
 import html
+import math
 import re
 import pandas as pd
 from datetime import datetime
@@ -2563,6 +2564,29 @@ def _format_residual(value):
     return f"{float(value):+.1f}"
 
 
+def _format_optional_number(value, digits=3, signed=False):
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError):
+        return "n/a"
+    if not math.isfinite(numeric):
+        return "n/a"
+    sign = "+" if signed else ""
+    return f"{numeric:{sign}.{digits}f}"
+
+
+def _format_p_value(value):
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError):
+        return "n/a"
+    if not math.isfinite(numeric):
+        return "n/a"
+    if numeric < 0.001:
+        return "< 0.001"
+    return f"{numeric:.3f}"
+
+
 def _translation_passage_link(passage_id):
     parts = str(passage_id).split(".")
     if len(parts) != 3:
@@ -2660,6 +2684,181 @@ def _render_translation_length_passage_table(rows):
     """
 
 
+def _nice_chart_ticks(min_value, max_value, count=6):
+    if not math.isfinite(min_value) or not math.isfinite(max_value):
+        return []
+    if max_value <= min_value:
+        return [min_value]
+
+    raw_step = (max_value - min_value) / max(1, count - 1)
+    magnitude = 10 ** math.floor(math.log10(raw_step))
+    step = 10 * magnitude
+    for candidate in (1, 2, 5, 10):
+        nice_step = candidate * magnitude
+        if raw_step <= nice_step:
+            step = nice_step
+            break
+
+    start = math.ceil(min_value / step) * step
+    ticks = []
+    current = start
+    while current <= max_value + (step * 0.5):
+        ticks.append(current)
+        current += step
+    return ticks
+
+
+def _tick_label(value):
+    if abs(value - round(value)) < 0.001:
+        return f"{int(round(value))}"
+    return f"{value:.1f}"
+
+
+def _render_translation_length_relationship_graph(points, metrics):
+    if points is None or len(points) == 0:
+        return "<p>No length relationship data points are available.</p>"
+
+    plot_points = points.copy()
+    plot_points = plot_points.dropna(subset=["greek_word_count", "english_word_count"])
+    if len(plot_points) == 0:
+        return "<p>No length relationship data points are available.</p>"
+
+    plot_points["greek_word_count"] = plot_points["greek_word_count"].astype(float)
+    plot_points["english_word_count"] = plot_points["english_word_count"].astype(float)
+    grouped = (
+        plot_points.groupby(["greek_word_count", "english_word_count"], as_index=False)
+        .agg(passage_count=("id", "count"))
+        .sort_values(["greek_word_count", "english_word_count"])
+    )
+
+    width = 920
+    height = 500
+    left = 72
+    right = 30
+    top = 36
+    bottom = 64
+    plot_width = width - left - right
+    plot_height = height - top - bottom
+
+    slope = float(metrics.get("length_slope", 0.0))
+    intercept = float(metrics.get("length_intercept", 0.0))
+    x_values = plot_points["greek_word_count"].tolist()
+    y_values = plot_points["english_word_count"].tolist()
+    x_min = min(0.0, min(x_values))
+    x_max = max(x_values)
+    if x_max <= x_min:
+        x_min = max(0.0, x_min - 1.0)
+        x_max = x_max + 1.0
+
+    line_y_min = intercept + slope * x_min
+    line_y_max = intercept + slope * x_max
+    y_min = min(0.0, min(y_values), line_y_min, line_y_max)
+    y_max = max(y_values + [line_y_min, line_y_max])
+    if y_max <= y_min:
+        y_min = max(0.0, y_min - 1.0)
+        y_max = y_max + 1.0
+    y_padding = (y_max - y_min) * 0.08
+    y_min = max(0.0, y_min - y_padding)
+    y_max = y_max + y_padding
+
+    def x_coord(value):
+        return left + ((value - x_min) / (x_max - x_min)) * plot_width
+
+    def y_coord(value):
+        return top + ((y_max - value) / (y_max - y_min)) * plot_height
+
+    x_ticks = _nice_chart_ticks(x_min, x_max)
+    y_ticks = _nice_chart_ticks(y_min, y_max)
+    grid_lines = []
+    for tick in x_ticks:
+        x = x_coord(tick)
+        grid_lines.append(f'<line class="chart-grid" x1="{x:.1f}" y1="{top}" x2="{x:.1f}" y2="{height - bottom}" />')
+        grid_lines.append(f'<text class="chart-tick" x="{x:.1f}" y="{height - bottom + 22}" text-anchor="middle">{html.escape(_tick_label(tick))}</text>')
+    for tick in y_ticks:
+        y = y_coord(tick)
+        grid_lines.append(f'<line class="chart-grid" x1="{left}" y1="{y:.1f}" x2="{width - right}" y2="{y:.1f}" />')
+        grid_lines.append(f'<text class="chart-tick" x="{left - 12}" y="{y + 4:.1f}" text-anchor="end">{html.escape(_tick_label(tick))}</text>')
+
+    max_count = max(grouped["passage_count"])
+    circles = []
+    for _, row in grouped.iterrows():
+        count = int(row["passage_count"])
+        radius = 3.0 + (5.0 * math.sqrt(count) / math.sqrt(max_count))
+        x = x_coord(float(row["greek_word_count"]))
+        y = y_coord(float(row["english_word_count"]))
+        title = (
+            f"{count} passage{'s' if count != 1 else ''}: "
+            f"{int(row['greek_word_count'])} Greek words, "
+            f"{int(row['english_word_count'])} English words"
+        )
+        circles.append(f"""
+            <circle class="length-point" cx="{x:.1f}" cy="{y:.1f}" r="{radius:.1f}">
+                <title>{html.escape(title)}</title>
+            </circle>
+        """)
+
+    line_x1 = x_coord(x_min)
+    line_x2 = x_coord(x_max)
+    line_y1 = y_coord(line_y_min)
+    line_y2 = y_coord(line_y_max)
+    equation = f"English = {intercept:.2f} + {slope:.2f} * Greek"
+    r2 = _format_optional_number(metrics.get("length_r2"), 3)
+    slope_p = _format_p_value(metrics.get("length_slope_p_value"))
+
+    coefficient_table = f"""
+        <table class="predictor-table translation-length-coefficients">
+            <thead>
+                <tr>
+                    <th>Term</th>
+                    <th>Coefficient</th>
+                    <th>Std. Error</th>
+                    <th>p-value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Intercept</td>
+                    <td class="num">{_format_optional_number(metrics.get("length_intercept"), 3, signed=True)}</td>
+                    <td class="num">{_format_optional_number(metrics.get("length_intercept_std_error"), 3)}</td>
+                    <td class="num">{html.escape(_format_p_value(metrics.get("length_intercept_p_value")))}</td>
+                </tr>
+                <tr>
+                    <td>Greek word count</td>
+                    <td class="num">{_format_optional_number(metrics.get("length_slope"), 3, signed=True)}</td>
+                    <td class="num">{_format_optional_number(metrics.get("length_slope_std_error"), 3)}</td>
+                    <td class="num">{html.escape(_format_p_value(metrics.get("length_slope_p_value")))}</td>
+                </tr>
+            </tbody>
+        </table>
+    """
+
+    return f"""
+        <section class="translation-length-relationship">
+            <h2>English Length vs. Greek Length</h2>
+            <p>Each point is a translated passage, grouped when multiple passages have the same Greek and English word counts. The fitted line is the baseline model used before calculating residuals.</p>
+            <div class="translation-length-chart" role="img" aria-label="Scatter plot of English translation length by Greek source length">
+                <svg viewBox="0 0 {width} {height}" xmlns="http://www.w3.org/2000/svg">
+                    <rect class="chart-background" x="{left}" y="{top}" width="{plot_width}" height="{plot_height}" />
+                    {''.join(grid_lines)}
+                    <line class="chart-axis" x1="{left}" y1="{height - bottom}" x2="{width - right}" y2="{height - bottom}" />
+                    <line class="chart-axis" x1="{left}" y1="{top}" x2="{left}" y2="{height - bottom}" />
+                    <line class="regression-line" x1="{line_x1:.1f}" y1="{line_y1:.1f}" x2="{line_x2:.1f}" y2="{line_y2:.1f}" />
+                    {''.join(circles)}
+                    <text class="chart-axis-label" x="{left + plot_width / 2:.1f}" y="{height - 18}" text-anchor="middle">Greek source words</text>
+                    <text class="chart-axis-label" transform="translate(20 {top + plot_height / 2:.1f}) rotate(-90)" text-anchor="middle">English translation words</text>
+                    <g class="chart-stat-panel">
+                        <rect x="{width - 315}" y="{top + 12}" width="275" height="76" rx="4" />
+                        <text x="{width - 298}" y="{top + 38}">{html.escape(equation)}</text>
+                        <text x="{width - 298}" y="{top + 60}">R^2 = {html.escape(r2)}</text>
+                        <text x="{width - 298}" y="{top + 82}">slope p = {html.escape(slope_p)}</text>
+                    </g>
+                </svg>
+            </div>
+            {coefficient_table}
+        </section>
+    """
+
+
 def generate_translation_length_page(analysis, output_dir, title):
     """Generate a page for translation length residual predictors."""
     translation_length_dir = os.path.join(output_dir, "translation_length")
@@ -2698,6 +2897,10 @@ def generate_translation_length_page(analysis, output_dir, title):
         )
         longest_table = _render_translation_length_passage_table(analysis["longest_passages"])
         shortest_table = _render_translation_length_passage_table(analysis["shortest_passages"])
+        relationship_graph = _render_translation_length_relationship_graph(
+            analysis.get("length_points"),
+            metrics,
+        )
 
         body = f"""
             <h2>Translation Length Residuals</h2>
@@ -2713,6 +2916,8 @@ def generate_translation_length_page(analysis, output_dir, title):
                 <div><strong>{metrics["vocabulary_residual_r2"]:.3f}</strong><span>vocabulary residual R2</span></div>
                 <div><strong>{metrics.get("english_vocabulary_residual_r2", 0.0):.3f}</strong><span>English residual R2</span></div>
             </div>
+
+            {relationship_graph}
 
             <h2>Greek Predictors of Longer English</h2>
             <p>These Greek words and phrases are associated with translations that run longer than expected after the length adjustment.</p>
@@ -2768,6 +2973,60 @@ def generate_translation_length_page(analysis, output_dir, title):
         .translation-length-table .num {{
             text-align: right;
             white-space: nowrap;
+        }}
+        .translation-length-relationship {{
+            margin: 30px 0 34px;
+        }}
+        .translation-length-chart {{
+            border: 1px solid #d8d0c5;
+            border-radius: 6px;
+            margin: 16px 0;
+            overflow-x: auto;
+            padding: 10px;
+        }}
+        .translation-length-chart svg {{
+            display: block;
+            min-width: 720px;
+            width: 100%;
+        }}
+        .chart-background {{
+            fill: #fbfaf7;
+        }}
+        .chart-grid {{
+            stroke: #ded7cc;
+            stroke-width: 1;
+        }}
+        .chart-axis {{
+            stroke: #5c5142;
+            stroke-width: 1.5;
+        }}
+        .chart-axis-label,
+        .chart-tick {{
+            fill: #5c5142;
+            font-size: 13px;
+        }}
+        .regression-line {{
+            stroke: #9a3f31;
+            stroke-width: 3;
+        }}
+        .length-point {{
+            fill: #316a84;
+            fill-opacity: 0.62;
+            stroke: #17475a;
+            stroke-opacity: 0.75;
+            stroke-width: 1;
+        }}
+        .chart-stat-panel rect {{
+            fill: rgba(255, 255, 255, 0.92);
+            stroke: #d8d0c5;
+        }}
+        .chart-stat-panel text {{
+            fill: #463d33;
+            font-size: 13px;
+            font-weight: bold;
+        }}
+        .translation-length-coefficients {{
+            max-width: 680px;
         }}
     </style>
 </head>

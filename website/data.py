@@ -10,6 +10,7 @@ from typing import Optional
 import networkx as nx
 from openai import OpenAI
 import numpy as np
+from scipy import stats
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LinearRegression, LogisticRegression, Ridge
 from sklearn.metrics import (
@@ -1499,6 +1500,52 @@ def count_words(text):
     return len(WORD_PATTERN.findall(str(text)))
 
 
+def _coefficient_p_value(coefficient, std_error, dof):
+    """Return a two-sided p-value for a regression coefficient."""
+    if dof <= 0 or not np.isfinite(std_error):
+        return math.nan
+    if std_error == 0:
+        if coefficient == 0:
+            return 1.0
+        return 0.0
+    t_statistic = coefficient / std_error
+    return float(2.0 * stats.t.sf(abs(t_statistic), dof))
+
+
+def simple_length_model_stats(greek_lengths, english_lengths, expected_lengths, length_model):
+    """Calculate coefficient standard errors and p-values for the length model."""
+    x = np.asarray(greek_lengths, dtype=float).reshape(-1)
+    y = np.asarray(english_lengths, dtype=float).reshape(-1)
+    predicted = np.asarray(expected_lengths, dtype=float).reshape(-1)
+    sample_count = len(x)
+    dof = sample_count - 2
+    slope = float(length_model.coef_[0])
+    intercept = float(length_model.intercept_)
+
+    x_mean = float(np.mean(x)) if sample_count else math.nan
+    sxx = float(np.sum((x - x_mean) ** 2)) if sample_count else 0.0
+    if dof <= 0 or sxx == 0:
+        return {
+            "length_intercept_std_error": math.nan,
+            "length_intercept_p_value": math.nan,
+            "length_slope_std_error": math.nan,
+            "length_slope_p_value": math.nan,
+        }
+
+    residuals = y - predicted
+    residual_sum_squares = float(np.sum(residuals ** 2))
+    residual_variance = residual_sum_squares / dof
+    slope_std_error = math.sqrt(residual_variance / sxx)
+    intercept_std_error = math.sqrt(residual_variance * ((1.0 / sample_count) + (x_mean ** 2 / sxx)))
+
+    return {
+        "length_intercept_std_error": float(intercept_std_error),
+        "length_intercept_p_value": _coefficient_p_value(intercept, intercept_std_error, dof),
+        "length_slope_std_error": float(slope_std_error),
+        "length_slope_p_value": _coefficient_p_value(slope, slope_std_error, dof),
+    }
+
+
 def tfidf_casefold_preprocessor(text):
     """Casefold and normalize text before Greek TF-IDF tokenization."""
     return unicodedata.normalize("NFC", str(text).casefold())
@@ -1607,6 +1654,7 @@ def calculate_translation_length_analysis(
         "shorter_predictors": pd.DataFrame(),
         "english_longer_predictors": pd.DataFrame(),
         "english_shorter_predictors": pd.DataFrame(),
+        "length_points": pd.DataFrame(),
         "longest_passages": pd.DataFrame(),
         "shortest_passages": pd.DataFrame(),
     }
@@ -1643,6 +1691,12 @@ def calculate_translation_length_analysis(
 
     df["expected_english_word_count"] = expected_lengths
     df["length_residual"] = residuals
+    length_model_stats = simple_length_model_stats(
+        greek_lengths,
+        english_lengths,
+        expected_lengths,
+        length_model,
+    )
 
     greek_vocabulary_column = "lemma_passage" if "lemma_passage" in df.columns else "passage"
     try:
@@ -1690,28 +1744,41 @@ def calculate_translation_length_analysis(
 
     longest_passages = df.sort_values("length_residual", ascending=False).head(20)
     shortest_passages = df.sort_values("length_residual", ascending=True).head(20)
+    length_points = df[
+        [
+            "id",
+            "greek_word_count",
+            "english_word_count",
+            "expected_english_word_count",
+            "length_residual",
+        ]
+    ].sort_values(["greek_word_count", "english_word_count", "id"])
+
+    metrics = {
+        "passage_count": int(sample_count),
+        "feature_count": int(greek_feature_count),
+        "english_feature_count": int(english_feature_count),
+        "length_intercept": float(length_model.intercept_),
+        "length_slope": float(length_model.coef_[0]),
+        "length_r2": float(r2_score(english_lengths, expected_lengths)),
+        "residual_std": float(np.std(residuals)),
+        "vocabulary_residual_r2": float(greek_residual_r2),
+        "english_vocabulary_residual_r2": float(english_residual_r2),
+        "greek_vocabulary_source": "lemma" if greek_vocabulary_column == "lemma_passage" else "surface",
+        "min_df": int(min_df),
+        "max_features": int(max_features),
+    }
+    metrics.update(length_model_stats)
 
     return {
         "available": True,
         "message": "",
-        "metrics": {
-            "passage_count": int(sample_count),
-            "feature_count": int(greek_feature_count),
-            "english_feature_count": int(english_feature_count),
-            "length_intercept": float(length_model.intercept_),
-            "length_slope": float(length_model.coef_[0]),
-            "length_r2": float(r2_score(english_lengths, expected_lengths)),
-            "residual_std": float(np.std(residuals)),
-            "vocabulary_residual_r2": float(greek_residual_r2),
-            "english_vocabulary_residual_r2": float(english_residual_r2),
-            "greek_vocabulary_source": "lemma" if greek_vocabulary_column == "lemma_passage" else "surface",
-            "min_df": int(min_df),
-            "max_features": int(max_features),
-        },
+        "metrics": metrics,
         "longer_predictors": longer_predictors.reset_index(drop=True),
         "shorter_predictors": shorter_predictors.reset_index(drop=True),
         "english_longer_predictors": english_longer_predictors.reset_index(drop=True),
         "english_shorter_predictors": english_shorter_predictors.reset_index(drop=True),
+        "length_points": length_points.reset_index(drop=True),
         "longest_passages": longest_passages.reset_index(drop=True),
         "shortest_passages": shortest_passages.reset_index(drop=True),
     }
