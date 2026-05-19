@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: illustrated Pausanias graphic-book main panel
+Primary request: Create a rich coffee-table-book historical reconstruction for Pausanias passage 1.3.4, centered on Euphranor's painting of the cavalry engagement near Mantineia, displayed as a monumental wall painting inside an ancient Athenian stoa/gallery.
+Scene/backdrop: an Athenian stoa or gallery interior frames a long painted wall showing the dusty Arcadian battlefield near Mantineia. Greek cavalry surge across low hills and rocky ground in late-afternoon light.
+Subject: Athenians sent to aid the Lacedaemonians against Thebans and Boeotians, with Grylus son of Xenophon among the Athenians and Epaminondas among the Thebans. The image should suggest a public civic painting in Athens, not only a generic battle.
+Composition: broad landscape main panel, dynamic cavalry movement, strong central depth, enough clear zones for later local callout labels, stoa columns and painted plaster edge visible but not dominant.
+Historical details: Greek cavalry, bronze helmets, cloaks, spears, shields, dust, Arcadian hills, classical architectural framing, no modern weapons.
+Style: highly finished painterly archaeological reconstruction with the visual ambition of a premium historical atlas or coffee-table book, consistent with the strongest approved references 1.1.4 and 1.1.5.
+Lighting/color: warm Mediterranean gold, dusty amber air, muted blue-gray hills, pale stone and terracotta architectural edges.
+Avoid: text, labels, map symbols, flat vector terrain, schematic look, fantasy armor, Roman legionaries, medieval tack, modern museum display, cartoon figures, gore.

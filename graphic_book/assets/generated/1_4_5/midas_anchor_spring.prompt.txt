@@ -1,0 +1,8 @@
+Use case: historical-scene
+Asset type: text-free scenic/object inset for a Pausanias graphic-book page, later overlaid locally with labels and captions
+Primary request: Create a refined historical inset showing the sanctuary of Zeus at ancient Ancyra in Phrygia, with the legendary anchor found by Midas preserved as a sacred object beside a clear spring where Midas is said to have mixed wine while hunting Silenus.
+Scene/backdrop: Hellenistic/Phrygian sanctuary court near Ancyra, warm stone, low altar, bronze or iron anchor displayed respectfully on a plinth, spring basin with flowing water, distant dry Anatolian hills, subtle attendants or hunters in period clothing.
+Subject: Midas' anchor and spring, treated as an archaeological object study with sacred atmosphere, not fantasy.
+Composition: Landscape inset, museum-book illustration, enough clean space around the anchor and basin for local labels. No exact text in the art.
+Style: refined watercolor-gouache and ink, naturalistic historical reconstruction, parchment-compatible warm palette, high detail, credible materials and architecture.
+Constraints: no words, no letters, no inscriptions, no labels, no banners, no modern objects, no nudity, no eroticized poses, no gore, no cartoon style, no flat vector style, no schematic diagram, no watermark.

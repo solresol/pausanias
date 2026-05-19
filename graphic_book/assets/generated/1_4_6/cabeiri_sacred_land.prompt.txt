@@ -1,0 +1,7 @@
+Use case: historical-scene
+Asset type: text-free scenic inset raster art for a Pausanias graphic-book page
+Primary request: Create a refined historical landscape inset for Pausanias passage 1.4.6 showing the territory around Pergamon/Mysia as originally sacred to the Cabeiri.
+Scene/backdrop: A sacred rural precinct in ancient Mysia near Pergamon: low stone sanctuary terraces, torch-lit altar or small shrine, cypress and oak trees, distant Pergamene hills, priests or attendants in modest Hellenistic garments, votive objects, warm dawn or late afternoon light.
+Subject: Sacred land claimed by the Pergamenes as belonging to the Cabeiri, visually grounded in Mysian terrain.
+Style: museum-quality historical illustration, refined watercolor-gouache and ink, parchment-compatible warm palette, rich texture, naturalistic terrain, sophisticated coffee-table atlas art.
+Constraints: no words, no letters, no inscriptions, no labels, no modern objects, no nudity, no eroticized poses, no gore, no graphic wounds, no schematic diagram, no cartoon style, no watermark.

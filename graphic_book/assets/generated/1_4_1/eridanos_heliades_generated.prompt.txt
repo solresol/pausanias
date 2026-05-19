@@ -1,0 +1,8 @@
+Use case: historical-scene
+Asset type: scenic inset art for a professional classical-history graphic book page about Pausanias 1.4.1
+Primary request: Create a finished painterly historical-mythic illustration of the Eridanos river myth in a non-nude, professional coffee-table-book style.
+Scene/backdrop: A northern riverbank identified visually by a broad river, damp reeds, and tall poplar trees under warm late-afternoon light. The setting should feel like a mythic geography at the edge of Europe, not a generic modern park.
+Subject: Three or four fully clothed mourning women representing the daughters of Helios / Heliades stand and kneel beneath poplar trees at the riverbank, grieving Phaethon. Their garments must be opaque ancient draped robes with full torso and lower-body coverage. Subtle amber drops or resin-like tears appear on the poplar bark and near the river edge. In the far sky or reflected in the water, include a small restrained hint of Phaethon's fall: a faint fiery streak or distant broken chariot glow, not a central spectacle.
+Composition: Landscape orientation suitable for cropping to a 396x220 inset. Keep figures modest, small-to-medium scale, integrated with the river landscape. Strong atmospheric depth, elegant brushwork, rich texture, parchment-compatible warm palette. No text, no labels, no borders, no modern objects.
+Quality bar: finished scenic raster art that can sit beside a professional historical atlas or coffee-table book spread; painterly realism, not a diagram, not flat vector art, not simple icon shapes.
+Content restrictions: no nudity, no exposed breasts, no exposed genitals, no exposed buttocks, no eroticized poses, no sheer clothing, no gore, no violence, no graphic injury.

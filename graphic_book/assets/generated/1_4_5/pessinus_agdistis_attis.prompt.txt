@@ -1,0 +1,8 @@
+Use case: historical-scene
+Asset type: text-free scenic inset for a Pausanias graphic-book page, later overlaid locally with labels and captions
+Primary request: Create a refined historical inset of Pessinus beneath Mount Agdistis, showing a Phrygian sanctuary landscape associated with Attis' burial, suitable for Pausanias passage 1.4.5.
+Scene/backdrop: Ancient Pessinus in central Anatolia, a sacred precinct at the foot of rugged Mount Agdistis, warm dry highland terrain, cypress and stone terraces, a modest tumulus or hero tomb for Attis, priests or travelers in period clothing, no nudity.
+Subject: The spatial relationship of Pessinus, Mount Agdistis, and the burial place of Attis. The scene should feel historically grounded and solemn, not fantasy.
+Composition: Landscape inset, clear mountain backdrop rising behind a sanctuary and tomb marker, clean areas for later local labels. No exact text in the art.
+Style: museum-quality historical landscape illustration, refined watercolor-gouache and ink, naturalistic texture, parchment atlas compatible, warm earth palette with blue distance, high detail, atmospheric depth.
+Constraints: no words, no letters, no inscriptions, no labels, no banners, no modern objects, no nudity, no eroticized poses, no gore, no severed bodies, no cartoon style, no flat vector style, no schematic diagram, no watermark.

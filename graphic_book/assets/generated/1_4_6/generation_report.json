@@ -1,0 +1,27 @@
+{
+  "passage_id": "1.4.6",
+  "approved_reference_pages": [
+    "graphic_book/images/1/1/4.png",
+    "graphic_book/images/1/1/5.png"
+  ],
+  "continuity_reference_pages": [
+    "graphic_book/images/1/4/5.png"
+  ],
+  "assets": [
+    {
+      "output": "graphic_book/assets/generated/1_4_6/main_pergamene_spoils.png",
+      "prompt_file": "graphic_book/assets/generated/1_4_6/main_pergamene_spoils.prompt.txt",
+      "source_image": "/Users/gregb/.codex/generated_images/019e371a-787b-7091-b79b-cf5435c18926/ig_004fa7a25fea7148016a0a03273adc819181e415bd4df9e1b4.png"
+    },
+    {
+      "output": "graphic_book/assets/generated/1_4_6/cabeiri_sacred_land.png",
+      "prompt_file": "graphic_book/assets/generated/1_4_6/cabeiri_sacred_land.prompt.txt",
+      "source_image": "/Users/gregb/.codex/generated_images/019e371a-787b-7091-b79b-cf5435c18926/ig_004fa7a25fea7148016a0a03666b8c8191acbc8ddd000a740d.png"
+    },
+    {
+      "output": "graphic_book/assets/generated/1_4_6/telephus_mysia.png",
+      "prompt_file": "graphic_book/assets/generated/1_4_6/telephus_mysia.prompt.txt",
+      "source_image": "/Users/gregb/.codex/generated_images/019e371a-787b-7091-b79b-cf5435c18926/ig_004fa7a25fea7148016a0a03a3c9a88191854c7cbe2c765d54.png"
+    }
+  ]
+}

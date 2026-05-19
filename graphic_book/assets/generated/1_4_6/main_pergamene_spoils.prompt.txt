@@ -1,0 +1,7 @@
+Use case: historical-scene
+Asset type: text-free main raster art for a Pausanias graphic-book page, later overlaid locally with labels and passage text
+Primary request: Create a rich, sophisticated Hellenistic Pergamene historical reconstruction for Pausanias passage 1.4.6: the Pergamenes display spoils taken from the Galatians and a large painting of their battle against the Galatians, with the sacred Mysian/Pergamene landscape implied beyond.
+Scene/backdrop: A grand but historically plausible Pergamene stoa or trophy hall near the acropolis, warm stone architecture, painted battle panel mounted on a wall, captured Galatian shields, helmets, standards, and weapons arranged as spoils, distant view toward the Pergamene/Mysian hills and lower Asia through colonnades.
+Subject: Pergamene memory of victory over the Galatians: trophy display, battlefield painting, dignified attendants and soldiers in Hellenistic dress, no explicit violence.
+Style: museum-quality historical landscape and architectural illustration, refined watercolor-gouache and ink, parchment atlas compatible, warm earth palette, high detail, atmospheric depth, sophisticated coffee-table book art.
+Constraints: no words, no letters, no inscriptions, no labels, no map text, no modern objects, no nudity, no eroticized poses, no gore, no severed bodies, no graphic wounds, no flat vector terrain, no schematic diagram, no cartoon style, no watermark.

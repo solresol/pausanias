@@ -1,0 +1,7 @@
+Use case: historical-scene
+Asset type: text-free scenic inset raster art for a Pausanias graphic-book page
+Primary request: Create a refined historical inset for Pausanias passage 1.4.6 showing Telephus, the Arcadian/Mysian hero, resisting Agamemnon's Greeks when they mistakenly ravage the Mysian plain thinking it is Trojan territory.
+Scene/backdrop: Hellenistic-style historical painting or reconstructed landscape of the Mysian plain near Pergamon, with distant hills, a fortified settlement, Greek ships or camp far in the background, and two opposing groups arranged in a disciplined heroic struggle.
+Subject: Telephus defending Mysia against Agamemnon's forces after the Greeks lose their way to Troy, dignified and non-graphic.
+Style: museum-quality historical illustration, refined watercolor-gouache and ink, parchment-compatible warm palette, rich terrain and fabric texture, sophisticated coffee-table atlas art.
+Constraints: no words, no letters, no inscriptions, no labels, no modern objects, no nudity, no eroticized poses, no gore, no graphic wounds, no schematic diagram, no cartoon style, no watermark.
