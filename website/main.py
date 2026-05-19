@@ -66,6 +66,25 @@ from .generators import (
     generate_network_analysis_pages,
 )
 
+
+def add_greta_analysis_phrase_translations(greta_analysis, conn, client, model):
+    """Add cached or fetched English glosses to generated Greta variant predictors."""
+    if not greta_analysis:
+        return greta_analysis
+
+    for variant in greta_analysis.get("variants", []):
+        predictors = variant.get("predictors")
+        if predictors is not None and len(predictors) > 0:
+            variant["predictors"] = add_phrase_translations(
+                predictors,
+                conn,
+                client,
+                model,
+            )
+
+    return greta_analysis
+
+
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Create a static website to visualize mythic and skeptical aspects of Pausanias passages")
     add_database_argument(parser)
@@ -164,6 +183,7 @@ def main():
             sentence_simplified_mythic_predictors = add_phrase_translations(sentence_simplified_mythic_predictors, conn, client, args.model)
         if len(sentence_simplified_skeptic_predictors) > 0:
             sentence_simplified_skeptic_predictors = add_phrase_translations(sentence_simplified_skeptic_predictors, conn, client, args.model)
+        greta_analysis = add_greta_analysis_phrase_translations(greta_analysis, conn, client, args.model)
         
         # Analyze translation length residuals
         translation_length_analysis = get_translation_length_analysis(conn)
