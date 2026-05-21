@@ -43,14 +43,123 @@ RHETORIC_MARKER_WORDS = [
     "λέγουσιν",
     "λέγει",
     "λέγειν",
+    "λεγεται",
+    "λεγουσι",
+    "λεγουσιν",
+    "λεγει",
+    "λεγειν",
     "φημί",
     "φησί",
     "φησίν",
+    "φησὶ",
+    "φησὶν",
+    "φησι",
+    "φησιν",
     "φασί",
     "φασίν",
+    "φασὶ",
+    "φασὶν",
+    "φασι",
+    "φασιν",
     "φάσι",
+    "φάσιν",
     "φάσις",
     "φάσκω",
+]
+
+SEMANTIC_FIELD_ABLATIONS = [
+    {
+        "id": "genealogy-kinship",
+        "label": "Genealogy and Kinship",
+        "description": "Kinship, descent, marriage, and birth terms that drive the genealogical side of mythic narration.",
+        "terms": [
+            "θυγάτηρ",
+            "πατήρ",
+            "μήτηρ",
+            "υἱός",
+            "παῖς",
+            "γυνή",
+            "ἀνήρ",
+            "γάμος",
+            "γαμέω",
+            "τίκτω",
+            "γένος",
+            "γεννάω",
+            "ἀδελφός",
+            "ἀδελφή",
+            "ἔκγονος",
+            "ἀπόγονος",
+        ],
+    },
+    {
+        "id": "speech-reporting",
+        "label": "Speech and Reporting",
+        "description": "Speech, report, attribution, naming, and knowledge-framing terms.",
+        "terms": [
+            "λέγω",
+            "φημί",
+            "φάσκω",
+            "λόγος",
+            "ἔπος",
+            "μῦθος",
+            "ἀκούω",
+            "καλέω",
+            "ὀνομάζω",
+            "ὄνομα",
+            "νομίζω",
+            "δοκέω",
+            "μανθάνω",
+            "οἶδα",
+        ],
+    },
+    {
+        "id": "memorial-place-ritual",
+        "label": "Memorial, Place, and Ritual",
+        "description": "Tombs, shrines, names, cult sites, and place-making vocabulary.",
+        "terms": [
+            "μνῆμα",
+            "τάφος",
+            "θάπτω",
+            "ἡρῷον",
+            "ἱερόν",
+            "ναός",
+            "βωμός",
+            "ἄγαλμα",
+            "ἄγος",
+            "ἀνάθημα",
+            "θυσία",
+            "θύω",
+            "τελετή",
+            "ὄνομα",
+            "καλέω",
+        ],
+    },
+    {
+        "id": "war-politics-competition",
+        "label": "War, Politics, and Competition",
+        "description": "Military, civic, dynastic, athletic, and victory vocabulary that marks historical narration.",
+        "terms": [
+            "πόλεμος",
+            "πολεμέω",
+            "πολέμιος",
+            "μάχη",
+            "στρατός",
+            "στρατεύω",
+            "νικάω",
+            "νίκη",
+            "τύραννος",
+            "τυραννέω",
+            "βασιλεύς",
+            "ἀρχή",
+            "ἄρχω",
+            "πέμπω",
+            "ἀποστέλλω",
+            "χρῆμα",
+            "ἀριθμός",
+            "ἀγών",
+            "ἀθλητής",
+        ],
+    },
 ]
 
 NETWORK_BETWEENNESS_EXACT_LIMIT = 250
@@ -363,6 +472,86 @@ def _stopword_rows(conn):
     return read_sql_query("\nUNION\n".join(parts), conn)["word"].dropna().tolist()
 
 
+def _sentence_texts_and_stopwords(
+    variant_df,
+    *,
+    token_source,
+    proper_stopwords,
+    lemma_lookup,
+    extra_stopwords=None,
+):
+    extra_stopwords = list(extra_stopwords or [])
+    if token_source == "lemma":
+        if not lemma_lookup:
+            return None, None, None, "No cached word-level lemmas are available."
+        texts, lemma_stats = build_lemma_texts(variant_df["sentence"], lemma_lookup)
+        stopwords = expand_stopwords_with_lemma_forms(
+            proper_stopwords + extra_stopwords,
+            lemma_lookup,
+        )
+        lemma_summary = {
+            "token_count": lemma_stats.token_count,
+            "lemmatized_token_count": lemma_stats.lemmatized_token_count,
+            "missing_token_count": lemma_stats.missing_token_count,
+            "unique_missing_count": lemma_stats.unique_missing_count,
+        }
+    else:
+        texts = variant_df["sentence"].tolist()
+        stopwords = normalize_stopwords(proper_stopwords + extra_stopwords)
+        lemma_summary = None
+
+    return texts, stopwords, lemma_summary, ""
+
+
+def _binary_classification_metrics(y_true, y_pred):
+    precision, recall, f1, support = precision_recall_fscore_support(
+        y_true,
+        y_pred,
+        labels=[0, 1],
+        zero_division=0,
+    )
+    actual_0_pred_0, actual_0_pred_1, actual_1_pred_0, actual_1_pred_1 = confusion_matrix(
+        y_true,
+        y_pred,
+        labels=[0, 1],
+    ).ravel()
+    return {
+        "accuracy": float(accuracy_score(y_true, y_pred)),
+        "precision_0": float(precision[0]),
+        "recall_0": float(recall[0]),
+        "f1_0": float(f1[0]),
+        "support_0": int(support[0]),
+        "precision_1": float(precision[1]),
+        "recall_1": float(recall[1]),
+        "f1_1": float(f1[1]),
+        "support_1": int(support[1]),
+        "actual_0_pred_0": int(actual_0_pred_0),
+        "actual_0_pred_1": int(actual_0_pred_1),
+        "actual_1_pred_0": int(actual_1_pred_0),
+        "actual_1_pred_1": int(actual_1_pred_1),
+    }
+
+
+def _new_sentence_vectorizer(stopwords, *, max_features=1000, min_df=2):
+    return TfidfVectorizer(
+        max_features=max_features,
+        min_df=min_df,
+        ngram_range=(1, 2),
+        token_pattern=TFIDF_TOKEN_PATTERN,
+        preprocessor=casefold_preprocessor,
+        stop_words=stopwords,
+    )
+
+
+def _new_sentence_logistic_model():
+    return LogisticRegression(
+        C=1.0,
+        max_iter=1000,
+        class_weight="balanced",
+        random_state=42,
+    )
+
+
 def _fit_greta_sentence_variant(
     df,
     *,
@@ -372,6 +561,7 @@ def _fit_greta_sentence_variant(
     remove_rhetoric_markers,
     proper_stopwords,
     lemma_lookup,
+    additional_stopwords=None,
     max_features=1000,
     top_features=30,
     min_df=2,
@@ -407,40 +597,30 @@ def _fit_greta_sentence_variant(
         result["message"] = "Not enough mythic and historical sentences are tagged yet."
         return result
 
-    extra_stopwords = RHETORIC_MARKER_WORDS if remove_rhetoric_markers else []
-    if token_source == "lemma":
-        if not lemma_lookup:
-            result["message"] = "No cached word-level lemmas are available."
-            return result
-        texts, lemma_stats = build_lemma_texts(variant_df["sentence"], lemma_lookup)
-        stopwords = expand_stopwords_with_lemma_forms(
-            proper_stopwords + extra_stopwords,
-            lemma_lookup,
-        )
+    extra_stopwords = list(additional_stopwords or [])
+    if remove_rhetoric_markers:
+        extra_stopwords.extend(RHETORIC_MARKER_WORDS)
+    texts, stopwords, lemma_stats, message = _sentence_texts_and_stopwords(
+        variant_df,
+        token_source=token_source,
+        proper_stopwords=proper_stopwords,
+        lemma_lookup=lemma_lookup,
+        extra_stopwords=extra_stopwords,
+    )
+    if message:
+        result["message"] = message
+        return result
+    if lemma_stats is not None:
         result["lemma_stats"] = {
-            "token_count": lemma_stats.token_count,
-            "lemmatized_token_count": lemma_stats.lemmatized_token_count,
-            "missing_token_count": lemma_stats.missing_token_count,
-            "unique_missing_count": lemma_stats.unique_missing_count,
+            **lemma_stats,
         }
-    else:
-        texts = variant_df["sentence"].tolist()
-        stopwords = normalize_stopwords(proper_stopwords + extra_stopwords)
 
-    vectorizer = TfidfVectorizer(
+    vectorizer = _new_sentence_vectorizer(
+        stopwords,
         max_features=max_features,
         min_df=min_df,
-        ngram_range=(1, 2),
-        token_pattern=TFIDF_TOKEN_PATTERN,
-        preprocessor=casefold_preprocessor,
-        stop_words=stopwords,
     )
-    model = LogisticRegression(
-        C=1.0,
-        max_iter=1000,
-        class_weight="balanced",
-        random_state=42,
-    )
+    model = _new_sentence_logistic_model()
 
     test_size = 0.25
     try:
@@ -508,41 +688,354 @@ def _fit_greta_sentence_variant(
         top_features
     )
 
-    precision, recall, f1, support = precision_recall_fscore_support(
-        y_test,
-        y_pred,
-        labels=[0, 1],
-        zero_division=0,
-    )
-    actual_0_pred_0, actual_0_pred_1, actual_1_pred_0, actual_1_pred_1 = confusion_matrix(
-        y_test,
-        y_pred,
-        labels=[0, 1],
-    ).ravel()
-
     result.update(
         {
             "available": True,
             "feature_count": int(len(feature_names)),
             "predictors": pd.concat([top_negative, top_positive]).reset_index(drop=True),
-            "metrics": {
-                "accuracy": float(accuracy_score(y_test, y_pred)),
-                "precision_0": float(precision[0]),
-                "recall_0": float(recall[0]),
-                "f1_0": float(f1[0]),
-                "support_0": int(support[0]),
-                "precision_1": float(precision[1]),
-                "recall_1": float(recall[1]),
-                "f1_1": float(f1[1]),
-                "support_1": int(support[1]),
-                "actual_0_pred_0": int(actual_0_pred_0),
-                "actual_0_pred_1": int(actual_0_pred_1),
-                "actual_1_pred_0": int(actual_1_pred_0),
-                "actual_1_pred_1": int(actual_1_pred_1),
-            },
+            "metrics": _binary_classification_metrics(y_test, y_pred),
         }
     )
     return result
+
+
+def _main_scope_sentence_frame(annotations, *, include_books_4_8=False):
+    frame = annotations[annotations["myth_history_bucket"].isin(["mythic", "historical"])].copy()
+    if not include_books_4_8:
+        frame = frame[~frame["book"].isin(["4", "8"])].copy()
+    return frame
+
+
+def _semantic_field_ablation_analysis(annotations, proper_stopwords, lemma_lookup, baseline_variant):
+    """Rerun the main lemma model after removing interpretable semantic fields."""
+    if not baseline_variant or not baseline_variant.get("available"):
+        return {
+            "available": False,
+            "message": "The baseline lemma model is unavailable.",
+            "fields": [],
+        }
+
+    baseline_metrics = baseline_variant.get("metrics") or {}
+    baseline_accuracy = baseline_metrics.get("accuracy")
+    rows = []
+    for field in SEMANTIC_FIELD_ABLATIONS:
+        variant = _fit_greta_sentence_variant(
+            annotations,
+            label=f"ablation-{field['id']}",
+            token_source="lemma",
+            include_books_4_8=False,
+            remove_rhetoric_markers=False,
+            proper_stopwords=proper_stopwords,
+            lemma_lookup=lemma_lookup,
+            additional_stopwords=field["terms"],
+            top_features=8,
+        )
+        metrics = variant.get("metrics") or {}
+        accuracy = metrics.get("accuracy")
+        if accuracy is not None and baseline_accuracy is not None:
+            delta = float(accuracy - baseline_accuracy)
+        else:
+            delta = None
+        rows.append(
+            {
+                "id": field["id"],
+                "label": field["label"],
+                "description": field["description"],
+                "terms": field["terms"],
+                "available": bool(variant.get("available")),
+                "message": variant.get("message", ""),
+                "sample_count": int(variant.get("sample_count", 0)),
+                "feature_count": int(variant.get("feature_count", 0)),
+                "metrics": metrics,
+                "accuracy_delta": delta,
+            }
+        )
+
+    return {
+        "available": True,
+        "message": "",
+        "baseline": {
+            "id": baseline_variant.get("id"),
+            "sample_count": int(baseline_variant.get("sample_count", 0)),
+            "feature_count": int(baseline_variant.get("feature_count", 0)),
+            "metrics": baseline_metrics,
+        },
+        "fields": rows,
+    }
+
+
+def _book_held_out_analysis(annotations, proper_stopwords, lemma_lookup):
+    """Train on all but one book and test on the held-out book."""
+    variant_df = _main_scope_sentence_frame(annotations, include_books_4_8=True)
+    if len(variant_df) < 20:
+        return {
+            "available": False,
+            "message": "Not enough mythic and historical sentences are tagged yet.",
+            "books": [],
+        }
+
+    texts, stopwords, _, message = _sentence_texts_and_stopwords(
+        variant_df,
+        token_source="lemma",
+        proper_stopwords=proper_stopwords,
+        lemma_lookup=lemma_lookup,
+        extra_stopwords=[],
+    )
+    if message:
+        return {"available": False, "message": message, "books": []}
+
+    text_series = pd.Series(texts, index=variant_df.index)
+    y_series = (variant_df["myth_history_bucket"] == "mythic").astype(int)
+    rows = []
+    total_correct = 0
+    total_test = 0
+    for book in sorted(variant_df["book"].unique(), key=lambda value: int(value)):
+        test_mask = variant_df["book"] == book
+        train_mask = ~test_mask
+        train_df = variant_df[train_mask]
+        test_df = variant_df[test_mask]
+        train_counts = train_df["myth_history_bucket"].value_counts().to_dict()
+        test_counts = test_df["myth_history_bucket"].value_counts().to_dict()
+        min_train_class = min(train_counts.values()) if len(train_counts) == 2 else 0
+        row = {
+            "book": str(book),
+            "available": False,
+            "message": "",
+            "train_count": int(len(train_df)),
+            "test_count": int(len(test_df)),
+            "train_mythic": int(train_counts.get("mythic", 0)),
+            "train_historical": int(train_counts.get("historical", 0)),
+            "test_mythic": int(test_counts.get("mythic", 0)),
+            "test_historical": int(test_counts.get("historical", 0)),
+            "feature_count": 0,
+            "metrics": {},
+        }
+        if len(test_df) == 0 or min_train_class < 5:
+            row["message"] = "Not enough train/test data for this held-out book."
+            rows.append(row)
+            continue
+
+        vectorizer = _new_sentence_vectorizer(stopwords)
+        model = _new_sentence_logistic_model()
+        try:
+            train_matrix = vectorizer.fit_transform(text_series[train_mask].tolist())
+            if train_matrix.shape[1] == 0:
+                row["message"] = "No repeated vocabulary survived filtering."
+                rows.append(row)
+                continue
+            y_train = y_series[train_mask].to_numpy()
+            y_test = y_series[test_mask].to_numpy()
+            model.fit(train_matrix, y_train)
+            y_pred = model.predict(vectorizer.transform(text_series[test_mask].tolist()))
+        except ValueError as exc:
+            row["message"] = f"Could not fit model: {exc}"
+            rows.append(row)
+            continue
+
+        majority_label = 1 if row["train_mythic"] >= row["train_historical"] else 0
+        baseline_pred = np.full_like(y_test, majority_label)
+        metrics = _binary_classification_metrics(y_test, y_pred)
+        metrics["baseline_accuracy"] = float(accuracy_score(y_test, baseline_pred))
+        metrics["baseline_label"] = int(majority_label)
+        metrics["accuracy_delta_vs_baseline"] = float(
+            metrics["accuracy"] - metrics["baseline_accuracy"]
+        )
+        row.update(
+            {
+                "available": True,
+                "feature_count": int(len(vectorizer.get_feature_names_out())),
+                "metrics": metrics,
+            }
+        )
+        total_correct += int(np.sum(y_pred == y_test))
+        total_test += int(len(y_test))
+        rows.append(row)
+
+    available_rows = [row for row in rows if row["available"]]
+    summary = {
+        "book_count": int(len(available_rows)),
+        "weighted_accuracy": float(total_correct / total_test) if total_test else None,
+        "macro_accuracy": float(np.mean([row["metrics"]["accuracy"] for row in available_rows]))
+        if available_rows
+        else None,
+        "total_test": int(total_test),
+    }
+    return {
+        "available": bool(available_rows),
+        "message": "" if available_rows else "No held-out book models could be fit.",
+        "summary": summary,
+        "books": rows,
+    }
+
+
+def _top_feature_contributions(row_vector, feature_names, coefficients, predicted_label, limit=8):
+    contributions = []
+    coo = row_vector.tocoo()
+    for feature_index, value in zip(coo.col, coo.data):
+        contribution = float(value * coefficients[feature_index])
+        contributions.append((feature_names[feature_index], contribution))
+    if predicted_label == 1:
+        preferred = [item for item in contributions if item[1] > 0]
+        preferred.sort(key=lambda item: item[1], reverse=True)
+    else:
+        preferred = [item for item in contributions if item[1] < 0]
+        preferred.sort(key=lambda item: item[1])
+    if not preferred:
+        preferred = sorted(contributions, key=lambda item: abs(item[1]), reverse=True)
+    return [
+        {"term": term, "contribution": float(contribution)}
+        for term, contribution in preferred[:limit]
+    ]
+
+
+def _error_analysis(annotations, proper_stopwords, lemma_lookup, limit_per_type=20):
+    """Collect deterministic examples where the main model misclassifies held-out sentences."""
+    variant_df = _main_scope_sentence_frame(annotations, include_books_4_8=False)
+    bucket_counts = variant_df["myth_history_bucket"].value_counts().to_dict()
+    if len(variant_df) < 20 or len(bucket_counts) < 2 or min(bucket_counts.values()) < 5:
+        return {
+            "available": False,
+            "message": "Not enough mythic and historical sentences are tagged yet.",
+            "examples": {},
+        }
+
+    texts, stopwords, _, message = _sentence_texts_and_stopwords(
+        variant_df,
+        token_source="lemma",
+        proper_stopwords=proper_stopwords,
+        lemma_lookup=lemma_lookup,
+        extra_stopwords=[],
+    )
+    if message:
+        return {"available": False, "message": message, "examples": {}}
+
+    y = (variant_df["myth_history_bucket"] == "mythic").astype(int).to_numpy()
+    try:
+        X_train, X_test, y_train, y_test, idx_train, idx_test = train_test_split(
+            texts,
+            y,
+            variant_df.index.to_numpy(),
+            test_size=0.25,
+            random_state=42,
+            stratify=y,
+        )
+        vectorizer = _new_sentence_vectorizer(stopwords)
+        train_matrix = vectorizer.fit_transform(X_train)
+        if train_matrix.shape[1] == 0:
+            return {
+                "available": False,
+                "message": "No repeated vocabulary survived filtering.",
+                "examples": {},
+            }
+        model = _new_sentence_logistic_model()
+        model.fit(train_matrix, y_train)
+        test_matrix = vectorizer.transform(X_test)
+        y_pred = model.predict(test_matrix)
+        mythic_class_index = list(model.classes_).index(1)
+        mythic_probabilities = model.predict_proba(test_matrix)[:, mythic_class_index]
+    except ValueError as exc:
+        return {"available": False, "message": f"Could not fit model: {exc}", "examples": {}}
+
+    feature_names = vectorizer.get_feature_names_out()
+    coefficients = model.coef_[0]
+    test_rows = variant_df.loc[idx_test]
+    error_rows = []
+    for row_position, (idx, actual, predicted, mythic_probability) in enumerate(
+        zip(idx_test, y_test, y_pred, mythic_probabilities)
+    ):
+        if int(actual) == int(predicted):
+            continue
+        source_row = test_rows.loc[idx]
+        predicted_confidence = (
+            float(mythic_probability)
+            if int(predicted) == 1
+            else float(1.0 - mythic_probability)
+        )
+        error_rows.append(
+            {
+                "passage_id": source_row["passage_id"],
+                "sentence_number": int(source_row["sentence_number"]),
+                "book": str(source_row["book"]),
+                "sentence": source_row["sentence"],
+                "english_sentence": source_row.get("english_sentence", ""),
+                "rationale": source_row.get("rationale", ""),
+                "actual_label": "mythic" if int(actual) == 1 else "historical",
+                "predicted_label": "mythic" if int(predicted) == 1 else "historical",
+                "probability_mythic": float(mythic_probability),
+                "predicted_confidence": predicted_confidence,
+                "contributions": _top_feature_contributions(
+                    test_matrix[row_position],
+                    feature_names,
+                    coefficients,
+                    int(predicted),
+                ),
+            }
+        )
+
+    false_mythic = [
+        row for row in error_rows
+        if row["actual_label"] == "historical" and row["predicted_label"] == "mythic"
+    ]
+    false_historical = [
+        row for row in error_rows
+        if row["actual_label"] == "mythic" and row["predicted_label"] == "historical"
+    ]
+    false_mythic.sort(
+        key=lambda row: (row["predicted_confidence"], row["passage_id"], row["sentence_number"]),
+        reverse=True,
+    )
+    false_historical.sort(
+        key=lambda row: (row["predicted_confidence"], row["passage_id"], row["sentence_number"]),
+        reverse=True,
+    )
+    metrics = _binary_classification_metrics(y_test, y_pred)
+    return {
+        "available": True,
+        "message": "",
+        "summary": {
+            "sample_count": int(len(variant_df)),
+            "test_count": int(len(y_test)),
+            "error_count": int(len(error_rows)),
+            "false_mythic_count": int(len(false_mythic)),
+            "false_historical_count": int(len(false_historical)),
+            "feature_count": int(len(feature_names)),
+            "metrics": metrics,
+        },
+        "examples": {
+            "false_mythic": false_mythic[:limit_per_type],
+            "false_historical": false_historical[:limit_per_type],
+        },
+    }
+
+
+def _get_greta_complementary_analyses(annotations, proper_stopwords, lemma_lookup, variants):
+    baseline = next(
+        (
+            variant for variant in variants
+            if variant.get("token_source") == "lemma"
+            and not variant.get("include_books_4_8")
+            and not variant.get("remove_rhetoric_markers")
+        ),
+        None,
+    )
+    return {
+        "semantic_field_ablation": _semantic_field_ablation_analysis(
+            annotations,
+            proper_stopwords,
+            lemma_lookup,
+            baseline,
+        ),
+        "book_held_out": _book_held_out_analysis(
+            annotations,
+            proper_stopwords,
+            lemma_lookup,
+        ),
+        "error_analysis": _error_analysis(
+            annotations,
+            proper_stopwords,
+            lemma_lookup,
+        ),
+    }
 
 
 def get_greta_sentence_analysis_variants(conn):
@@ -591,6 +1084,12 @@ def get_greta_sentence_analysis_variants(conn):
         "prompt_version": annotations.iloc[0]["prompt_version"],
         "model": annotations.iloc[0].get("model", ""),
         "variants": variants,
+        "complementary": _get_greta_complementary_analyses(
+            annotations,
+            proper_stopwords,
+            lemma_lookup,
+            variants,
+        ),
         "bucket_counts": bucket_counts,
         "book_counts": book_counts,
         "tagged_sentence_count": int(len(annotations)),
@@ -1204,6 +1703,197 @@ def _bridge_noun_rows(sentence_nouns, limit=60):
     return rows[:limit]
 
 
+def _louvain_core_analysis(
+    sentence_nouns,
+    *,
+    min_contexts=10,
+    min_strength=20,
+    exclude_books=("4", "8"),
+    limit_communities=20,
+):
+    relevant = sentence_nouns[
+        sentence_nouns["myth_history_bucket"].isin(["mythic", "historical"])
+    ].copy()
+    if exclude_books:
+        relevant = relevant[~relevant["book"].isin(list(exclude_books))].copy()
+    if len(relevant) == 0:
+        return {
+            "available": False,
+            "message": "No mythic or historical sentence-level noun matches are available.",
+            "communities": [],
+        }
+
+    graph, context_counts = _graph_from_context_rows(relevant)
+    if graph.number_of_nodes() == 0 or graph.number_of_edges() == 0:
+        return {
+            "available": False,
+            "message": "The shared noun graph is empty.",
+            "communities": [],
+        }
+
+    largest_component_nodes = max(nx.connected_components(graph), key=len)
+    largest_component = graph.subgraph(largest_component_nodes).copy()
+    strengths = _weighted_strengths(largest_component)
+    core_nodes = [
+        node for node in largest_component.nodes()
+        if context_counts.get(node, 0) >= min_contexts
+        and strengths.get(node, 0) >= min_strength
+    ]
+    core_graph = largest_component.subgraph(core_nodes).copy()
+    core_graph.remove_nodes_from(list(nx.isolates(core_graph)))
+    if core_graph.number_of_nodes() == 0 or core_graph.number_of_edges() == 0:
+        return {
+            "available": False,
+            "message": "No connected core remains after the context and strength thresholds.",
+            "communities": [],
+        }
+    core_graph = core_graph.subgraph(max(nx.connected_components(core_graph), key=len)).copy()
+    stable_core_graph = nx.Graph()
+    for node in sorted(core_graph.nodes(), key=lambda value: (value[0], value[1])):
+        stable_core_graph.add_node(node, **core_graph.nodes[node])
+    for source, target, attrs in sorted(
+        core_graph.edges(data=True),
+        key=lambda edge: (edge[0][0], edge[0][1], edge[1][0], edge[1][1]),
+    ):
+        stable_core_graph.add_edge(source, target, **attrs)
+    core_graph = stable_core_graph
+    strengths = _weighted_strengths(core_graph)
+
+    bucket_contexts = defaultdict(lambda: defaultdict(set))
+    for _, row in relevant.iterrows():
+        node = _network_node_key(row)
+        if node in core_graph:
+            bucket_contexts[node][row["myth_history_bucket"]].add(row["context_id"])
+
+    node_bucket = {}
+    for node in core_graph.nodes():
+        mythic_contexts = len(bucket_contexts[node].get("mythic", set()))
+        historical_contexts = len(bucket_contexts[node].get("historical", set()))
+        if mythic_contexts > historical_contexts:
+            dominant_bucket = "mythic"
+        elif historical_contexts > mythic_contexts:
+            dominant_bucket = "historical"
+        else:
+            dominant_bucket = "balanced"
+        node_bucket[node] = dominant_bucket
+        core_graph.nodes[node]["mythic_contexts"] = mythic_contexts
+        core_graph.nodes[node]["historical_contexts"] = historical_contexts
+        core_graph.nodes[node]["dominant_bucket"] = dominant_bucket
+
+    try:
+        communities = nx.community.louvain_communities(
+            core_graph,
+            weight="weight",
+            seed=42,
+            resolution=1.0,
+        )
+    except (AttributeError, nx.NetworkXException, ZeroDivisionError) as exc:
+        return {
+            "available": False,
+            "message": f"Could not run Louvain community detection: {exc}",
+            "communities": [],
+        }
+
+    communities = sorted(
+        communities,
+        key=lambda community: (
+            -len(community),
+            sorted(community, key=lambda node: (node[0], node[1]))[0],
+        ),
+    )
+    modularity = nx.community.modularity(core_graph, communities, weight="weight")
+    community_index = {}
+    for idx, community in enumerate(communities, start=1):
+        for node in community:
+            community_index[node] = idx
+
+    community_rows = []
+    for idx, community in enumerate(communities[:limit_communities], start=1):
+        node_counts = Counter(node_bucket[node] for node in community)
+        mythic_contexts = sum(
+            core_graph.nodes[node].get("mythic_contexts", 0) for node in community
+        )
+        historical_contexts = sum(
+            core_graph.nodes[node].get("historical_contexts", 0) for node in community
+        )
+        if mythic_contexts > historical_contexts:
+            dominant_context = "mythic"
+        elif historical_contexts > mythic_contexts:
+            dominant_context = "historical"
+        else:
+            dominant_context = "balanced"
+        top_nodes = sorted(
+            community,
+            key=lambda node: (
+                strengths.get(node, 0),
+                core_graph.degree(node),
+                node[0],
+            ),
+            reverse=True,
+        )[:10]
+        community_rows.append(
+            {
+                "community": int(idx),
+                "size": int(len(community)),
+                "node_mythic": int(node_counts.get("mythic", 0)),
+                "node_historical": int(node_counts.get("historical", 0)),
+                "node_balanced": int(node_counts.get("balanced", 0)),
+                "context_mythic": int(mythic_contexts),
+                "context_historical": int(historical_contexts),
+                "dominant_context": dominant_context,
+                "top_nodes": [
+                    _network_node_label(core_graph.nodes[node], node)
+                    for node in top_nodes
+                ],
+            }
+        )
+
+    cross_edges = Counter()
+    for source, target, attrs in core_graph.edges(data=True):
+        source_community = community_index[source]
+        target_community = community_index[target]
+        if source_community == target_community:
+            continue
+        cross_edges[tuple(sorted((source_community, target_community)))] += attrs.get(
+            "weight",
+            1,
+        )
+    cross_community_edges = [
+        {
+            "source": int(source),
+            "target": int(target),
+            "weight": int(weight),
+        }
+        for (source, target), weight in sorted(
+            cross_edges.items(),
+            key=lambda item: item[1],
+            reverse=True,
+        )
+    ]
+
+    return {
+        "available": True,
+        "message": "",
+        "scope": "excluding books 4 and 8",
+        "min_contexts": int(min_contexts),
+        "min_strength": int(min_strength),
+        "source_sentence_count": int(
+            relevant[["passage_id", "sentence_number"]].drop_duplicates().shape[0]
+        ),
+        "source_noun_mentions": int(len(relevant)),
+        "source_node_count": int(graph.number_of_nodes()),
+        "source_edge_count": int(graph.number_of_edges()),
+        "largest_component_size": int(largest_component.number_of_nodes()),
+        "core_node_count": int(core_graph.number_of_nodes()),
+        "core_edge_count": int(core_graph.number_of_edges()),
+        "community_count": int(len(communities)),
+        "modularity": float(modularity),
+        "dominant_node_counts": dict(Counter(node_bucket.values())),
+        "communities": community_rows,
+        "cross_community_edges": cross_community_edges[:30],
+    }
+
+
 def _node_set(graph):
     return set(graph.nodes())
 
@@ -1376,9 +2066,15 @@ def get_extended_network_analysis(conn):
     if len(sentence_nouns) == 0:
         class_subgraphs = {}
         bridge_nouns = []
+        louvain_core = {
+            "available": False,
+            "message": "No sentence-level noun matches are available.",
+            "communities": [],
+        }
     else:
         class_subgraphs = _class_subgraph_analysis(sentence_nouns)
         bridge_nouns = _bridge_noun_rows(sentence_nouns)
+        louvain_core = _louvain_core_analysis(sentence_nouns)
 
     return {
         "available": True,
@@ -1386,6 +2082,7 @@ def get_extended_network_analysis(conn):
         "sentence_matching": sentence_stats,
         "class_subgraphs": class_subgraphs,
         "bridge_nouns": bridge_nouns,
+        "louvain_core": louvain_core,
         "book_drift": _book_drift_analysis(passage_nouns),
         "bipartite": _bipartite_analysis(passage_nouns),
     }

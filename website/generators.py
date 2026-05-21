@@ -826,12 +826,242 @@ def _variant_href(variant):
     return f"{variant['id']}.html"
 
 
+def _format_optional_float(value, digits=3, signed=False):
+    if value is None:
+        return ""
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return ""
+    sign = "+" if signed else ""
+    return f"{number:{sign}.{digits}f}"
+
+
+def _format_label(value):
+    return str(value).replace("_", " ").title()
+
+
+def _format_error_contributions(contributions):
+    if not contributions:
+        return ""
+    parts = []
+    for item in contributions:
+        contribution = item.get("contribution")
+        contribution_text = _format_optional_float(contribution, digits=3, signed=True)
+        parts.append(
+            f"{html.escape(str(item.get('term', '')))} "
+            f"<span class=\"note\">({contribution_text})</span>"
+        )
+    return "<br>".join(parts)
+
+
+def _render_error_rows(rows):
+    if not rows:
+        return '<tr><td colspan="7">No errors of this type in the sampled test split.</td></tr>'
+    rendered = []
+    for row in rows:
+        sentence = html.escape(str(row.get("sentence", "")))
+        english_sentence = html.escape(str(row.get("english_sentence") or ""))
+        rationale = html.escape(str(row.get("rationale") or ""))
+        details = f"<p class=\"greek-text\">{sentence}</p>"
+        if english_sentence:
+            details += f"<p>{english_sentence}</p>"
+        if rationale:
+            details += f"<details><summary>Tagging rationale</summary><p>{rationale}</p></details>"
+        rendered.append(f"""
+            <tr>
+                <td>{html.escape(str(row.get("passage_id", "")))}.{int(row.get("sentence_number", 0))}</td>
+                <td>{html.escape(_format_label(row.get("actual_label", "")))}</td>
+                <td>{html.escape(_format_label(row.get("predicted_label", "")))}</td>
+                <td class="num">{_format_optional_float(row.get("probability_mythic"), 3)}</td>
+                <td class="num">{_format_optional_float(row.get("predicted_confidence"), 3)}</td>
+                <td>{_format_error_contributions(row.get("contributions", []))}</td>
+                <td>{details}</td>
+            </tr>
+        """)
+    return "".join(rendered)
+
+
+def _write_analysis_html_page(analysis_dir, filename, title, header_subtitle, body, site_title):
+    page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{html.escape(site_title)} - {html.escape(title)}</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{html.escape(site_title)}</h1>
+        <p>{html.escape(header_subtitle)}</p>
+    </header>
+    {_site_nav("../", "analysis")}
+    <div class="container wide-container">
+        <div class="breadcrumb"><a href="index.html">Analyses</a> &rsaquo; {html.escape(title)}</div>
+        <h2>{html.escape(title)}</h2>
+        {body}
+        <footer>{_generated_footer()}</footer>
+    </div>
+</body>
+</html>
+"""
+    with open(os.path.join(analysis_dir, filename), "w", encoding="utf-8") as f:
+        f.write(page)
+
+
+def _write_complementary_analysis_pages(complementary, analysis_dir, title):
+    semantic = complementary.get("semantic_field_ablation", {}) if complementary else {}
+    if semantic.get("available"):
+        baseline = semantic.get("baseline", {})
+        baseline_metrics = baseline.get("metrics", {})
+        rows = []
+        for row in semantic.get("fields", []):
+            metrics = row.get("metrics", {})
+            row_status = (
+                f"{metrics.get('accuracy', 0.0):.3f}"
+                if row.get("available") and metrics
+                else html.escape(row.get("message", "Unavailable"))
+            )
+            terms = ", ".join(row.get("terms", []))
+            rows.append(f"""
+                <tr>
+                    <td><strong>{html.escape(row.get("label", ""))}</strong><br><span class="note">{html.escape(row.get("description", ""))}</span></td>
+                    <td>{html.escape(terms)}</td>
+                    <td class="num">{row_status}</td>
+                    <td class="num">{_format_optional_float(row.get("accuracy_delta"), 3, signed=True)}</td>
+                    <td class="num">{_format_optional_float(metrics.get("f1_0"), 3)}</td>
+                    <td class="num">{_format_optional_float(metrics.get("f1_1"), 3)}</td>
+                    <td class="num">{int(row.get("feature_count", 0)):,}</td>
+                </tr>
+            """)
+        body = f"""
+            <p class="note">Baseline is the main paper-facing model: lemma vocabulary, books 4 and 8 excluded, proper nouns removed, rhetoric markers retained.</p>
+            <div class="metric-strip">
+                <div><strong>{baseline_metrics.get("accuracy", 0):.3f}</strong><span>baseline accuracy</span></div>
+                <div><strong>{int(baseline.get("sample_count", 0)):,}</strong><span>sentences</span></div>
+                <div><strong>{int(baseline.get("feature_count", 0)):,}</strong><span>baseline features</span></div>
+            </div>
+            <table class="predictor-table">
+                <thead>
+                    <tr><th>Removed Field</th><th>Terms Removed</th><th>Accuracy</th><th>Delta</th><th>Historical F1</th><th>Mythic F1</th><th>Features</th></tr>
+                </thead>
+                <tbody>{''.join(rows)}</tbody>
+            </table>
+        """
+    else:
+        body = f"<p>{html.escape(semantic.get('message', 'Semantic-field ablation is unavailable.'))}</p>"
+    _write_analysis_html_page(
+        analysis_dir,
+        "semantic_field_ablation.html",
+        "Semantic-Field Ablation",
+        "What happens when interpretable lexical fields are removed",
+        body,
+        title,
+    )
+
+    holdout = complementary.get("book_held_out", {}) if complementary else {}
+    if holdout.get("available"):
+        summary = holdout.get("summary", {})
+        rows = []
+        for row in holdout.get("books", []):
+            metrics = row.get("metrics", {})
+            if row.get("available"):
+                status_cells = f"""
+                    <td class="num">{metrics.get("accuracy", 0):.3f}</td>
+                    <td class="num">{metrics.get("baseline_accuracy", 0):.3f}</td>
+                    <td class="num">{_format_optional_float(metrics.get("accuracy_delta_vs_baseline"), 3, signed=True)}</td>
+                    <td class="num">{_format_optional_float(metrics.get("f1_0"), 3)}</td>
+                    <td class="num">{_format_optional_float(metrics.get("f1_1"), 3)}</td>
+                    <td class="num">{metrics.get("actual_0_pred_0", 0)}/{metrics.get("actual_0_pred_1", 0)}/{metrics.get("actual_1_pred_0", 0)}/{metrics.get("actual_1_pred_1", 0)}</td>
+                """
+            else:
+                status_cells = f'<td colspan="6">{html.escape(row.get("message", "Unavailable"))}</td>'
+            rows.append(f"""
+                <tr>
+                    <td class="num">{html.escape(str(row.get("book", "")))}</td>
+                    <td class="num">{int(row.get("test_count", 0)):,}</td>
+                    <td class="num">{int(row.get("test_historical", 0)):,}</td>
+                    <td class="num">{int(row.get("test_mythic", 0)):,}</td>
+                    <td class="num">{int(row.get("train_historical", 0)):,}</td>
+                    <td class="num">{int(row.get("train_mythic", 0)):,}</td>
+                    {status_cells}
+                </tr>
+            """)
+        body = f"""
+            <p class="note">Each row trains the same lemma/proper-noun-removed model on all other books and tests on the held-out book. Books 4 and 8 are included here deliberately as stress tests.</p>
+            <div class="metric-strip">
+                <div><strong>{_format_optional_float(summary.get("weighted_accuracy"), 3)}</strong><span>weighted accuracy</span></div>
+                <div><strong>{_format_optional_float(summary.get("macro_accuracy"), 3)}</strong><span>mean book accuracy</span></div>
+                <div><strong>{int(summary.get("total_test", 0)):,}</strong><span>held-out sentences</span></div>
+            </div>
+            <table class="predictor-table">
+                <thead>
+                    <tr><th>Book</th><th>Test</th><th>Hist Test</th><th>Myth Test</th><th>Hist Train</th><th>Myth Train</th><th>Accuracy</th><th>Baseline</th><th>Delta</th><th>Hist F1</th><th>Myth F1</th><th>HH/HM/MH/MM</th></tr>
+                </thead>
+                <tbody>{''.join(rows)}</tbody>
+            </table>
+        """
+    else:
+        body = f"<p>{html.escape(holdout.get('message', 'Book-held-out analysis is unavailable.'))}</p>"
+    _write_analysis_html_page(
+        analysis_dir,
+        "book_held_out.html",
+        "Book-Held-Out Robustness",
+        "Does the vocabulary model generalise across books?",
+        body,
+        title,
+    )
+
+    errors = complementary.get("error_analysis", {}) if complementary else {}
+    if errors.get("available"):
+        summary = errors.get("summary", {})
+        metrics = summary.get("metrics", {})
+        examples = errors.get("examples", {})
+        body = f"""
+            <p class="note">These are deterministic test-split errors from the main lemma model, sorted by the model's confidence in the wrong prediction. They are meant for close reading, not as a new classifier.</p>
+            <div class="metric-strip">
+                <div><strong>{metrics.get("accuracy", 0):.3f}</strong><span>test accuracy</span></div>
+                <div><strong>{int(summary.get("error_count", 0)):,}</strong><span>test errors</span></div>
+                <div><strong>{int(summary.get("false_mythic_count", 0)):,}</strong><span>false mythic</span></div>
+                <div><strong>{int(summary.get("false_historical_count", 0)):,}</strong><span>false historical</span></div>
+            </div>
+            <h3>Historical Sentences Predicted as Mythic</h3>
+            <table class="predictor-table">
+                <thead>
+                    <tr><th>Sentence</th><th>Actual</th><th>Predicted</th><th>P(mythic)</th><th>Confidence</th><th>Top Contributions</th><th>Text</th></tr>
+                </thead>
+                <tbody>{_render_error_rows(examples.get("false_mythic", []))}</tbody>
+            </table>
+
+            <h3>Mythic Sentences Predicted as Historical</h3>
+            <table class="predictor-table">
+                <thead>
+                    <tr><th>Sentence</th><th>Actual</th><th>Predicted</th><th>P(mythic)</th><th>Confidence</th><th>Top Contributions</th><th>Text</th></tr>
+                </thead>
+                <tbody>{_render_error_rows(examples.get("false_historical", []))}</tbody>
+            </table>
+        """
+    else:
+        body = f"<p>{html.escape(errors.get('message', 'Error analysis is unavailable.'))}</p>"
+    _write_analysis_html_page(
+        analysis_dir,
+        "error_analysis.html",
+        "Model Error Analysis",
+        "Confident misclassifications for close reading",
+        body,
+        title,
+    )
+
+
 def generate_analysis_pages(greta_analysis, output_dir, title):
     """Generate the analysis hub and current Greta logistic-regression variants."""
     analysis_dir = os.path.join(output_dir, "analysis")
     os.makedirs(analysis_dir, exist_ok=True)
 
     variants = greta_analysis.get("variants", []) if greta_analysis else []
+    complementary = greta_analysis.get("complementary", {}) if greta_analysis else {}
+    _write_complementary_analysis_pages(complementary, analysis_dir, title)
     for variant in variants:
         predictors = variant.get("predictors")
         metrics = variant.get("metrics")
@@ -972,6 +1202,25 @@ def generate_analysis_pages(greta_analysis, output_dir, title):
     {_site_nav("../", "analysis")}
     <div class="container wide-container">
         {greta_section}
+
+        <h2>Complementary Robustness Checks</h2>
+        <div class="hub-grid">
+            <section class="hub-card">
+                <h3>Semantic-Field Ablation</h3>
+                <p>Reruns the main lemma model after removing kinship, reporting, memorial, and military-political vocabularies.</p>
+                <a href="semantic_field_ablation.html">Open Ablation Analysis</a>
+            </section>
+            <section class="hub-card">
+                <h3>Book-Held-Out Robustness</h3>
+                <p>Trains on all but one book, then tests whether the model generalises to the held-out book.</p>
+                <a href="book_held_out.html">Open Held-Out Analysis</a>
+            </section>
+            <section class="hub-card">
+                <h3>Model Error Analysis</h3>
+                <p>Confident false mythic and false historical predictions for close-reading follow-up.</p>
+                <a href="error_analysis.html">Open Error Analysis</a>
+            </section>
+        </div>
 
         <h2>Translation Length</h2>
         <section class="hub-card">
@@ -1244,6 +1493,43 @@ def _render_community_rows(rows):
     return "".join(output)
 
 
+def _render_louvain_community_rows(rows):
+    if not rows:
+        return "<tr><td colspan=\"8\">No Louvain community rows available yet.</td></tr>"
+
+    output = []
+    for row in rows:
+        output.append(f"""
+            <tr>
+                <td class="num">{int(row["community"])}</td>
+                <td>{html.escape(str(row["dominant_context"]))}</td>
+                <td class="num">{int(row["size"]):,}</td>
+                <td class="num">{int(row.get("node_mythic", 0)):,}</td>
+                <td class="num">{int(row.get("node_historical", 0)):,}</td>
+                <td class="num">{int(row.get("context_mythic", 0)):,}</td>
+                <td class="num">{int(row.get("context_historical", 0)):,}</td>
+                <td>{html.escape(", ".join(row.get("top_nodes", [])))}</td>
+            </tr>
+        """)
+    return "".join(output)
+
+
+def _render_louvain_cross_edge_rows(rows):
+    if not rows:
+        return "<tr><td colspan=\"3\">No cross-community edges available.</td></tr>"
+
+    output = []
+    for row in rows:
+        output.append(f"""
+            <tr>
+                <td class="num">{int(row["source"])}</td>
+                <td class="num">{int(row["target"])}</td>
+                <td class="num">{int(row["weight"]):,}</td>
+            </tr>
+        """)
+    return "".join(output)
+
+
 def generate_network_analysis_pages(network_analysis, output_dir, title):
     """Generate paper-facing network analysis pages."""
     analysis_dir = os.path.join(output_dir, "network_analysis")
@@ -1371,6 +1657,61 @@ def generate_network_analysis_pages(network_analysis, output_dir, title):
 """
     with open(os.path.join(analysis_dir, "bridge_nouns.html"), "w", encoding="utf-8") as f:
         f.write(bridge_page)
+
+    louvain = network_analysis.get("louvain_core", {})
+    if louvain.get("available"):
+        louvain_body = f"""
+        <p class="note">This shared-core analysis builds one sentence-level proper-noun graph from mythic and historical sentences, excludes books 4 and 8, keeps names in at least <strong>{int(louvain.get("min_contexts", 0))}</strong> tagged sentences with weighted degree at least <strong>{int(louvain.get("min_strength", 0))}</strong>, and then runs Louvain community detection.</p>
+        <div class="metric-strip">
+            <div><strong>{int(louvain.get("core_node_count", 0)):,}</strong><span>core names</span></div>
+            <div><strong>{int(louvain.get("core_edge_count", 0)):,}</strong><span>core links</span></div>
+            <div><strong>{int(louvain.get("community_count", 0)):,}</strong><span>communities</span></div>
+            <div><strong>{_format_network_float(louvain.get("modularity", 0), 3)}</strong><span>modularity</span></div>
+        </div>
+
+        <h2>Louvain Communities</h2>
+        <table class="predictor-table">
+            <thead>
+                <tr><th>#</th><th>Dominant</th><th>Names</th><th>Mythic-Dominant Names</th><th>Historical-Dominant Names</th><th>Mythic Contexts</th><th>Historical Contexts</th><th>Leading Names</th></tr>
+            </thead>
+            <tbody>{_render_louvain_community_rows(louvain.get("communities", []))}</tbody>
+        </table>
+
+        <h2>Strongest Cross-Community Links</h2>
+        <table class="predictor-table">
+            <thead>
+                <tr><th>Community A</th><th>Community B</th><th>Weighted Links</th></tr>
+            </thead>
+            <tbody>{_render_louvain_cross_edge_rows(louvain.get("cross_community_edges", []))}</tbody>
+        </table>
+        """
+    else:
+        louvain_body = f"<p>{html.escape(louvain.get('message', 'No Louvain core analysis is available.'))}</p>"
+    louvain_page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - Louvain Core Communities</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{title}</h1>
+        <p>Community detection on the shared mythic/historical proper-noun core</p>
+    </header>
+    {_site_nav("../", "places")}
+    <div class="container wide-container">
+        <div class="breadcrumb"><a href="index.html">Network Analyses</a> &rsaquo; Louvain Core Communities</div>
+        <h2>Louvain Core Communities</h2>
+        {louvain_body}
+        <footer>{_generated_footer()}</footer>
+    </div>
+</body>
+</html>
+"""
+    with open(os.path.join(analysis_dir, "louvain_core.html"), "w", encoding="utf-8") as f:
+        f.write(louvain_page)
 
     book_rows = []
     for book in network_analysis["book_drift"].get("books", []):
@@ -1559,6 +1900,11 @@ def generate_network_analysis_pages(network_analysis, output_dir, title):
                 <h3>Bridge Nouns</h3>
                 <p>Names and places with high bridge scores between mythic and historical sentence networks.</p>
                 <a href="bridge_nouns.html">Open Bridge Nouns</a>
+            </section>
+            <section class="hub-card">
+                <h3>Louvain Core Communities</h3>
+                <p>Community detection on the shared mythic/historical proper-noun core, excluding books 4 and 8.</p>
+                <a href="louvain_core.html">Open Louvain Core</a>
             </section>
             <section class="hub-card">
                 <h3>Book-Level Drift</h3>
