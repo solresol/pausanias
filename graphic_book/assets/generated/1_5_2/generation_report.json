@@ -1,0 +1,27 @@
+{
+  "passage_id": "1.5.2",
+  "approved_reference_pages": [
+    "graphic_book/images/1/1/4.png",
+    "graphic_book/images/1/1/5.png"
+  ],
+  "continuity_references": [
+    "graphic_book/images/1/5/1.png"
+  ],
+  "generated_assets": [
+    {
+      "output": "graphic_book/assets/generated/1_5_2/main_eponymous_heroes.png",
+      "prompt_file": "graphic_book/assets/generated/1_5_2/main_eponymous_heroes.prompt.txt",
+      "source_image": "/Users/gregb/.codex/generated_images/019e4166-0feb-79b1-b3a3-ca35ad6092d0/ig_0c590503e05ad790016a0ca5ec4e508191a8d9bdb99bab8902.png"
+    },
+    {
+      "output": "graphic_book/assets/generated/1_5_2/leos_daughters_oracle.png",
+      "prompt_file": "graphic_book/assets/generated/1_5_2/leos_daughters_oracle.prompt.txt",
+      "source_image": "/Users/gregb/.codex/generated_images/019e4166-0feb-79b1-b3a3-ca35ad6092d0/ig_0c590503e05ad790016a0ca637366481918f077e1f52fd26da.png"
+    },
+    {
+      "output": "graphic_book/assets/generated/1_5_2/erechtheus_eleusinians.png",
+      "prompt_file": "graphic_book/assets/generated/1_5_2/erechtheus_eleusinians.prompt.txt",
+      "source_image": "/Users/gregb/.codex/generated_images/019e4166-0feb-79b1-b3a3-ca35ad6092d0/ig_0c590503e05ad790016a0ca6876df88191892c44fcae29e579.png"
+    }
+  ]
+}
