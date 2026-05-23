@@ -588,6 +588,7 @@ def _fit_greta_sentence_variant(
         "bucket_counts": bucket_counts,
         "feature_count": 0,
         "predictors": pd.DataFrame(),
+        "all_predictors": pd.DataFrame(),
         "metrics": None,
         "available": False,
         "message": "",
@@ -693,6 +694,7 @@ def _fit_greta_sentence_variant(
             "available": True,
             "feature_count": int(len(feature_names)),
             "predictors": pd.concat([top_negative, top_positive]).reset_index(drop=True),
+            "all_predictors": predictor_rows.reset_index(drop=True),
             "metrics": _binary_classification_metrics(y_test, y_pred),
         }
     )
@@ -2270,7 +2272,7 @@ def calculate_residual_predictors(
     feature_matrix = vectorizer.fit_transform(texts)
     feature_names = vectorizer.get_feature_names_out()
     if len(feature_names) == 0:
-        return pd.DataFrame(), pd.DataFrame(), 0, 0.0
+        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), 0, 0.0
 
     residual_model = Ridge(alpha=10.0)
     residual_model.fit(feature_matrix, residuals)
@@ -2325,9 +2327,190 @@ def calculate_residual_predictors(
     return (
         longer_predictors.reset_index(drop=True),
         shorter_predictors.reset_index(drop=True),
+        predictors.reset_index(drop=True),
         int(len(feature_names)),
         float(r2_score(residuals, predicted_residuals)),
     )
+
+
+def _safe_correlation(x_values, y_values, *, method):
+    x = np.asarray(x_values, dtype=float)
+    y = np.asarray(y_values, dtype=float)
+    finite = np.isfinite(x) & np.isfinite(y)
+    x = x[finite]
+    y = y[finite]
+    if len(x) < 3 or float(np.std(x)) == 0.0 or float(np.std(y)) == 0.0:
+        return {"coefficient": None, "p_value": None}
+    if method == "spearman":
+        coefficient, p_value = stats.spearmanr(x, y)
+    else:
+        coefficient, p_value = stats.pearsonr(x, y)
+    return {
+        "coefficient": float(coefficient) if math.isfinite(coefficient) else None,
+        "p_value": float(p_value) if math.isfinite(p_value) else None,
+    }
+
+
+def _quadratic_r2(x_values, y_values):
+    x = np.asarray(x_values, dtype=float)
+    y = np.asarray(y_values, dtype=float)
+    finite = np.isfinite(x) & np.isfinite(y)
+    x = x[finite]
+    y = y[finite]
+    if len(x) < 3 or float(np.std(x)) == 0.0 or float(np.std(y)) == 0.0:
+        return None
+    design = np.column_stack([x, x ** 2])
+    model = LinearRegression()
+    model.fit(design, y)
+    predicted = model.predict(design)
+    return float(r2_score(y, predicted))
+
+
+def calculate_translation_mythic_coefficient_relationship(
+    translation_length_analysis,
+    greta_analysis,
+):
+    """Relate translation-length residual terms to mythic/historical coefficients."""
+    unavailable = {
+        "available": False,
+        "message": "Translation residual and Greta coefficient data are not both available.",
+        "points": pd.DataFrame(),
+        "metrics": {},
+    }
+    if not translation_length_analysis or not translation_length_analysis.get("available"):
+        result = unavailable.copy()
+        result["message"] = "Translation length residual data is unavailable."
+        return result
+    if not greta_analysis or not greta_analysis.get("available"):
+        result = unavailable.copy()
+        result["message"] = "Greta mythic/historical coefficient data is unavailable."
+        return result
+
+    baseline = next(
+        (
+            variant for variant in greta_analysis.get("variants", [])
+            if variant.get("token_source") == "lemma"
+            and not variant.get("include_books_4_8")
+            and not variant.get("remove_rhetoric_markers")
+        ),
+        None,
+    )
+    if not baseline or not baseline.get("available"):
+        result = unavailable.copy()
+        result["message"] = "The paper-facing lemma model is unavailable."
+        return result
+
+    residual_terms = translation_length_analysis.get("all_greek_predictors")
+    if residual_terms is None or len(residual_terms) == 0:
+        fallback_frames = []
+        for direction, key in (("longer", "longer_predictors"), ("shorter", "shorter_predictors")):
+            frame = translation_length_analysis.get(key)
+            if frame is not None and len(frame) > 0:
+                fallback_frame = frame.copy()
+                fallback_frame["translation_direction"] = direction
+                fallback_frames.append(fallback_frame)
+        residual_terms = (
+            pd.concat(fallback_frames, ignore_index=True)
+            if fallback_frames
+            else pd.DataFrame()
+        )
+    if residual_terms is None or len(residual_terms) == 0:
+        result = unavailable.copy()
+        result["message"] = "No Greek residual terms are available."
+        return result
+
+    residual_terms = residual_terms.copy()
+    if "translation_direction" not in residual_terms.columns:
+        residual_terms["translation_direction"] = np.where(
+            residual_terms["coefficient"].astype(float) >= 0,
+            "longer",
+            "shorter",
+        )
+    residual_terms = residual_terms.rename(
+        columns={
+            "coefficient": "translation_residual_coefficient",
+            "passage_count": "translation_passage_count",
+            "mean_residual_with_term": "mean_translation_residual_with_term",
+            "mean_residual_without_term": "mean_translation_residual_without_term",
+        }
+    )
+    residual_terms["abs_translation_residual_coefficient"] = residual_terms[
+        "translation_residual_coefficient"
+    ].abs()
+    residual_terms = (
+        residual_terms.sort_values("abs_translation_residual_coefficient", ascending=False)
+        .drop_duplicates(subset=["phrase"])
+        .reset_index(drop=True)
+    )
+
+    classifier_predictors = baseline.get("all_predictors")
+    if classifier_predictors is None or len(classifier_predictors) == 0:
+        classifier_predictors = baseline.get("predictors")
+    if classifier_predictors is None or len(classifier_predictors) == 0:
+        result = unavailable.copy()
+        result["message"] = "The paper-facing lemma model has no coefficient table."
+        return result
+
+    classifier_terms = classifier_predictors.copy().rename(
+        columns={
+            "coefficient": "mythic_log_odds_coefficient",
+            "p_value": "mythic_p_value",
+            "q_value": "mythic_q_value",
+        }
+    )
+    merged = residual_terms.merge(
+        classifier_terms[
+            [
+                "phrase",
+                "mythic_log_odds_coefficient",
+                "mythic_count",
+                "historical_count",
+                "mythic_p_value",
+                "mythic_q_value",
+            ]
+        ],
+        on="phrase",
+        how="inner",
+    )
+    if len(merged) == 0:
+        result = unavailable.copy()
+        result["message"] = "None of the Greek residual terms are features in the paper-facing lemma model."
+        return result
+
+    merged["classification_direction"] = np.where(
+        merged["mythic_log_odds_coefficient"] >= 0,
+        "mythic",
+        "historical",
+    )
+    merged["abs_mythic_log_odds_coefficient"] = merged[
+        "mythic_log_odds_coefficient"
+    ].abs()
+    merged = merged.sort_values(
+        ["abs_translation_residual_coefficient", "abs_mythic_log_odds_coefficient"],
+        ascending=[False, False],
+    ).reset_index(drop=True)
+
+    x = merged["translation_residual_coefficient"].to_numpy(dtype=float)
+    y = merged["mythic_log_odds_coefficient"].to_numpy(dtype=float)
+    abs_x = np.abs(x)
+    abs_y = np.abs(y)
+    metrics = {
+        "matched_term_count": int(len(merged)),
+        "residual_term_count": int(len(residual_terms)),
+        "baseline_feature_count": int(baseline.get("feature_count", 0)),
+        "linear_pearson": _safe_correlation(x, y, method="pearson"),
+        "linear_spearman": _safe_correlation(x, y, method="spearman"),
+        "extremity_pearson": _safe_correlation(abs_x, abs_y, method="pearson"),
+        "extremity_spearman": _safe_correlation(abs_x, abs_y, method="spearman"),
+        "quadratic_abs_r2": _quadratic_r2(x, abs_y),
+    }
+
+    return {
+        "available": True,
+        "message": "",
+        "points": merged.reset_index(drop=True),
+        "metrics": metrics,
+    }
 
 
 def calculate_translation_length_analysis(
@@ -2349,8 +2532,10 @@ def calculate_translation_length_analysis(
         "metrics": {},
         "longer_predictors": pd.DataFrame(),
         "shorter_predictors": pd.DataFrame(),
+        "all_greek_predictors": pd.DataFrame(),
         "english_longer_predictors": pd.DataFrame(),
         "english_shorter_predictors": pd.DataFrame(),
+        "all_english_predictors": pd.DataFrame(),
         "length_points": pd.DataFrame(),
         "longest_passages": pd.DataFrame(),
         "shortest_passages": pd.DataFrame(),
@@ -2400,6 +2585,7 @@ def calculate_translation_length_analysis(
         (
             longer_predictors,
             shorter_predictors,
+            all_greek_predictors,
             greek_feature_count,
             greek_residual_r2,
         ) = calculate_residual_predictors(
@@ -2419,6 +2605,7 @@ def calculate_translation_length_analysis(
         (
             english_longer_predictors,
             english_shorter_predictors,
+            all_english_predictors,
             english_feature_count,
             english_residual_r2,
         ) = calculate_residual_predictors(
@@ -2431,6 +2618,7 @@ def calculate_translation_length_analysis(
     except ValueError:
         english_longer_predictors = pd.DataFrame()
         english_shorter_predictors = pd.DataFrame()
+        all_english_predictors = pd.DataFrame()
         english_feature_count = 0
         english_residual_r2 = 0.0
 
@@ -2473,12 +2661,241 @@ def calculate_translation_length_analysis(
         "metrics": metrics,
         "longer_predictors": longer_predictors.reset_index(drop=True),
         "shorter_predictors": shorter_predictors.reset_index(drop=True),
+        "all_greek_predictors": all_greek_predictors.reset_index(drop=True),
         "english_longer_predictors": english_longer_predictors.reset_index(drop=True),
         "english_shorter_predictors": english_shorter_predictors.reset_index(drop=True),
+        "all_english_predictors": all_english_predictors.reset_index(drop=True),
         "length_points": length_points.reset_index(drop=True),
         "longest_passages": longest_passages.reset_index(drop=True),
         "shortest_passages": shortest_passages.reset_index(drop=True),
     }
+
+
+TRANSLATION_BUCKET_LABELS = {
+    "mythic": "Mythic",
+    "historical": "Historical",
+    "other": "Other",
+}
+
+
+def _empty_sentence_translation_bucket_analysis(message="No tagged sentence translations found."):
+    return {
+        "available": False,
+        "message": message,
+        "metrics": {},
+        "bucket_summary": pd.DataFrame(),
+        "bucket_analyses": {},
+        "sentence_analysis": {},
+    }
+
+
+def _sentence_bucket_id(row):
+    passage_id = str(row.get("passage_id", "")).strip()
+    sentence_number = str(row.get("sentence_number", "")).strip()
+    if passage_id and sentence_number:
+        return f"{passage_id}#{sentence_number}"
+    return ""
+
+
+def _fit_bucket_length_model(bucket_rows):
+    x = bucket_rows["greek_word_count"].to_numpy(dtype=float).reshape(-1, 1)
+    y = bucket_rows["english_word_count"].to_numpy(dtype=float)
+    if len(bucket_rows) < 3 or float(np.std(x)) == 0.0 or float(np.std(y)) == 0.0:
+        return None, None
+
+    model = LinearRegression()
+    model.fit(x, y)
+    predicted = model.predict(x)
+    return float(model.coef_[0]), float(r2_score(y, predicted))
+
+
+def calculate_sentence_translation_bucket_analysis(
+    sentences_df,
+    max_features=1200,
+    top_features=20,
+    min_df=2,
+    greek_stop_words=None,
+):
+    """Compare sentence-level translation length residuals across Greta buckets."""
+    required_columns = {"sentence", "english_sentence", "myth_history_bucket"}
+    if sentences_df is None or len(sentences_df) == 0:
+        return _empty_sentence_translation_bucket_analysis()
+    missing_columns = required_columns.difference(sentences_df.columns)
+    if missing_columns:
+        return _empty_sentence_translation_bucket_analysis(
+            f"Tagged sentence translation data is missing: {', '.join(sorted(missing_columns))}."
+        )
+
+    df = sentences_df.copy()
+    df = df.dropna(subset=["sentence", "english_sentence", "myth_history_bucket"])
+    df["sentence"] = df["sentence"].astype(str)
+    df["english_sentence"] = df["english_sentence"].astype(str)
+    df["myth_history_bucket"] = df["myth_history_bucket"].astype(str)
+    df = df[
+        (df["sentence"].str.strip() != "")
+        & (df["english_sentence"].str.strip() != "")
+        & (df["myth_history_bucket"].isin(TRANSLATION_BUCKET_LABELS))
+    ].copy()
+    if len(df) < 5:
+        return _empty_sentence_translation_bucket_analysis(
+            "At least five tagged sentence translations are needed for the bucket length model."
+        )
+
+    if "id" not in df.columns:
+        df["id"] = df.apply(_sentence_bucket_id, axis=1)
+    df["id"] = df["id"].astype(str)
+    missing_ids = df["id"].str.strip() == ""
+    if missing_ids.any():
+        df.loc[missing_ids, "id"] = [f"sentence-{i}" for i in range(1, int(missing_ids.sum()) + 1)]
+
+    analysis_df = df[
+        [
+            "id",
+            "sentence",
+            "english_sentence",
+            "myth_history_bucket",
+        ]
+    ].rename(columns={"sentence": "passage", "english_sentence": "english_translation"})
+    if "lemma_sentence" in df.columns:
+        analysis_df = analysis_df.copy()
+        analysis_df["lemma_passage"] = df["lemma_sentence"].astype(str)
+
+    sentence_analysis = calculate_translation_length_analysis(
+        analysis_df,
+        max_features=max_features,
+        top_features=top_features,
+        min_df=min_df,
+        greek_stop_words=greek_stop_words,
+    )
+    if not sentence_analysis.get("available"):
+        return _empty_sentence_translation_bucket_analysis(
+            f"Could not calculate the shared sentence baseline: {sentence_analysis.get('message', '')}"
+        )
+
+    length_points = sentence_analysis["length_points"][
+        [
+            "id",
+            "greek_word_count",
+            "english_word_count",
+            "expected_english_word_count",
+            "length_residual",
+        ]
+    ]
+    bucket_points = df[["id", "myth_history_bucket"]].merge(length_points, on="id", how="inner")
+    if len(bucket_points) == 0:
+        return _empty_sentence_translation_bucket_analysis(
+            "No sentence bucket rows matched the shared sentence baseline."
+        )
+
+    summary_rows = []
+    bucket_analyses = {}
+    for bucket, label in TRANSLATION_BUCKET_LABELS.items():
+        bucket_rows = bucket_points[bucket_points["myth_history_bucket"] == bucket].copy()
+        if len(bucket_rows) == 0:
+            continue
+
+        bucket_slope, bucket_r2 = _fit_bucket_length_model(bucket_rows)
+        greek_total = float(bucket_rows["greek_word_count"].sum())
+        english_total = float(bucket_rows["english_word_count"].sum())
+        summary_rows.append(
+            {
+                "bucket": bucket,
+                "label": label,
+                "sentence_count": int(len(bucket_rows)),
+                "mean_greek_word_count": float(bucket_rows["greek_word_count"].mean()),
+                "mean_english_word_count": float(bucket_rows["english_word_count"].mean()),
+                "english_per_greek_word": english_total / greek_total if greek_total else math.nan,
+                "mean_expected_english_word_count": float(
+                    bucket_rows["expected_english_word_count"].mean()
+                ),
+                "mean_global_residual": float(bucket_rows["length_residual"].mean()),
+                "median_global_residual": float(bucket_rows["length_residual"].median()),
+                "global_residual_std": float(np.std(bucket_rows["length_residual"])),
+                "bucket_length_slope": bucket_slope,
+                "bucket_length_r2": bucket_r2,
+            }
+        )
+
+        bucket_ids = set(bucket_rows["id"])
+        bucket_analysis_df = analysis_df[analysis_df["id"].isin(bucket_ids)].copy()
+        if len(bucket_analysis_df) >= 5:
+            bucket_analyses[bucket] = calculate_translation_length_analysis(
+                bucket_analysis_df,
+                max_features=max_features,
+                top_features=top_features,
+                min_df=min_df,
+                greek_stop_words=greek_stop_words,
+            )
+        else:
+            bucket_analyses[bucket] = _empty_sentence_translation_bucket_analysis(
+                "At least five sentence translations are needed for this bucket model."
+            )
+
+    bucket_summary = pd.DataFrame(summary_rows)
+    if len(bucket_summary) > 0:
+        bucket_summary["_order"] = bucket_summary["bucket"].map(
+            {bucket: index for index, bucket in enumerate(TRANSLATION_BUCKET_LABELS)}
+        )
+        bucket_summary = bucket_summary.sort_values("_order").drop(columns=["_order"])
+
+    metrics = {
+        "sentence_count": int(len(bucket_points)),
+        "bucket_count": int(len(bucket_summary)),
+        "length_slope": sentence_analysis["metrics"]["length_slope"],
+        "length_r2": sentence_analysis["metrics"]["length_r2"],
+        "residual_std": sentence_analysis["metrics"]["residual_std"],
+        "vocabulary_residual_r2": sentence_analysis["metrics"]["vocabulary_residual_r2"],
+        "greek_vocabulary_source": sentence_analysis["metrics"].get("greek_vocabulary_source"),
+        "min_df": int(min_df),
+        "max_features": int(max_features),
+    }
+
+    return {
+        "available": True,
+        "message": "",
+        "metrics": metrics,
+        "bucket_summary": bucket_summary.reset_index(drop=True),
+        "bucket_analyses": bucket_analyses,
+        "sentence_analysis": sentence_analysis,
+    }
+
+
+def get_sentence_translation_bucket_analysis(conn):
+    """Get sentence-level translation length residuals by Greta myth/history bucket."""
+    if not table_exists(conn, "greek_sentences") or not table_exists(conn, "sentence_greta_tags"):
+        return _empty_sentence_translation_bucket_analysis(
+            "Sentence translations or Greta bucket tags are not available."
+        )
+
+    df = get_greta_sentence_annotations(conn)
+    if len(df) == 0:
+        return _empty_sentence_translation_bucket_analysis()
+
+    greek_stop_words = None
+    if table_exists(conn, "greek_word_lemmas"):
+        lemma_lookup = load_word_lemma_lookup(conn)
+        if lemma_lookup:
+            lemma_texts, _ = build_lemma_texts(df["sentence"], lemma_lookup)
+            df = df.copy()
+            df["lemma_sentence"] = lemma_texts
+            if table_exists(conn, "proper_nouns") and table_exists(conn, "manual_stopwords"):
+                stopword_query = """
+                SELECT exact_form AS word FROM proper_nouns
+                UNION
+                SELECT reference_form AS word FROM proper_nouns
+                UNION
+                SELECT word FROM manual_stopwords
+                """
+                stopword_df = read_sql_query(stopword_query, conn)
+                greek_stop_words = expand_stopwords_with_lemma_forms(
+                    stopword_df["word"].tolist(),
+                    lemma_lookup,
+                )
+
+    return calculate_sentence_translation_bucket_analysis(
+        df,
+        greek_stop_words=greek_stop_words,
+    )
 
 
 def get_translation_length_analysis(conn):

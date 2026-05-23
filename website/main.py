@@ -36,9 +36,11 @@ from .data import (
     get_translation_page_data,
     get_passage_summaries,
     get_translation_length_analysis,
+    get_sentence_translation_bucket_analysis,
     get_progress_data,
     get_place_pairs,
     get_extended_network_analysis,
+    calculate_translation_mythic_coefficient_relationship,
     add_phrase_translations,
 )
 from .structure import create_website_structure
@@ -187,11 +189,45 @@ def main():
         
         # Analyze translation length residuals
         translation_length_analysis = get_translation_length_analysis(conn)
+        translation_length_analysis["sentence_bucket_analysis"] = (
+            get_sentence_translation_bucket_analysis(conn)
+        )
+        translation_length_analysis["mythic_coefficient_relationship"] = (
+            calculate_translation_mythic_coefficient_relationship(
+                translation_length_analysis,
+                greta_analysis,
+            )
+        )
         if translation_length_analysis["available"]:
             for key in ("longer_predictors", "shorter_predictors"):
                 predictors = translation_length_analysis[key]
                 if len(predictors) > 0:
                     translation_length_analysis[key] = add_phrase_translations(predictors, conn, client, args.model)
+            relationship = translation_length_analysis.get("mythic_coefficient_relationship", {})
+            relationship_points = relationship.get("points")
+            if relationship_points is not None and len(relationship_points) > 0:
+                # The relationship scatter uses the full residual feature set, so keep
+                # enrichment cache-only here; fetching hundreds of new glosses would
+                # make routine site generation unnecessarily slow.
+                relationship["points"] = add_phrase_translations(
+                    relationship_points,
+                    conn,
+                    None,
+                    args.model,
+                )
+            bucket_analysis = translation_length_analysis.get("sentence_bucket_analysis", {})
+            for bucket_result in bucket_analysis.get("bucket_analyses", {}).values():
+                if not bucket_result.get("available"):
+                    continue
+                for key in ("longer_predictors", "shorter_predictors"):
+                    predictors = bucket_result.get(key)
+                    if predictors is not None and len(predictors) > 0:
+                        bucket_result[key] = add_phrase_translations(
+                            predictors,
+                            conn,
+                            client,
+                            args.model,
+                        )
 
         # Create website structure
         output_dir, css_dir = create_website_structure(args.output_dir)

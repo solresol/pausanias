@@ -1223,11 +1223,18 @@ def generate_analysis_pages(greta_analysis, output_dir, title):
         </div>
 
         <h2>Translation Length</h2>
-        <section class="hub-card">
-            <h3>Unexpectedly Long or Short Translations</h3>
-            <p>Greek predictors of length residuals, plus the dual view of English terms found in longer or shorter-than-expected passages.</p>
-            <a href="../translation_length/index.html">Open Translation Length Analysis</a>
-        </section>
+        <div class="hub-grid">
+            <section class="hub-card">
+                <h3>Unexpectedly Long or Short Translations</h3>
+                <p>Greek predictors of length residuals, plus the dual view of English terms found in longer or shorter-than-expected passages.</p>
+                <a href="../translation_length/index.html">Open Translation Length Analysis</a>
+            </section>
+            <section class="hub-card">
+                <h3>Residual Length vs. Mythic/Historical Strength</h3>
+                <p>Exploratory comparison of length-residual terms against the main mythic/historical classifier coefficients.</p>
+                <a href="../translation_length/mythic_historical_strength.html">Open Diagnostic Page</a>
+            </section>
+        </div>
 
         <h2>Place and Network Analyses</h2>
         <div class="hub-grid">
@@ -3205,6 +3212,456 @@ def _render_translation_length_relationship_graph(points, metrics):
     """
 
 
+def _format_correlation_stat(stat):
+    if not stat:
+        return "n/a", "n/a"
+    return (
+        _format_optional_number(stat.get("coefficient"), 3, signed=True),
+        _format_p_value(stat.get("p_value")),
+    )
+
+
+def _plotly_safe_number(value, digits=6):
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError):
+        return None
+    if not math.isfinite(numeric):
+        return None
+    return round(numeric, digits)
+
+
+def _render_translation_coefficient_scatter(points, *, y_column, y_label, title, chart_id, absolute_view=False):
+    if points is None or len(points) == 0:
+        return "<p>No matched coefficient points are available.</p>"
+
+    plot_points = points.copy()
+    plot_points = plot_points.dropna(subset=["translation_residual_coefficient", y_column])
+    if len(plot_points) == 0:
+        return "<p>No matched coefficient points are available.</p>"
+
+    plot_points["translation_residual_coefficient"] = plot_points[
+        "translation_residual_coefficient"
+    ].astype(float)
+    plot_points[y_column] = plot_points[y_column].astype(float)
+
+    traces = []
+    color_by_direction = {
+        "mythic": "#9a3f31",
+        "historical": "#316a84",
+    }
+    for direction, direction_points in plot_points.groupby("classification_direction"):
+        custom_data = []
+        for _, row in direction_points.iterrows():
+            custom_data.append(
+                [
+                    str(row.get("phrase", "")),
+                    str(row.get("english_translation", "") or ""),
+                    str(row.get("translation_direction", "")).title(),
+                    _plotly_safe_number(row.get("translation_residual_coefficient"), 3),
+                    _plotly_safe_number(row.get("mythic_log_odds_coefficient"), 3),
+                    int(row.get("translation_passage_count", 0) or 0),
+                    int(row.get("mythic_count", 0) or 0),
+                    int(row.get("historical_count", 0) or 0),
+                    _plotly_safe_number(row.get("mythic_q_value"), 6),
+                ]
+            )
+        traces.append(
+            {
+                "type": "scattergl",
+                "mode": "markers",
+                "name": str(direction).title(),
+                "x": [
+                    _plotly_safe_number(value)
+                    for value in direction_points["translation_residual_coefficient"]
+                ],
+                "y": [
+                    _plotly_safe_number(value)
+                    for value in direction_points[y_column]
+                ],
+                "customdata": custom_data,
+                "marker": {
+                    "color": color_by_direction.get(str(direction), "#75685a"),
+                    "size": 8,
+                    "opacity": 0.72,
+                    "line": {"color": "rgba(40, 35, 30, 0.55)", "width": 0.7},
+                },
+                "hovertemplate": (
+                    "<b>%{customdata[0]}</b><br>"
+                    "%{customdata[1]}<br>"
+                    "Translation direction: %{customdata[2]}<br>"
+                    "Residual coefficient: %{customdata[3]:+.3f}<br>"
+                    "Myth/history coefficient: %{customdata[4]:+.3f}<br>"
+                    "Translated passages: %{customdata[5]}<br>"
+                    "Mythic / historical counts: %{customdata[6]} / %{customdata[7]}<br>"
+                    "q-value: %{customdata[8]}<extra></extra>"
+                ),
+            }
+        )
+
+    layout = {
+        "title": {"text": title, "font": {"size": 16}},
+        "height": 520,
+        "margin": {"l": 76, "r": 26, "t": 52, "b": 70},
+        "plot_bgcolor": "#fbfaf7",
+        "paper_bgcolor": "#fffdf8",
+        "legend": {"orientation": "h", "x": 0, "y": 1.08},
+        "xaxis": {
+            "title": "Translation-length residual coefficient",
+            "zeroline": True,
+            "zerolinecolor": "#75685a",
+            "gridcolor": "#ded7cc",
+        },
+        "yaxis": {
+            "title": y_label,
+            "zeroline": not absolute_view,
+            "zerolinecolor": "#75685a",
+            "gridcolor": "#ded7cc",
+            **({"rangemode": "tozero"} if absolute_view else {}),
+        },
+        "hovermode": "closest",
+    }
+    config = {
+        "responsive": True,
+        "displaylogo": False,
+        "modeBarButtonsToRemove": ["lasso2d", "select2d"],
+    }
+    script = f"""
+        <script>
+        Plotly.newPlot(
+            {json.dumps(chart_id)},
+            {json.dumps(traces, ensure_ascii=False)},
+            {json.dumps(layout, ensure_ascii=False)},
+            {json.dumps(config)}
+        );
+        </script>
+    """
+
+    return f"""
+        <div class="translation-coefficient-chart" role="img" aria-label="{html.escape(title)}">
+            <div id="{html.escape(chart_id)}" class="plotly-chart"></div>
+            {script}
+        </div>
+    """
+
+
+def _render_translation_mythic_relationship_table(points):
+    if points is None or len(points) == 0:
+        return "<p>No matched terms are available.</p>"
+
+    rows = []
+    for _, row in points.iterrows():
+        english = row.get("english_translation", "")
+        translation_cell = f"<td>{html.escape(str(english or ''))}</td>"
+        rows.append(f"""
+            <tr>
+                <td>{html.escape(str(row["phrase"]))}</td>
+                {translation_cell}
+                <td>{html.escape(str(row["translation_direction"]).title())}</td>
+                <td class="num">{float(row["translation_residual_coefficient"]):+.3f}</td>
+                <td class="num">{float(row["mythic_log_odds_coefficient"]):+.3f}</td>
+                <td>{html.escape(str(row["classification_direction"]).title())}</td>
+                <td class="num">{int(row["mythic_count"])}</td>
+                <td class="num">{int(row["historical_count"])}</td>
+                <td class="num">{html.escape(_format_p_value(row.get("mythic_q_value")))}</td>
+            </tr>
+        """)
+
+    return f"""
+        <table class="predictor-table translation-length-table">
+            <thead>
+                <tr>
+                    <th>Greek Word/Phrase</th>
+                    <th>Translation</th>
+                    <th>Length Direction</th>
+                    <th>Residual Coefficient</th>
+                    <th>Myth/History Coefficient</th>
+                    <th>Class Direction</th>
+                    <th>Mythic Count</th>
+                    <th>Historical Count</th>
+                    <th>q-value</th>
+                </tr>
+            </thead>
+            <tbody>{''.join(rows)}</tbody>
+        </table>
+    """
+
+
+def _render_translation_mythic_coefficient_relationship(relationship):
+    if not relationship or not relationship.get("available"):
+        message = (
+            relationship.get("message", "No translation/coefficient relationship is available.")
+            if relationship
+            else "No translation/coefficient relationship is available."
+        )
+        return f"""
+            <section class="translation-coefficient-relationship">
+                <h2>Residual Terms vs. Mythic/Historical Coefficients</h2>
+                <p>{html.escape(message)}</p>
+            </section>
+        """
+
+    points = relationship.get("points")
+    metrics = relationship.get("metrics", {})
+    linear_pearson, linear_pearson_p = _format_correlation_stat(metrics.get("linear_pearson"))
+    linear_spearman, linear_spearman_p = _format_correlation_stat(metrics.get("linear_spearman"))
+    extremity_pearson, extremity_pearson_p = _format_correlation_stat(metrics.get("extremity_pearson"))
+    extremity_spearman, extremity_spearman_p = _format_correlation_stat(metrics.get("extremity_spearman"))
+    quadratic_abs_r2 = _format_optional_number(metrics.get("quadratic_abs_r2"), 3)
+
+    signed_chart = _render_translation_coefficient_scatter(
+        points,
+        y_column="mythic_log_odds_coefficient",
+        y_label="Mythic/historical log-odds coefficient",
+        title="Signed Mythic vs. Historical Direction",
+        chart_id="translation-mythic-signed-scatter",
+    )
+    extremity_chart = _render_translation_coefficient_scatter(
+        points,
+        y_column="abs_mythic_log_odds_coefficient",
+        y_label="Classification strength |log-odds|",
+        title="Coefficient Extremity",
+        chart_id="translation-mythic-extremity-scatter",
+        absolute_view=True,
+    )
+    terms_table = _render_translation_mythic_relationship_table(points)
+
+    return f"""
+        <section class="translation-coefficient-relationship">
+            <h2>Residual Terms vs. Mythic/Historical Coefficients</h2>
+            <p>This matches every Greek residual term from the translation-length model against the main lemma model's mythic/historical coefficients. Positive myth/history coefficients point toward mythic narration; negative coefficients point toward historical narration.</p>
+            <div class="translation-length-metrics">
+                <div><strong>{metrics.get("matched_term_count", 0):,}</strong><span>matched residual terms</span></div>
+                <div><strong>{metrics.get("residual_term_count", 0):,}</strong><span>residual terms checked</span></div>
+                <div><strong>{linear_pearson}</strong><span>linear Pearson r, p = {linear_pearson_p}</span></div>
+                <div><strong>{linear_spearman}</strong><span>linear Spearman rho, p = {linear_spearman_p}</span></div>
+                <div><strong>{extremity_pearson}</strong><span>|residual| vs |coefficient| Pearson r, p = {extremity_pearson_p}</span></div>
+                <div><strong>{extremity_spearman}</strong><span>|residual| vs |coefficient| Spearman rho, p = {extremity_spearman_p}</span></div>
+                <div><strong>{quadratic_abs_r2}</strong><span>quadratic R2 for coefficient extremity</span></div>
+            </div>
+            <div class="coefficient-chart-grid">
+                {signed_chart}
+                {extremity_chart}
+            </div>
+            <h3>Matched Terms</h3>
+            {terms_table}
+        </section>
+    """
+
+
+def _write_translation_mythic_strength_page(analysis, translation_length_dir, title, timestamp):
+    relationship = analysis.get("mythic_coefficient_relationship") if analysis else None
+    body = _render_translation_mythic_coefficient_relationship(relationship)
+    page_html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - Residual Length vs. Mythic/Historical Strength</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <style>
+        .translation-length-metrics {{
+            display: grid;
+            gap: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            margin: 22px 0 30px;
+        }}
+        .translation-length-metrics div {{
+            background: #eee9e3;
+            border-radius: 5px;
+            padding: 12px;
+        }}
+        .translation-length-metrics strong {{
+            display: block;
+            color: #5c5142;
+            font-size: 1.4em;
+        }}
+        .translation-length-metrics span {{
+            display: block;
+            font-size: 0.9em;
+        }}
+        .translation-length-table .num {{
+            text-align: right;
+            white-space: nowrap;
+        }}
+        .translation-coefficient-relationship {{
+            margin: 34px 0;
+        }}
+        .coefficient-chart-grid {{
+            display: grid;
+            gap: 18px;
+            grid-template-columns: 1fr;
+            margin: 20px 0 28px;
+        }}
+        .translation-coefficient-chart {{
+            border: 1px solid #d8d0c5;
+            border-radius: 6px;
+            padding: 12px;
+            overflow-x: auto;
+        }}
+        .plotly-chart {{
+            min-height: 520px;
+            min-width: 560px;
+            width: 100%;
+        }}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>{title}</h1>
+        <p>Translation residuals compared with mythic/historical classifier strength</p>
+    </header>
+    {_translation_nav("../", "translation_length")}
+    <div class="container" style="max-width: 1100px;">
+        <p><a href="index.html">Back to Translation Length Analysis</a></p>
+        <section class="hub-card">
+            <h2>Exploratory Diagnostic</h2>
+            <p>This page keeps the residual-length comparison separate from the stronger translation-length results. The linear relationship is weak, but the scatterplots remain useful as a check on whether unexpectedly long or short translated terms align with mythic or historical classifier strength.</p>
+        </section>
+        {body}
+        <footer>
+            Generated on {timestamp} from the PostgreSQL database
+        </footer>
+    </div>
+</body>
+</html>
+"""
+
+    with open(
+        os.path.join(translation_length_dir, "mythic_historical_strength.html"),
+        "w",
+        encoding="utf-8",
+    ) as f:
+        f.write(page_html)
+
+    print("Translation mythic/historical strength page generated.")
+
+
+def _render_sentence_bucket_summary_table(summary):
+    if summary is None or len(summary) == 0:
+        return "<p>No sentence bucket summary is available.</p>"
+
+    rows = []
+    for _, row in summary.iterrows():
+        rows.append(f"""
+            <tr>
+                <td>{html.escape(str(row.get("label", row.get("bucket", ""))))}</td>
+                <td class="num">{int(row.get("sentence_count", 0)):,}</td>
+                <td class="num">{_format_optional_number(row.get("mean_greek_word_count"), 1)}</td>
+                <td class="num">{_format_optional_number(row.get("mean_english_word_count"), 1)}</td>
+                <td class="num">{_format_optional_number(row.get("english_per_greek_word"), 2)}</td>
+                <td class="num">{_format_optional_number(row.get("mean_global_residual"), 2, signed=True)}</td>
+                <td class="num">{_format_optional_number(row.get("median_global_residual"), 2, signed=True)}</td>
+                <td class="num">{_format_optional_number(row.get("global_residual_std"), 2)}</td>
+                <td class="num">{_format_optional_number(row.get("bucket_length_slope"), 2)}</td>
+                <td class="num">{_format_optional_number(row.get("bucket_length_r2"), 3)}</td>
+            </tr>
+        """)
+
+    return f"""
+        <table class="predictor-table translation-length-table sentence-bucket-table">
+            <thead>
+                <tr>
+                    <th>Bucket</th>
+                    <th>Sentences</th>
+                    <th>Mean Greek Words</th>
+                    <th>Mean English Words</th>
+                    <th>English / Greek</th>
+                    <th>Mean Residual</th>
+                    <th>Median Residual</th>
+                    <th>Residual SD</th>
+                    <th>Bucket Slope</th>
+                    <th>Bucket R2</th>
+                </tr>
+            </thead>
+            <tbody>{''.join(rows)}</tbody>
+        </table>
+    """
+
+
+def _render_sentence_bucket_predictors(bucket_analyses):
+    if not bucket_analyses:
+        return ""
+
+    bucket_labels = {
+        "mythic": "Mythic",
+        "historical": "Historical",
+        "other": "Other",
+    }
+    sections = []
+    for bucket, label in bucket_labels.items():
+        bucket_result = bucket_analyses.get(bucket)
+        if not bucket_result:
+            continue
+        if not bucket_result.get("available"):
+            message = bucket_result.get("message", "No model is available for this bucket.")
+            sections.append(f"""
+                <section class="sentence-bucket-predictor-block">
+                    <h3>{html.escape(label)} Sentence Predictors</h3>
+                    <p>{html.escape(message)}</p>
+                </section>
+            """)
+            continue
+
+        metrics = bucket_result.get("metrics", {})
+        longer_table = _render_translation_length_predictor_table(
+            bucket_result.get("longer_predictors"),
+            "No Greek terms had positive residual coefficients in this bucket.",
+            phrase_label="Greek Word/Phrase",
+        )
+        shorter_table = _render_translation_length_predictor_table(
+            bucket_result.get("shorter_predictors"),
+            "No Greek terms had negative residual coefficients in this bucket.",
+            phrase_label="Greek Word/Phrase",
+        )
+        sections.append(f"""
+            <section class="sentence-bucket-predictor-block">
+                <h3>{html.escape(label)} Sentence Predictors</h3>
+                <p>Within-bucket residual model over {metrics.get("passage_count", 0):,} sentences; length R2 = {_format_optional_number(metrics.get("length_r2"), 3)}, residual SD = {_format_optional_number(metrics.get("residual_std"), 2)}.</p>
+                <h4>Longer English</h4>
+                {longer_table}
+                <h4>Shorter English</h4>
+                {shorter_table}
+            </section>
+        """)
+
+    return "".join(sections)
+
+
+def _render_sentence_translation_bucket_analysis(bucket_analysis):
+    if not bucket_analysis:
+        return ""
+    if not bucket_analysis.get("available"):
+        return f"""
+            <section class="sentence-translation-buckets">
+                <h2>Sentence Translation Length by Bucket</h2>
+                <p>{html.escape(bucket_analysis.get("message", "No sentence bucket analysis is available."))}</p>
+            </section>
+        """
+
+    metrics = bucket_analysis.get("metrics", {})
+    summary_table = _render_sentence_bucket_summary_table(bucket_analysis.get("bucket_summary"))
+    predictor_sections = _render_sentence_bucket_predictors(bucket_analysis.get("bucket_analyses"))
+
+    return f"""
+        <section class="sentence-translation-buckets">
+            <h2>Sentence Translation Length by Bucket</h2>
+            <p>This uses the aligned Greek and English sentence table plus the active Greta mythic/historical/other tags. The residual means use one shared sentence-level baseline, so positive values mean that a bucket's English sentences run longer than expected for their Greek sentence lengths.</p>
+            <div class="translation-length-metrics">
+                <div><strong>{metrics.get("sentence_count", 0):,}</strong><span>tagged sentence translations</span></div>
+                <div><strong>{metrics.get("bucket_count", 0):,}</strong><span>buckets compared</span></div>
+                <div><strong>{_format_optional_number(metrics.get("length_slope"), 2)}</strong><span>shared English words per Greek word</span></div>
+                <div><strong>{_format_optional_number(metrics.get("length_r2"), 3)}</strong><span>shared length model R2</span></div>
+                <div><strong>{_format_optional_number(metrics.get("residual_std"), 2)}</strong><span>shared residual SD</span></div>
+                <div><strong>{html.escape(str(metrics.get("greek_vocabulary_source") or "surface"))}</strong><span>Greek vocabulary source</span></div>
+            </div>
+            {summary_table}
+            {predictor_sections}
+        </section>
+    """
+
+
 def generate_translation_length_page(analysis, output_dir, title):
     """Generate a page for translation length residual predictors."""
     translation_length_dir = os.path.join(output_dir, "translation_length")
@@ -3247,6 +3704,9 @@ def generate_translation_length_page(analysis, output_dir, title):
             analysis.get("length_points"),
             metrics,
         )
+        sentence_bucket_analysis = _render_sentence_translation_bucket_analysis(
+            analysis.get("sentence_bucket_analysis")
+        )
 
         body = f"""
             <h2>Translation Length Residuals</h2>
@@ -3264,6 +3724,8 @@ def generate_translation_length_page(analysis, output_dir, title):
             </div>
 
             {relationship_graph}
+
+            {sentence_bucket_analysis}
 
             <h2>Greek Predictors of Longer English</h2>
             <p>These Greek words and phrases are associated with translations that run longer than expected after the length adjustment.</p>
@@ -3374,6 +3836,16 @@ def generate_translation_length_page(analysis, output_dir, title):
         .translation-length-coefficients {{
             max-width: 680px;
         }}
+        .sentence-translation-buckets {{
+            margin: 34px 0;
+        }}
+        .sentence-bucket-table th,
+        .sentence-bucket-table td {{
+            vertical-align: top;
+        }}
+        .sentence-bucket-predictor-block {{
+            margin: 26px 0 34px;
+        }}
     </style>
 </head>
 <body>
@@ -3394,6 +3866,8 @@ def generate_translation_length_page(analysis, output_dir, title):
 
     with open(os.path.join(translation_length_dir, "index.html"), "w", encoding="utf-8") as f:
         f.write(page_html)
+
+    _write_translation_mythic_strength_page(analysis, translation_length_dir, title, timestamp)
 
     print("Translation length page generated.")
 
