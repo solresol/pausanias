@@ -36,7 +36,23 @@ from stats_utils import compute_p_q_values
 WORD_PATTERN = re.compile(r"(?u)\b\w+\b")
 TFIDF_TOKEN_PATTERN = r"(?u)\b\w\w+\b"
 GRETA_SENTENCE_PROMPT_VERSION = "greta-myth-history-other-no-scepticism-v1"
-RHETORIC_MARKER_WORDS = [
+RHETORIC_MARKER_LEMMAS = [
+    "λέγω",
+    "φημί",
+    "φάσκω",
+    "φάσις",
+    "λόγος",
+    "ἔπος",
+    "ἀκούω",
+    "καλέω",
+    "ὀνομάζω",
+    "ὄνομα",
+    "νομίζω",
+    "δοκέω",
+    "μανθάνω",
+    "οἶδα",
+]
+RHETORIC_MARKER_SURFACE_FORMS = [
     "λέγω",
     "λέγεται",
     "λέγουσι",
@@ -66,6 +82,9 @@ RHETORIC_MARKER_WORDS = [
     "φάσις",
     "φάσκω",
 ]
+RHETORIC_MARKER_WORDS = list(
+    dict.fromkeys(RHETORIC_MARKER_LEMMAS + RHETORIC_MARKER_SURFACE_FORMS)
+)
 
 SEMANTIC_FIELD_ABLATIONS = [
     {
@@ -95,22 +114,7 @@ SEMANTIC_FIELD_ABLATIONS = [
         "id": "speech-reporting",
         "label": "Speech and Reporting",
         "description": "Speech, report, attribution, naming, and knowledge-framing terms.",
-        "terms": [
-            "λέγω",
-            "φημί",
-            "φάσκω",
-            "λόγος",
-            "ἔπος",
-            "μῦθος",
-            "ἀκούω",
-            "καλέω",
-            "ὀνομάζω",
-            "ὄνομα",
-            "νομίζω",
-            "δοκέω",
-            "μανθάνω",
-            "οἶδα",
-        ],
+        "terms": RHETORIC_MARKER_LEMMAS + ["μῦθος"],
     },
     {
         "id": "memorial-place-ritual",
@@ -1062,7 +1066,7 @@ def get_greta_sentence_analysis_variants(conn):
             for remove_rhetoric in [False, True]:
                 label = "-".join(
                     [
-                        "greta-sentence",
+                        "tri-marked-sentence",
                         token_source,
                         "all-books" if include_books else "excluding-4-8",
                         "without-rhetoric" if remove_rhetoric else "with-rhetoric",

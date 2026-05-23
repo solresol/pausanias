@@ -826,6 +826,31 @@ def _variant_href(variant):
     return f"{variant['id']}.html"
 
 
+def _legacy_variant_href(variant):
+    variant_id = variant.get("id", "")
+    if variant_id.startswith("tri-marked-sentence-"):
+        return f"{variant_id.replace('tri-marked-sentence-', 'greta-sentence-', 1)}.html"
+    return None
+
+
+def _write_redirect_page(analysis_dir, filename, target_href, title, label):
+    page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="0; url={html.escape(target_href)}">
+    <link rel="canonical" href="{html.escape(target_href)}">
+    <title>{html.escape(title)} - {html.escape(label)}</title>
+</head>
+<body>
+    <p>This analysis page has moved to <a href="{html.escape(target_href)}">{html.escape(target_href)}</a>.</p>
+</body>
+</html>
+"""
+    with open(os.path.join(analysis_dir, filename), "w", encoding="utf-8") as f:
+        f.write(page)
+
+
 def _format_optional_float(value, digits=3, signed=False):
     if value is None:
         return ""
@@ -1117,7 +1142,7 @@ def generate_analysis_pages(greta_analysis, output_dir, title):
 <body>
     <header>
         <h1>{title}</h1>
-        <p>Greta sentence-level mythic vs. historical analysis</p>
+        <p>Tri-marked sentence-level mythic vs. historical analysis</p>
     </header>
     {_site_nav("../", "analysis")}
     <div class="container wide-container">
@@ -1133,6 +1158,15 @@ def generate_analysis_pages(greta_analysis, output_dir, title):
 """
         with open(os.path.join(analysis_dir, _variant_href(variant)), "w", encoding="utf-8") as f:
             f.write(page)
+        legacy_href = _legacy_variant_href(variant)
+        if legacy_href:
+            _write_redirect_page(
+                analysis_dir,
+                legacy_href,
+                _variant_href(variant),
+                title,
+                _variant_display_name(variant),
+            )
 
     if greta_analysis and greta_analysis.get("available"):
         bucket_counts = greta_analysis.get("bucket_counts", {})
@@ -1169,7 +1203,7 @@ def generate_analysis_pages(greta_analysis, output_dir, title):
                 </tr>
             """)
         greta_section = f"""
-            <h2>Current Sentence-Level Analyses</h2>
+            <h2>Current Tri-Marked Sentence-Level Analyses</h2>
             <p>The current paper-facing analysis uses the active three-bucket tags, then restricts the model to mythic vs. historical sentences.</p>
             {book_scope_note}
             <ul class="compact-list">{bucket_html}</ul>
@@ -1182,7 +1216,7 @@ def generate_analysis_pages(greta_analysis, output_dir, title):
         """
     else:
         greta_section = f"""
-            <h2>Current Sentence-Level Analyses</h2>
+            <h2>Current Tri-Marked Sentence-Level Analyses</h2>
             <p>{html.escape(greta_analysis.get("message", "No Greta analysis data is available.") if greta_analysis else "No Greta analysis data is available.")}</p>
         """
 
