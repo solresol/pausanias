@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 import math
-import sqlite3
 import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -12,6 +11,8 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
+
+from pausanias_db import connect
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageOps
 
@@ -52,10 +53,9 @@ def root_dir() -> Path:
 
 
 def load_translation() -> str:
-    db_path = root_dir() / "pausanias.sqlite"
-    with sqlite3.connect(db_path) as conn:
+    with connect() as conn:
         row = conn.execute(
-            "SELECT english_translation FROM translations WHERE passage_id = ?",
+            "SELECT english_translation FROM translations WHERE passage_id = %s",
             (PASSAGE_ID,),
         ).fetchone()
     if not row or not row[0]:
