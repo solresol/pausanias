@@ -1,0 +1,4 @@
+Use case: historical-scene
+Asset type: text-free scenic inset raster artwork for a Pausanias graphic-book page; exact caption and labels will be added locally later.
+Primary request: Create a refined imperial-era tableau for Pausanias passage 1.5.5 showing Emperor Hadrian as a benefactor receiving envoys and temple plans from Greek cities and eastern communities. The focus is diplomatic and civic, not military: Hadrian seated or standing in dignified classical dress, architects with tablets and rolled plans, envoys presenting small models and offerings, with subtle visual hints of Egypt and Mysia through textiles, column capitals, and regional gifts.
+Constraints: no readable text, no letters, no numbers, no labels, no inscriptions, no watermark, no modern objects, no nudity, no eroticized poses, no gore, no battle violence, no weapons-centered scene, not cartoon, not vector, not diagrammatic.

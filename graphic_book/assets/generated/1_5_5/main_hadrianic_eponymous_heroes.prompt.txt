@@ -1,0 +1,4 @@
+Use case: historical-scene
+Asset type: text-free main raster artwork for a Pausanias graphic-book page; exact labels and passage text will be added locally later.
+Primary request: Create a rich, sophisticated coffee-table historical reconstruction for Pausanias passage 1.5.5, centered on Hadrianic Athens at the Monument of the Eponymous Heroes in the Agora. The scene should show Athenian civic officials and robed attendants adding or honoring later tribal founders alongside the older heroic statue monument: Attalus the Mysian, Ptolemy the Egyptian, and Emperor Hadrian. Keep the Acropolis visible in the background and imply a Hadrianic sacred precinct or common sanctuary of the gods in the middle distance.
+Constraints: no readable text, no letters, no numbers, no labels, no inscriptions, no watermark, no modern objects, no nudity, no eroticized poses, no gore, no battle violence, not cartoon, not vector, not diagrammatic.

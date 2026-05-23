@@ -1,0 +1,4 @@
+Use case: historical-scene
+Asset type: text-free scenic inset raster artwork for a Pausanias graphic-book page; exact caption and labels will be added locally later.
+Primary request: Create a refined historical inset for Pausanias passage 1.5.5 showing the common sanctuary of the gods at Athens as a dignified Hadrianic sacred record space. The image should focus on marble temple architecture, votive offerings, small architectural models, laurel, oil lamps, and a large marble register wall that is visually present but has no readable writing.
+Constraints: absolutely no readable text, no letters, no numbers, no labels, no watermark, no modern objects, no nudity, no eroticized figures, no gore, no battle violence, not cartoon, not vector, not diagrammatic.
