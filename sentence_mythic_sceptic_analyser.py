@@ -17,6 +17,7 @@ from pausanias_db import add_database_argument, column_exists, connect
 
 LEGACY_PROMPT_VERSION = "legacy-mythic-scepticism-v1"
 GRETA_PROMPT_VERSION = "greta-myth-history-other-v1"
+GRETA_BOTH_PROMPT_VERSION = "greta-myth-history-both-other-v1"
 DEFAULT_MODEL = "gpt-5"
 DEFAULT_COMPARISON_MODEL = "gpt-5.4-mini"
 DEFAULT_JUDGE_MODEL = "gpt-5.4"
@@ -39,11 +40,12 @@ def parse_arguments():
     )
     parser.add_argument(
         "--mode",
-        choices=("legacy", "compare-mini", "greta"),
+        choices=("legacy", "compare-mini", "greta", "greta-both"),
         default="legacy",
         help=(
             "legacy updates the old boolean columns; compare-mini re-runs a "
-            "sample against another model; greta stores the new three-bucket tags."
+            "sample against another model; greta stores the three-bucket tags; "
+            "greta-both stores independent mythic and historical flags."
         ),
     )
     parser.add_argument(
@@ -215,6 +217,44 @@ def ensure_sentence_tagging_tables(conn):
         )
         """
     )
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS sentence_greta_both_tags (
+            passage_id TEXT NOT NULL,
+            sentence_number INTEGER NOT NULL,
+            prompt_version TEXT NOT NULL,
+            model TEXT NOT NULL,
+            references_mythic BOOLEAN NOT NULL,
+            references_historical BOOLEAN NOT NULL,
+            myth_history_bucket TEXT NOT NULL CHECK (
+                myth_history_bucket IN ('mythic', 'historical', 'both', 'other')
+            ),
+            confidence TEXT NOT NULL,
+            rationale TEXT NOT NULL,
+            input_tokens INTEGER NOT NULL,
+            output_tokens INTEGER NOT NULL,
+            run_id TEXT NOT NULL REFERENCES sentence_tagging_runs(run_id)
+                ON DELETE CASCADE,
+            created_at TEXT NOT NULL,
+            PRIMARY KEY (passage_id, sentence_number, prompt_version),
+            CHECK (
+                (myth_history_bucket = 'both' AND references_mythic AND references_historical)
+                OR (myth_history_bucket = 'mythic' AND references_mythic AND NOT references_historical)
+                OR (myth_history_bucket = 'historical' AND references_historical AND NOT references_mythic)
+                OR (myth_history_bucket = 'other' AND NOT references_mythic AND NOT references_historical)
+            ),
+            FOREIGN KEY (passage_id, sentence_number)
+                REFERENCES greek_sentences(passage_id, sentence_number)
+                ON DELETE CASCADE
+        )
+        """
+    )
+    cursor.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_sentence_greta_both_tags_bucket
+            ON sentence_greta_both_tags (prompt_version, myth_history_bucket)
+        """
+    )
     conn.commit()
 
 
@@ -354,6 +394,36 @@ def get_greta_unprocessed_sentences(conn, prompt_version, excluded_books, limit=
         return cursor.fetchall()
 
 
+def get_greta_both_unprocessed_sentences(conn, prompt_version, excluded_books, limit=None):
+    params = [prompt_version]
+    book_filter = ""
+    if excluded_books:
+        book_filter = "AND split_part(s.passage_id, '.', 1) <> ALL(%s)"
+        params.append(list(excluded_books))
+    limit_clause = ""
+    if limit:
+        limit_clause = f"LIMIT {int(limit)}"
+    with conn.cursor() as cursor:
+        cursor.execute(
+            f"""
+            SELECT s.passage_id, s.sentence_number, s.sentence, s.english_sentence
+            FROM greek_sentences s
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM sentence_greta_both_tags t
+                WHERE t.passage_id = s.passage_id
+                  AND t.sentence_number = s.sentence_number
+                  AND t.prompt_version = %s
+            )
+            {book_filter}
+            ORDER BY s.passage_id, s.sentence_number
+            {limit_clause}
+            """,
+            params,
+        )
+        return cursor.fetchall()
+
+
 def save_legacy_analysis_results(
     conn, passage_id, sentence_number, references_mythic_era, expresses_scepticism
 ):
@@ -440,6 +510,65 @@ def greta_tool():
                     "required": [
                         "myth_history_bucket",
                         "expresses_scepticism",
+                        "confidence",
+                        "rationale",
+                    ],
+                },
+            },
+        }
+    ]
+
+
+def bucket_from_flags(references_mythic, references_historical):
+    if references_mythic and references_historical:
+        return "both"
+    if references_mythic:
+        return "mythic"
+    if references_historical:
+        return "historical"
+    return "other"
+
+
+def greta_both_tool():
+    return [
+        {
+            "type": "function",
+            "function": {
+                "name": "save_greta_both_sentence_tag",
+                "description": (
+                    "Save Greta's Pausanias sentence tag with independent mythic "
+                    "and historical flags."
+                ),
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "references_mythic": {
+                            "type": "boolean",
+                            "description": (
+                                "Whether the sentence contains mythic, heroic, "
+                                "genealogical, or mythic-landscape material."
+                            ),
+                        },
+                        "references_historical": {
+                            "type": "boolean",
+                            "description": (
+                                "Whether the sentence contains post-500 BCE "
+                                "historical, institutional, political, military, "
+                                "dedicatory, or biographical material."
+                            ),
+                        },
+                        "confidence": {
+                            "type": "string",
+                            "enum": ["high", "medium", "low"],
+                        },
+                        "rationale": {
+                            "type": "string",
+                            "description": "One short reason for the two flag choices.",
+                        },
+                    },
+                    "required": [
+                        "references_mythic",
+                        "references_historical",
                         "confidence",
                         "rationale",
                     ],
@@ -547,6 +676,69 @@ def analyse_sentence_greta(
         bucket = function_args.get("myth_history_bucket")
         if bucket not in BUCKETS:
             return None, input_tokens, output_tokens, f"Invalid bucket: {bucket}"
+        return function_args, input_tokens, output_tokens, None
+    except Exception as exc:
+        return None, 0, 0, str(exc)
+
+
+def analyse_sentence_greta_both(
+    client, model, passage_id, sentence_number, sentence_text, english_text
+):
+    """Analyse a sentence using independent mythic and historical flags."""
+    system_prompt = (
+        "Act as a Pausanias scholar. Mark two independent labels for each "
+        "sentence: references_mythic and references_historical. A sentence may "
+        "be mythic only, historical only, both mythic and historical, or neither. "
+        "Set references_mythic true for mythic or heroic events, mythic-era "
+        "genealogy, founder legend, heroic/Trojan/Heraclid tradition, oracle-linked "
+        "heroic relics, or the impact of mythic events and traditions on cult, "
+        "monuments, or landscape. Set references_historical true for events after "
+        "roughly 500 BC or their impact on landscape, cult, monuments, institutions, "
+        "dedications, athletic or artistic records, courts, politics, war, or "
+        "biography. Antiquarian detail can be mythic or historical when it carries "
+        "one of those functions; it is not automatically other. Do not classify a "
+        "bare mention of a deity, hero, sanctuary, statue, tomb, or route landmark "
+        "as mythic unless the sentence links it to a mythic tradition, event, "
+        "genealogy, or etiology. Do not classify early legendary or pre-500 Spartan, "
+        "Dorian, Heraclid, or heroic king-list material as historical merely because "
+        "it describes kings, colonies, or warfare. Set both flags false only for "
+        "pure route, geography, object description, or narrative transition with no "
+        "mythic or historical function. Do not classify scepticism."
+    )
+    user_content = (
+        f"Passage {passage_id}, sentence {sentence_number}:\n\n"
+        f"Greek:\n{sentence_text}\n\nEnglish:\n{english_text}\n\n"
+        "Classify this sentence using the save_greta_both_sentence_tag function."
+    )
+
+    try:
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_content},
+            ],
+            tools=greta_both_tool(),
+            tool_choice={
+                "type": "function",
+                "function": {"name": "save_greta_both_sentence_tag"},
+            },
+        )
+        input_tokens = response.usage.prompt_tokens
+        output_tokens = response.usage.completion_tokens
+        tool_calls = response.choices[0].message.tool_calls
+        if not tool_calls:
+            return None, input_tokens, output_tokens, "No tool call returned"
+
+        function_args = json.loads(tool_calls[0].function.arguments)
+        function_args["references_mythic"] = bool(function_args.get("references_mythic"))
+        function_args["references_historical"] = bool(
+            function_args.get("references_historical")
+        )
+        function_args["myth_history_bucket"] = bucket_from_flags(
+            function_args["references_mythic"],
+            function_args["references_historical"],
+        )
         return function_args, input_tokens, output_tokens, None
     except Exception as exc:
         return None, 0, 0, str(exc)
@@ -726,6 +918,57 @@ def save_greta_tag(
             model,
             tag["myth_history_bucket"],
             tag["expresses_scepticism"],
+            tag["confidence"],
+            tag["rationale"],
+            input_tokens,
+            output_tokens,
+            run_id,
+            now_iso(),
+        ),
+    )
+    conn.commit()
+
+
+def save_greta_both_tag(
+    conn,
+    *,
+    run_id,
+    prompt_version,
+    model,
+    passage_id,
+    sentence_number,
+    tag,
+    input_tokens,
+    output_tokens,
+):
+    conn.execute(
+        """
+        INSERT INTO sentence_greta_both_tags (
+            passage_id, sentence_number, prompt_version, model,
+            references_mythic, references_historical, myth_history_bucket,
+            confidence, rationale, input_tokens, output_tokens, run_id, created_at
+        )
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        ON CONFLICT (passage_id, sentence_number, prompt_version) DO UPDATE
+        SET model = EXCLUDED.model,
+            references_mythic = EXCLUDED.references_mythic,
+            references_historical = EXCLUDED.references_historical,
+            myth_history_bucket = EXCLUDED.myth_history_bucket,
+            confidence = EXCLUDED.confidence,
+            rationale = EXCLUDED.rationale,
+            input_tokens = EXCLUDED.input_tokens,
+            output_tokens = EXCLUDED.output_tokens,
+            run_id = EXCLUDED.run_id,
+            created_at = EXCLUDED.created_at
+        """,
+        (
+            passage_id,
+            sentence_number,
+            prompt_version,
+            model,
+            tag["references_mythic"],
+            tag["references_historical"],
+            tag["myth_history_bucket"],
             tag["confidence"],
             tag["rationale"],
             input_tokens,
@@ -1047,6 +1290,139 @@ def run_greta_mode(args, conn, client):
         raise
 
 
+def run_greta_both_mode(args, conn, client):
+    ensure_sentence_tagging_tables(conn)
+    prompt_version = args.prompt_version or GRETA_BOTH_PROMPT_VERSION
+    excluded_books = parse_excluded_books(args.exclude_books)
+    run_id = create_run(
+        conn,
+        mode="greta-both",
+        model=args.model,
+        prompt_version=prompt_version,
+        token_budget=args.token_budget,
+        notes=f"exclude_books={','.join(sorted(excluded_books))}",
+    )
+    rows = get_greta_both_unprocessed_sentences(
+        conn, prompt_version, excluded_books, args.stop_after
+    )
+    if not rows:
+        finish_run(
+            conn,
+            run_id,
+            status="completed",
+            input_tokens=0,
+            output_tokens=0,
+            processed_count=0,
+        )
+        print("No unprocessed both-capable Greta-plan sentences found.")
+        return
+
+    print(
+        f"Run {run_id}: tagging up to {len(rows)} sentences with {args.model}; "
+        f"token budget={args.token_budget or 'none'}; "
+        f"exclude_books={','.join(sorted(excluded_books)) or 'none'}."
+    )
+
+    total_input_tokens = 0
+    total_output_tokens = 0
+    processed_count = 0
+    failures = []
+    row_iter = iter(rows)
+    pending = set()
+    max_workers = max(1, args.concurrency)
+    stop_submitting = False
+
+    def submit_next(executor):
+        try:
+            row = next(row_iter)
+        except StopIteration:
+            return False
+        passage_id, sentence_number, sentence_text, english_text = row
+        future = executor.submit(
+            analyse_sentence_greta_both,
+            client,
+            args.model,
+            passage_id,
+            sentence_number,
+            sentence_text,
+            english_text,
+        )
+        future.row = row
+        pending.add(future)
+        return True
+
+    try:
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            for _ in range(max_workers):
+                if not submit_next(executor):
+                    break
+
+            while pending:
+                for future in as_completed(pending):
+                    pending.remove(future)
+                    passage_id, sentence_number, _, _ = future.row
+                    tag, input_tokens, output_tokens, error = future.result()
+                    total_input_tokens += input_tokens
+                    total_output_tokens += output_tokens
+                    if tag is None:
+                        failures.append((passage_id, sentence_number, error))
+                        print(f"FAILED {passage_id} #{sentence_number}: {error}")
+                    else:
+                        save_greta_both_tag(
+                            conn,
+                            run_id=run_id,
+                            prompt_version=prompt_version,
+                            model=args.model,
+                            passage_id=passage_id,
+                            sentence_number=sentence_number,
+                            tag=tag,
+                            input_tokens=input_tokens,
+                            output_tokens=output_tokens,
+                        )
+                        processed_count += 1
+                        print(
+                            f"Tagged {passage_id} #{sentence_number}: "
+                            f"{tag['myth_history_bucket']} "
+                            f"tokens={input_tokens + output_tokens}"
+                        )
+
+                    total_tokens = total_input_tokens + total_output_tokens
+                    if args.token_budget and total_tokens >= args.token_budget:
+                        stop_submitting = True
+                    if not stop_submitting:
+                        submit_next(executor)
+
+        status = "completed" if not failures else "completed_with_failures"
+        notes = None
+        if failures:
+            notes = f"{len(failures)} failures; first={failures[0]}"
+        finish_run(
+            conn,
+            run_id,
+            status=status,
+            input_tokens=total_input_tokens,
+            output_tokens=total_output_tokens,
+            processed_count=processed_count,
+            notes=notes,
+        )
+        print(
+            f"Both-capable Greta tagging run complete: {processed_count} saved, "
+            f"{len(failures)} failed, tokens={total_input_tokens + total_output_tokens}. "
+            f"Run id: {run_id}"
+        )
+    except Exception as exc:
+        finish_run(
+            conn,
+            run_id,
+            status="failed",
+            input_tokens=total_input_tokens,
+            output_tokens=total_output_tokens,
+            processed_count=processed_count,
+            notes=str(exc),
+        )
+        raise
+
+
 def main():
     args = parse_arguments()
     api_key = load_openai_api_key(args.openai_api_key_file)
@@ -1059,6 +1435,8 @@ def main():
             run_compare_mode(args, conn, client)
         elif args.mode == "greta":
             run_greta_mode(args, conn, client)
+        elif args.mode == "greta-both":
+            run_greta_both_mode(args, conn, client)
         else:
             raise ValueError(f"Unknown mode: {args.mode}")
     except Exception as exc:

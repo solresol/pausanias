@@ -162,6 +162,68 @@ CREATE TABLE IF NOT EXISTS sentence_greta_tags (
     PRIMARY KEY (passage_id, sentence_number, prompt_version)
 );
 
+CREATE TABLE IF NOT EXISTS sentence_greta_both_tags (
+    passage_id TEXT NOT NULL,
+    sentence_number INTEGER NOT NULL,
+    prompt_version TEXT NOT NULL,
+    model TEXT NOT NULL,
+    references_mythic BOOLEAN NOT NULL,
+    references_historical BOOLEAN NOT NULL,
+    myth_history_bucket TEXT NOT NULL CHECK (
+        myth_history_bucket IN ('mythic', 'historical', 'both', 'other')
+    ),
+    confidence TEXT NOT NULL,
+    rationale TEXT NOT NULL,
+    input_tokens INTEGER NOT NULL,
+    output_tokens INTEGER NOT NULL,
+    run_id TEXT NOT NULL REFERENCES sentence_tagging_runs(run_id) ON DELETE CASCADE,
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (passage_id, sentence_number, prompt_version),
+    CHECK (
+        (myth_history_bucket = 'both' AND references_mythic AND references_historical)
+        OR (myth_history_bucket = 'mythic' AND references_mythic AND NOT references_historical)
+        OR (myth_history_bucket = 'historical' AND references_historical AND NOT references_mythic)
+        OR (myth_history_bucket = 'other' AND NOT references_mythic AND NOT references_historical)
+    ),
+    FOREIGN KEY (passage_id, sentence_number)
+        REFERENCES greek_sentences(passage_id, sentence_number)
+        ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_sentence_greta_both_tags_bucket
+    ON sentence_greta_both_tags (prompt_version, myth_history_bucket);
+
+CREATE TABLE IF NOT EXISTS sentence_manual_tags (
+    source_id TEXT NOT NULL,
+    annotators TEXT NOT NULL,
+    source_document TEXT NOT NULL,
+    passage_id TEXT NOT NULL,
+    sentence_number INTEGER NOT NULL,
+    manual_label TEXT NOT NULL,
+    manual_bucket TEXT NOT NULL CHECK (
+        manual_bucket IN ('mythic', 'historical', 'other', 'mixed_mythic_historical')
+    ),
+    yellow_mythic BOOLEAN NOT NULL DEFAULT FALSE,
+    blue_historical BOOLEAN NOT NULL DEFAULT FALSE,
+    green_both BOOLEAN NOT NULL DEFAULT FALSE,
+    manual_highlighted_text TEXT NOT NULL DEFAULT '',
+    yellow_mythic_letter_count INTEGER NOT NULL DEFAULT 0,
+    blue_historical_letter_count INTEGER NOT NULL DEFAULT 0,
+    green_both_letter_count INTEGER NOT NULL DEFAULT 0,
+    sentence_letter_count INTEGER NOT NULL DEFAULT 0,
+    highlighted_letter_fraction DOUBLE PRECISION NOT NULL DEFAULT 0,
+    alignment_coverage DOUBLE PRECISION NOT NULL DEFAULT 0,
+    alignment_status TEXT NOT NULL DEFAULT '',
+    imported_at TEXT NOT NULL,
+    PRIMARY KEY (source_id, passage_id, sentence_number),
+    FOREIGN KEY (passage_id, sentence_number)
+        REFERENCES greek_sentences(passage_id, sentence_number)
+        ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_sentence_manual_tags_bucket
+    ON sentence_manual_tags (source_id, manual_bucket);
+
 CREATE TABLE IF NOT EXISTS sentence_tagging_batch_items (
     run_id TEXT NOT NULL REFERENCES sentence_tagging_runs(run_id)
         ON DELETE CASCADE,
