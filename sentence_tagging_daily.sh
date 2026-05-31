@@ -24,6 +24,7 @@ run_batch \
   --use-batch-api \
   --model gpt-5.4-mini \
   --token-budget 500000 \
+  --priority-books-first 3 \
   --priority-books-last 4,8 \
   --skip-if-submitted-hours 6
 

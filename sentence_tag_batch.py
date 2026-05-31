@@ -113,6 +113,11 @@ def parse_arguments() -> argparse.Namespace:
         help="Planning estimate used before Batch API usage is known.",
     )
     parser.add_argument(
+        "--priority-books-first",
+        default="",
+        help="Comma-separated book numbers to process before the natural order.",
+    )
+    parser.add_argument(
         "--priority-books-last",
         default="4,8",
         help="Comma-separated book numbers to leave until other books are submitted.",
@@ -389,20 +394,29 @@ def request_limit(args: argparse.Namespace) -> int | None:
     return min(limits)
 
 
-def priority_order_sql(priority_books: list[str]) -> str:
+def priority_order_sql(priority_books_first: list[str], priority_books_last: list[str]) -> str:
     natural_order = (
         "split_part(s.passage_id, '.', 1)::integer, "
         "split_part(s.passage_id, '.', 2)::integer, "
         "split_part(s.passage_id, '.', 3)::integer, "
         "s.sentence_number"
     )
-    if not priority_books:
+    if not priority_books_first and not priority_books_last:
         return natural_order
-    books = ", ".join(sql_string(book) for book in priority_books)
-    return (
-        f"CASE WHEN split_part(s.passage_id, '.', 1) = ANY(ARRAY[{books}]) "
-        f"THEN 1 ELSE 0 END, {natural_order}"
-    )
+    book_expr = "split_part(s.passage_id, '.', 1)"
+    order_parts = []
+    if priority_books_first:
+        first_books = ", ".join(sql_string(book) for book in priority_books_first)
+        order_parts.append(
+            f"CASE WHEN {book_expr} = ANY(ARRAY[{first_books}]) THEN 0 ELSE 1 END"
+        )
+    if priority_books_last:
+        last_books = ", ".join(sql_string(book) for book in priority_books_last)
+        order_parts.append(
+            f"CASE WHEN {book_expr} = ANY(ARRAY[{last_books}]) THEN 1 ELSE 0 END"
+        )
+    order_parts.append(natural_order)
+    return ", ".join(order_parts)
 
 
 def pending_status_sql() -> str:
@@ -415,7 +429,10 @@ def unprocessed_sql(args: argparse.Namespace) -> str:
     prompt_version = mode_prompt_version(args)
     limit = request_limit(args)
     limit_clause = f"LIMIT {int(limit)}" if limit else ""
-    order_by = priority_order_sql(parse_list(args.priority_books_last))
+    order_by = priority_order_sql(
+        parse_list(args.priority_books_first),
+        parse_list(args.priority_books_last),
+    )
     terminal_statuses = pending_status_sql()
     pending_clause = f"""
       AND NOT EXISTS (

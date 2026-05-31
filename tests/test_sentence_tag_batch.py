@@ -18,6 +18,7 @@ def args_for_mode(mode):
         tokens_per_sentence=None,
         stop_after=10,
         token_budget=None,
+        priority_books_first="",
         priority_books_last="4,8",
     )
 
@@ -60,6 +61,17 @@ class SentenceTagBatchTests(unittest.TestCase):
         self.assertIn("sentence_greta_both_tags", sql)
         self.assertNotIn("FROM sentence_greta_tags t", sql)
         self.assertIn(GRETA_BOTH_BATCH_PROMPT_VERSION, sql)
+
+    def test_priority_books_first_order_is_before_natural_order(self):
+        args = args_for_mode("greta-both")
+        args.priority_books_first = "3"
+        sql = unprocessed_sql(args)
+        self.assertIn("THEN 0 ELSE 1 END", sql)
+        self.assertIn("ARRAY['3']", sql)
+        self.assertLess(
+            sql.index("ARRAY['3']"),
+            sql.index("split_part(s.passage_id, '.', 1)::integer"),
+        )
 
 
 if __name__ == "__main__":
