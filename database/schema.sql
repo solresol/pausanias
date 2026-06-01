@@ -193,6 +193,37 @@ CREATE TABLE IF NOT EXISTS sentence_greta_both_tags (
 CREATE INDEX IF NOT EXISTS idx_sentence_greta_both_tags_bucket
     ON sentence_greta_both_tags (prompt_version, myth_history_bucket);
 
+CREATE TABLE IF NOT EXISTS sentence_greta_both_context_tags (
+    passage_id TEXT NOT NULL,
+    sentence_number INTEGER NOT NULL,
+    prompt_version TEXT NOT NULL,
+    model TEXT NOT NULL,
+    references_mythic BOOLEAN NOT NULL,
+    references_historical BOOLEAN NOT NULL,
+    myth_history_bucket TEXT NOT NULL CHECK (
+        myth_history_bucket IN ('mythic', 'historical', 'both', 'other')
+    ),
+    confidence TEXT NOT NULL,
+    rationale TEXT NOT NULL,
+    input_tokens INTEGER NOT NULL,
+    output_tokens INTEGER NOT NULL,
+    run_id TEXT NOT NULL REFERENCES sentence_tagging_runs(run_id) ON DELETE CASCADE,
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (passage_id, sentence_number, prompt_version),
+    CHECK (
+        (myth_history_bucket = 'both' AND references_mythic AND references_historical)
+        OR (myth_history_bucket = 'mythic' AND references_mythic AND NOT references_historical)
+        OR (myth_history_bucket = 'historical' AND references_historical AND NOT references_mythic)
+        OR (myth_history_bucket = 'other' AND NOT references_mythic AND NOT references_historical)
+    ),
+    FOREIGN KEY (passage_id, sentence_number)
+        REFERENCES greek_sentences(passage_id, sentence_number)
+        ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_sentence_greta_both_context_tags_bucket
+    ON sentence_greta_both_context_tags (prompt_version, myth_history_bucket);
+
 CREATE TABLE IF NOT EXISTS sentence_manual_tags (
     source_id TEXT NOT NULL,
     annotators TEXT NOT NULL,

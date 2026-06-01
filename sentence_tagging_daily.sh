@@ -20,10 +20,10 @@ run_batch() {
 run_batch --fetch-batches
 
 run_batch \
-  --mode greta-both \
+  --mode greta-both-context \
   --use-batch-api \
   --model gpt-5.4-mini \
-  --token-budget 500000 \
+  --token-budget 1500000 \
   --priority-books-first 3 \
   --priority-books-last 4,8 \
   --skip-if-submitted-hours 6

@@ -3,6 +3,7 @@ import unittest
 
 from sentence_tag_batch import (
     GRETA_BOTH_BATCH_PROMPT_VERSION,
+    GRETA_BOTH_CONTEXT_BATCH_PROMPT_VERSION,
     bucket_from_flags,
     completion_body,
     mode_prompt_version,
@@ -36,6 +37,12 @@ class SentenceTagBatchTests(unittest.TestCase):
             GRETA_BOTH_BATCH_PROMPT_VERSION,
         )
 
+    def test_greta_both_context_prompt_version_is_separate(self):
+        self.assertEqual(
+            mode_prompt_version(args_for_mode("greta-both-context")),
+            GRETA_BOTH_CONTEXT_BATCH_PROMPT_VERSION,
+        )
+
     def test_greta_both_completion_uses_independent_flags(self):
         body = completion_body(
             args_for_mode("greta-both"),
@@ -61,6 +68,35 @@ class SentenceTagBatchTests(unittest.TestCase):
         self.assertIn("sentence_greta_both_tags", sql)
         self.assertNotIn("FROM sentence_greta_tags t", sql)
         self.assertIn(GRETA_BOTH_BATCH_PROMPT_VERSION, sql)
+
+    def test_greta_both_context_completion_includes_passage_context(self):
+        body = completion_body(
+            args_for_mode("greta-both-context"),
+            {
+                "passage_id": "3.1.1",
+                "sentence_number": 1,
+                "sentence": "target Greek",
+                "english_sentence": "target English",
+                "passage": "full Greek passage",
+                "english_passage": "full English passage",
+            },
+        )
+        content = "\n".join(message["content"] for message in body["messages"])
+        tool = body["tools"][0]["function"]
+        self.assertEqual(tool["name"], "save_greta_both_sentence_tag")
+        self.assertIn("full Greek passage", content)
+        self.assertIn("full English passage", content)
+        self.assertIn("target English", content)
+        self.assertIn("passage context", content)
+
+    def test_greta_both_context_unprocessed_sql_uses_context_table_and_joins(self):
+        sql = unprocessed_sql(args_for_mode("greta-both-context"))
+        self.assertIn("sentence_greta_both_context_tags", sql)
+        self.assertIn("JOIN passages p", sql)
+        self.assertIn("JOIN translations t", sql)
+        self.assertIn("p.passage", sql)
+        self.assertIn("t.english_translation AS english_passage", sql)
+        self.assertIn(GRETA_BOTH_CONTEXT_BATCH_PROMPT_VERSION, sql)
 
     def test_priority_books_first_order_is_before_natural_order(self):
         args = args_for_mode("greta-both")
