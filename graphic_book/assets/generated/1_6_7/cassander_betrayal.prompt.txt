@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: text-free scenic inset for a Pausanias graphic-book page, to be overlaid locally with exact labels and captions
+Primary request: Create a refined Hellenistic court-and-betrayal study for Pausanias passage 1.6.7: Cassander of Macedon, stern and politically calculating, in a Macedonian palace or campaign command room, with a shadowed memory of Antigonus as his former benefactor implied by a folded campaign map, seals, and a distant standard; the mood should convey impiety and betrayal without literal gore or melodrama.
+Scene/backdrop: late 4th-century BCE Macedonian royal interior or command tent with stone columns, bronze lamps, wax tablets, campaign map of Macedon and Asia Minor suggested only as unreadable markings.
+Subject: Cassander and advisors in historically plausible Macedonian/Hellenistic clothing and armor accents; guarded political atmosphere.
+Style/medium: finely detailed painterly historical illustration, warm watercolor and gouache over ink, museum-quality book plate, parchment atlas companion art.
+Composition/framing: medium-wide horizontal inset, Cassander left or center, table/map foreground, empty space near upper edge for later local label; no built-in text or inscriptions.
+Lighting/mood: warm lamp light, cool shadow, tense and sober.
+Color palette: parchment tan, bronze, muted crimson, smoky blue-gray, dark olive.
+Constraints: no readable text, no inscriptions, no modern objects, no crowns shaped like medieval Europe, no nudity, no erotic content, no graphic violence.
+Avoid: flat vector illustration, cartoon faces, theatrical fantasy costume, crude symbolic icons, watermark, border, caption, fake letters.

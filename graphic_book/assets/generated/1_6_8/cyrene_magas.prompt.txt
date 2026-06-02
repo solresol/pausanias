@@ -1,0 +1,6 @@
+Use case: historical-scene
+Asset type: text-free raster inset artwork for a Pausanias graphic-book page, to be overlaid locally with labels and captions
+Primary request: Create a refined historical inset for Pausanias passage 1.6.8 showing Cyrene after revolt under Magas, son of Berenice: a Greek city on the Libyan plateau with Doric buildings, silphium-like plants and dry hills, a small civic/royal procession entering the city gate, and the Mediterranean visible in the distance. The mood is political consolidation, not battle.
+Style: sophisticated archaeological watercolor and gouache over parchment, warm light, detailed city and landscape, historically grounded Hellenistic North Africa, coffee-table book quality.
+Composition: horizontal scenic panel, no labels or readable writing, strong sense of place, room for local caption below.
+Avoid: flat vector terrain, simple icon figures, classroom map, cartoon, modern objects, readable text, letters, numbers, watermark, nudity, gore.

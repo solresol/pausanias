@@ -1,0 +1,8 @@
+Use case: historical-scene
+Asset type: main raster art panel for a Pausanias illustrated graphic-book page
+Primary request: Create a rich, finished coffee-table-book illustration of Ptolemy defending Egypt at Pelusium after Antigonus and Demetrius threaten by land and sea.
+Scene/backdrop: late 4th century BCE eastern Nile Delta at Pelusium, low river channels, marshes, sandbanks, papyrus, defensive earthworks, a fortified Egyptian-Greek camp, triremes and transports on the river mouth, Mediterranean light, distant desert edge.
+Subject: Ptolemaic troops hold a defensive line near Pelusium while an Antigonid land army approaches in the hazy distance and warships threaten offshore; the image should clearly communicate a land-and-sea siege pressure around Egypt, not a generic battle.
+Style: sophisticated historical illustration, painterly watercolor and gouache over fine ink, warm parchment atlas mood, detailed topography, credible Hellenistic armor and ships, realistic scale, rich texture, deep spatial composition, visually ambitious like a high-end illustrated classical atlas.
+Composition: wide landscape panel, high oblique viewpoint over the Nile mouth and fortifications, river fleet in foreground/right, land army in distance/left, strong readable shapes for local callout labels to be added later. Leave some uncluttered sky/water/terrain areas for labels.
+Avoid: no text, no labels, no captions, no map lettering, no modern objects, no nudity, no gore, no cartoon style, no flat vector terrain, no simple diagram, no classroom map, no icon figures, no watermark.

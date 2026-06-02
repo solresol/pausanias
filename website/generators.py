@@ -492,6 +492,87 @@ def _sentence_passage_link(passage_id, prefix="../"):
     return f'<a href="{href}">{html.escape(str(passage_id))}</a>'
 
 
+def _text_or_empty(value):
+    if value is None:
+        return ""
+    try:
+        if pd.isna(value):
+            return ""
+    except (TypeError, ValueError):
+        pass
+    return str(value)
+
+
+def _normalized_text_with_spans(text):
+    normalized = []
+    spans = []
+    in_space = False
+    for index, character in enumerate(text):
+        if character.isspace():
+            if in_space and spans:
+                start, _ = spans[-1]
+                spans[-1] = (start, index + 1)
+            else:
+                normalized.append(" ")
+                spans.append((index, index + 1))
+                in_space = True
+        else:
+            normalized.append(character)
+            spans.append((index, index + 1))
+            in_space = False
+    return "".join(normalized), spans
+
+
+def _find_context_span(context, target):
+    if not context or not target:
+        return None
+
+    start = context.find(target)
+    if start >= 0:
+        return start, start + len(target)
+
+    normalized_context, spans = _normalized_text_with_spans(context)
+    normalized_target = re.sub(r"\s+", " ", target.strip())
+    if not normalized_context or not normalized_target:
+        return None
+
+    normalized_start = normalized_context.find(normalized_target)
+    if normalized_start < 0:
+        return None
+
+    normalized_end = normalized_start + len(normalized_target) - 1
+    if normalized_start >= len(spans) or normalized_end >= len(spans):
+        return None
+    return spans[normalized_start][0], spans[normalized_end][1]
+
+
+def _highlight_sentence_context(context, target, css_class="sentence-review-highlight"):
+    context = _text_or_empty(context)
+    target = _text_or_empty(target)
+    if not context:
+        context = target
+    if not target:
+        return html.escape(context), False
+
+    span = _find_context_span(context, target)
+    if not span:
+        fallback = (
+            f'{html.escape(context)}'
+            f'<span class="sentence-review-fallback">'
+            f'<mark class="{css_class}">{html.escape(target)}</mark>'
+            f'</span>'
+        )
+        return fallback, False
+
+    start, end = span
+    return (
+        f'{html.escape(context[:start])}'
+        f'<mark class="{css_class}">{html.escape(context[start:end])}</mark>'
+        f'{html.escape(context[end:])}',
+        True,
+    )
+
+
 def _generated_footer():
     return f"Generated on {datetime.now().strftime('%Y-%m-%d at %H:%M:%S')} from the PostgreSQL database"
 
@@ -712,6 +793,163 @@ def generate_greta_sentence_annotation_pages(greta_sentences_df, output_dir, tit
 """
     with open(os.path.join(sentences_dir, "index.html"), "w", encoding="utf-8") as f:
         f.write(index_page)
+
+
+def generate_sentence_review_sample_page(review_sample_df, output_dir, title):
+    """Generate an unlinked deterministic sentence-classification review sample."""
+    annotations_dir = os.path.join(output_dir, "annotations")
+    os.makedirs(annotations_dir, exist_ok=True)
+
+    if review_sample_df is None or len(review_sample_df) == 0:
+        summary = "No active sentence tags are available for review."
+        prompt_version = ""
+        sample_rows = """
+            <section class="sentence-review-card">
+                <p>No sentence review sample could be generated.</p>
+            </section>
+        """
+    else:
+        prompt_version = str(review_sample_df.iloc[0].get("prompt_version", ""))
+        summary = (
+            f"{len(review_sample_df):,} deterministic-random sentence"
+            f"{'' if len(review_sample_df) == 1 else 's'} selected from the active tag set."
+        )
+        rendered_rows = []
+        for _, row in review_sample_df.iterrows():
+            rank = int(row.get("sample_rank", len(rendered_rows) + 1))
+            bucket_value = _text_or_empty(row.get("myth_history_bucket", ""))
+            bucket = html.escape(bucket_value)
+            bucket_class = re.sub(r"[^a-z0-9_-]+", "-", bucket_value.lower()).strip("-")
+            bucket_class = bucket_class or "unknown"
+            confidence = html.escape(_text_or_empty(row.get("confidence", "")))
+            rationale = html.escape(_text_or_empty(row.get("rationale", "")))
+            model = html.escape(_text_or_empty(row.get("model", "")))
+            greek_context, greek_matched = _highlight_sentence_context(
+                row.get("passage", ""),
+                row.get("sentence", ""),
+            )
+            english_context, english_matched = _highlight_sentence_context(
+                row.get("english_translation", ""),
+                row.get("english_sentence", ""),
+            )
+            match_note = ""
+            if not greek_matched or not english_matched:
+                missing = []
+                if not greek_matched:
+                    missing.append("Greek")
+                if not english_matched:
+                    missing.append("English")
+                match_note = (
+                    f'<p class="note">Exact context match not found for '
+                    f'{html.escape(" and ".join(missing))}; the tagged sentence is shown separately.</p>'
+                )
+
+            scepticism_value = row.get("expresses_scepticism", False)
+            scepticism = (
+                "no"
+                if pd.isna(scepticism_value)
+                else ("yes" if bool(scepticism_value) else "no")
+            )
+            rendered_rows.append(f"""
+            <section class="sentence-review-card" id="sample-{rank}">
+                <div class="sentence-review-meta">
+                    <span class="sample-rank">#{rank}</span>
+                    <span>{_sentence_passage_link(row.get("passage_id", ""), "../")} sentence {int(row.get("sentence_number", 0))}</span>
+                    <span class="status-pill bucket-{bucket_class}">{bucket}</span>
+                    <span>confidence: {confidence}</span>
+                    <span>scepticism: {scepticism}</span>
+                </div>
+                <div class="sentence-review-contexts">
+                    <div>
+                        <h3>Greek Context</h3>
+                        <p class="greek-passage sentence-review-context">{greek_context}</p>
+                    </div>
+                    <div>
+                        <h3>English Context</h3>
+                        <p class="sentence-review-context">{english_context}</p>
+                    </div>
+                </div>
+                {match_note}
+                <details>
+                    <summary>Classification Rationale</summary>
+                    <p>{rationale}</p>
+                    <p class="note">Model: {model}</p>
+                </details>
+            </section>
+            """)
+        sample_rows = "\n".join(rendered_rows)
+
+    prompt_note = (
+        f"<p class=\"note\">Prompt version: <code>{html.escape(prompt_version)}</code></p>"
+        if prompt_version
+        else ""
+    )
+    html_content = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{html.escape(title)} - Sentence Review Sample</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .sentence-review-card {{
+            border: 1px solid #d8d1c4;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            background: #fffdf8;
+        }}
+        .sentence-review-meta {{
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem 0.75rem;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            color: #4b4032;
+        }}
+        .sentence-review-meta .sample-rank {{
+            font-weight: 700;
+            color: #2f261e;
+        }}
+        .sentence-review-contexts {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+        }}
+        .sentence-review-context {{
+            line-height: 1.65;
+        }}
+        .sentence-review-highlight {{
+            background: #fff1a8;
+            box-decoration-break: clone;
+            -webkit-box-decoration-break: clone;
+            padding: 0.08em 0.16em;
+        }}
+        .sentence-review-fallback {{
+            display: block;
+            margin-top: 0.75rem;
+        }}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>{html.escape(title)}</h1>
+        <p>Sentence classification review sample</p>
+    </header>
+    {_site_nav("../", "annotations")}
+    <div class="container wide-container">
+        <div class="breadcrumb"><a href="index.html">Annotations</a> &rsaquo; Sentence Review Sample</div>
+        <h2>Sentence Review Sample</h2>
+        <p>{summary}</p>
+        {prompt_note}
+        {sample_rows}
+        <footer>{_generated_footer()}</footer>
+    </div>
+</body>
+</html>
+"""
+    with open(os.path.join(annotations_dir, "sentence-review-sample.html"), "w", encoding="utf-8") as f:
+        f.write(html_content)
 
 
 def generate_lemma_pages(sentence_lemmas_df, output_dir, title):
@@ -1079,6 +1317,226 @@ def _write_complementary_analysis_pages(complementary, analysis_dir, title):
     )
 
 
+def _sensitivity_count(records, row_key, row_value, column_key=None, column_value=None):
+    for record in records or []:
+        if record.get(row_key) != row_value:
+            continue
+        if column_key is not None and record.get(column_key) != column_value:
+            continue
+        return int(record.get("count", 0))
+    return 0
+
+
+def _render_label_confusion_matrix(sensitivity):
+    manual_rows = [
+        ("historical", "Historical"),
+        ("mythic", "Mythic"),
+        ("other", "Other / not highlighted"),
+        ("mixed_mythic_historical", "Mixed mythic+historical"),
+    ]
+    greta_columns = [
+        ("historical", "GPT Historical"),
+        ("mythic", "GPT Mythic"),
+        ("other", "GPT Other"),
+    ]
+    confusion = sensitivity.get("confusion", [])
+    body_rows = []
+    column_totals = {key: 0 for key, _ in greta_columns}
+    grand_total = 0
+    for manual_key, manual_label in manual_rows:
+        cells = []
+        row_total = 0
+        for greta_key, _greta_label in greta_columns:
+            count = _sensitivity_count(
+                confusion,
+                "manual_bucket",
+                manual_key,
+                "greta_bucket",
+                greta_key,
+            )
+            row_total += count
+            column_totals[greta_key] += count
+            cells.append(f'<td class="num">{count:,}</td>')
+        grand_total += row_total
+        body_rows.append(f"""
+            <tr>
+                <th>{html.escape(manual_label)}</th>
+                {''.join(cells)}
+                <td class="num"><strong>{row_total:,}</strong></td>
+            </tr>
+        """)
+    footer_cells = "".join(
+        f'<td class="num"><strong>{column_totals[key]:,}</strong></td>'
+        for key, _label in greta_columns
+    )
+    return f"""
+        <table class="confusion-table sensitivity-confusion">
+            <thead>
+                <tr>
+                    <th>Manual Label</th>
+                    {''.join(f'<th>{html.escape(label)}</th>' for _key, label in greta_columns)}
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {''.join(body_rows)}
+                <tr>
+                    <th>Total</th>
+                    {footer_cells}
+                    <td class="num"><strong>{grand_total:,}</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    """
+
+
+def _render_sensitivity_scenario_table(scenarios):
+    rows = []
+    for scenario in scenarios or []:
+        metrics = scenario.get("metrics") or {}
+        bucket_counts = scenario.get("bucket_counts") or {}
+        if scenario.get("available"):
+            status = "Available"
+            accuracy = _format_optional_float(metrics.get("accuracy"), 3)
+            hist_f1 = _format_optional_float(metrics.get("f1_0"), 3)
+            myth_f1 = _format_optional_float(metrics.get("f1_1"), 3)
+        else:
+            status = html.escape(scenario.get("message", "Unavailable"))
+            accuracy = hist_f1 = myth_f1 = ""
+        downweighted = scenario.get("downweighted_count")
+        rows.append(f"""
+            <tr>
+                <td><strong>{html.escape(scenario.get("label", ""))}</strong><br><span class="note">{html.escape(scenario.get("description", ""))}</span></td>
+                <td class="num">{int(scenario.get("sample_count", 0)):,}</td>
+                <td class="num">{int(bucket_counts.get("historical", 0)):,}</td>
+                <td class="num">{int(bucket_counts.get("mythic", 0)):,}</td>
+                <td class="num">{int(scenario.get("feature_count", 0)):,}</td>
+                <td class="num">{accuracy}</td>
+                <td class="num">{hist_f1}</td>
+                <td class="num">{myth_f1}</td>
+                <td class="num">{'' if downweighted is None else f'{int(downweighted):,}'}</td>
+                <td>{status}</td>
+            </tr>
+        """)
+    return f"""
+        <table class="predictor-table">
+            <thead>
+                <tr><th>Scenario</th><th>Sample</th><th>Historical</th><th>Mythic</th><th>Features</th><th>Accuracy</th><th>Hist F1</th><th>Myth F1</th><th>Downweighted</th><th>Status</th></tr>
+            </thead>
+            <tbody>{''.join(rows)}</tbody>
+        </table>
+    """
+
+
+def _render_sensitivity_stability_table(stability, scenarios, limit=30):
+    scenario_labels = {scenario.get("id"): scenario.get("label", scenario.get("id", "")) for scenario in scenarios or []}
+    scenario_ids = [
+        "gpt_book3",
+        "manual_strict",
+        "agreement_only",
+        "gpt_downweighted_disagreements",
+    ]
+    scenario_ids = [scenario_id for scenario_id in scenario_ids if scenario_id in scenario_labels]
+    header_cells = "".join(
+        f"<th>{html.escape(scenario_labels[scenario_id])}</th>"
+        for scenario_id in scenario_ids
+    )
+    rows = []
+    for row in (stability or [])[:limit]:
+        coefficients = row.get("coefficients", {})
+        coefficient_cells = "".join(
+            f'<td class="num">{_format_optional_float(coefficients.get(scenario_id), 3, signed=True)}</td>'
+            for scenario_id in scenario_ids
+        )
+        rows.append(f"""
+            <tr>
+                <td>{html.escape(str(row.get("phrase", "")))}</td>
+                <td>{html.escape(str(row.get("baseline_direction", "")))}</td>
+                {coefficient_cells}
+                <td class="num">{int(row.get("present_scenario_count", 0))}</td>
+                <td>{'yes' if row.get("sign_stable") else 'no'}</td>
+            </tr>
+        """)
+    return f"""
+        <table class="predictor-table">
+            <thead>
+                <tr><th>Feature</th><th>Baseline Direction</th>{header_cells}<th>Present</th><th>Sign Stable</th></tr>
+            </thead>
+            <tbody>{''.join(rows)}</tbody>
+        </table>
+    """
+
+
+def _render_monte_carlo_table(monte_carlo, limit=25):
+    if not monte_carlo or not monte_carlo.get("available"):
+        return f"<p>{html.escape((monte_carlo or {}).get('message', 'Monte Carlo label-noise analysis is unavailable.'))}</p>"
+    metrics = monte_carlo.get("metrics", {})
+    rows = []
+    for row in (monte_carlo.get("terms") or [])[:limit]:
+        rows.append(f"""
+            <tr>
+                <td>{html.escape(str(row.get("phrase", "")))}</td>
+                <td class="num">{int(row.get("present_count", 0)):,}</td>
+                <td class="num">{int(row.get("positive_count", 0)):,}</td>
+                <td class="num">{int(row.get("negative_count", 0)):,}</td>
+                <td class="num">{_format_optional_float(row.get("mean_coefficient"), 3, signed=True)}</td>
+                <td class="num">{_format_optional_float(row.get("coefficient_min"), 3, signed=True)}</td>
+                <td class="num">{_format_optional_float(row.get("coefficient_max"), 3, signed=True)}</td>
+                <td class="num">{_format_optional_float(row.get("sign_stability"), 2)}</td>
+            </tr>
+        """)
+    return f"""
+        <div class="metric-strip">
+            <div><strong>{int(metrics.get("completed_iterations", 0)):,}</strong><span>noise runs</span></div>
+            <div><strong>{_format_optional_float(metrics.get("mean_accuracy"), 3)}</strong><span>mean accuracy</span></div>
+            <div><strong>{_format_optional_float(metrics.get("min_accuracy"), 3)}-{_format_optional_float(metrics.get("max_accuracy"), 3)}</strong><span>accuracy range</span></div>
+            <div><strong>{_format_optional_float(metrics.get("mean_sample_count"), 1)}</strong><span>mean fitted rows</span></div>
+        </div>
+        <table class="predictor-table">
+            <thead>
+                <tr><th>Feature</th><th>Present</th><th>Positive</th><th>Negative</th><th>Mean Coef</th><th>Min</th><th>Max</th><th>Sign Stability</th></tr>
+            </thead>
+            <tbody>{''.join(rows)}</tbody>
+        </table>
+    """
+
+
+def _write_label_sensitivity_page(sensitivity, analysis_dir, title):
+    if sensitivity and sensitivity.get("available"):
+        rate = sensitivity.get("exact_agreement_rate")
+        scenarios = sensitivity.get("scenarios", [])
+        body = f"""
+            <p class="note">Manual labels come from {html.escape(str(sensitivity.get("source_document", "")))} ({html.escape(str(sensitivity.get("annotators", "")))}). GPT labels are the active three-way <code>{html.escape(str(sensitivity.get("prompt_version", "")))}</code> run using <code>{html.escape(str(sensitivity.get("model", "")))}</code>.</p>
+            <div class="metric-strip">
+                <div><strong>{int(sensitivity.get("sentence_count", 0)):,}</strong><span>joined sentences</span></div>
+                <div><strong>{int(sensitivity.get("exact_agreement_count", 0)):,}</strong><span>exact agreements</span></div>
+                <div><strong>{_format_optional_float(rate, 3)}</strong><span>agreement rate</span></div>
+                <div><strong>{int(sensitivity.get("exact_comparable_count", 0)):,}</strong><span>exact-comparable rows</span></div>
+            </div>
+            <h3>Manual vs GPT Confusion Matrix</h3>
+            {_render_label_confusion_matrix(sensitivity)}
+            <h3>Refit Scenarios</h3>
+            <p>The scenario models all use the same lemma TF-IDF logistic-regression setup as the current sentence analysis. Rows tagged <code>other</code> are not used in mythic-vs-historical fitting unless a scenario turns them into a mythic or historical sample.</p>
+            {_render_sensitivity_scenario_table(scenarios)}
+            <h3>Top Baseline Feature Stability</h3>
+            <p>This table starts from the strongest GPT-labelled Book 3 coefficients and shows whether their direction survives manual-label and agreement-only refits.</p>
+            {_render_sensitivity_stability_table(sensitivity.get("stability", []), scenarios)}
+            <h3>Monte Carlo Label-Noise Stress Test</h3>
+            <p>This stress test resamples labels from the observed manual-vs-GPT confusion rates and refits the lemma model repeatedly. It is a sensitivity diagnostic, not a claim that either label set is ground truth.</p>
+            {_render_monte_carlo_table(sensitivity.get("monte_carlo"))}
+        """
+    else:
+        body = f"<p>{html.escape((sensitivity or {}).get('message', 'Manual label sensitivity analysis is unavailable.'))}</p>"
+    _write_analysis_html_page(
+        analysis_dir,
+        "label_sensitivity.html",
+        "Manual Label Sensitivity",
+        "How sentence-model conclusions move under unreliable labels",
+        body,
+        title,
+    )
+
+
 def generate_analysis_pages(greta_analysis, output_dir, title):
     """Generate the analysis hub and current Greta logistic-regression variants."""
     analysis_dir = os.path.join(output_dir, "analysis")
@@ -1086,7 +1544,9 @@ def generate_analysis_pages(greta_analysis, output_dir, title):
 
     variants = greta_analysis.get("variants", []) if greta_analysis else []
     complementary = greta_analysis.get("complementary", {}) if greta_analysis else {}
+    label_sensitivity = greta_analysis.get("label_sensitivity", {}) if greta_analysis else {}
     _write_complementary_analysis_pages(complementary, analysis_dir, title)
+    _write_label_sensitivity_page(label_sensitivity, analysis_dir, title)
     for variant in variants:
         predictors = variant.get("predictors")
         metrics = variant.get("metrics")
@@ -1253,6 +1713,11 @@ def generate_analysis_pages(greta_analysis, output_dir, title):
                 <h3>Model Error Analysis</h3>
                 <p>Confident false mythic and false historical predictions for close-reading follow-up.</p>
                 <a href="error_analysis.html">Open Error Analysis</a>
+            </section>
+            <section class="hub-card">
+                <h3>Manual Label Sensitivity</h3>
+                <p>Confusion matrix, label-scenario refits, and noise stress tests using the Greta/Rosie Book 3 manual labels.</p>
+                <a href="label_sensitivity.html">Open Sensitivity Analysis</a>
             </section>
         </div>
 

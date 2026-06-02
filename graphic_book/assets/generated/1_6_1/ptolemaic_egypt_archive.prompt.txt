@@ -1,0 +1,8 @@
+Use case: historical-scene
+Asset type: project raster inset art for a Pausanias graphic-book page; no readable text, no labels, no watermark.
+Primary request: Create a refined Hellenistic historical inset for Pausanias passage 1.6.1 showing Ptolemaic Egypt entering dynastic memory: Alexandria harbor and Nile delta seen as a scholar-court tableau.
+Scene/backdrop: a richly painted Ptolemaic Alexandria harbor with Pharos-like lighthouse silhouette in the distance, Nile boats, papyrus bundles, stone columns, archival scrolls, and a small group of fully clothed Hellenistic scribes/historians consulting neglected accounts.
+Subject: the focus is Egyptian kingship and historical memory, not battle. Include Ptolemaic court atmosphere, Nile delta geography, scrolls and tablets, ships, warm Egyptian light.
+Style: high-quality painterly historical illustration on aged parchment tones, detailed architecture and fabric, mineral pigments, coffee-table history book quality, not flat vector art.
+Composition: landscape inset suitable for cropping to about 420x250; leave clean areas for later caption/label overlays.
+Constraints: no readable text or pseudo-text, no modern objects, no nudity, no eroticized figures, no gore, no cartoon style, no icon figures, no schematic map.

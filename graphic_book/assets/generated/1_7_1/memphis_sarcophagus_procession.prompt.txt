@@ -1,0 +1,7 @@
+Use case: historical-scene
+Asset type: text-free raster scenic inset for a Pausanias graphic-book page
+Primary request: Create a refined archaeological watercolor scene of Alexander the Great's ornate sarcophagus being received and moved at Memphis in Ptolemaic Egypt. The focus is a gold-and-blue ceremonial bier or sarcophagus canopy, Macedonian guards, Egyptian priests, palm trees, temple pylons, and Nile-side stone architecture. The scene should clarify the passage detail that Ptolemy transferred Alexander's corpse from Memphis.
+Style/medium: high-quality museum coffee-table book illustration, watercolor and gouache over parchment, historically grounded, rich texture, warm sunlight, dignified processional mood. No exact text in the art.
+Composition/framing: medium-wide rectangular inset, sarcophagus and procession central, temple architecture and Nile bank visible, open edges for local caption overlay outside the art.
+Constraints: no readable writing, no labels, no captions, no watermark, no nudity, no gore, no modern objects.
+Avoid: cartoon style, flat vector art, classroom diagram, simple icons, schematic figures, overdramatic fantasy armor.

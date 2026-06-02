@@ -1,0 +1,8 @@
+Use case: historical-scene
+Asset type: project raster inset art for a Pausanias graphic-book page; no readable text, no labels, no watermark.
+Primary request: Create a refined Hellenistic historical inset for Pausanias passage 1.6.1 showing Mysia and Pergamon entering dynastic memory through the house of Attalus.
+Scene/backdrop: terraced Pergamon acropolis in Mysia rising above rugged Anatolian hills, royal stoas and temples, a small archive/court terrace with fully clothed Hellenistic historians and attendants examining scrolls and royal genealogies, distant road toward the Aegean.
+Subject: Attalid royal origins, Mysia, old fame preserved imperfectly by historians; no battle scene. Include weathered marble, bronze vessels, parchment, mountain topography, and a sense of old accounts being gathered after fame has faded.
+Style: high-quality painterly historical illustration on warm parchment/mineral tones, sophisticated archaeological reconstruction, detailed but not cluttered, coffee-table history book quality, not vector or diagrammatic.
+Composition: landscape inset suitable for cropping to about 420x250; clear acropolis silhouette and readable geography with open areas for later labels.
+Constraints: no readable text or pseudo-text, no modern objects, no nudity, no eroticized figures, no gore, no cartoon style, no icon figures, no schematic map.

@@ -36,6 +36,7 @@ from stats_utils import compute_p_q_values
 WORD_PATTERN = re.compile(r"(?u)\b\w+\b")
 TFIDF_TOKEN_PATTERN = r"(?u)\b\w\w+\b"
 GRETA_SENTENCE_PROMPT_VERSION = "greta-myth-history-other-no-scepticism-v1"
+MANUAL_SENTENCE_SOURCE_ID = "greta-rosie-book3-rtf-2026-05-28"
 RHETORIC_MARKER_LEMMAS = [
     "λέγω",
     "φημί",
@@ -422,6 +423,61 @@ def get_greta_sentence_annotations(conn, prompt_version=None):
     """
     df = read_sql_query(query, conn, (active_prompt,))
     return _add_sentence_sort_columns(df)
+
+
+def get_sentence_review_sample(conn, prompt_version=None, sample_size=50):
+    """Return a deterministic pseudo-random sample of active sentence tags."""
+    active_prompt = _active_greta_prompt_version(conn, prompt_version)
+    if not active_prompt:
+        return pd.DataFrame()
+
+    sample_size = max(0, int(sample_size))
+    if sample_size == 0:
+        return pd.DataFrame()
+
+    query = """
+    SELECT gs.passage_id,
+           gs.sentence_number,
+           gs.sentence,
+           gs.english_sentence,
+           p.passage,
+           tr.english_translation,
+           t.prompt_version,
+           COALESCE(NULLIF(t.model, ''), NULLIF(r.model, ''), t.model) AS model,
+           t.myth_history_bucket,
+           t.expresses_scepticism,
+           t.confidence,
+           t.rationale,
+           t.run_id,
+           t.created_at,
+           md5(%s || ':' || t.prompt_version || ':' || gs.passage_id || ':' || gs.sentence_number::text) AS sample_key
+    FROM sentence_greta_tags t
+    JOIN greek_sentences gs
+      ON gs.passage_id = t.passage_id
+     AND gs.sentence_number = t.sentence_number
+    JOIN passages p
+      ON p.id = gs.passage_id
+    LEFT JOIN translations tr
+      ON tr.passage_id = gs.passage_id
+    LEFT JOIN sentence_tagging_runs r
+      ON r.run_id = t.run_id
+    WHERE t.prompt_version = %s
+    ORDER BY sample_key, gs.passage_id, gs.sentence_number
+    LIMIT %s
+    """
+    df = read_sql_query(
+        query,
+        conn,
+        ("sentence-review-sample-v1", active_prompt, sample_size),
+    )
+    if len(df) == 0:
+        return df
+
+    df = df.copy()
+    df["sample_rank"] = range(1, len(df) + 1)
+    df["book"] = df["passage_id"].apply(lambda pid: str(pid).split(".")[0])
+    df["chapter"] = df["passage_id"].apply(lambda pid: ".".join(str(pid).split(".")[:2]))
+    return df
 
 
 def get_sentence_lemma_view(conn):
@@ -1096,9 +1152,567 @@ def get_greta_sentence_analysis_variants(conn):
             lemma_lookup,
             variants,
         ),
+        "label_sensitivity": get_manual_label_sensitivity_analysis(
+            conn,
+            source_id=MANUAL_SENTENCE_SOURCE_ID,
+            proper_stopwords=proper_stopwords,
+            lemma_lookup=lemma_lookup,
+        ),
         "bucket_counts": bucket_counts,
         "book_counts": book_counts,
         "tagged_sentence_count": int(len(annotations)),
+    }
+
+
+def _manual_component_agrees(manual_bucket, greta_bucket):
+    if manual_bucket == "mixed_mythic_historical":
+        return greta_bucket in {"mythic", "historical"}
+    return manual_bucket == greta_bucket
+
+
+def _comparison_result(manual_bucket, greta_bucket):
+    if not greta_bucket:
+        return "missing_greta_tag"
+    if manual_bucket in {"mythic", "historical", "other"}:
+        return "exact_agreement" if manual_bucket == greta_bucket else "disagreement"
+    if _manual_component_agrees(manual_bucket, greta_bucket):
+        return "partial_agreement_manual_mixed"
+    return "disagreement_manual_mixed"
+
+
+def _counter_records(counter, first_key, second_key=None):
+    records = []
+    for key, count in sorted(counter.items()):
+        if second_key:
+            first_value, second_value = key
+            records.append(
+                {
+                    first_key: first_value,
+                    second_key: second_value,
+                    "count": int(count),
+                }
+            )
+        else:
+            records.append({first_key: key, "count": int(count)})
+    return records
+
+
+def _fit_label_sensitivity_scenario(
+    df,
+    *,
+    scenario_id,
+    label,
+    description,
+    token_source,
+    proper_stopwords,
+    lemma_lookup,
+    sample_weight_column=None,
+    max_features=1000,
+    top_features=25,
+    min_df=2,
+):
+    """Fit one mythic-vs-historical model for a label-sensitivity scenario."""
+    variant_df = df[df["analysis_bucket"].isin(["mythic", "historical"])].copy()
+    bucket_counts = (
+        variant_df["analysis_bucket"].value_counts().sort_index().to_dict()
+        if len(variant_df) > 0
+        else {}
+    )
+    y = (variant_df["analysis_bucket"] == "mythic").astype(int).to_numpy()
+    min_class_count = min(bucket_counts.values()) if bucket_counts else 0
+    result = {
+        "id": scenario_id,
+        "label": label,
+        "description": description,
+        "token_source": token_source,
+        "sample_count": int(len(variant_df)),
+        "bucket_counts": bucket_counts,
+        "feature_count": 0,
+        "predictors": pd.DataFrame(),
+        "all_predictors": pd.DataFrame(),
+        "metrics": None,
+        "available": False,
+        "message": "",
+    }
+    if sample_weight_column and sample_weight_column in variant_df.columns:
+        result["downweighted_count"] = int(
+            (variant_df[sample_weight_column].astype(float) < 1.0).sum()
+        )
+
+    if len(variant_df) < 20 or min_class_count < 5:
+        result["message"] = "Not enough mythic and historical sentences for this label scenario."
+        return result
+
+    texts, stopwords, lemma_stats, message = _sentence_texts_and_stopwords(
+        variant_df,
+        token_source=token_source,
+        proper_stopwords=proper_stopwords,
+        lemma_lookup=lemma_lookup,
+        extra_stopwords=[],
+    )
+    if message:
+        result["message"] = message
+        return result
+    if lemma_stats is not None:
+        result["lemma_stats"] = {**lemma_stats}
+
+    weights = None
+    if sample_weight_column and sample_weight_column in variant_df.columns:
+        weights = variant_df[sample_weight_column].astype(float).to_numpy()
+
+    vectorizer = _new_sentence_vectorizer(
+        stopwords,
+        max_features=max_features,
+        min_df=min_df,
+    )
+    model = _new_sentence_logistic_model()
+    try:
+        if weights is None:
+            X_train, X_test, y_train, y_test = train_test_split(
+                texts,
+                y,
+                test_size=0.25,
+                random_state=42,
+                stratify=y,
+            )
+            train_weights = None
+        else:
+            X_train, X_test, y_train, y_test, train_weights, _test_weights = train_test_split(
+                texts,
+                y,
+                weights,
+                test_size=0.25,
+                random_state=42,
+                stratify=y,
+            )
+        train_matrix = vectorizer.fit_transform(X_train)
+        if train_matrix.shape[1] == 0:
+            result["message"] = "No repeated vocabulary survived filtering."
+            return result
+        if train_weights is None:
+            model.fit(train_matrix, y_train)
+        else:
+            model.fit(train_matrix, y_train, sample_weight=train_weights)
+        test_matrix = vectorizer.transform(X_test)
+        y_pred = model.predict(test_matrix)
+    except ValueError as exc:
+        result["message"] = f"Could not fit model: {exc}"
+        return result
+
+    feature_names = vectorizer.get_feature_names_out()
+    coefficients = model.coef_[0]
+    analyzer = vectorizer.build_analyzer()
+    vocab = set(feature_names)
+    mythic_counter = Counter()
+    historical_counter = Counter()
+    total_mythic = int(np.sum(y))
+    total_historical = len(y) - total_mythic
+
+    for text, label_value in zip(texts, y):
+        terms = {term for term in analyzer(text) if term in vocab}
+        if label_value:
+            mythic_counter.update(terms)
+        else:
+            historical_counter.update(terms)
+
+    mythic_counts = np.array([mythic_counter.get(feature, 0) for feature in feature_names])
+    historical_counts = np.array(
+        [historical_counter.get(feature, 0) for feature in feature_names]
+    )
+    p_values, q_values = compute_p_q_values(
+        mythic_counts,
+        historical_counts,
+        total_mythic,
+        total_historical,
+    )
+
+    predictor_rows = pd.DataFrame(
+        {
+            "phrase": feature_names,
+            "english_translation": "",
+            "coefficient": coefficients,
+            "is_mythic": (coefficients > 0).astype(int),
+            "mythic_count": mythic_counts,
+            "historical_count": historical_counts,
+            "p_value": p_values,
+            "q_value": q_values,
+        }
+    )
+    top_positive = predictor_rows.sort_values("coefficient", ascending=False).head(
+        top_features
+    )
+    top_negative = predictor_rows.sort_values("coefficient", ascending=True).head(
+        top_features
+    )
+    result.update(
+        {
+            "available": True,
+            "feature_count": int(len(feature_names)),
+            "predictors": pd.concat([top_negative, top_positive]).reset_index(drop=True),
+            "all_predictors": predictor_rows.reset_index(drop=True),
+            "metrics": _binary_classification_metrics(y_test, y_pred),
+        }
+    )
+    return result
+
+
+def _scenario_feature_stability(scenarios, *, top_n=40):
+    baseline = next((scenario for scenario in scenarios if scenario.get("id") == "gpt_book3"), None)
+    if not baseline or not baseline.get("available"):
+        return []
+    all_predictors = baseline.get("all_predictors")
+    if all_predictors is None or len(all_predictors) == 0:
+        return []
+
+    baseline_terms = (
+        all_predictors.assign(abs_coefficient=all_predictors["coefficient"].abs())
+        .sort_values("abs_coefficient", ascending=False)
+        .head(top_n)
+    )
+    scenario_maps = {}
+    for scenario in scenarios:
+        predictors = scenario.get("all_predictors")
+        if predictors is None or len(predictors) == 0:
+            scenario_maps[scenario["id"]] = {}
+            continue
+        scenario_maps[scenario["id"]] = dict(
+            zip(predictors["phrase"], predictors["coefficient"])
+        )
+
+    rows = []
+    for _, row in baseline_terms.iterrows():
+        term = row["phrase"]
+        coefficients = {
+            scenario["id"]: scenario_maps.get(scenario["id"], {}).get(term)
+            for scenario in scenarios
+        }
+        present_values = [
+            float(value) for value in coefficients.values() if value is not None
+        ]
+        nonzero_signs = {
+            1 if value > 0 else -1
+            for value in present_values
+            if abs(value) > 1e-12
+        }
+        rows.append(
+            {
+                "phrase": term,
+                "baseline_coefficient": float(row["coefficient"]),
+                "baseline_direction": "mythic" if row["coefficient"] > 0 else "historical",
+                "coefficients": coefficients,
+                "present_scenario_count": int(len(present_values)),
+                "sign_stable": len(nonzero_signs) <= 1,
+                "coefficient_min": float(min(present_values)) if present_values else None,
+                "coefficient_max": float(max(present_values)) if present_values else None,
+            }
+        )
+    return rows
+
+
+def _manual_conditioned_probabilities(joined):
+    probability_map = {}
+    for greta_bucket, group in joined.groupby("greta_bucket"):
+        counts = Counter(group["manual_bucket"])
+        mythic = counts.get("mythic", 0) + 0.5 * counts.get("mixed_mythic_historical", 0)
+        historical = counts.get("historical", 0) + 0.5 * counts.get("mixed_mythic_historical", 0)
+        other = counts.get("other", 0)
+        total = mythic + historical + other
+        if total <= 0:
+            continue
+        probability_map[greta_bucket] = {
+            "buckets": np.array(["historical", "mythic", "other"], dtype=object),
+            "probabilities": np.array(
+                [historical / total, mythic / total, other / total],
+                dtype=float,
+            ),
+        }
+    return probability_map
+
+
+def _monte_carlo_label_noise_analysis(
+    joined,
+    *,
+    proper_stopwords,
+    lemma_lookup,
+    baseline_terms,
+    iterations=30,
+):
+    probability_map = _manual_conditioned_probabilities(joined)
+    if not probability_map or not baseline_terms:
+        return {
+            "available": False,
+            "message": "No manual/GPT confusion probabilities are available.",
+            "iterations": 0,
+            "terms": [],
+            "metrics": {},
+        }
+
+    rng = np.random.default_rng(42)
+    term_coefficients = defaultdict(list)
+    accuracies = []
+    sample_counts = []
+    completed = 0
+    for iteration in range(iterations):
+        sampled = joined.copy()
+        sampled_buckets = []
+        for _, row in sampled.iterrows():
+            probs = probability_map.get(row["greta_bucket"])
+            if probs is None:
+                sampled_buckets.append("other")
+                continue
+            sampled_buckets.append(
+                rng.choice(probs["buckets"], p=probs["probabilities"])
+            )
+        sampled["analysis_bucket"] = sampled_buckets
+        scenario = _fit_label_sensitivity_scenario(
+            sampled,
+            scenario_id=f"noise_{iteration + 1}",
+            label=f"Noise run {iteration + 1}",
+            description="Sampled from the observed manual-vs-GPT confusion rates.",
+            token_source="lemma",
+            proper_stopwords=proper_stopwords,
+            lemma_lookup=lemma_lookup,
+            max_features=500,
+            top_features=10,
+        )
+        if not scenario.get("available"):
+            continue
+        completed += 1
+        sample_counts.append(int(scenario.get("sample_count", 0)))
+        metrics = scenario.get("metrics") or {}
+        if metrics.get("accuracy") is not None:
+            accuracies.append(float(metrics["accuracy"]))
+        predictors = scenario.get("all_predictors")
+        if predictors is None or len(predictors) == 0:
+            continue
+        predictor_map = dict(zip(predictors["phrase"], predictors["coefficient"]))
+        for term in baseline_terms:
+            if term in predictor_map:
+                term_coefficients[term].append(float(predictor_map[term]))
+
+    term_rows = []
+    for term in baseline_terms:
+        values = term_coefficients.get(term, [])
+        if not values:
+            term_rows.append(
+                {
+                    "phrase": term,
+                    "present_count": 0,
+                    "positive_count": 0,
+                    "negative_count": 0,
+                    "mean_coefficient": None,
+                    "coefficient_min": None,
+                    "coefficient_max": None,
+                    "sign_stability": None,
+                }
+            )
+            continue
+        positive = sum(1 for value in values if value > 0)
+        negative = sum(1 for value in values if value < 0)
+        term_rows.append(
+            {
+                "phrase": term,
+                "present_count": int(len(values)),
+                "positive_count": int(positive),
+                "negative_count": int(negative),
+                "mean_coefficient": float(np.mean(values)),
+                "coefficient_min": float(min(values)),
+                "coefficient_max": float(max(values)),
+                "sign_stability": float(max(positive, negative) / len(values)),
+            }
+        )
+
+    metrics = {
+        "completed_iterations": int(completed),
+        "requested_iterations": int(iterations),
+        "mean_accuracy": float(np.mean(accuracies)) if accuracies else None,
+        "min_accuracy": float(min(accuracies)) if accuracies else None,
+        "max_accuracy": float(max(accuracies)) if accuracies else None,
+        "mean_sample_count": float(np.mean(sample_counts)) if sample_counts else None,
+    }
+    return {
+        "available": completed > 0,
+        "message": "" if completed else "No Monte Carlo label-noise models could be fit.",
+        "iterations": int(completed),
+        "terms": term_rows,
+        "metrics": metrics,
+    }
+
+
+def get_manual_label_sensitivity_analysis(
+    conn,
+    *,
+    source_id=MANUAL_SENTENCE_SOURCE_ID,
+    proper_stopwords=None,
+    lemma_lookup=None,
+):
+    """Compare manual Greta/Rosie labels with GPT Greta tags and refit models."""
+    if not table_exists(conn, "sentence_manual_tags") or not table_exists(conn, "sentence_greta_tags"):
+        return {
+            "available": False,
+            "message": "Manual sentence labels or Greta sentence tags are not available.",
+            "source_id": source_id,
+        }
+
+    joined = read_sql_query(
+        """
+        SELECT gs.passage_id,
+               gs.sentence_number,
+               gs.sentence,
+               gs.english_sentence,
+               m.source_id,
+               m.annotators,
+               m.source_document,
+               m.manual_label,
+               m.manual_bucket,
+               m.yellow_mythic,
+               m.blue_historical,
+               m.green_both,
+               m.alignment_coverage,
+               m.alignment_status,
+               t.prompt_version,
+               COALESCE(NULLIF(t.model, ''), NULLIF(r.model, ''), t.model) AS model,
+               t.myth_history_bucket AS greta_bucket,
+               t.confidence AS greta_confidence,
+               t.rationale AS greta_rationale
+        FROM sentence_manual_tags m
+        JOIN greek_sentences gs
+          ON gs.passage_id = m.passage_id
+         AND gs.sentence_number = m.sentence_number
+        JOIN sentence_greta_tags t
+          ON t.passage_id = m.passage_id
+         AND t.sentence_number = m.sentence_number
+         AND t.prompt_version = %s
+        LEFT JOIN sentence_tagging_runs r
+          ON r.run_id = t.run_id
+        WHERE m.source_id = %s
+        ORDER BY gs.passage_id, gs.sentence_number
+        """,
+        conn,
+        (GRETA_SENTENCE_PROMPT_VERSION, source_id),
+    )
+    if len(joined) == 0:
+        return {
+            "available": False,
+            "message": f"No joined manual/GPT sentence labels found for {source_id}.",
+            "source_id": source_id,
+        }
+
+    joined = _add_sentence_sort_columns(joined)
+    joined["comparison_result"] = joined.apply(
+        lambda row: _comparison_result(row["manual_bucket"], row["greta_bucket"]),
+        axis=1,
+    )
+    joined["component_agreement"] = joined.apply(
+        lambda row: _manual_component_agrees(row["manual_bucket"], row["greta_bucket"]),
+        axis=1,
+    )
+
+    manual_label_counts = Counter(joined["manual_label"])
+    manual_bucket_counts = Counter(joined["manual_bucket"])
+    greta_bucket_counts = Counter(joined["greta_bucket"])
+    comparison_counts = Counter(joined["comparison_result"])
+    confusion = Counter(zip(joined["manual_bucket"], joined["greta_bucket"]))
+    manual_label_confusion = Counter(zip(joined["manual_label"], joined["greta_bucket"]))
+
+    proper_stopwords = proper_stopwords if proper_stopwords is not None else _stopword_rows(conn)
+    lemma_lookup = lemma_lookup if lemma_lookup is not None else (
+        load_word_lemma_lookup(conn) if table_exists(conn, "greek_word_lemmas") else {}
+    )
+
+    gpt_scope = joined.copy()
+    gpt_scope["analysis_bucket"] = gpt_scope["greta_bucket"]
+    manual_scope = joined.copy()
+    manual_scope["analysis_bucket"] = manual_scope["manual_bucket"]
+    agreement_scope = joined[
+        (joined["manual_bucket"].isin(["mythic", "historical"]))
+        & (joined["manual_bucket"] == joined["greta_bucket"])
+    ].copy()
+    agreement_scope["analysis_bucket"] = agreement_scope["manual_bucket"]
+    weighted_scope = joined.copy()
+    weighted_scope["analysis_bucket"] = weighted_scope["greta_bucket"]
+    weighted_scope["scenario_weight"] = np.where(weighted_scope["component_agreement"], 1.0, 0.35)
+
+    scenario_inputs = [
+        (
+            gpt_scope,
+            "gpt_book3",
+            "GPT labels on manual Book 3 scope",
+            "Uses the active GPT-5.4-mini three-way tags, restricted to sentences that have manual Book 3 labels.",
+            None,
+        ),
+        (
+            manual_scope,
+            "manual_strict",
+            "Manual labels only",
+            "Uses Greta/Rosie manual labels; unhighlighted and mixed rows are dropped for mythic-vs-historical fitting.",
+            None,
+        ),
+        (
+            agreement_scope,
+            "agreement_only",
+            "Agreement-only labels",
+            "Keeps only sentences where manual and GPT labels exactly agree as mythic or historical.",
+            None,
+        ),
+        (
+            weighted_scope,
+            "gpt_downweighted_disagreements",
+            "GPT labels, disagreements downweighted",
+            "Uses GPT labels but gives manual/GPT disagreements 35% of the weight of agreement rows.",
+            "scenario_weight",
+        ),
+    ]
+    scenarios = [
+        _fit_label_sensitivity_scenario(
+            frame,
+            scenario_id=scenario_id,
+            label=label,
+            description=description,
+            token_source="lemma",
+            proper_stopwords=proper_stopwords,
+            lemma_lookup=lemma_lookup,
+            sample_weight_column=weight_column,
+        )
+        for frame, scenario_id, label, description, weight_column in scenario_inputs
+    ]
+
+    stability = _scenario_feature_stability(scenarios)
+    baseline_terms = [row["phrase"] for row in stability[:25]]
+    monte_carlo = _monte_carlo_label_noise_analysis(
+        joined,
+        proper_stopwords=proper_stopwords,
+        lemma_lookup=lemma_lookup,
+        baseline_terms=baseline_terms,
+    )
+
+    exact_comparable = int(joined["manual_bucket"].isin(["mythic", "historical", "other"]).sum())
+    exact_agreement = int((joined["comparison_result"] == "exact_agreement").sum())
+    return {
+        "available": True,
+        "message": "",
+        "source_id": source_id,
+        "source_document": joined.iloc[0].get("source_document", ""),
+        "annotators": joined.iloc[0].get("annotators", ""),
+        "prompt_version": joined.iloc[0].get("prompt_version", ""),
+        "model": joined.iloc[0].get("model", ""),
+        "sentence_count": int(len(joined)),
+        "exact_comparable_count": exact_comparable,
+        "exact_agreement_count": exact_agreement,
+        "exact_agreement_rate": float(exact_agreement / exact_comparable) if exact_comparable else None,
+        "manual_label_counts": _counter_records(manual_label_counts, "manual_label"),
+        "manual_bucket_counts": _counter_records(manual_bucket_counts, "manual_bucket"),
+        "greta_bucket_counts": _counter_records(greta_bucket_counts, "greta_bucket"),
+        "comparison_counts": _counter_records(comparison_counts, "comparison_result"),
+        "confusion": _counter_records(confusion, "manual_bucket", "greta_bucket"),
+        "manual_label_confusion": _counter_records(
+            manual_label_confusion,
+            "manual_label",
+            "greta_bucket",
+        ),
+        "scenarios": scenarios,
+        "stability": stability,
+        "monte_carlo": monte_carlo,
     }
 
 

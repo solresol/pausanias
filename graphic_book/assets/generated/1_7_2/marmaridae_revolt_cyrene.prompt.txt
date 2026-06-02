@@ -1,0 +1,7 @@
+Use case: historical-scene
+Asset type: scenic inset raster art for a Pausanias graphic-book page; exact labels and text will be added locally later.
+Primary request: Create a high-quality historical atlas illustration of the Marmaridae, nomadic Libyans, in revolt near Cyrene, causing Magas to turn back from his march toward Egypt. No readable text, no labels, no captions.
+Scene/backdrop: North African desert uplands near Cyrene, scrub, tents, pack animals, armed nomadic riders and families moving around a camp, dust rising, a messenger or scout arriving with urgent news, distant Greek Cyrene on a ridge or coastal plateau. Historically grounded, nonviolent tension rather than battle.
+Subject: Nomadic Libyan revolt as a concrete reason for Magas withdrawing to Cyrene.
+Style: rich watercolor and gouache historical illustration, parchment-compatible, detailed fabric, terrain, animals, and atmospheric depth, sophisticated coffee-table-book quality; same visual family as a finished antiquarian atlas with scenic inserts.
+Avoid: flat diagram, cartoon, icons, modern weapons, modern tents, gore, nudity, eroticized figures, visible text, pseudo-writing, watermark, empty sparse desert.

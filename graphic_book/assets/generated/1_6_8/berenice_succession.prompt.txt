@@ -1,0 +1,6 @@
+Use case: historical-scene
+Asset type: text-free raster inset artwork for a Pausanias graphic-book page, to be overlaid locally with labels and captions
+Primary request: Create a refined Hellenistic court inset for Pausanias passage 1.6.8 showing the dynastic succession of Ptolemy I Soter: Ptolemy near the end of his reign in an Alexandrian palace chamber, Berenice dignified at his side, Eurydice set apart with her children in restrained court tension, and the younger Ptolemy chosen as heir. The image should be historically grounded and psychologically clear without melodrama.
+Style: museum-quality archaeological watercolor/gouache over warm parchment, rich textiles, marble, bronze lamps, scrolls and sealed tablets, natural faces, sophisticated book illustration.
+Composition: horizontal panel, text-free, no labels or readable writing, faces and gestures visible, room left for local caption under the image.
+Avoid: cartoon, flat vector, comic style, nudity, eroticized figures, violence, readable text, letters, numbers, watermark.

@@ -1,0 +1,8 @@
+Use case: historical-scene
+Asset type: scenic inset raster art for a Pausanias illustrated graphic-book page
+Primary request: Create a finished historical illustration of Demetrius beginning the siege of Rhodes after Antigonus fails to capture Egypt.
+Scene/backdrop: late 4th century BCE harbor of Rhodes, fortified city walls and towers, ships gathered offshore, siege engines and timber structures being prepared on the beach or aboard vessels, clear Aegean light, rocky island coast.
+Subject: Rhodian defenders visible on walls while Demetrius' forces prepare an ambitious siege from sea and shore; historically grounded, dramatic but not violent.
+Style: sophisticated classical atlas illustration, painterly watercolor/gouache over fine ink, warm parchment-compatible color, detailed architecture and ships, high-quality coffee-table history book art.
+Composition: horizontal inset crop, city walls on one side, fleet and siege works on the other, enough visual clarity for later local labels/caption.
+Avoid: no text, no labels, no readable banners, no modern objects, no nudity, no gore, no cartoon style, no flat vector art, no simple diagram, no watermark.

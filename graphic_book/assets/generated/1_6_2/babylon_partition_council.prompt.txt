@@ -1,0 +1,12 @@
+Use case: historical-scene
+Asset type: text-free scenic inset raster art for a Pausanias graphic-book page, later overlaid locally with caption and labels
+Primary request: Create a high-quality historical inset for Pausanias passage 1.6.2 showing the post-Alexander council where commanders debate Arrhidaeus and the division of the empire into separate kingdoms.
+Scene/backdrop: A Macedonian royal pavilion in Babylon after Alexander's death, with a low table covered in a map, seals, wax tablets, scrolls, and tokens representing satrapies.
+Subject: Ptolemy and other Macedonian commanders stand or sit around the map table in tense debate; Arrhidaeus is suggested as a quiet, passive royal figure under guard or attendance. The scene should convey political division and the birth of separate kingdoms, not a battle.
+Style/medium: rich painterly historical reconstruction, parchment-atlas book illustration, sophisticated, detailed, archaeological plausibility.
+Composition/framing: horizontal inset composition designed for a 384x238 crop. Clear map table and figures; quiet upper area for local label overlays. No readable text.
+Lighting/mood: lamplight and warm pavilion light, tense deliberation, solemn political transition.
+Color palette: parchment, bronze, crimson and purple cloth, warm lamplight, muted blue river lines, stone and ochre.
+Materials/textures: papyrus, wax tablets, bronze seals, linen tent, leather, polished wood, Macedonian armor, carved stone.
+Constraints: fully clothed figures; no nudity; no gore; no modern objects; no readable writing, letters, numbers, labels, captions, logos, watermark, or inscriptions.
+Avoid: fantasy council, Roman senate, medieval clothing, cartoon faces, flat diagram, fake text, poster layout, schematic arrows.

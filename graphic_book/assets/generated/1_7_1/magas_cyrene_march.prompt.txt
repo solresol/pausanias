@@ -1,0 +1,7 @@
+Use case: historical-scene
+Asset type: text-free raster scenic inset for a Pausanias graphic-book page
+Primary request: Create a refined archaeological watercolor scene of Magas of Cyrene leading Cyrenaean forces eastward from Cyrene toward Egypt. Show the Greek city of Cyrene on a Libyan plateau with colonnades, dry hills, coastal light in the distance, cavalry and infantry setting out on a dusty road, standards and pack animals, the mood of a regional revolt against Ptolemy.
+Style/medium: high-quality museum coffee-table book illustration, watercolor and gouache over parchment, historically grounded Hellenistic North Africa, rich texture, warm terrain and blue sea distance, dignified and spatially clear. No exact text in the art.
+Composition/framing: medium-wide rectangular inset, marching column and city gate in foreground/middle ground, desert road pointing east, open sky for later local callouts outside art.
+Constraints: no readable writing, no labels, no captions, no watermark, no nudity, no gore, no modern objects.
+Avoid: cartoon style, flat vector art, classroom diagram, simple icons, schematic terrain, fantasy monsters, modern military equipment.

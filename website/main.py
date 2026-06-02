@@ -16,6 +16,7 @@ from .data import (
     get_proper_nouns_by_passage,
     get_all_sentences,
     get_greta_sentence_annotations,
+    get_sentence_review_sample,
     get_sentence_lemma_view,
     get_greta_sentence_analysis_variants,
     get_sentence_mythicness_predictors,
@@ -50,6 +51,7 @@ from .generators import (
     generate_texts_index,
     generate_annotations_index,
     generate_greta_sentence_annotation_pages,
+    generate_sentence_review_sample_page,
     generate_lemma_pages,
     generate_analysis_pages,
     generate_places_index,
@@ -133,6 +135,7 @@ def main():
         proper_nouns_dict = get_proper_nouns_by_passage(conn)
         sentences_df = get_all_sentences(conn)
         greta_sentences_df = get_greta_sentence_annotations(conn)
+        sentence_review_sample_df = get_sentence_review_sample(conn)
         sentence_lemmas_df = get_sentence_lemma_view(conn)
         greta_analysis = get_greta_sentence_analysis_variants(conn)
         extended_network_analysis = get_extended_network_analysis(conn)
@@ -245,6 +248,7 @@ def main():
         generate_texts_index(output_dir, args.title)
         generate_annotations_index(greta_sentences_df, output_dir, args.title)
         generate_greta_sentence_annotation_pages(greta_sentences_df, output_dir, args.title)
+        generate_sentence_review_sample_page(sentence_review_sample_df, output_dir, args.title)
         generate_lemma_pages(sentence_lemmas_df, output_dir, args.title)
         generate_analysis_pages(greta_analysis, output_dir, args.title)
         generate_places_index(output_dir, args.title)

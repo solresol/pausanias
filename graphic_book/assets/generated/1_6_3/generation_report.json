@@ -1,0 +1,19 @@
+{
+  "passage_id": "1.6.3",
+  "approved_style_references": [
+    "graphic_book/images/1/1/4.png",
+    "graphic_book/images/1/1/5.png"
+  ],
+  "continuity_references": [
+    "graphic_book/images/1/6/2.png"
+  ],
+  "generated_assets": [
+    {
+      "output": "graphic_book/assets/generated/1_6_3/main_memphis_ptolemy_funeral.png",
+      "prompt_file": "graphic_book/assets/generated/1_6_3/main_memphis_ptolemy_funeral.prompt.txt",
+      "description": "Generated raster main panel: Ptolemy at Memphis with Alexander's covered funeral wagon, Nile setting, guarded Egypt, and Perdiccas' distant army."
+    }
+  ],
+  "layout_report": "tmp/passage_1_6_3_layout_report.json",
+  "final_image": "graphic_book/images/1/6/3.png"
+}

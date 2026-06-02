@@ -1,0 +1,12 @@
+Use case: historical-scene
+Asset type: text-free main raster art for a Pausanias graphic-book page, later overlaid locally with labels and passage text
+Primary request: Create a rich, sophisticated coffee-table historical atlas-tableau for Pausanias passage 1.6.2: Ptolemy after Alexander's death, opposing sole rule by Arrhidaeus and helping divide Alexander's empire into separate kingdoms.
+Scene/backdrop: A late 4th-century BCE Macedonian command tent or royal pavilion at Babylon. In the foreground, Ptolemy in dignified Macedonian armor and cloak stands at a broad parchment map table with other commanders. The map surface and atmospheric backdrop should visually span Macedonia and Aegae, Babylon, Egypt and the Nile, and the far Indus/Oxydracae campaign zone, so the reader gets geographic orientation even before labels are added.
+Subject: Ptolemy as a serious companion of Alexander and political actor, with Arrhidaeus suggested as a passive royal figure nearby, commanders debating the succession, tablets, seals, scrolls, helmets, and satrapal tokens indicating division into kingdoms.
+Style/medium: painterly historical reconstruction with parchment-atlas sensibility, high detail, warm ink-and-watercolor texture, archaeological plausibility, sophisticated book illustration, not cartoon and not vector.
+Composition/framing: wide horizontal landscape panel, strong central table and figures, visible map geography and distant city/river motifs, designed to be cropped into a 950x614 main panel. Leave quiet areas for later local labels; do not include any readable text.
+Lighting/mood: warm late-afternoon light through linen tent fabric, scholarly and tense political mood rather than battle spectacle.
+Color palette: warm parchment, bronze, muted Macedonian reds, dusty blues for rivers, Nile green, stone and ochre.
+Materials/textures: linen tent, bronze armor, leather straps, wax tablets, papyrus, carved wood, dusty stone, parchment map, subtle relief terrain.
+Constraints: historically grounded; fully clothed figures; no nudity; no gore; no modern objects; no exact text, letters, numbers, captions, label boxes, logos, watermark, or fake inscriptions.
+Avoid: flat vector terrain, classroom diagram map, icon figures, fantasy armor, Roman imperial armor, readable writing, schematic arrows, poster typography, crude silhouettes, violent gore.

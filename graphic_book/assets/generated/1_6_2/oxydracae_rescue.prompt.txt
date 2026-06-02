@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: text-free scenic inset raster art for a Pausanias graphic-book page, later overlaid locally with caption and labels
+Primary request: Create a high-quality historical inset for Pausanias passage 1.6.2 showing Ptolemy protecting Alexander during the Oxydracae campaign in Asia.
+Scene/backdrop: Late 4th-century BCE siege scene near an Indian/Oxydracae city wall, with dust, timber ladders, shields, and a breached wall in the background.
+Subject: Ptolemy, a Macedonian companion in period armor, shields or supports Alexander at a moment of danger; Alexander is endangered but dignified, with no explicit wound detail. Other Macedonian soldiers rush in support. The composition should clearly read as a heroic rescue under pressure.
+Style/medium: rich painterly historical reconstruction, warm parchment-book illustration, detailed and mature, suitable for a coffee-table historical graphic book.
+Composition/framing: horizontal inset composition designed for a 416x238 crop. Leave some quiet sky/wall area for local label overlays. No readable text.
+Lighting/mood: dusty hard sunlight, urgent but restrained, heroic not sensational.
+Color palette: ochre dust, bronze, linen, muted red cloaks, stone wall, pale blue sky.
+Constraints: fully clothed figures; historically plausible Macedonian armor; no nudity; no gore; no modern objects; no readable writing, letters, numbers, labels, captions, logos, watermark, or inscriptions.
+Avoid: comic-book action, fantasy armor, Roman legionaries, elephant focus, graphic wounds, blood, flat vector art, schematic diagram, fake text.

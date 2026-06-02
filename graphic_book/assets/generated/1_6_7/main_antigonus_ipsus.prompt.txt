@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: text-free raster artwork for a Pausanias graphic-book page, to be overlaid locally with labels and passage text
+Primary request: Create a rich, sophisticated Hellenistic historical reconstruction for Pausanias passage 1.6.7, showing the final collapse of Antigonus Monophthalmus' power after the failed Rhodes and Egypt campaigns: an oblique coffee-table-book battlefield panorama on a dry Phrygian/Asia Minor plain, with Antigonus' Macedonian phalanx and standards under pressure from the combined forces of Lysimachus, Cassander, and Seleucus, including Seleucid war elephants in the midground and cavalry dust on the flanks.
+Scene/backdrop: broad Anatolian plain with low hills, dusty roads, distant camp lines, late afternoon light, parchment-atlas atmosphere.
+Subject: historically grounded Hellenistic armies, pikes, shields, commanders, elephants, banners, field camps; Antigonus' side visibly losing cohesion but without graphic gore.
+Style/medium: finely detailed painterly historical illustration, warm watercolor and gouache over ink, museum-quality book plate, realistic geography, sophisticated muted earth palette, rich texture.
+Composition/framing: wide oblique aerial view, strong depth, space near top and sides suitable for later labels; no built-in labels, no text, no map labels, no fake writing.
+Lighting/mood: sunlit dust haze, dramatic but restrained, readable terrain and troop movements.
+Color palette: parchment golds, ochres, muted olive, dusty blue-gray shadows, bronze and linen accents.
+Constraints: no visible nudity, no eroticized figures, no excessive blood, no modern equipment, no Roman legionaries, no fantasy armor, no text or inscriptions anywhere.
+Avoid: flat vector terrain, classroom-diagram map, icon-like figures, simple silhouettes, cartoon style, crude schematic layout, watermark, border, caption, invented readable text.

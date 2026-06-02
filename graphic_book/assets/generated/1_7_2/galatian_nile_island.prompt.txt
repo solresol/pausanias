@@ -1,0 +1,7 @@
+Use case: historical-scene
+Asset type: scenic inset raster art for a Pausanias graphic-book page; exact labels and text will be added locally later.
+Primary request: Create a high-quality historical atlas illustration of foreign Galatian mercenaries being ferried by river boats to a deserted Nile island, isolated after Ptolemy learns they intended to seize Egypt. No readable text, no labels, no captions.
+Scene/backdrop: A Nile channel with papyrus reeds and sandbanks, a bleak uninhabited island in the middle distance, Ptolemaic boats and oared river craft carrying armed Celtic/Galatian mercenaries under guard, watchful Egyptian/Ptolemaic soldiers on the bank, evening light, distant Delta marshes. The mood is tense and austere, not graphically violent.
+Subject: Galatian mercenaries conveyed to a deserted island by way of the river, where isolation and famine will overtake them.
+Style: sophisticated watercolor-and-gouache historical scene, antiquarian atlas insert, detailed boats, armor, reeds, water reflections, parchment-friendly palette, finished coffee-table-book quality.
+Avoid: gore, corpses, starvation imagery, nudity, modern boats, modern uniforms, flat vector art, classroom diagram, crude icons, visible text, pseudo-writing, watermark.
