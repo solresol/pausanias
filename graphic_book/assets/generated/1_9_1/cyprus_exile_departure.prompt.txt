@@ -1,0 +1,6 @@
+Use case: historical-scene
+Asset type: high-quality raster scenic inset for a Pausanias graphic-book page; exact text and captions will be added locally.
+Primary request: Illustrate the Cyprus exile element in Pausanias 1.9.1: the elder Ptolemy Philometor is sent away from Alexandria to Cyprus under royal pressure.
+Scene/backdrop: Hellenistic harbor departure at Alexandria or Cyprus, marble quay, oared ship with sail being readied, bronze and painted details, sea haze, distant lighthouse or island coast.
+Subject: A young royal man in modest Hellenistic dress stands at the gangplank with attendants and a sealed scroll; a court envoy indicates the ship and the sea route. The mood is dignified exile, not violence.
+Composition: Landscape inset, painterly historical reconstruction, polished atlas-book watercolor and gouache look, rich detail, parchment-compatible warm palette. Keep the center and lower area visually clear enough for later local frame/caption outside the art. No baked-in text, no readable inscriptions, no modern objects, no nudity.
