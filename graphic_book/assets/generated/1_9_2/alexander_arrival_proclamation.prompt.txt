@@ -1,0 +1,7 @@
+Use case: historical-scene
+Asset type: high-quality raster scenic inset for a Pausanias graphic-book page; exact labels and captions will be added later locally.
+Primary request: Illustrate Alexander arriving from Cyprus and being proclaimed king by the Alexandrians during the Ptolemaic crisis of Pausanias 1.9.2.
+Scene/backdrop: Hellenistic Alexandria harbor quay, Cyprus ship newly arrived, marble steps, palace guards, banners without writing, sea haze, distant lighthouse or harbor towers.
+Subject: A younger Ptolemaic prince in modest royal cloak steps from a ship or stands on the quay as Alexandrian citizens and court officials acclaim him; the mood is tense political transfer, not triumphal fantasy. Historically plausible Greek-Egyptian dress, no nudity.
+Composition: Landscape inset, painterly historical reconstruction, rich detail and depth, parchment-compatible warm palette, with clear readable silhouettes and no baked-in text. No inscriptions, no readable letters, no modern objects, no graphic violence.
+Style constraints: sophisticated watercolor-gouache and engraved atlas illustration hybrid, museum reconstruction quality, not flat vector, not classroom diagram, not cartoon.
