@@ -1,0 +1,6 @@
+Use case: historical-scene
+Asset type: raster scenic inset for a Pausanias illustrated graphic-book page
+Primary request: Create a refined painterly close study of bronze honor statues of Philip II of Macedon and Alexander son of Philip being acknowledged in an Athenian civic sanctuary. Show two bronze royal figures on stone bases with a small group of Athenian officials and wreath-bearers nearby, suggesting public honors motivated by political flattery rather than intimate devotion. Include subtle Macedonian armor and cloak details, marble architecture, warm Attic light, and a sense of civic ceremony.
+Composition: horizontal inset artwork, suitable for cropping to about 430x220. Keep figures fully clothed and dignified. No readable inscriptions or text on bases.
+Style: detailed watercolor and gouache historical illustration, parchment atlas mood, finished coffee-table book quality, rich bronze and marble texture, historically grounded, sophisticated and not schematic.
+Avoid: all text, labels, inscriptions, watermarks, modern objects, nudity, eroticized poses, gore, cartoon style, flat vector terrain, diagrammatic composition.
