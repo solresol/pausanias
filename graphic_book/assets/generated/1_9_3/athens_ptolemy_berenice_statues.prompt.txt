@@ -1,0 +1,5 @@
+Use case: historical-scene
+Asset type: scenic inset raster art for a Pausanias graphic-book page, later overlaid with local labels and a caption.
+Primary request: Create a polished historical illustration of two bronze honor statues, Ptolemy and Berenice, newly set up by the Athenians in a classical Athenian civic setting. Show a sunlit agora or odeion precinct with marble paving, restrained Hellenistic architecture, robed Athenians, and the bronze pair on separate bases or a shared plinth. The statues should look like dignified Hellenistic royal portrait sculpture, not modern monuments. Include a hint of Athens in the background, such as the Acropolis silhouette or columned stoas, but no exact text.
+Style and quality: coffee-table historical atlas illustration, painterly realism, detailed bronze patina, warm parchment-compatible colors, sophisticated composition suitable for a printed graphic-book spread.
+Composition: medium-wide horizontal scene, no text, no labels, no watermark, no border. Avoid nudity, eroticized figures, graphic violence, cartoon style, flat vector art, modern objects, and fake readable inscriptions.
