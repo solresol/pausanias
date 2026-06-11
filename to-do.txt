@@ -28,6 +28,10 @@ repository.
 - Run enough basic statistics to support a 15-minute paper: show both rhetorical
   differences and content-based differences between mythic and historical
   passages.
+- Review how well the new Pausanias classifier is working and record the
+  finding before choosing the next analysis.
+- Decide what additional analysis to run on Pausanias after the classifier
+  check.
 - Target: first week of June, because the conference paper needs to be recorded
   before the 20-23 July event.
 
