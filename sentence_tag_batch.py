@@ -20,18 +20,17 @@ from pausanias_db import schema_path
 from sentence_mythic_sceptic_analyser import LEGACY_PROMPT_VERSION, legacy_tool
 
 
-GRETA_BATCH_PROMPT_VERSION = "greta-myth-history-other-no-scepticism-v1"
-GRETA_BOTH_BATCH_PROMPT_VERSION = "greta-myth-history-both-other-no-scepticism-v1"
-GRETA_BOTH_CONTEXT_BATCH_PROMPT_VERSION = (
-    "greta-myth-history-both-passage-context-no-scepticism-v1"
-)
+# Two production classifiers, both no-context, temperature=0:
+#   greta      -> "original-myth-history-other"      (simple forced single label)
+#   greta-both -> "greta-inspired-myth-history-other" (two-flag, calibrated to Greta/Rosie)
+GRETA_BATCH_PROMPT_VERSION = "original-myth-history-other"
+GRETA_BOTH_BATCH_PROMPT_VERSION = "greta-inspired-myth-history-other"
 DEFAULT_GRETA_MODEL = "gpt-5.4-mini"
 DEFAULT_LEGACY_MODEL = "gpt-5"
 DEFAULT_GRETA_TOKENS_PER_SENTENCE = 545
 DEFAULT_GRETA_BOTH_TOKENS_PER_SENTENCE = 680
-DEFAULT_GRETA_BOTH_CONTEXT_TOKENS_PER_SENTENCE = 1550
 DEFAULT_LEGACY_TOKENS_PER_SENTENCE = 540
-GRETA_MODES = {"greta", "greta-both", "greta-both-context"}
+GRETA_MODES = {"greta", "greta-both"}
 TERMINAL_RUN_STATUSES = (
     "completed",
     "completed_with_failures",
@@ -107,7 +106,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument("--openai-api-key-file", default="~/.openai.key")
     parser.add_argument(
         "--mode",
-        choices=("greta", "greta-both", "greta-both-context", "legacy"),
+        choices=("greta", "greta-both", "legacy"),
         default="greta",
     )
     parser.add_argument("--model", default=None)
@@ -158,8 +157,6 @@ def mode_prompt_version(args: argparse.Namespace) -> str:
         return GRETA_BATCH_PROMPT_VERSION
     if args.mode == "greta-both":
         return GRETA_BOTH_BATCH_PROMPT_VERSION
-    if args.mode == "greta-both-context":
-        return GRETA_BOTH_CONTEXT_BATCH_PROMPT_VERSION
     return LEGACY_PROMPT_VERSION
 
 
@@ -170,8 +167,6 @@ def mode_tokens_per_sentence(args: argparse.Namespace) -> int:
         return DEFAULT_GRETA_TOKENS_PER_SENTENCE
     if args.mode == "greta-both":
         return DEFAULT_GRETA_BOTH_TOKENS_PER_SENTENCE
-    if args.mode == "greta-both-context":
-        return DEFAULT_GRETA_BOTH_CONTEXT_TOKENS_PER_SENTENCE
     return DEFAULT_LEGACY_TOKENS_PER_SENTENCE
 
 
@@ -307,88 +302,39 @@ def greta_both_completion_body(
     *, model: str, passage_id: str, sentence_number: int, sentence: str, english_sentence: str
 ) -> dict:
     system_prompt = (
-        "Act as a Pausanias scholar. Mark two independent labels for each "
-        "sentence: references_mythic and references_historical. A sentence may "
-        "be mythic only, historical only, both mythic and historical, or neither. "
-        "Set references_mythic true for mythic or heroic events, mythic-era "
-        "genealogy, founder legend, heroic/Trojan/Heraclid tradition, oracle-linked "
-        "heroic relics, or the impact of mythic events and traditions on cult, "
-        "monuments, or landscape. Set references_historical true for events after "
-        "roughly 500 BC or their impact on landscape, cult, monuments, institutions, "
-        "dedications, athletic or artistic records, courts, politics, war, or "
-        "biography. Antiquarian detail can be mythic or historical when it carries "
-        "one of those functions; it is not automatically other. Do not classify a "
-        "bare mention of a deity, hero, sanctuary, statue, tomb, or route landmark "
-        "as mythic unless the sentence links it to a mythic tradition, event, "
-        "genealogy, or etiology. Do not classify early legendary or pre-500 Spartan, "
-        "Dorian, Heraclid, or heroic king-list material as historical merely because "
-        "it describes kings, colonies, or warfare. Set both flags false only for "
-        "pure route, geography, object description, or narrative transition with no "
-        "mythic or historical function. Do not classify scepticism."
+        "You are tagging single sentences of Pausanias to match the human annotators "
+        "Greta and Rosie, who highlighted Book 3 sentence by sentence. Mark two "
+        "independent flags for THIS sentence only: references_mythic and "
+        "references_historical. Judge the sentence by what it itself asserts, not by "
+        "the episode around it. The annotators are conservative: a little under half "
+        "of all sentences get neither flag. Do NOT inherit a label from neighbouring "
+        "sentences.\n\n"
+        "Set references_mythic = true only when the sentence itself narrates or "
+        "asserts mythic content: a deed of a god or hero, divine or heroic genealogy, "
+        "a foundation or naming legend, a cult etiology (why a rite/name/object exists, "
+        "told as story), an oracle's pronouncement within myth, or an explicit claim "
+        "that a mythic figure did/made/suffered something.\n\n"
+        "Set references_historical = true only when the sentence itself narrates or "
+        "asserts post-~500 BC historical content: a datable event, war, treaty, "
+        "political act, institution's workings, victory record, dedication with a "
+        "historical agent, or biography of a historical person.\n\n"
+        "Set BOTH flags false (other) when the sentence is, in its own right: a route "
+        "or topographic note (what comes next, distances, what is 'on the right'); a "
+        "bare notice that a sanctuary, temple, statue, tomb, spring, or shrine exists "
+        "or is located somewhere; a physical description of an object or place; a "
+        "procedural or ritual instruction without narration; an authorial transition, "
+        "cross-reference, or comment. Such sentences are 'other' EVEN when they sit "
+        "inside a mythic or historical episode and EVEN when they name a god, hero, "
+        "king, or famous place. Naming or locating a mythic/historic entity is not "
+        "enough; the sentence must do the mythic or historical asserting.\n\n"
+        "Use both flags true only when the single sentence genuinely asserts mythic and "
+        "historical content together. When in doubt between a content flag and other, "
+        "prefer other. Do not classify scepticism."
     )
     user_content = (
         f"Passage {passage_id}, sentence {sentence_number}:\n\n"
         f"Greek:\n{sentence}\n\nEnglish:\n{english_sentence}\n\n"
         "Classify this sentence using the save_greta_both_sentence_tag function."
-    )
-    return {
-        "model": model,
-        "temperature": 0,
-        "messages": [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_content},
-        ],
-        "tools": greta_both_tool(),
-        "tool_choice": {
-            "type": "function",
-            "function": {"name": "save_greta_both_sentence_tag"},
-        },
-    }
-
-
-def greta_both_context_completion_body(
-    *,
-    model: str,
-    passage_id: str,
-    sentence_number: int,
-    sentence: str,
-    english_sentence: str,
-    passage: str,
-    english_passage: str,
-) -> dict:
-    system_prompt = (
-        "Act as a Pausanias scholar matching Greta/Rosie passage-span labels. "
-        "Mark two independent labels for the target sentence: references_mythic "
-        "and references_historical. Use the full passage context to decide whether "
-        "the target sentence belongs to a mythic or historical span; do not classify "
-        "the target sentence as an isolated bag of cue words. A target sentence may "
-        "inherit the label of the surrounding episode when it is a transition, route "
-        "note, topographic detail, procedure, genealogy, or connective detail that "
-        "carries that episode forward. Set references_mythic true when the target "
-        "sentence belongs to a mythic, heroic, foundation, genealogical, cult-etiology, "
-        "Trojan, Heraclid, divine, or oracle-linked mythic passage unit. Set "
-        "references_historical true when the target sentence belongs to a post-500 BCE "
-        "or otherwise explicitly historical, political, military, institutional, "
-        "biographical, dedicatory, or commemorative passage unit. Do not let bare "
-        "war, family, deity, hero, oracle, sanctuary, statue, tomb, or route words "
-        "decide the label by themselves. Early Spartan, Dorian, Heraclid, royal, "
-        "or war material is not automatically mythic or historical; use the passage's "
-        "function. Post-500 historical episodes remain historical even when oracles, "
-        "gods, portents, or divine causation appear. Use both flags only when the "
-        "target sentence itself belongs to an overlap between mythic and historical "
-        "functions. Set both flags false for neutral route, object description, "
-        "bibliographic note, or narrative transition that is not part of a mythic or "
-        "historical span. Do not classify scepticism."
-    )
-    user_content = (
-        f"Passage {passage_id} full context:\n\n"
-        f"Greek passage:\n{passage}\n\n"
-        f"English passage:\n{english_passage}\n\n"
-        f"Target sentence {sentence_number}:\n\n"
-        f"Greek target:\n{sentence}\n\n"
-        f"English target:\n{english_sentence}\n\n"
-        "Classify only the target sentence using the full passage context and "
-        "the save_greta_both_sentence_tag function."
     )
     return {
         "model": model,
@@ -442,12 +388,6 @@ def completion_body(args: argparse.Namespace, row: dict) -> dict:
         return greta_completion_body(**kwargs)
     if args.mode == "greta-both":
         return greta_both_completion_body(**kwargs)
-    if args.mode == "greta-both-context":
-        return greta_both_context_completion_body(
-            **kwargs,
-            passage=row["passage"],
-            english_passage=row["english_passage"],
-        )
     return legacy_completion_body(**kwargs)
 
 
@@ -527,12 +467,6 @@ def unprocessed_sql(args: argparse.Namespace) -> str:
 """
     join_clause = ""
     select_context = ""
-    if args.mode == "greta-both-context":
-        join_clause = """
-    JOIN passages p ON p.id = s.passage_id
-    JOIN translations t ON t.passage_id = s.passage_id
-"""
-        select_context = ", p.passage, t.english_translation AS english_passage"
 
     if args.mode == "greta":
         work_clause = f"""
@@ -549,16 +483,6 @@ def unprocessed_sql(args: argparse.Namespace) -> str:
       AND NOT EXISTS (
           SELECT 1
           FROM sentence_greta_both_tags t
-          WHERE t.passage_id = s.passage_id
-            AND t.sentence_number = s.sentence_number
-            AND t.prompt_version = {sql_string(prompt_version)}
-      )
-"""
-    elif args.mode == "greta-both-context":
-        work_clause = f"""
-      AND NOT EXISTS (
-          SELECT 1
-          FROM sentence_greta_both_context_tags t
           WHERE t.passage_id = s.passage_id
             AND t.sentence_number = s.sentence_number
             AND t.prompt_version = {sql_string(prompt_version)}
@@ -860,7 +784,6 @@ COPY (
       AND mode IN (
           'greta-batch',
           'greta-both-batch',
-          'greta-both-context-batch',
           'legacy-batch'
       )
       AND openai_batch_id IS NOT NULL
@@ -1060,52 +983,6 @@ SET model = EXCLUDED.model,
 
 WITH payload AS (
     SELECT ${tag}${payload_json}${tag}$::jsonb AS j
-)
-INSERT INTO sentence_greta_both_context_tags (
-    passage_id, sentence_number, prompt_version, model, references_mythic,
-    references_historical, myth_history_bucket, confidence, rationale,
-    input_tokens, output_tokens, run_id, created_at
-)
-SELECT
-    x.passage_id,
-    x.sentence_number,
-    j->'run'->>'prompt_version',
-    j->'run'->>'model',
-    x.references_mythic,
-    x.references_historical,
-    x.myth_history_bucket,
-    x.confidence,
-    x.rationale,
-    x.input_tokens,
-    x.output_tokens,
-    j->'run'->>'run_id',
-    j->'run'->>'completed_at'
-FROM payload,
-     jsonb_to_recordset(j->'greta_both_context_tags') AS x(
-        passage_id text,
-        sentence_number integer,
-        references_mythic boolean,
-        references_historical boolean,
-        myth_history_bucket text,
-        confidence text,
-        rationale text,
-        input_tokens integer,
-        output_tokens integer
-     )
-ON CONFLICT (passage_id, sentence_number, prompt_version) DO UPDATE
-SET model = EXCLUDED.model,
-    references_mythic = EXCLUDED.references_mythic,
-    references_historical = EXCLUDED.references_historical,
-    myth_history_bucket = EXCLUDED.myth_history_bucket,
-    confidence = EXCLUDED.confidence,
-    rationale = EXCLUDED.rationale,
-    input_tokens = EXCLUDED.input_tokens,
-    output_tokens = EXCLUDED.output_tokens,
-    run_id = EXCLUDED.run_id,
-    created_at = EXCLUDED.created_at;
-
-WITH payload AS (
-    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
 ), legacy_rows AS (
     SELECT x.*
     FROM payload,
@@ -1178,7 +1055,6 @@ def fetch_batches(
         item_updates = []
         greta_tags = []
         greta_both_tags = []
-        greta_both_context_tags = []
         legacy_tags = []
         failures = []
         seen_requests = set()
@@ -1217,15 +1093,10 @@ def fetch_batches(
                             "output_tokens": output_tokens,
                         }
                     )
-                elif output_mode in {"greta-both", "greta-both-context"}:
+                elif output_mode == "greta-both":
                     references_mythic = bool(args.get("references_mythic"))
                     references_historical = bool(args.get("references_historical"))
-                    target_tags = (
-                        greta_both_context_tags
-                        if output_mode == "greta-both-context"
-                        else greta_both_tags
-                    )
-                    target_tags.append(
+                    greta_both_tags.append(
                         {
                             "passage_id": source["passage_id"],
                             "sentence_number": source["sentence_number"],
@@ -1302,7 +1173,6 @@ def fetch_batches(
         processed_count = (
             len(greta_tags)
             + len(greta_both_tags)
-            + len(greta_both_context_tags)
             + len(legacy_tags)
         )
         status = "completed" if not failures else "completed_with_failures"
@@ -1326,7 +1196,6 @@ def fetch_batches(
             "items": item_updates,
             "greta_tags": greta_tags,
             "greta_both_tags": greta_both_tags,
-            "greta_both_context_tags": greta_both_context_tags,
             "legacy_tags": legacy_tags,
         }
         write_results(psql, payload)

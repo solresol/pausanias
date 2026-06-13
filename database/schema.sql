@@ -193,37 +193,6 @@ CREATE TABLE IF NOT EXISTS sentence_greta_both_tags (
 CREATE INDEX IF NOT EXISTS idx_sentence_greta_both_tags_bucket
     ON sentence_greta_both_tags (prompt_version, myth_history_bucket);
 
-CREATE TABLE IF NOT EXISTS sentence_greta_both_context_tags (
-    passage_id TEXT NOT NULL,
-    sentence_number INTEGER NOT NULL,
-    prompt_version TEXT NOT NULL,
-    model TEXT NOT NULL,
-    references_mythic BOOLEAN NOT NULL,
-    references_historical BOOLEAN NOT NULL,
-    myth_history_bucket TEXT NOT NULL CHECK (
-        myth_history_bucket IN ('mythic', 'historical', 'both', 'other')
-    ),
-    confidence TEXT NOT NULL,
-    rationale TEXT NOT NULL,
-    input_tokens INTEGER NOT NULL,
-    output_tokens INTEGER NOT NULL,
-    run_id TEXT NOT NULL REFERENCES sentence_tagging_runs(run_id) ON DELETE CASCADE,
-    created_at TEXT NOT NULL,
-    PRIMARY KEY (passage_id, sentence_number, prompt_version),
-    CHECK (
-        (myth_history_bucket = 'both' AND references_mythic AND references_historical)
-        OR (myth_history_bucket = 'mythic' AND references_mythic AND NOT references_historical)
-        OR (myth_history_bucket = 'historical' AND references_historical AND NOT references_mythic)
-        OR (myth_history_bucket = 'other' AND NOT references_mythic AND NOT references_historical)
-    ),
-    FOREIGN KEY (passage_id, sentence_number)
-        REFERENCES greek_sentences(passage_id, sentence_number)
-        ON DELETE CASCADE
-);
-
-CREATE INDEX IF NOT EXISTS idx_sentence_greta_both_context_tags_bucket
-    ON sentence_greta_both_context_tags (prompt_version, myth_history_bucket);
-
 CREATE TABLE IF NOT EXISTS sentence_manual_tags (
     source_id TEXT NOT NULL,
     annotators TEXT NOT NULL,
@@ -329,6 +298,147 @@ CREATE TABLE IF NOT EXISTS sentence_lemma_tokens (
 
 CREATE INDEX IF NOT EXISTS idx_sentence_lemma_tokens_lemma
     ON sentence_lemma_tokens (lemma);
+
+CREATE TABLE IF NOT EXISTS sentence_udpipe_runs (
+    run_id TEXT PRIMARY KEY,
+    started_at TEXT NOT NULL,
+    completed_at TEXT,
+    model_name TEXT NOT NULL,
+    model_path TEXT NOT NULL,
+    model_sha256 TEXT NOT NULL,
+    udpipe_version TEXT NOT NULL,
+    input_format TEXT NOT NULL DEFAULT 'horizontal',
+    status TEXT NOT NULL,
+    processed_count INTEGER NOT NULL DEFAULT 0,
+    token_count INTEGER NOT NULL DEFAULT 0,
+    failure_count INTEGER NOT NULL DEFAULT 0,
+    notes TEXT
+);
+
+ALTER TABLE sentence_udpipe_runs
+    ALTER COLUMN input_format SET DEFAULT 'horizontal';
+
+CREATE TABLE IF NOT EXISTS sentence_udpipe_analyses (
+    passage_id TEXT NOT NULL,
+    sentence_number INTEGER NOT NULL,
+    model_name TEXT NOT NULL,
+    run_id TEXT NOT NULL REFERENCES sentence_udpipe_runs(run_id)
+        ON DELETE CASCADE,
+    greek_sentence TEXT NOT NULL,
+    conllu TEXT NOT NULL,
+    token_count INTEGER NOT NULL,
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (passage_id, sentence_number, model_name),
+    FOREIGN KEY (passage_id, sentence_number)
+        REFERENCES greek_sentences(passage_id, sentence_number)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS sentence_udpipe_tokens (
+    passage_id TEXT NOT NULL,
+    sentence_number INTEGER NOT NULL,
+    model_name TEXT NOT NULL,
+    token_order INTEGER NOT NULL,
+    token_id TEXT NOT NULL,
+    form TEXT NOT NULL,
+    lemma TEXT,
+    upos TEXT,
+    xpos TEXT,
+    feats_raw TEXT NOT NULL DEFAULT '_',
+    feats JSONB NOT NULL DEFAULT '{}'::JSONB,
+    head_token_id TEXT,
+    deprel TEXT,
+    deps_raw TEXT NOT NULL DEFAULT '_',
+    deps JSONB NOT NULL DEFAULT '[]'::JSONB,
+    misc_raw TEXT NOT NULL DEFAULT '_',
+    misc JSONB NOT NULL DEFAULT '{}'::JSONB,
+    is_multiword_token BOOLEAN NOT NULL DEFAULT FALSE,
+    is_empty_node BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (passage_id, sentence_number, model_name, token_order),
+    FOREIGN KEY (passage_id, sentence_number, model_name)
+        REFERENCES sentence_udpipe_analyses(passage_id, sentence_number, model_name)
+        ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_sentence_udpipe_tokens_lemma
+    ON sentence_udpipe_tokens (model_name, lemma);
+
+CREATE INDEX IF NOT EXISTS idx_sentence_udpipe_tokens_upos
+    ON sentence_udpipe_tokens (model_name, upos);
+
+CREATE INDEX IF NOT EXISTS idx_sentence_udpipe_tokens_deprel
+    ON sentence_udpipe_tokens (model_name, deprel);
+
+CREATE TABLE IF NOT EXISTS sentence_trankit_runs (
+    run_id TEXT PRIMARY KEY,
+    started_at TEXT NOT NULL,
+    completed_at TEXT,
+    model_name TEXT NOT NULL,
+    model_path TEXT NOT NULL,
+    source_path TEXT NOT NULL,
+    model_sha256 TEXT NOT NULL,
+    trankit_version TEXT NOT NULL,
+    python_version TEXT NOT NULL,
+    annotation_scheme TEXT NOT NULL DEFAULT 'AGDT',
+    status TEXT NOT NULL,
+    processed_count INTEGER NOT NULL DEFAULT 0,
+    token_count INTEGER NOT NULL DEFAULT 0,
+    failure_count INTEGER NOT NULL DEFAULT 0,
+    notes TEXT
+);
+
+CREATE TABLE IF NOT EXISTS sentence_trankit_analyses (
+    passage_id TEXT NOT NULL,
+    sentence_number INTEGER NOT NULL,
+    model_name TEXT NOT NULL,
+    run_id TEXT NOT NULL REFERENCES sentence_trankit_runs(run_id)
+        ON DELETE CASCADE,
+    greek_sentence TEXT NOT NULL,
+    conllu TEXT NOT NULL,
+    token_count INTEGER NOT NULL,
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (passage_id, sentence_number, model_name),
+    FOREIGN KEY (passage_id, sentence_number)
+        REFERENCES greek_sentences(passage_id, sentence_number)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS sentence_trankit_tokens (
+    passage_id TEXT NOT NULL,
+    sentence_number INTEGER NOT NULL,
+    model_name TEXT NOT NULL,
+    token_order INTEGER NOT NULL,
+    token_id TEXT NOT NULL,
+    form TEXT NOT NULL,
+    lemma TEXT,
+    pos TEXT,
+    xpos TEXT,
+    feats_raw TEXT NOT NULL DEFAULT '_',
+    feats JSONB NOT NULL DEFAULT '{}'::JSONB,
+    head_token_id TEXT,
+    deprel TEXT,
+    deps_raw TEXT NOT NULL DEFAULT '_',
+    deps JSONB NOT NULL DEFAULT '[]'::JSONB,
+    misc_raw TEXT NOT NULL DEFAULT '_',
+    misc JSONB NOT NULL DEFAULT '{}'::JSONB,
+    is_multiword_token BOOLEAN NOT NULL DEFAULT FALSE,
+    is_empty_node BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (passage_id, sentence_number, model_name, token_order),
+    FOREIGN KEY (passage_id, sentence_number, model_name)
+        REFERENCES sentence_trankit_analyses(passage_id, sentence_number, model_name)
+        ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_sentence_trankit_tokens_lemma
+    ON sentence_trankit_tokens (model_name, lemma);
+
+CREATE INDEX IF NOT EXISTS idx_sentence_trankit_tokens_pos
+    ON sentence_trankit_tokens (model_name, pos);
+
+CREATE INDEX IF NOT EXISTS idx_sentence_trankit_tokens_deprel
+    ON sentence_trankit_tokens (model_name, deprel);
 
 CREATE TABLE IF NOT EXISTS word_lemmatization_runs (
     run_id TEXT PRIMARY KEY,

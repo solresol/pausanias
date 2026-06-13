@@ -35,7 +35,7 @@ from stats_utils import compute_p_q_values
 
 WORD_PATTERN = re.compile(r"(?u)\b\w+\b")
 TFIDF_TOKEN_PATTERN = r"(?u)\b\w\w+\b"
-GRETA_SENTENCE_PROMPT_VERSION = "greta-myth-history-other-no-scepticism-v1"
+GRETA_SENTENCE_PROMPT_VERSION = "original-myth-history-other"
 MANUAL_SENTENCE_SOURCE_ID = "greta-rosie-book3-rtf-2026-05-28"
 RHETORIC_MARKER_LEMMAS = [
     "λέγω",

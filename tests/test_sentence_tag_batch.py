@@ -2,8 +2,8 @@ import argparse
 import unittest
 
 from sentence_tag_batch import (
+    GRETA_BATCH_PROMPT_VERSION,
     GRETA_BOTH_BATCH_PROMPT_VERSION,
-    GRETA_BOTH_CONTEXT_BATCH_PROMPT_VERSION,
     bucket_from_flags,
     completion_body,
     mode_prompt_version,
@@ -31,16 +31,17 @@ class SentenceTagBatchTests(unittest.TestCase):
         self.assertEqual(bucket_from_flags(False, True), "historical")
         self.assertEqual(bucket_from_flags(False, False), "other")
 
-    def test_greta_both_prompt_version_is_separate(self):
+    def test_production_prompt_versions(self):
+        self.assertEqual(
+            mode_prompt_version(args_for_mode("greta")), GRETA_BATCH_PROMPT_VERSION
+        )
         self.assertEqual(
             mode_prompt_version(args_for_mode("greta-both")),
             GRETA_BOTH_BATCH_PROMPT_VERSION,
         )
-
-    def test_greta_both_context_prompt_version_is_separate(self):
+        self.assertEqual(GRETA_BATCH_PROMPT_VERSION, "original-myth-history-other")
         self.assertEqual(
-            mode_prompt_version(args_for_mode("greta-both-context")),
-            GRETA_BOTH_CONTEXT_BATCH_PROMPT_VERSION,
+            GRETA_BOTH_BATCH_PROMPT_VERSION, "greta-inspired-myth-history-other"
         )
 
     def test_greta_both_completion_uses_independent_flags(self):
@@ -58,45 +59,41 @@ class SentenceTagBatchTests(unittest.TestCase):
         self.assertEqual(tool["name"], "save_greta_both_sentence_tag")
         self.assertIn("references_mythic", properties)
         self.assertIn("references_historical", properties)
-        self.assertIn(
-            "both mythic and historical",
-            body["messages"][0]["content"],
-        )
+        # V1 (calibrated) prompt judges each sentence on its own content.
+        self.assertIn("two independent flags", body["messages"][0]["content"])
+        self.assertEqual(body["temperature"], 0)
 
-    def test_greta_both_unprocessed_sql_uses_new_table(self):
-        sql = unprocessed_sql(args_for_mode("greta-both"))
-        self.assertIn("sentence_greta_both_tags", sql)
-        self.assertNotIn("FROM sentence_greta_tags t", sql)
-        self.assertIn(GRETA_BOTH_BATCH_PROMPT_VERSION, sql)
-
-    def test_greta_both_context_completion_includes_passage_context(self):
+    def test_greta_both_completion_is_no_context(self):
+        # The greta-both lane must not pull in full-passage context.
         body = completion_body(
-            args_for_mode("greta-both-context"),
+            args_for_mode("greta-both"),
             {
                 "passage_id": "3.1.1",
                 "sentence_number": 1,
                 "sentence": "target Greek",
                 "english_sentence": "target English",
-                "passage": "full Greek passage",
-                "english_passage": "full English passage",
             },
         )
         content = "\n".join(message["content"] for message in body["messages"])
-        tool = body["tools"][0]["function"]
-        self.assertEqual(tool["name"], "save_greta_both_sentence_tag")
-        self.assertIn("full Greek passage", content)
-        self.assertIn("full English passage", content)
-        self.assertIn("target English", content)
-        self.assertIn("passage context", content)
+        self.assertNotIn("full context", content)
 
-    def test_greta_both_context_unprocessed_sql_uses_context_table_and_joins(self):
-        sql = unprocessed_sql(args_for_mode("greta-both-context"))
-        self.assertIn("sentence_greta_both_context_tags", sql)
-        self.assertIn("JOIN passages p", sql)
-        self.assertIn("JOIN translations t", sql)
-        self.assertIn("p.passage", sql)
-        self.assertIn("t.english_translation AS english_passage", sql)
-        self.assertIn(GRETA_BOTH_CONTEXT_BATCH_PROMPT_VERSION, sql)
+    def test_greta_both_unprocessed_sql_uses_new_table(self):
+        sql = unprocessed_sql(args_for_mode("greta-both"))
+        self.assertIn("sentence_greta_both_tags", sql)
+        self.assertNotIn("FROM sentence_greta_tags t", sql)
+        self.assertNotIn("sentence_greta_both_context_tags", sql)
+        self.assertNotIn("JOIN passages p", sql)
+        self.assertIn(GRETA_BOTH_BATCH_PROMPT_VERSION, sql)
+
+    def test_context_mode_is_removed(self):
+        with self.assertRaises(SystemExit):
+            # argparse would reject the removed choice; mode_prompt_version never
+            # sees it, but guard the dispatch too.
+            import argparse as _ap
+
+            parser = _ap.ArgumentParser()
+            parser.add_argument("--mode", choices=("greta", "greta-both", "legacy"))
+            parser.parse_args(["--mode", "greta-both-context"])
 
     def test_priority_books_first_order_is_before_natural_order(self):
         args = args_for_mode("greta-both")

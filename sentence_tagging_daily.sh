@@ -19,10 +19,10 @@ run_batch() {
 
 run_batch --fetch-batches
 
-# Primary lane: no-context two-flag tagger. On the Book 3 Greta/Rosie gold this
-# matches ~0.69 exact vs ~0.64 for the old greta-both-context lane, at ~3x lower
-# token cost per sentence (no full-passage context). See the 2026-06-13 prompt
-# experiment. temperature is pinned to 0 in sentence_tag_batch.py for reproducibility.
+# "greta-inspired-myth-history-other": the calibrated two-flag tagger (no context,
+# temperature 0). On the Book 3 Greta/Rosie gold it best matches her mythic/historical/
+# other base rates (calib gap 12% vs 17% for the original) and is the most precise.
+# The abandoned greta-both-context lane has been removed. See the 2026-06-13 experiment.
 run_batch \
   --mode greta-both \
   --use-batch-api \
@@ -32,6 +32,8 @@ run_batch \
   --priority-books-last 4,8 \
   --skip-if-submitted-hours 6
 
+# "original-myth-history-other": the simple forced single-label tagger (the original
+# prompt). Kept as the second classifier so we can compare it against greta-inspired.
 run_batch \
   --mode greta \
   --use-batch-api \
