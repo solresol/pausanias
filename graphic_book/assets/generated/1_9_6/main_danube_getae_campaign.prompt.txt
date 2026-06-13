@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: main raster art for a Pausanias illustrated graphic-book page, later overlaid with exact labels and parchment callouts
+Primary request: A rich coffee-table-book historical tableau of Lysimachus' campaign at the Danube frontier against Dromichaetes and the Getae, suitable as the main visual for passage 1.9.6.
+Scene/backdrop: broad late-4th/early-3rd-century BCE Thracian/Getic frontier beyond the Danube: a wide river bend, marshy banks, steppe grassland, low wooded hills, distant fortified Getic settlement, Macedonian encampment and columns under strain.
+Subject: Lysimachus' Macedonian campaign in danger, with disciplined but exhausted Hellenistic soldiers, local Getic warriors in historically plausible Thracian/Dacian clothing, and the Danube landscape as the organizing visual.
+Style/medium: sophisticated painterly historical illustration, naturalistic watercolor and gouache over etched detail, warm parchment-atlas compatibility, rich terrain and architectural detail like an illustrated archaeology atlas.
+Composition/framing: wide landscape view from a slightly elevated vantage, strong spatial orientation; river crossing/river bend visible, Macedonian force in foreground/middle ground, Getic settlement and warriors across or along the river, room for later labels in sky/terrain margins.
+Lighting/mood: late afternoon golden light, tense but non-gory, atmospheric depth, high detail, mature editorial art.
+Color palette: ochres, olive greens, river blue-gray, weathered bronze, muted reds and browns, compatible with antique parchment.
+Constraints: no readable text, no labels, no captions, no watermark, no modern equipment, no nudity, no gore, no cartoon style, no flat vector map, no classroom diagram, no fantasy armor, no anachronistic medieval castles. Keep figures clothed and historically grounded.

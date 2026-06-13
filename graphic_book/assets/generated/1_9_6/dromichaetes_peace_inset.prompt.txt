@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: scenic inset raster art for a Pausanias illustrated graphic-book page, later overlaid with exact local caption
+Primary request: A historically grounded scene of Dromichaetes and the Getae negotiating peace with Lysimachus after the capture of Agathocles, suitable as a small but polished inset for passage 1.9.6.
+Scene/backdrop: interior or sheltered courtyard of a Getic/Thracian timber-and-earth stronghold near the Danube, with woven textiles, wooden pillars, bronze vessels, shields, and a frontier winter-steppe atmosphere outside.
+Subject: Dromichaetes, the Getan ruler, receives envoys or stands in negotiation; Agathocles appears as a dignified captive or recently released nobleman under guard, not humiliated; Macedonian and Getic costumes clearly distinct.
+Style/medium: sophisticated painterly historical illustration, naturalistic watercolor and gouache over etched detail, rich detail, antique illustrated atlas compatibility.
+Composition/framing: medium-wide scene with central negotiation table or ceremonial exchange, Getic ruler on one side, Macedonian captive/envoy on the other, enough quiet edges for cropping; no text.
+Lighting/mood: warm firelight and cool daylight mix, tense diplomacy, restrained and non-gory.
+Color palette: ochre, dark timber, muted blue-gray, bronze, wool reds, parchment-compatible warmth.
+Constraints: no readable text, no labels, no captions, no watermark, no modern objects, no nudity, no gore, no cartoon style, no fantasy or medieval costumes, no exaggerated violence. Keep all figures clothed and historically plausible.
