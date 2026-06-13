@@ -36,6 +36,9 @@ from stats_utils import compute_p_q_values
 WORD_PATTERN = re.compile(r"(?u)\b\w+\b")
 TFIDF_TOKEN_PATTERN = r"(?u)\b\w\w+\b"
 GRETA_SENTENCE_PROMPT_VERSION = "original-myth-history-other"
+# The two production sentence classifiers compared on the comparison page.
+ORIGINAL_CLASSIFIER_VERSION = "original-myth-history-other"
+GRETA_INSPIRED_CLASSIFIER_VERSION = "greta-inspired-myth-history-other"
 MANUAL_SENTENCE_SOURCE_ID = "greta-rosie-book3-rtf-2026-05-28"
 RHETORIC_MARKER_LEMMAS = [
     "λέγω",
@@ -478,6 +481,105 @@ def get_sentence_review_sample(conn, prompt_version=None, sample_size=50):
     df["book"] = df["passage_id"].apply(lambda pid: str(pid).split(".")[0])
     df["chapter"] = df["passage_id"].apply(lambda pid: ".".join(str(pid).split(".")[:2]))
     return df
+
+
+def get_classifier_comparison(conn):
+    """Compare the two production sentence classifiers across the whole corpus.
+
+    Returns a dict with corpus-wide and per-book bucket base rates for the
+    'original' three-way tagger and the 'greta-inspired' two-flag tagger, their
+    per-sentence agreement, the bucket confusion matrix, and the list of
+    sentences where they disagree. Returns None if either lane is missing.
+    """
+    if not (
+        table_exists(conn, "sentence_greta_tags")
+        and table_exists(conn, "sentence_greta_both_tags")
+    ):
+        return None
+
+    original = read_sql_query(
+        """
+        SELECT passage_id, sentence_number,
+               myth_history_bucket AS original_bucket
+        FROM sentence_greta_tags
+        WHERE prompt_version = %s
+        """,
+        conn,
+        (ORIGINAL_CLASSIFIER_VERSION,),
+    )
+    greta = read_sql_query(
+        """
+        SELECT t.passage_id, t.sentence_number,
+               t.myth_history_bucket AS greta_bucket,
+               t.rationale,
+               gs.sentence, gs.english_sentence
+        FROM sentence_greta_both_tags t
+        JOIN greek_sentences gs
+          ON gs.passage_id = t.passage_id
+         AND gs.sentence_number = t.sentence_number
+        WHERE t.prompt_version = %s
+        """,
+        conn,
+        (GRETA_INSPIRED_CLASSIFIER_VERSION,),
+    )
+    if len(original) == 0 or len(greta) == 0:
+        return None
+
+    df = original.merge(greta, on=["passage_id", "sentence_number"], how="inner")
+    if len(df) == 0:
+        return None
+    df["book"] = df["passage_id"].apply(lambda pid: str(pid).split(".")[0])
+    df["agree"] = df["original_bucket"] == df["greta_bucket"]
+
+    original_buckets = ["mythic", "historical", "other"]
+    greta_buckets = ["mythic", "historical", "both", "other"]
+
+    def _rates(frame, column, buckets):
+        n = len(frame)
+        counts = frame[column].value_counts().to_dict()
+        return {b: (round(100.0 * counts.get(b, 0) / n, 1) if n else 0.0) for b in buckets}
+
+    corpus = {
+        "n": len(df),
+        "agree_pct": round(100.0 * df["agree"].mean(), 1),
+        "original_rates": _rates(df, "original_bucket", original_buckets),
+        "greta_rates": _rates(df, "greta_bucket", greta_buckets),
+    }
+
+    per_book = []
+    for book in sorted(df["book"].unique(), key=lambda b: int(b)):
+        book_df = df[df["book"] == book]
+        per_book.append(
+            {
+                "book": book,
+                "n": len(book_df),
+                "agree_pct": round(100.0 * book_df["agree"].mean(), 1),
+                "original_rates": _rates(book_df, "original_bucket", original_buckets),
+                "greta_rates": _rates(book_df, "greta_bucket", greta_buckets),
+            }
+        )
+
+    confusion = {}
+    for orig in original_buckets:
+        for grb in greta_buckets:
+            confusion[(orig, grb)] = int(
+                ((df["original_bucket"] == orig) & (df["greta_bucket"] == grb)).sum()
+            )
+
+    disagreements = df[~df["agree"]].copy()
+    disagreements["sort_key"] = disagreements["passage_id"].apply(passage_id_sort_key)
+    disagreements = disagreements.sort_values(["sort_key", "sentence_number"]).drop(
+        columns=["sort_key"]
+    )
+
+    return {
+        "corpus": corpus,
+        "per_book": per_book,
+        "confusion": confusion,
+        "original_buckets": original_buckets,
+        "greta_buckets": greta_buckets,
+        "disagreements": disagreements,
+    }
 
 
 def get_sentence_lemma_view(conn):

@@ -673,6 +673,14 @@ def generate_annotations_index(greta_sentences_df, output_dir, title):
             <a href="sentences/index.html">Open Current Sentence Tags</a>
         </section>
 
+        <section class="hub-card">
+            <h3>Classifier Comparison: Original vs. Greta-inspired</h3>
+            <p>Compare the simple three-way tagger against the calibrated two-flag
+            tagger across the whole corpus &mdash; base rates per book and every
+            sentence where they disagree.</p>
+            <a href="comparison/index.html">Open Classifier Comparison</a>
+        </section>
+
         <h2>Deprecated Annotation Schemes</h2>
         <div class="hub-grid">
             <section class="hub-card deprecated">
@@ -950,6 +958,210 @@ def generate_sentence_review_sample_page(review_sample_df, output_dir, title):
 """
     with open(os.path.join(annotations_dir, "sentence-review-sample.html"), "w", encoding="utf-8") as f:
         f.write(html_content)
+
+
+def _bucket_pill(bucket):
+    bucket = str(bucket)
+    return f'<span class="status-pill bucket-{html.escape(bucket)}">{html.escape(bucket)}</span>'
+
+
+def generate_classifier_comparison_pages(comparison, output_dir, title):
+    """Generate the 'original vs greta-inspired' classifier comparison pages."""
+    comparison_dir = os.path.join(output_dir, "annotations", "comparison")
+    os.makedirs(comparison_dir, exist_ok=True)
+
+    if not comparison:
+        page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - Classifier Comparison</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+    <header><h1>{title}</h1><p>Sentence classifier comparison</p></header>
+    {_site_nav("../../", "annotations")}
+    <div class="container">
+        <div class="breadcrumb"><a href="../index.html">Annotations</a> &rsaquo; Classifier Comparison</div>
+        <p>Both classifiers have not yet been tagged across the corpus.</p>
+        <footer>{_generated_footer()}</footer>
+    </div>
+</body>
+</html>
+"""
+        with open(os.path.join(comparison_dir, "index.html"), "w", encoding="utf-8") as f:
+            f.write(page)
+        return
+
+    corpus = comparison["corpus"]
+    original_buckets = comparison["original_buckets"]
+    greta_buckets = comparison["greta_buckets"]
+    confusion = comparison["confusion"]
+    disagreements = comparison["disagreements"]
+
+    # --- corpus base-rate table (bucket distribution per classifier) ---
+    all_buckets = ["mythic", "historical", "both", "other"]
+    rate_rows = ""
+    for b in all_buckets:
+        orig = corpus["original_rates"].get(b)
+        grt = corpus["greta_rates"].get(b)
+        orig_cell = "&mdash;" if orig is None else f"{orig:.1f}%"
+        grt_cell = "&mdash;" if grt is None else f"{grt:.1f}%"
+        rate_rows += (
+            f"<tr><td>{_bucket_pill(b)}</td>"
+            f"<td class=\"num\">{orig_cell}</td>"
+            f"<td class=\"num\">{grt_cell}</td></tr>\n"
+        )
+
+    # --- confusion matrix (rows = original, cols = greta-inspired) ---
+    conf_header = "".join(f"<th>{_bucket_pill(g)}</th>" for g in greta_buckets)
+    conf_rows = ""
+    for orig in original_buckets:
+        cells = ""
+        for grb in greta_buckets:
+            count = confusion.get((orig, grb), 0)
+            agree = orig == grb
+            cls = ' class="num agree-cell"' if agree else ' class="num"'
+            cells += f"<td{cls}>{count:,}</td>"
+        conf_rows += f"<tr><th>{_bucket_pill(orig)}</th>{cells}</tr>\n"
+
+    # --- per-book table ---
+    book_rows = ""
+    for entry in comparison["per_book"]:
+        orates = entry["original_rates"]
+        grates = entry["greta_rates"]
+        book_rows += (
+            f"<tr>"
+            f"<td><a href=\"book_{entry['book']}.html\">Book {html.escape(entry['book'])}</a></td>"
+            f"<td class=\"num\">{entry['n']:,}</td>"
+            f"<td class=\"num\">{entry['agree_pct']:.1f}%</td>"
+            f"<td class=\"num\">{orates['mythic']:.0f}%</td>"
+            f"<td class=\"num\">{orates['historical']:.0f}%</td>"
+            f"<td class=\"num\">{orates['other']:.0f}%</td>"
+            f"<td class=\"num\">{grates['mythic']:.0f}%</td>"
+            f"<td class=\"num\">{grates['historical']:.0f}%</td>"
+            f"<td class=\"num\">{grates['both']:.0f}%</td>"
+            f"<td class=\"num\">{grates['other']:.0f}%</td>"
+            f"</tr>\n"
+        )
+
+    index_page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - Classifier Comparison</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{title}</h1>
+        <p>Two sentence classifiers, compared across the whole corpus</p>
+    </header>
+    {_site_nav("../../", "annotations")}
+    <div class="container wide-container">
+        <div class="breadcrumb"><a href="../index.html">Annotations</a> &rsaquo; Classifier Comparison</div>
+        <h2>Original vs. Greta-inspired</h2>
+        <p>Each Greek sentence is tagged by two independent classifiers
+        (both <code>gpt-5.4-mini</code>, temperature&nbsp;0):</p>
+        <ul>
+            <li><strong>Original</strong> (<code>original-myth-history-other</code>) &mdash;
+            the simple prompt that forces every sentence into exactly one of
+            <em>mythic</em>, <em>historical</em>, or <em>other</em>.</li>
+            <li><strong>Greta-inspired</strong> (<code>greta-inspired-myth-history-other</code>) &mdash;
+            two independent flags judged on each sentence's own content, calibrated to the
+            Greta/Rosie Book&nbsp;3 base rates; a sentence may be <em>both</em> or <em>neither</em>.</li>
+        </ul>
+        <p>The two agree on the bucket for
+        <strong>{corpus['agree_pct']:.1f}%</strong> of {corpus['n']:,} sentences.</p>
+
+        <h3>Corpus-wide bucket rates</h3>
+        <table class="predictor-table">
+            <thead><tr><th>Bucket</th><th>Original</th><th>Greta-inspired</th></tr></thead>
+            <tbody>{rate_rows}</tbody>
+        </table>
+
+        <h3>Where they disagree (bucket confusion)</h3>
+        <p>Rows = Original, columns = Greta-inspired; the shaded diagonal is agreement.</p>
+        <table class="predictor-table">
+            <thead><tr><th>Original \\ Greta-inspired</th>{conf_header}</tr></thead>
+            <tbody>{conf_rows}</tbody>
+        </table>
+
+        <h3>By book</h3>
+        <table class="predictor-table sentence-detail-table">
+            <thead>
+                <tr>
+                    <th rowspan="2">Book</th><th rowspan="2">Sentences</th><th rowspan="2">Agree</th>
+                    <th colspan="3">Original</th><th colspan="4">Greta-inspired</th>
+                </tr>
+                <tr>
+                    <th>myth</th><th>hist</th><th>other</th>
+                    <th>myth</th><th>hist</th><th>both</th><th>other</th>
+                </tr>
+            </thead>
+            <tbody>{book_rows}</tbody>
+        </table>
+        <p>Click a book to see every sentence where the two classifiers disagree.</p>
+        <footer>{_generated_footer()}</footer>
+    </div>
+</body>
+</html>
+"""
+    with open(os.path.join(comparison_dir, "index.html"), "w", encoding="utf-8") as f:
+        f.write(index_page)
+
+    # --- per-book disagreement detail pages ---
+    for entry in comparison["per_book"]:
+        book = entry["book"]
+        book_df = disagreements[disagreements["book"] == book]
+        rows = ""
+        for _, row in book_df.iterrows():
+            rows += (
+                "<tr>"
+                f"<td>{_sentence_passage_link(row['passage_id'], '../../')}</td>"
+                f"<td class=\"num\">{int(row['sentence_number'])}</td>"
+                f"<td>{_bucket_pill(row['original_bucket'])}</td>"
+                f"<td>{_bucket_pill(row['greta_bucket'])}</td>"
+                f"<td class=\"greek-cell\">{html.escape(str(row['sentence']))}</td>"
+                f"<td>{html.escape(str(row['english_sentence']))}</td>"
+                f"<td>{html.escape(str(row.get('rationale', '') or ''))}</td>"
+                "</tr>\n"
+            )
+        if not rows:
+            rows = '<tr><td colspan="7">The two classifiers agree on every sentence in this book.</td></tr>'
+
+        book_page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - Classifier Disagreements Book {html.escape(book)}</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{title}</h1>
+        <p>Sentences where the two classifiers disagree</p>
+    </header>
+    {_site_nav("../../", "annotations")}
+    <div class="container wide-container">
+        <div class="breadcrumb"><a href="../index.html">Annotations</a> &rsaquo; <a href="index.html">Classifier Comparison</a> &rsaquo; Book {html.escape(book)}</div>
+        <h2>Book {html.escape(book)} &mdash; {len(book_df):,} of {entry['n']:,} sentences disagree</h2>
+        <table class="predictor-table sentence-detail-table">
+            <thead>
+                <tr><th>Passage</th><th>Sentence</th><th>Original</th><th>Greta-inspired</th><th>Greek</th><th>English</th><th>Greta-inspired rationale</th></tr>
+            </thead>
+            <tbody>{rows}</tbody>
+        </table>
+        <footer>{_generated_footer()}</footer>
+    </div>
+</body>
+</html>
+"""
+        with open(os.path.join(comparison_dir, f"book_{book}.html"), "w", encoding="utf-8") as f:
+            f.write(book_page)
 
 
 def generate_lemma_pages(sentence_lemmas_df, output_dir, title):

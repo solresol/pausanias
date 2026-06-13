@@ -16,6 +16,7 @@ from .data import (
     get_proper_nouns_by_passage,
     get_all_sentences,
     get_greta_sentence_annotations,
+    get_classifier_comparison,
     get_sentence_review_sample,
     get_sentence_lemma_view,
     get_greta_sentence_analysis_variants,
@@ -50,6 +51,7 @@ from .generators import (
     generate_home_page,
     generate_texts_index,
     generate_annotations_index,
+    generate_classifier_comparison_pages,
     generate_greta_sentence_annotation_pages,
     generate_sentence_review_sample_page,
     generate_lemma_pages,
@@ -135,6 +137,7 @@ def main():
         proper_nouns_dict = get_proper_nouns_by_passage(conn)
         sentences_df = get_all_sentences(conn)
         greta_sentences_df = get_greta_sentence_annotations(conn)
+        classifier_comparison = get_classifier_comparison(conn)
         sentence_review_sample_df = get_sentence_review_sample(conn)
         sentence_lemmas_df = get_sentence_lemma_view(conn)
         greta_analysis = get_greta_sentence_analysis_variants(conn)
@@ -247,6 +250,7 @@ def main():
         generate_home_page(output_dir, args.title, timestamp)
         generate_texts_index(output_dir, args.title)
         generate_annotations_index(greta_sentences_df, output_dir, args.title)
+        generate_classifier_comparison_pages(classifier_comparison, output_dir, args.title)
         generate_greta_sentence_annotation_pages(greta_sentences_df, output_dir, args.title)
         generate_sentence_review_sample_page(sentence_review_sample_df, output_dir, args.title)
         generate_lemma_pages(sentence_lemmas_df, output_dir, args.title)

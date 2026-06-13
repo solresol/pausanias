@@ -467,6 +467,16 @@ def create_website_structure(output_dir):
         color: #4f604f;
     }
 
+    .bucket-both {
+        background-color: #f3e8fb;
+        color: #6b3a9f;
+    }
+
+    .agree-cell {
+        background-color: #eef5ee;
+        font-weight: bold;
+    }
+
     .metric-strip {
         display: grid;
         gap: 12px;
