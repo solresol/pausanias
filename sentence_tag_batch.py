@@ -290,6 +290,7 @@ def greta_completion_body(
     )
     return {
         "model": model,
+        "temperature": 0,
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_content},
@@ -332,6 +333,7 @@ def greta_both_completion_body(
     )
     return {
         "model": model,
+        "temperature": 0,
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_content},
@@ -390,6 +392,7 @@ def greta_both_context_completion_body(
     )
     return {
         "model": model,
+        "temperature": 0,
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_content},

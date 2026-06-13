@@ -19,8 +19,12 @@ run_batch() {
 
 run_batch --fetch-batches
 
+# Primary lane: no-context two-flag tagger. On the Book 3 Greta/Rosie gold this
+# matches ~0.69 exact vs ~0.64 for the old greta-both-context lane, at ~3x lower
+# token cost per sentence (no full-passage context). See the 2026-06-13 prompt
+# experiment. temperature is pinned to 0 in sentence_tag_batch.py for reproducibility.
 run_batch \
-  --mode greta-both-context \
+  --mode greta-both \
   --use-batch-api \
   --model gpt-5.4-mini \
   --token-budget 1500000 \
