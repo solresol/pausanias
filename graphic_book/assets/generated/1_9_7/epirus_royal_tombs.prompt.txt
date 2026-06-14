@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: scenic inset art for a parchment atlas graphic-book page
+Primary request: Create a historically grounded illustration of Lysimachus' forces approaching the royal tombs of Epirus while Pyrrhus is away. Show rugged Epirote hills, stone tumuli and built tomb facades, cypress trees, Macedonian/Hellenistic soldiers and officers moving cautiously through the sanctuary-like burial ground, with no battle and no desecration shown.
+Input images: The visible reference pages 1.1.4 and 1.1.5 are style anchors for painterly detail, antiquarian atlas finish, and parchment-compatible color.
+Scene/backdrop: Mountainous Epirus, ancient royal burial precinct, stone paths, tombs, distant highlands.
+Subject: Lysimachus' raid reaches the tombs of the Epirote kings after Pyrrhus leaves on expedition.
+Style/medium: Rich historical gouache and watercolor illustration with fine ink detail, realistic terrain and ancient architecture, serious coffee-table-book art.
+Composition/framing: Horizontal scenic inset, readable at about 420 by 210 pixels after crop; tombs and approaching soldiers should remain clear; no border and no labels.
+Lighting/mood: Late afternoon mountain light, grave and quiet, historically grounded.
+Color palette: parchment ochres, gray stone, dark cypress, muted red and bronze military details, hazy blue mountains.
+Constraints: no readable text, no modern objects, no flat diagram, no cartoon style, no nudity, no gore, no explicit violence, no watermark.

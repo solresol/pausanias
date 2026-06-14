@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: main panel art for a parchment atlas graphic-book page
+Primary request: Create a rich illustrated reconstruction of Lysimachus reshaping Ephesus by the sea after crossing into Asia and defeating Antigonus. Show an elevated oblique view of the Ionian coast: a harbor basin and shoreline, the city of Ephesus being drawn down toward the water, Hellenistic walls, temples, houses, quays, ships, work crews and relocated citizens arriving from inland towns. Include a subtle sense of displaced Colophon and Lebedos in the distance through roads and caravans, but no text.
+Input images: The visible reference pages 1.1.4 and 1.1.5 are style anchors for parchment-atlas sophistication, scenic density, painterly terrain, coffee-table-book finish, and historical orientation; do not copy their geography.
+Scene/backdrop: Ionian coastal landscape near ancient Ephesus, hills, sea, harbor construction, Hellenistic urban fabric.
+Subject: Hellenistic Ephesus extended down to the sea under Lysimachus, after crossing into Asia.
+Style/medium: Sophisticated historical illustration, painterly gouache and watercolor over fine ink detail, antiquarian atlas plate, realistic terrain and architecture, rich but restrained.
+Composition/framing: Wide panoramic oblique aerial view, suitable for cropping into a 944 by 592 main panel; keep strong visual landmarks in the center and middle distance; no hard vignette, no border, no labels.
+Lighting/mood: Warm Mediterranean daylight, clear atmosphere, detailed but not cluttered.
+Color palette: parchment-compatible ochres, stone, olive hills, blue-green Aegean water, muted terracotta roofs.
+Constraints: no readable text, no captions, no modern buildings, no modern ships, no maps or flat vector diagram, no nudity, no gore, no cartoon style, no simple icon figures, no watermark.
