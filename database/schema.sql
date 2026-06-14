@@ -440,6 +440,79 @@ CREATE INDEX IF NOT EXISTS idx_sentence_trankit_tokens_pos
 CREATE INDEX IF NOT EXISTS idx_sentence_trankit_tokens_deprel
     ON sentence_trankit_tokens (model_name, deprel);
 
+CREATE TABLE IF NOT EXISTS sentence_llm_grammar_runs (
+    run_id TEXT PRIMARY KEY,
+    started_at TEXT NOT NULL,
+    completed_at TEXT,
+    model TEXT NOT NULL,
+    prompt_version TEXT NOT NULL,
+    status TEXT NOT NULL,
+    input_tokens INTEGER NOT NULL DEFAULT 0,
+    output_tokens INTEGER NOT NULL DEFAULT 0,
+    processed_count INTEGER NOT NULL DEFAULT 0,
+    token_count INTEGER NOT NULL DEFAULT 0,
+    failure_count INTEGER NOT NULL DEFAULT 0,
+    notes TEXT
+);
+
+CREATE TABLE IF NOT EXISTS sentence_llm_grammar_analyses (
+    passage_id TEXT NOT NULL,
+    sentence_number INTEGER NOT NULL,
+    model TEXT NOT NULL,
+    prompt_version TEXT NOT NULL,
+    run_id TEXT NOT NULL REFERENCES sentence_llm_grammar_runs(run_id)
+        ON DELETE CASCADE,
+    greek_sentence TEXT NOT NULL,
+    conllu TEXT NOT NULL,
+    response_json JSONB NOT NULL DEFAULT '{}'::JSONB,
+    sentence_note TEXT NOT NULL DEFAULT '',
+    input_tokens INTEGER NOT NULL DEFAULT 0,
+    output_tokens INTEGER NOT NULL DEFAULT 0,
+    token_count INTEGER NOT NULL,
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (passage_id, sentence_number, model, prompt_version),
+    FOREIGN KEY (passage_id, sentence_number)
+        REFERENCES greek_sentences(passage_id, sentence_number)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS sentence_llm_grammar_tokens (
+    passage_id TEXT NOT NULL,
+    sentence_number INTEGER NOT NULL,
+    model TEXT NOT NULL,
+    prompt_version TEXT NOT NULL,
+    token_order INTEGER NOT NULL,
+    token_id TEXT NOT NULL,
+    form TEXT NOT NULL,
+    lemma TEXT,
+    upos TEXT,
+    xpos TEXT,
+    feats_raw TEXT NOT NULL DEFAULT '_',
+    feats JSONB NOT NULL DEFAULT '{}'::JSONB,
+    head_token_id TEXT,
+    deprel TEXT,
+    confidence TEXT NOT NULL DEFAULT 'medium',
+    note TEXT NOT NULL DEFAULT '',
+    is_multiword_token BOOLEAN NOT NULL DEFAULT FALSE,
+    is_empty_node BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (passage_id, sentence_number, model, prompt_version, token_order),
+    FOREIGN KEY (passage_id, sentence_number, model, prompt_version)
+        REFERENCES sentence_llm_grammar_analyses(
+            passage_id, sentence_number, model, prompt_version
+        )
+        ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_sentence_llm_grammar_tokens_lemma
+    ON sentence_llm_grammar_tokens (model, prompt_version, lemma);
+
+CREATE INDEX IF NOT EXISTS idx_sentence_llm_grammar_tokens_upos
+    ON sentence_llm_grammar_tokens (model, prompt_version, upos);
+
+CREATE INDEX IF NOT EXISTS idx_sentence_llm_grammar_tokens_deprel
+    ON sentence_llm_grammar_tokens (model, prompt_version, deprel);
+
 CREATE TABLE IF NOT EXISTS word_lemmatization_runs (
     run_id TEXT PRIMARY KEY,
     started_at TEXT NOT NULL,

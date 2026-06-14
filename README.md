@@ -94,3 +94,96 @@ uv run check_proper_noun_spellings.py \
 The review importer chooses the dominant completed-prose spelling for each
 entity, with a small set of explicit overrides where a base name and compound
 name would otherwise fight each other.
+
+## UDPipe grammar annotations
+
+Sentence-level grammar annotations are stored separately from the LLM
+lemmatization tables. The UDPipe runner reads `greek_sentences`, stores full
+CoNLL-U output in `sentence_udpipe_analyses`, and stores queryable token-level
+lemma, UPOS, morphology, head, and dependency labels in
+`sentence_udpipe_tokens`.
+
+The default model is `ancient_greek-perseus-ud-2.5-191206`, downloaded into the
+ignored `models/udpipe/` cache when missing:
+
+```bash
+uv run python sentence_udpipe.py --ssh-host raksasa
+```
+
+Useful smaller checks:
+
+```bash
+uv run python sentence_udpipe.py --ssh-host raksasa --stop-after 1 --dry-run \
+  --output-json tmp/udpipe-dry-run.json
+
+uv run python sentence_udpipe.py --ssh-host raksasa --schema-only
+```
+
+## Trankit OGA grammar annotations
+
+For higher-accuracy Ancient Greek dependency parsing, use Celano's Trankit
+Ancient Greek model. It reports AGDT-style morphosyntax and dependency labels,
+not Universal Dependencies, so the output is kept in separate
+`sentence_trankit_runs`, `sentence_trankit_analyses`, and
+`sentence_trankit_tokens` tables.
+
+The model cache lives outside git under `models/trankit-oga/`. The bundled
+Trankit source currently needs an isolated Python 3.10 runtime and pinned ML
+dependencies:
+
+```bash
+PYTHONPATH=models/trankit-oga/trankit-master \
+uv run --no-project --python 3.10 \
+  --with adapters==0.1.1 \
+  --with transformers==4.35.2 \
+  --with huggingface-hub==0.20.3 \
+  --with langid==1.1.6 \
+  --with sentencepiece \
+  --with 'torch>=1.6.0,<=2.0.1' \
+  --with 'numpy<2' \
+  --with six \
+  python sentence_trankit.py --ssh-host raksasa --parse-batch-size 16 --write-batch-size 64
+```
+
+Useful smaller checks:
+
+```bash
+uv run python sentence_trankit.py --ssh-host raksasa --schema-only
+
+PYTHONPATH=models/trankit-oga/trankit-master \
+uv run --no-project --python 3.10 \
+  --with adapters==0.1.1 \
+  --with transformers==4.35.2 \
+  --with huggingface-hub==0.20.3 \
+  --with langid==1.1.6 \
+  --with sentencepiece \
+  --with 'torch>=1.6.0,<=2.0.1' \
+  --with 'numpy<2' \
+  --with six \
+  python sentence_trankit.py --ssh-host raksasa --stop-after 1 --dry-run \
+    --output-json tmp/trankit-dry-run.json
+```
+
+This model does not supply lemmas in its CoNLL-U output; `lemma` is therefore
+nullable in the Trankit token table. Keep using the separate lemmatization tables
+for lemma-focused work.
+
+## LLM grammar annotations
+
+The LLM grammar runner asks `gpt-5.4-mini` for parser-style token annotations:
+lemma, UPOS, detailed morphology, UD-style features, head token, and dependency
+relation. Results are stored separately from deterministic parser output in
+`sentence_llm_grammar_runs`, `sentence_llm_grammar_analyses`, and
+`sentence_llm_grammar_tokens`.
+
+Run a deterministic 20-sentence sample:
+
+```bash
+uv run python sentence_llm_grammar.py --ssh-host raksasa \
+  --sample-size 20 \
+  --sample-seed sentence-llm-grammar-20-v1 \
+  --output-json tmp/llm-grammar-20.json
+```
+
+The script validates each response before storing it: token count, token forms,
+UPOS tags, and dependency heads must align with the input token list.

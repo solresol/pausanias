@@ -3,6 +3,87 @@
 Source anchors are in the private ignored transcript notes, not in this public
 repository.
 
+## 2026-06-12 Greg/Greta/Ben call follow-up
+
+Private source note: `transcripts/2026-06-12-greg-greta-ben-pausanias-stylometry.md`.
+
+- For the July conference paper, present the current content classifier as a
+  preliminary result with clear limitations, then frame syntactic/stylometric
+  work as the next step rather than trying to finish the whole method before the
+  talk.
+- Add a Universal Dependencies / UDPipe lane for the Ancient Greek corpus:
+  choose the appropriate Ancient Greek model, run it over the Greek text, and
+  spot-check enough output before using the parse as evidence.
+- Build syntax/morphology feature extraction on top of the UD output. Count
+  features per sentence or chunk, but prefer larger chunks where labels make
+  sense; sentence-level labels are acceptable only with a noise caveat.
+- Read and cite the Gorman work on Universal Dependencies / syntactic features
+  for ancient-language stylometry before presenting this as a method.
+- Keep the new stylometry lane separate from the current content-vocabulary
+  classifier:
+  - content classifier: vocabulary and topic signals such as daughter, wife,
+    marriage, military, army, conquer, king;
+  - stylometry lane: masked/function-word, morphology, syntax, or n-gram
+    language-model signals that could survive content masking.
+- Test whether Book 4, especially the Messenian Wars, is stylistically unusual
+  relative to Pausanias' internal variation. Treat Book 8 as a likely content
+  outlier first; only call it a style outlier if the stylometry supports that.
+- Use Pausanias 4.4.1-4.27.1 as the precise Messenian Wars test span. Frame it
+  as a novelistic, Messenian-perspective, source-dependent section rather than
+  a vague "Book 4 is weird" claim.
+- Add a diachronic-composition framing section before the stylometric tests:
+  Book 1 probably comes first and may be around 160 CE; Book 5 gives a 173 CE
+  anchor from the Roman refoundation of Corinth; a similar rate for Books 6-10
+  implies a total composition period of roughly 20-25 years.
+- Add the cross-reference evidence to that framing: 155 cross-references across
+  the whole work, about one-third of them forward-looking, plus few repeated
+  information blocks. Use this as evidence for either strong pre-planning or
+  substantial later finishing/rearrangement.
+- Read and cite Bill Hutton as the key existing diachronic study. Test whether
+  stylometry supports or undermines his claim that Pausanias' topographical
+  method, self-presentation, and writing voice stay broadly consistent, even
+  while his treatment of local histories and Panhellenic collaboration develops.
+- Use chunking for internal variation and outlier tests. Ben's rough guidance
+  was that prose chunks around 5000 words are already plenty, so split larger
+  units rather than treating whole books as single points.
+- Consider a network/UMAP-style visualization of chunk similarity for Book 4
+  and Book 8, but report only local clusters/connectedness; do not treat 2D
+  embedding distances as direct evidence.
+- Refine the annotation ontology before leaning harder on the classifier:
+  decide whether implicit references count, and focus on substantial narrative
+  material rather than tiny inferential cues.
+- Add the framework dimension Greta proposed:
+  - chronological framework + post-500 BC historical narrative;
+  - chronological framework + mythical narrative;
+  - spatial framework + post-500 BC historical narrative;
+  - spatial framework + mythical narrative;
+  - other/unhighlighted.
+- Measure inter-annotator agreement between two expert annotators using the
+  revised ontology. Use a limited passage sample if the whole corpus is too
+  much, and try to involve Rosie before she leaves.
+- Compare the expert labels against AI labels and use the disagreement rate as
+  uncertainty/error bars for claims such as "daughter is strongly mythic" rather
+  than treating the AI labels as ground truth.
+- Add a genealogy/person-name analysis:
+  - count female versus male names across the mythic/historical/framework
+    classes;
+  - use Manto for mythical figures where possible and add a path for historical
+    figures;
+  - measure named versus unnamed persons, including anonymous "daughter of X"
+    patterns;
+  - include non-linear kinship terms such as aunt, uncle, and cousin;
+  - check Hellenistic dynastic material after Alexander as a likely historical
+    confounder for kinship vocabulary.
+- Prepare a Unicode Greek plain-text corpus dump for Ben, with passage or chunk
+  identifiers and useful labels, rather than expecting him to work directly from
+  the database or from romanized text.
+- Keep Ben apprised once there is concrete output to inspect. His useful
+  availability sounded more like August than June/July, so do not block the
+  conference paper on his toolkit.
+- Implement first outputs before the next Greta check-in, then schedule the
+  follow-up for Tuesday or Friday if possible because she expects to be off
+  Wednesday and possibly Thursday.
+
 ## Conference paper first pass
 
 - Run a 50-item sentence-tagging comparison before changing the production
