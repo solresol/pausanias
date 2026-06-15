@@ -42,6 +42,8 @@ from .data import (
     get_progress_data,
     get_place_pairs,
     get_extended_network_analysis,
+    get_llm_grammar_page_data,
+    get_stylometry_page_data,
     calculate_translation_mythic_coefficient_relationship,
     add_phrase_translations,
 )
@@ -68,6 +70,8 @@ from .generators import (
     generate_place_pairs_page,
     generate_translation_pages,
     generate_translation_length_page,
+    generate_llm_grammar_pages,
+    generate_stylometry_pages,
     generate_progress_page,
     generate_network_analysis_pages,
 )
@@ -108,6 +112,8 @@ def parse_arguments():
                         help="File containing OpenAI API key (default: ~/.openai.key)")
     parser.add_argument("--model", default="gpt-5",
                         help="OpenAI model to use for translations (default: gpt-5)")
+    parser.add_argument("--grammar-model", default="gpt-5.4-mini",
+                        help="LLM grammar model to publish on grammar pages (default: gpt-5.4-mini)")
 
     return parser.parse_args()
 
@@ -140,6 +146,12 @@ def main():
         classifier_comparison = get_classifier_comparison(conn)
         sentence_review_sample_df = get_sentence_review_sample(conn)
         sentence_lemmas_df = get_sentence_lemma_view(conn)
+        llm_grammar_data = get_llm_grammar_page_data(conn, args.grammar_model)
+        stylometry_data = get_stylometry_page_data(
+            conn,
+            grammar_data=llm_grammar_data,
+            model=args.grammar_model,
+        )
         greta_analysis = get_greta_sentence_analysis_variants(conn)
         extended_network_analysis = get_extended_network_analysis(conn)
         sentence_mythic_predictors = get_sentence_mythicness_predictors(conn)
@@ -254,7 +266,9 @@ def main():
         generate_greta_sentence_annotation_pages(greta_sentences_df, output_dir, args.title)
         generate_sentence_review_sample_page(sentence_review_sample_df, output_dir, args.title)
         generate_lemma_pages(sentence_lemmas_df, output_dir, args.title)
+        generate_llm_grammar_pages(llm_grammar_data, output_dir, args.title)
         generate_analysis_pages(greta_analysis, output_dir, args.title)
+        generate_stylometry_pages(stylometry_data, output_dir, args.title)
         generate_places_index(output_dir, args.title)
         generate_network_analysis_pages(extended_network_analysis, output_dir, args.title)
         generate_mythic_page(passages_df, mythic_color_map, mythic_class_map, proper_nouns_dict, output_dir, args.title)
@@ -315,6 +329,7 @@ def main():
             args.title,
             passage_summaries,
             graphic_book_image_dir=args.graphic_book_image_dir,
+            grammar_passage_ids=llm_grammar_data.get("passage_ids", set()),
         )
 
         # Generate progress page

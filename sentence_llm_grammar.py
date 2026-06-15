@@ -24,6 +24,7 @@ DEFAULT_DATABASE_URL = "dbname=pausanias user=gregb"
 DEFAULT_MODEL = "gpt-5.4-mini"
 DEFAULT_PROMPT_VERSION = "greek-sentence-grammar-v1"
 DEFAULT_SAMPLE_SEED = "sentence-llm-grammar-sample-v1"
+DEFAULT_BUDGET_TIMEZONE = "Australia/Sydney"
 UPOS_TAGS = {
     "ADJ",
     "ADP",
@@ -62,6 +63,24 @@ def parse_list(value: str) -> list[str]:
     return [part.strip() for part in value.split(",") if part.strip()]
 
 
+def effective_token_budget(
+    *,
+    token_budget: int | None,
+    daily_token_budget: int | None,
+    daily_tokens_used: int,
+) -> int | None:
+    if daily_token_budget is None:
+        return token_budget
+    daily_remaining = max(0, daily_token_budget - daily_tokens_used)
+    if token_budget is None:
+        return daily_remaining
+    return min(token_budget, daily_remaining)
+
+
+def total_api_tokens(run: dict) -> int:
+    return int(run["input_tokens"]) + int(run["output_tokens"])
+
+
 def load_openai_api_key(key_file: str) -> str:
     key_path = os.path.expanduser(key_file)
     with open(key_path, "r", encoding="utf-8") as handle:
@@ -84,11 +103,48 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument("--stop-after", type=int, default=None)
     parser.add_argument("--sample-size", type=int, default=None)
     parser.add_argument("--sample-seed", default=DEFAULT_SAMPLE_SEED)
+    parser.add_argument(
+        "--random-order",
+        action="store_true",
+        help="Process unannotated sentences in seeded pseudo-random order.",
+    )
+    parser.add_argument(
+        "--token-budget",
+        type=int,
+        default=None,
+        help=(
+            "Soft maximum API tokens for this run. With concurrency or write "
+            "batches above 1, the run can exceed this by the final in-flight batch."
+        ),
+    )
+    parser.add_argument(
+        "--daily-token-budget",
+        type=int,
+        default=None,
+        help=(
+            "Soft maximum API tokens per day for this model/prompt version, "
+            "counted from stored successful analyses."
+        ),
+    )
+    parser.add_argument(
+        "--budget-timezone",
+        default=DEFAULT_BUDGET_TIMEZONE,
+        help=(
+            "--daily-token-budget day-boundary timezone "
+            f"(default: {DEFAULT_BUDGET_TIMEZONE})."
+        ),
+    )
     parser.add_argument("--exclude-books", default="")
     parser.add_argument("--passage-id", default=None)
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--concurrency", type=int, default=1)
     parser.add_argument("--write-batch-size", type=int, default=20)
+    parser.add_argument(
+        "--max-failures",
+        type=int,
+        default=None,
+        help="Stop the run after this many failed sentence analyses.",
+    )
     parser.add_argument("--output-json", default=None)
     parser.add_argument("--schema-only", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
@@ -136,6 +192,37 @@ def schema_sql() -> str:
     return (Path(__file__).resolve().parent / "database" / "schema.sql").read_text(
         encoding="utf-8"
     )
+
+
+def get_daily_token_usage(
+    psql: PsqlRunner,
+    *,
+    model: str,
+    prompt_version: str,
+    budget_timezone: str,
+) -> int:
+    sql = f"""
+COPY (
+    WITH bounds AS (
+        SELECT
+            (date_trunc('day', timezone({sql_string(budget_timezone)}, now()))
+                AT TIME ZONE {sql_string(budget_timezone)}) AS day_start,
+            ((date_trunc('day', timezone({sql_string(budget_timezone)}, now()))
+                + interval '1 day') AT TIME ZONE {sql_string(budget_timezone)}) AS day_end
+    )
+    SELECT COALESCE(SUM(a.input_tokens + a.output_tokens), 0)::bigint AS token_count
+    FROM sentence_llm_grammar_analyses a
+    CROSS JOIN bounds
+    WHERE a.model = {sql_string(model)}
+      AND a.prompt_version = {sql_string(prompt_version)}
+      AND a.created_at::timestamptz >= bounds.day_start
+      AND a.created_at::timestamptz < bounds.day_end
+) TO STDOUT WITH CSV HEADER;
+"""
+    rows = list(csv.DictReader(io.StringIO(psql.run(sql))))
+    if not rows:
+        return 0
+    return int(rows[0]["token_count"] or 0)
 
 
 def tokenize_for_llm(sentence: str) -> list[str]:
@@ -443,6 +530,7 @@ def get_sentences(
     limit: int | None,
     sample_size: int | None,
     sample_seed: str,
+    random_order: bool,
 ) -> list[dict]:
     clauses = ["TRUE"]
     if not overwrite:
@@ -466,7 +554,7 @@ def get_sentences(
 
     limit_value = sample_size or limit
     limit_clause = f"LIMIT {int(limit_value)}" if limit_value else ""
-    if sample_size:
+    if sample_size or random_order:
         order_clause = (
             "ORDER BY md5(s.passage_id || ':' || s.sentence_number::text || ':' "
             f"|| {sql_string(sample_seed)})"
@@ -715,6 +803,29 @@ def main() -> None:
         print("Schema ensured.")
         return
 
+    daily_tokens_used = 0
+    run_token_budget = args.token_budget
+    if args.daily_token_budget is not None:
+        daily_tokens_used = get_daily_token_usage(
+            psql,
+            model=args.model,
+            prompt_version=args.prompt_version,
+            budget_timezone=args.budget_timezone,
+        )
+        run_token_budget = effective_token_budget(
+            token_budget=args.token_budget,
+            daily_token_budget=args.daily_token_budget,
+            daily_tokens_used=daily_tokens_used,
+        )
+        if run_token_budget <= 0:
+            print(
+                "Daily LLM grammar token budget exhausted: "
+                f"{daily_tokens_used}/{args.daily_token_budget} tokens used today "
+                f"for {args.model}/{args.prompt_version} "
+                f"({args.budget_timezone})."
+            )
+            return
+
     rows = get_sentences(
         psql,
         model=args.model,
@@ -725,6 +836,7 @@ def main() -> None:
         limit=args.stop_after,
         sample_size=args.sample_size,
         sample_seed=args.sample_seed,
+        random_order=args.random_order,
     )
     if not rows:
         print(f"No unprocessed LLM grammar rows found for {args.model}/{args.prompt_version}.")
@@ -746,7 +858,10 @@ def main() -> None:
             f"sample_size={args.sample_size}; stop_after={args.stop_after}; "
             f"sample_seed={args.sample_seed}; exclude_books={args.exclude_books}; "
             f"passage_id={args.passage_id}; overwrite={args.overwrite}; "
-            f"concurrency={args.concurrency}"
+            f"concurrency={args.concurrency}; random_order={args.random_order}; "
+            f"token_budget={args.token_budget}; daily_token_budget={args.daily_token_budget}; "
+            f"daily_tokens_used={daily_tokens_used}; effective_token_budget={run_token_budget}; "
+            f"budget_timezone={args.budget_timezone}; max_failures={args.max_failures}"
         ),
     }
     payload = {"run": run, "results": [], "failures": []}
@@ -755,12 +870,15 @@ def main() -> None:
 
     print(
         f"Run {run['run_id']}: analysing {len(rows)} sentences with "
-        f"{args.model}/{args.prompt_version}."
+        f"{args.model}/{args.prompt_version}; "
+        f"token budget={run_token_budget if run_token_budget is not None else 'none'}."
     )
     client = OpenAI(api_key=load_openai_api_key(args.openai_api_key_file))
     write_batch_size = max(1, args.write_batch_size)
     pending_results: list[dict] = []
     concurrency = max(1, args.concurrency)
+    budget_hit = False
+    failure_limit_hit = False
 
     for batch in batched(rows, write_batch_size):
         if concurrency == 1:
@@ -811,10 +929,30 @@ def main() -> None:
                 f"({run['processed_count']}/{len(rows)} complete)."
             )
             pending_results = []
+        if run_token_budget is not None and total_api_tokens(run) >= run_token_budget:
+            budget_hit = True
+            print(
+                f"Reached token budget after {total_api_tokens(run)} API tokens; "
+                "stopping before the next batch."
+            )
+            break
+        if args.max_failures is not None and run["failure_count"] >= args.max_failures:
+            failure_limit_hit = True
+            print(
+                f"Reached failure limit after {run['failure_count']} failed analyses; "
+                "stopping before the next batch."
+            )
+            break
 
     run["completed_at"] = now_iso()
     if args.dry_run:
         run["status"] = "dry_run"
+    elif failure_limit_hit:
+        run["status"] = "failed_failure_limit"
+    elif budget_hit and run["failure_count"]:
+        run["status"] = "completed_with_failures_budget_exhausted"
+    elif budget_hit:
+        run["status"] = "completed_budget_exhausted"
     elif run["failure_count"]:
         run["status"] = "completed_with_failures"
     else:

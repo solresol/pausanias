@@ -17,6 +17,7 @@ GRAPHIC_PASSAGE_IMAGE_RE = re.compile(
 SITE_NAV_LINKS = [
     ("index.html", "Home", "home"),
     ("texts/index.html", "Texts", "texts"),
+    ("grammar/index.html", "Grammar", "grammar"),
     ("annotations/index.html", "Annotations", "annotations"),
     ("lemmas/index.html", "Lemmas", "lemmas"),
     ("analysis/index.html", "Analysis", "analysis"),
@@ -28,6 +29,7 @@ LEGACY_NAV_ACTIVE_MAP = {
     "translation": "texts",
     "graphic_book": "texts",
     "nouns": "texts",
+    "grammar": "grammar",
     "mythic": "annotations",
     "skepticism": "annotations",
     "sentences": "annotations",
@@ -441,6 +443,12 @@ def generate_home_page(output_dir, title, timestamp):
             </div>
 
             <div class="home-card">
+                <h2>Grammar</h2>
+                <p>Inspect parser-style LLM grammar outputs passage by passage, including token tables and dependency-tree views.</p>
+                <a href="grammar/index.html">Open Grammar</a>
+            </div>
+
+            <div class="home-card">
                 <h2>Annotations</h2>
                 <p>Review current sentence-level mythic, historical, and other tags, with legacy classifiers kept separately.</p>
                 <a href="annotations/index.html">Open Annotations</a>
@@ -618,6 +626,11 @@ def generate_texts_index(output_dir, title):
                 <h3>Graphic Book PDF</h3>
                 <p>PDF export of the illustrated graphic-book pages.</p>
                 <a href="../graphic-book/pausanias-graphic-book.pdf">Open Graphic PDF</a>
+            </section>
+            <section class="hub-card">
+                <h3>Grammar Parses</h3>
+                <p>Passage-level parser-style outputs from the current LLM grammar pipeline.</p>
+                <a href="../grammar/index.html">Open Grammar Parses</a>
             </section>
             <section class="hub-card">
                 <h3>Proper Noun Index</h3>
@@ -1749,6 +1762,452 @@ def _write_label_sensitivity_page(sensitivity, analysis_dir, title):
     )
 
 
+def _fmt_stylometry_number(value, digits=3):
+    if value is None:
+        return "n/a"
+    try:
+        if math.isnan(value):
+            return "n/a"
+    except TypeError:
+        pass
+    if isinstance(value, int):
+        return f"{value:,}"
+    return f"{float(value):.{digits}f}"
+
+
+def _stylometry_feature_label(feature):
+    feature = str(feature or "")
+    prefixes = {
+        "word:": "word ",
+        "char4:": "char 4-gram ",
+        "upos:": "UPOS ",
+        "deprel:": "DepRel ",
+        "deprel_upos:": "DepRel/UPOS ",
+        "feat:": "Feature ",
+        "head_child_upos:": "Head>child ",
+        "head_direction:": "Head direction ",
+        "root_upos:": "Root UPOS ",
+        "sentence_len_bin:": "Sentence length ",
+    }
+    for prefix, label in prefixes.items():
+        if feature.startswith(prefix):
+            return label + feature[len(prefix) :]
+    return feature
+
+
+def _render_stylometry_metric_strip(metrics):
+    return f"""
+        <div class="metric-strip">
+            <div><strong>{int(metrics.get('passage_count') or 0):,}</strong><span>parsed passage units</span></div>
+            <div><strong>{int(metrics.get('sentence_count') or 0):,}</strong><span>sentences</span></div>
+            <div><strong>{int(metrics.get('token_count') or 0):,}</strong><span>word tokens</span></div>
+            <div><strong>{int(metrics.get('book_count') or 0):,}</strong><span>books represented</span></div>
+            <div><strong>{int(metrics.get('messenian_wars_count') or 0):,}</strong><span>Messenian Wars units</span></div>
+            <div><strong>{int(metrics.get('book8_count') or 0):,}</strong><span>Book 8 units</span></div>
+        </div>
+    """
+
+
+def _render_stylometry_notes(notes):
+    if not notes:
+        return ""
+    items = "".join(f"<li>{html.escape(str(note))}</li>" for note in notes)
+    return f'<ul class="compact-list stylometry-notes">{items}</ul>'
+
+
+def _render_stylometry_feature_cards(feature_sets):
+    if not feature_sets:
+        return "<p>No stylometry feature sets are available yet.</p>"
+    cards = []
+    for feature_set in feature_sets:
+        features = feature_set.get("features") or []
+        feature_list = "".join(
+            f"<span>{html.escape(_stylometry_feature_label(feature))}</span>"
+            for feature in features[:12]
+        )
+        cards.append(
+            f"""
+            <section class="hub-card stylometry-feature-card">
+                <h3>{html.escape(feature_set.get('label') or '')}</h3>
+                <p>{html.escape(feature_set.get('description') or '')}</p>
+                <p><strong>{int(feature_set.get('feature_count') or 0):,}</strong> selected features; projection method: <strong>{html.escape(feature_set.get('projection_method') or 'n/a')}</strong>.</p>
+                <div class="stylometry-feature-tags">{feature_list}</div>
+            </section>
+            """
+        )
+    return f'<div class="hub-grid">{"".join(cards)}</div>'
+
+
+def _stylometry_json_payload(stylometry_data):
+    return json.dumps(stylometry_data or {}, ensure_ascii=False).replace("</", "<\\/")
+
+
+def _render_stylometry_comparison_table(feature_set):
+    rows = []
+    for comparison in feature_set.get("comparisons") or []:
+        status = "ready" if comparison.get("available") else comparison.get("message", "unavailable")
+        rows.append(
+            f"""
+            <tr>
+                <td>{html.escape(comparison.get('label') or '')}</td>
+                <td class="num">{int(comparison.get('positive_count') or 0):,}</td>
+                <td class="num">{int(comparison.get('negative_count') or 0):,}</td>
+                <td class="num">{_fmt_stylometry_number(comparison.get('within_positive'))}</td>
+                <td class="num">{_fmt_stylometry_number(comparison.get('within_negative'))}</td>
+                <td class="num">{_fmt_stylometry_number(comparison.get('between'))}</td>
+                <td class="num">{_fmt_stylometry_number(comparison.get('separation'))}</td>
+                <td>{html.escape(status)}</td>
+            </tr>
+            """
+        )
+    return f"""
+        <table class="predictor-table stylometry-comparison-table">
+            <thead>
+                <tr>
+                    <th>Question</th>
+                    <th>Target n</th>
+                    <th>Other n</th>
+                    <th>Within target</th>
+                    <th>Within other</th>
+                    <th>Between</th>
+                    <th>Separation</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>{''.join(rows)}</tbody>
+        </table>
+    """
+
+
+def _render_stylometry_outlier_table(feature_set):
+    rows = []
+    for row in feature_set.get("outliers") or []:
+        pid = row.get("passage_id")
+        rows.append(
+            f"""
+            <tr>
+                <td>{_translation_passage_link(pid)}</td>
+                <td class="num">{_fmt_stylometry_number(row.get('score'))}</td>
+                <td class="num">{_fmt_stylometry_number(row.get('nearest_distance'))}</td>
+            </tr>
+            """
+        )
+    if not rows:
+        return "<p>No outlier table is available yet.</p>"
+    return f"""
+        <table class="predictor-table">
+            <thead><tr><th>Passage</th><th>Mean distance to nearest neighbors</th><th>Nearest distance</th></tr></thead>
+            <tbody>{''.join(rows)}</tbody>
+        </table>
+    """
+
+
+def _render_stylometry_neighbor_table(feature_set):
+    rows = []
+    for row in (feature_set.get("nearest_neighbors") or [])[:16]:
+        neighbors = ", ".join(
+            f"{html.escape(neighbor.get('passage_id') or '')} ({_fmt_stylometry_number(neighbor.get('distance'))})"
+            for neighbor in row.get("neighbors", [])[:4]
+        )
+        rows.append(
+            f"""
+            <tr>
+                <td>{_translation_passage_link(row.get('passage_id'))}</td>
+                <td>{neighbors}</td>
+            </tr>
+            """
+        )
+    if not rows:
+        return "<p>No nearest-neighbor table is available yet.</p>"
+    return f"""
+        <table class="predictor-table">
+            <thead><tr><th>Passage</th><th>Nearest neighbors by cosine distance</th></tr></thead>
+            <tbody>{''.join(rows)}</tbody>
+        </table>
+    """
+
+
+def _render_stylometry_delta_list(rows, empty_message):
+    if not rows:
+        return f"<p>{html.escape(empty_message)}</p>"
+    items = "".join(
+        f"<li><code>{html.escape(_stylometry_feature_label(row.get('feature')))}</code> "
+        f"<span>{_fmt_stylometry_number(row.get('delta'), 4)}</span></li>"
+        for row in rows[:10]
+    )
+    return f'<ol class="stylometry-delta-list">{items}</ol>'
+
+
+def _render_stylometry_feature_deltas(feature_set):
+    sections = []
+    for comparison in feature_set.get("comparisons") or []:
+        if not comparison.get("available"):
+            continue
+        sections.append(
+            f"""
+            <section class="stylometry-delta-card">
+                <h4>{html.escape(comparison.get('label') or '')}</h4>
+                <div class="stylometry-delta-grid">
+                    <div>
+                        <h5>Higher in {html.escape(comparison.get('positive_label') or 'target')}</h5>
+                        {_render_stylometry_delta_list(comparison.get('top_positive_features'), 'No positive feature deltas.')}
+                    </div>
+                    <div>
+                        <h5>Higher in {html.escape(comparison.get('negative_label') or 'other')}</h5>
+                        {_render_stylometry_delta_list(comparison.get('top_negative_features'), 'No negative feature deltas.')}
+                    </div>
+                </div>
+            </section>
+            """
+        )
+    return "".join(sections) or "<p>No target-vs-rest feature deltas are available with the current parsed coverage.</p>"
+
+
+def generate_stylometry_pages(stylometry_data, output_dir, title):
+    """Generate morphosyntactic stylometry and traditional baseline pages."""
+    analysis_dir = os.path.join(output_dir, "analysis")
+    os.makedirs(analysis_dir, exist_ok=True)
+
+    data = stylometry_data or {}
+    metrics = data.get("metrics") or {}
+    feature_sets = data.get("feature_sets") or []
+    timestamp = datetime.now().strftime("%Y-%m-%d at %H:%M:%S")
+    model = data.get("model") or "gpt-5.4-mini"
+    method_notes = _render_stylometry_notes(data.get("method_notes"))
+    coverage_notes = _render_stylometry_notes(data.get("coverage_notes"))
+    feature_cards = _render_stylometry_feature_cards(feature_sets)
+
+    index_page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{html.escape(title)} - Stylometry</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{html.escape(title)}</h1>
+        <p>Morphosyntactic stylometry and traditional baselines</p>
+    </header>
+    {_site_nav("../", "analysis")}
+    <div class="container wide-container">
+        <div class="breadcrumb"><a href="index.html">Analyses</a> &rsaquo; Stylometry</div>
+        <h2>Stylometry</h2>
+        <p>This section compares passage-level units using the current <code>{html.escape(model)}</code> LLM grammar parses. It publishes the morphosyntactic feature model alongside traditional word-frequency and character n-gram baselines.</p>
+        {_render_stylometry_metric_strip(metrics)}
+        {coverage_notes}
+
+        <div class="hub-grid">
+            <section class="hub-card">
+                <h3>Interactive Projection</h3>
+                <p>Mouse over passages in each feature family to inspect labels, token counts, and nearest-neighbor context.</p>
+                <a href="stylometry-umap.html">Open Projection</a>
+            </section>
+            <section class="hub-card">
+                <h3>Statistical Outputs</h3>
+                <p>Distance summaries, outlier lists, nearest-neighbor tables, and target-vs-rest feature deltas.</p>
+                <a href="stylometry-statistics.html">Open Statistics</a>
+            </section>
+        </div>
+
+        <h2>Feature Families</h2>
+        {feature_cards}
+
+        <h2>Current Repo State</h2>
+        {method_notes}
+        <footer>Generated on {timestamp} from the PostgreSQL database</footer>
+    </div>
+</body>
+</html>
+"""
+    with open(os.path.join(analysis_dir, "stylometry.html"), "w", encoding="utf-8") as f:
+        f.write(index_page)
+
+    payload = _stylometry_json_payload(data)
+    umap_page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{html.escape(title)} - Stylometry Projection</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>{html.escape(title)}</h1>
+        <p>Interactive stylometry projection</p>
+    </header>
+    {_site_nav("../", "analysis")}
+    <div class="container wide-container">
+        <div class="breadcrumb"><a href="index.html">Analyses</a> &rsaquo; <a href="stylometry.html">Stylometry</a> &rsaquo; Projection</div>
+        <h2>Stylometry Projection</h2>
+        <div class="stylometry-controls">
+            <label for="stylometry-feature-select">Feature family</label>
+            <select id="stylometry-feature-select"></select>
+            <span id="stylometry-method" class="stylometry-method"></span>
+        </div>
+        <div id="stylometry-note" class="note"></div>
+        <div class="stylometry-chart-wrap">
+            <svg id="stylometry-chart" class="stylometry-chart" viewBox="0 0 980 620" role="img" aria-label="Interactive passage projection"></svg>
+            <div id="stylometry-tooltip" class="stylometry-tooltip" hidden></div>
+        </div>
+        <p class="stylometry-legend"><span class="legend-dot mess"></span>Messenian Wars <span class="legend-dot book4"></span>Book 4 <span class="legend-dot book8"></span>Book 8 <span class="legend-dot other"></span>Other parsed passages</p>
+        <footer>Generated on {timestamp} from the PostgreSQL database</footer>
+    </div>
+    <script id="stylometry-data" type="application/json">{payload}</script>
+    <script>
+    (function () {{
+        const payload = JSON.parse(document.getElementById("stylometry-data").textContent || "{{}}");
+        const featureSets = payload.feature_sets || [];
+        const select = document.getElementById("stylometry-feature-select");
+        const method = document.getElementById("stylometry-method");
+        const note = document.getElementById("stylometry-note");
+        const tooltip = document.getElementById("stylometry-tooltip");
+        const svg = d3.select("#stylometry-chart");
+        const width = 980;
+        const height = 620;
+        const margin = {{ top: 36, right: 36, bottom: 54, left: 58 }};
+
+        featureSets.forEach(function (featureSet) {{
+            const option = document.createElement("option");
+            option.value = featureSet.id;
+            option.textContent = featureSet.label;
+            select.appendChild(option);
+        }});
+
+        function color(point) {{
+            if (point.is_messenian_wars) return "#b94a38";
+            if (point.is_book8) return "#397d7a";
+            if (point.is_book4) return "#9a762d";
+            return "#5f6673";
+        }}
+
+        function extent(values) {{
+            const e = d3.extent(values);
+            if (e[0] === undefined || e[1] === undefined) return [-1, 1];
+            if (e[0] === e[1]) return [e[0] - 1, e[1] + 1];
+            const pad = (e[1] - e[0]) * 0.08;
+            return [e[0] - pad, e[1] + pad];
+        }}
+
+        function render(featureSetId) {{
+            const featureSet = featureSets.find(function (item) {{ return item.id === featureSetId; }}) || featureSets[0];
+            svg.selectAll("*").remove();
+            if (!featureSet) {{
+                note.textContent = "No stylometry projection is available yet.";
+                method.textContent = "";
+                return;
+            }}
+            const points = featureSet.points || [];
+            method.textContent = "Projection: " + (featureSet.projection_method || "n/a") + " | features: " + (featureSet.feature_count || 0);
+            note.textContent = featureSet.projection_note || featureSet.description || "";
+            const xScale = d3.scaleLinear().domain(extent(points.map(function (d) {{ return d.x; }}))).range([margin.left, width - margin.right]);
+            const yScale = d3.scaleLinear().domain(extent(points.map(function (d) {{ return d.y; }}))).range([height - margin.bottom, margin.top]);
+
+            svg.append("line").attr("x1", margin.left).attr("x2", width - margin.right).attr("y1", height - margin.bottom).attr("y2", height - margin.bottom).attr("class", "stylometry-axis");
+            svg.append("line").attr("x1", margin.left).attr("x2", margin.left).attr("y1", margin.top).attr("y2", height - margin.bottom).attr("class", "stylometry-axis");
+            svg.append("text").attr("x", width / 2).attr("y", height - 15).attr("text-anchor", "middle").attr("class", "stylometry-axis-label").text("Dimension 1");
+            svg.append("text").attr("x", 18).attr("y", height / 2).attr("text-anchor", "middle").attr("transform", "rotate(-90 18 " + (height / 2) + ")").attr("class", "stylometry-axis-label").text("Dimension 2");
+
+            const neighborsByPassage = new Map((featureSet.nearest_neighbors || []).map(function (row) {{ return [row.passage_id, row.neighbors || []]; }}));
+            svg.append("g").selectAll("circle")
+                .data(points)
+                .join("circle")
+                .attr("cx", function (d) {{ return xScale(d.x); }})
+                .attr("cy", function (d) {{ return yScale(d.y); }})
+                .attr("r", 7)
+                .attr("fill", color)
+                .attr("class", "stylometry-point")
+                .on("mousemove", function (event, d) {{
+                    const labels = (d.labels || []).length ? d.labels.join(", ") : "other parsed passage";
+                    const neighbors = (neighborsByPassage.get(d.passage_id) || []).slice(0, 3).map(function (n) {{
+                        return n.passage_id + " (" + Number(n.distance).toFixed(3) + ")";
+                    }}).join("<br>");
+                    tooltip.hidden = false;
+                    tooltip.style.left = (event.offsetX + 18) + "px";
+                    tooltip.style.top = (event.offsetY + 18) + "px";
+                    tooltip.innerHTML = "<strong>" + d.passage_id + "</strong><br>" + labels + "<br>" + d.sentence_count + " sentences; " + d.token_count + " tokens" + (neighbors ? "<hr><strong>Nearest</strong><br>" + neighbors : "");
+                }})
+                .on("mouseleave", function () {{
+                    tooltip.hidden = true;
+                }});
+
+            svg.append("g").selectAll("text")
+                .data(points)
+                .join("text")
+                .attr("x", function (d) {{ return xScale(d.x) + 9; }})
+                .attr("y", function (d) {{ return yScale(d.y) - 9; }})
+                .attr("class", "stylometry-point-label")
+                .text(function (d) {{ return d.passage_id; }});
+        }}
+
+        select.addEventListener("change", function () {{ render(select.value); }});
+        if (featureSets.length) {{
+            select.value = featureSets[0].id;
+            render(featureSets[0].id);
+        }} else {{
+            render(null);
+        }}
+    }}());
+    </script>
+</body>
+</html>
+"""
+    with open(os.path.join(analysis_dir, "stylometry-umap.html"), "w", encoding="utf-8") as f:
+        f.write(umap_page)
+
+    feature_sections = []
+    for feature_set in feature_sets:
+        feature_sections.append(
+            f"""
+            <section class="stylometry-stat-section">
+                <h2>{html.escape(feature_set.get('label') or '')}</h2>
+                <p>{html.escape(feature_set.get('description') or '')}</p>
+                {_render_stylometry_comparison_table(feature_set)}
+                <h3>Feature Deltas</h3>
+                {_render_stylometry_feature_deltas(feature_set)}
+                <h3>Outlier Passages</h3>
+                {_render_stylometry_outlier_table(feature_set)}
+                <h3>Nearest Neighbors</h3>
+                {_render_stylometry_neighbor_table(feature_set)}
+            </section>
+            """
+        )
+    stats_page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{html.escape(title)} - Stylometry Statistics</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{html.escape(title)}</h1>
+        <p>Stylometry statistical outputs</p>
+    </header>
+    {_site_nav("../", "analysis")}
+    <div class="container wide-container">
+        <div class="breadcrumb"><a href="index.html">Analyses</a> &rsaquo; <a href="stylometry.html">Stylometry</a> &rsaquo; Statistics</div>
+        <h2>Stylometry Statistics</h2>
+        <p>Distances are cosine distances over normalized feature counts. Positive separation means target passages are farther from the comparison group than their available within-group baseline.</p>
+        {''.join(feature_sections) if feature_sections else '<p>No stylometry statistics are available yet.</p>'}
+        <footer>Generated on {timestamp} from the PostgreSQL database</footer>
+    </div>
+</body>
+</html>
+"""
+    with open(os.path.join(analysis_dir, "stylometry-statistics.html"), "w", encoding="utf-8") as f:
+        f.write(stats_page)
+
+    print(
+        f"Stylometry pages generated: {int(metrics.get('passage_count') or 0)} passage units, "
+        f"{len(feature_sets)} feature families."
+    )
+
+
 def generate_analysis_pages(greta_analysis, output_dir, title):
     """Generate the analysis hub and current Greta logistic-regression variants."""
     analysis_dir = os.path.join(output_dir, "analysis")
@@ -1905,9 +2364,23 @@ def generate_analysis_pages(greta_analysis, output_dir, title):
         <h1>{title}</h1>
         <p>Analysis outputs and model variants</p>
     </header>
-    {_site_nav("../", "analysis")}
+        {_site_nav("../", "analysis")}
     <div class="container wide-container">
         {greta_section}
+
+        <h2>Morphosyntactic Stylometry</h2>
+        <div class="hub-grid">
+            <section class="hub-card">
+                <h3>LLM Grammar Stylometry</h3>
+                <p>Passage-level morphosyntactic features from the gpt-5.4-mini grammar parser, with word-frequency and character n-gram baselines.</p>
+                <a href="stylometry.html">Open Stylometry</a>
+            </section>
+            <section class="hub-card">
+                <h3>Interactive Projection</h3>
+                <p>Feature-family projection display for comparing current parsed passages and mouseover neighbor context.</p>
+                <a href="stylometry-umap.html">Open Projection</a>
+            </section>
+        </div>
 
         <h2>Complementary Robustness Checks</h2>
         <div class="hub-grid">
@@ -4583,6 +5056,426 @@ def generate_translation_length_page(analysis, output_dir, title):
     print("Translation length page generated.")
 
 
+def _grammar_passage_href(passage_id, prefix=""):
+    parts = str(passage_id).split(".")
+    if len(parts) != 3:
+        return "#"
+    return f"{prefix}grammar/{parts[0]}/{parts[1]}/{parts[2]}.html"
+
+
+def _translation_href_for_passage(passage_id, prefix=""):
+    parts = str(passage_id).split(".")
+    if len(parts) != 3:
+        return "#"
+    return f"{prefix}translation/{parts[0]}/{parts[1]}/{parts[2]}.html"
+
+
+def _grammar_token_index(token):
+    raw = token.get("token_id") or token.get("token_order")
+    try:
+        return int(raw)
+    except (TypeError, ValueError):
+        return None
+
+
+def _grammar_head_label(tokens_by_index, token):
+    raw = token.get("head_token_id")
+    try:
+        head = int(raw)
+    except (TypeError, ValueError):
+        return str(raw or "")
+    if head == 0:
+        return "0 ROOT"
+    head_token = tokens_by_index.get(head)
+    if not head_token:
+        return str(head)
+    return f"{head} {head_token.get('form') or ''}"
+
+
+def _render_grammar_tree_svg(tokens):
+    if not tokens:
+        return '<div class="grammar-empty-tree">No tokens stored.</div>'
+
+    spacing = 88
+    margin = 46
+    width = max(760, margin * 2 + spacing * max(1, len(tokens) - 1))
+    indexed_tokens = [(_grammar_token_index(token), token) for token in tokens]
+    positions = {
+        index: margin + position * spacing
+        for position, (index, _token) in enumerate(indexed_tokens)
+        if index is not None
+    }
+    max_span = 1
+    arcs = []
+    root_tokens = []
+    for index, token in indexed_tokens:
+        if index is None:
+            continue
+        try:
+            head = int(token.get("head_token_id") or 0)
+        except (TypeError, ValueError):
+            continue
+        if head == 0:
+            root_tokens.append(token)
+            continue
+        if head not in positions:
+            continue
+        span = abs(head - index)
+        max_span = max(max_span, span)
+        arcs.append((token, head, index, span))
+
+    baseline = 58 + min(260, 24 + max_span * 15)
+    height = baseline + 112
+    svg_parts = [
+        f'<svg class="grammar-parse-tree" viewBox="0 0 {width} {height}" '
+        'role="img" aria-label="Dependency parse tree">'
+    ]
+    svg_parts.append(f'<line class="grammar-axis" x1="24" y1="{baseline}" x2="{width - 24}" y2="{baseline}" />')
+
+    for token, head, child, span in sorted(arcs, key=lambda item: item[3], reverse=True):
+        x1 = positions[head]
+        x2 = positions[child]
+        top = baseline - min(260, 34 + span * 15)
+        control_y = top - 12
+        label_x = (x1 + x2) / 2
+        label_y = top - 5
+        deprel = html.escape(str(token.get("deprel") or "dep"))
+        svg_parts.append(
+            f'<path class="grammar-arc" d="M{x1},{baseline} C{x1},{control_y} {x2},{control_y} {x2},{baseline}" />'
+        )
+        svg_parts.append(
+            f'<text class="grammar-arc-label" x="{label_x}" y="{label_y}" text-anchor="middle">{deprel}</text>'
+        )
+
+    for token in root_tokens:
+        index = _grammar_token_index(token)
+        if index is None or index not in positions:
+            continue
+        x = positions[index]
+        top = baseline - min(250, 48 + max_span * 15)
+        svg_parts.append(f'<line class="grammar-root-line" x1="{x}" y1="{top}" x2="{x}" y2="{baseline}" />')
+        svg_parts.append(f'<text class="grammar-root-label" x="{x}" y="{top - 7}" text-anchor="middle">root</text>')
+
+    for index, token in indexed_tokens:
+        if index is None or index not in positions:
+            continue
+        x = positions[index]
+        form = html.escape(str(token.get("form") or ""))
+        lemma = html.escape(str(token.get("lemma") or ""))
+        upos = html.escape(str(token.get("upos") or ""))
+        svg_parts.append(f'<circle class="grammar-token-dot" cx="{x}" cy="{baseline}" r="4" />')
+        svg_parts.append(
+            f'<text class="grammar-token-index" x="{x}" y="{baseline + 22}" text-anchor="middle">{index}</text>'
+        )
+        svg_parts.append(
+            f'<text class="grammar-token-form" x="{x}" y="{baseline + 44}" text-anchor="middle">{form}</text>'
+        )
+        svg_parts.append(
+            f'<text class="grammar-token-meta" x="{x}" y="{baseline + 64}" text-anchor="middle">{lemma} / {upos}</text>'
+        )
+
+    svg_parts.append("</svg>")
+    return "\n".join(svg_parts)
+
+
+def _render_grammar_token_table(tokens):
+    tokens_by_index = {
+        index: token
+        for token in tokens
+        if (index := _grammar_token_index(token)) is not None
+    }
+    rows = []
+    for token in tokens:
+        feats = token.get("feats_raw") or "_"
+        note = token.get("note") or ""
+        rows.append(
+            "<tr>"
+            f"<td>{html.escape(str(token.get('token_id') or token.get('token_order') or ''))}</td>"
+            f"<td class=\"greek-cell\">{html.escape(str(token.get('form') or ''))}</td>"
+            f"<td class=\"greek-cell\">{html.escape(str(token.get('lemma') or ''))}</td>"
+            f"<td><span class=\"upos\">{html.escape(str(token.get('upos') or ''))}</span></td>"
+            f"<td>{html.escape(str(token.get('xpos') or '_'))}</td>"
+            f"<td>{html.escape(str(feats))}</td>"
+            f"<td>{html.escape(_grammar_head_label(tokens_by_index, token))}</td>"
+            f"<td>{html.escape(str(token.get('deprel') or ''))}</td>"
+            f"<td>{html.escape(str(token.get('confidence') or ''))}</td>"
+            f"<td>{html.escape(str(note))}</td>"
+            "</tr>"
+        )
+    return (
+        '<div class="grammar-table-wrap">'
+        '<table class="predictor-table grammar-token-table">'
+        "<thead><tr>"
+        "<th>#</th><th>Form</th><th>Lemma</th><th>UPOS</th><th>XPOS</th>"
+        "<th>Features</th><th>Head</th><th>DepRel</th><th>Conf.</th><th>Note</th>"
+        "</tr></thead>"
+        f"<tbody>{''.join(rows)}</tbody>"
+        "</table>"
+        "</div>"
+    )
+
+
+def _render_grammar_sentence_card(sentence):
+    tokens = sentence.get("tokens") or []
+    total_tokens = int(sentence.get("input_tokens") or 0) + int(sentence.get("output_tokens") or 0)
+    sentence_note = sentence.get("sentence_note") or ""
+    return f"""
+        <section class="grammar-sentence-card" id="sentence-{int(sentence['sentence_number'])}">
+            <header class="grammar-sentence-header">
+                <div>
+                    <div class="ordinal">Sentence {int(sentence['sentence_number'])}</div>
+                    <h3>{html.escape(str(sentence.get('passage_id', '')))} sentence {int(sentence['sentence_number'])}</h3>
+                </div>
+                <dl class="grammar-metrics">
+                    <div><dt>Tokens</dt><dd>{len(tokens)}</dd></div>
+                    <div><dt>Input</dt><dd>{int(sentence.get('input_tokens') or 0):,}</dd></div>
+                    <div><dt>Output</dt><dd>{int(sentence.get('output_tokens') or 0):,}</dd></div>
+                    <div><dt>Total</dt><dd>{total_tokens:,}</dd></div>
+                </dl>
+            </header>
+            <p class="greek-cell grammar-sentence-text">{html.escape(str(sentence.get('greek_sentence') or ''))}</p>
+            {f'<p class="grammar-sentence-note">{html.escape(sentence_note)}</p>' if sentence_note else ''}
+            <div class="grammar-tree-wrap">{_render_grammar_tree_svg(tokens)}</div>
+            {_render_grammar_token_table(tokens)}
+        </section>
+    """
+
+
+def generate_llm_grammar_pages(grammar_data, output_dir, title):
+    """Generate passage-level pages for stored gpt-5.4-mini grammar parses."""
+    grammar_dir = os.path.join(output_dir, "grammar")
+    os.makedirs(grammar_dir, exist_ok=True)
+
+    data = grammar_data or {}
+    passages = data.get("passages") or []
+    model = data.get("model") or "gpt-5.4-mini"
+    timestamp = datetime.now().strftime("%Y-%m-%d at %H:%M:%S")
+    prompt_versions = ", ".join(data.get("prompt_versions") or [])
+    created_summary = ""
+    if data.get("created_at_min") and data.get("created_at_max"):
+        created_summary = f"{data['created_at_min']} to {data['created_at_max']}"
+
+    books = sorted({passage["book"] for passage in passages})
+    book_chapters = {
+        book: sorted({passage["chapter"] for passage in passages if passage["book"] == book})
+        for book in books
+    }
+    passage_order = sorted(
+        passages,
+        key=lambda passage: (passage["book"], passage["chapter"], passage["section"]),
+    )
+    passage_index = {
+        passage["passage_id"]: index for index, passage in enumerate(passage_order)
+    }
+
+    if not passages:
+        body = """
+        <p>No stored grammar parses are available yet for this model.</p>
+        """
+    else:
+        body = f"""
+        <div class="metric-strip">
+            <div><strong>{len(passages):,}</strong><span>passages with parses</span></div>
+            <div><strong>{int(data.get('sentence_count') or 0):,}</strong><span>sentences</span></div>
+            <div><strong>{int(data.get('token_count') or 0):,}</strong><span>Greek tokens</span></div>
+            <div><strong>{int(data.get('input_tokens') or 0):,}</strong><span>input tokens</span></div>
+            <div><strong>{int(data.get('output_tokens') or 0):,}</strong><span>output tokens</span></div>
+        </div>
+        <p class="note">Model: <code>{html.escape(model)}</code>{f'; prompt version(s): <code>{html.escape(prompt_versions)}</code>' if prompt_versions else ''}{f'; created: {html.escape(created_summary)}' if created_summary else ''}.</p>
+        <h2>Books</h2>
+        <ul>
+        """
+        for book in books:
+            book_passages = [passage for passage in passages if passage["book"] == book]
+            sentence_count = sum(len(passage["sentences"]) for passage in book_passages)
+            body += (
+                f'<li><a href="{book}/index.html">Book {book}</a> '
+                f'({len(book_passages):,} passages, {sentence_count:,} sentences)</li>\n'
+            )
+        body += "</ul>"
+
+    index_page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{html.escape(title)} - Grammar Parses</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{html.escape(title)}</h1>
+        <p>LLM grammar parses by passage</p>
+    </header>
+    {_site_nav("../", "grammar")}
+    <div class="container wide-container">
+        <h2>Grammar Parses</h2>
+        {body}
+        <footer>Generated on {timestamp} from the PostgreSQL database</footer>
+    </div>
+</body>
+</html>
+"""
+    with open(os.path.join(grammar_dir, "index.html"), "w", encoding="utf-8") as f:
+        f.write(index_page)
+
+    for book in books:
+        book_dir = os.path.join(grammar_dir, str(book))
+        os.makedirs(book_dir, exist_ok=True)
+        chapter_links = []
+        for chapter in book_chapters[book]:
+            chapter_passages = [
+                passage
+                for passage in passages
+                if passage["book"] == book and passage["chapter"] == chapter
+            ]
+            sentence_count = sum(len(passage["sentences"]) for passage in chapter_passages)
+            chapter_links.append(
+                f'<li><a href="{chapter}/index.html">Chapter {book}.{chapter}</a> '
+                f'({len(chapter_passages):,} passages, {sentence_count:,} sentences)</li>'
+            )
+        book_page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{html.escape(title)} - Grammar Book {book}</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{html.escape(title)}</h1>
+        <p>Grammar parses, Book {book}</p>
+    </header>
+    {_site_nav("../../", "grammar")}
+    <div class="container">
+        <div class="breadcrumb"><a href="../index.html">Grammar</a> &rsaquo; Book {book}</div>
+        <h2>Book {book}</h2>
+        <ul>{''.join(chapter_links)}</ul>
+        <footer>Generated on {timestamp}</footer>
+    </div>
+</body>
+</html>
+"""
+        with open(os.path.join(book_dir, "index.html"), "w", encoding="utf-8") as f:
+            f.write(book_page)
+
+    for book in books:
+        for chapter in book_chapters[book]:
+            chapter_dir = os.path.join(grammar_dir, str(book), str(chapter))
+            os.makedirs(chapter_dir, exist_ok=True)
+            chapter_passages = [
+                passage
+                for passage in passages
+                if passage["book"] == book and passage["chapter"] == chapter
+            ]
+            passage_links = []
+            for passage in chapter_passages:
+                pid = passage["passage_id"]
+                sentence_count = len(passage["sentences"])
+                token_count = sum(len(sentence.get("tokens") or []) for sentence in passage["sentences"])
+                passage_links.append(
+                    f'<li><a href="{passage["section"]}.html">{html.escape(pid)}</a> '
+                    f'({sentence_count:,} sentences, {token_count:,} tokens) '
+                    f'<span class="preview"><a href="../../../translation/{book}/{chapter}/{passage["section"]}.html">translation</a></span></li>'
+                )
+            chapter_page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{html.escape(title)} - Grammar Chapter {book}.{chapter}</title>
+    <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{html.escape(title)}</h1>
+        <p>Grammar parses, Chapter {book}.{chapter}</p>
+    </header>
+    {_site_nav("../../../", "grammar")}
+    <div class="container">
+        <div class="breadcrumb"><a href="../../index.html">Grammar</a> &rsaquo; <a href="../index.html">Book {book}</a> &rsaquo; Chapter {book}.{chapter}</div>
+        <h2>Chapter {book}.{chapter}</h2>
+        <ul class="passage-list">{''.join(passage_links)}</ul>
+        <footer>Generated on {timestamp}</footer>
+    </div>
+</body>
+</html>
+"""
+            with open(os.path.join(chapter_dir, "index.html"), "w", encoding="utf-8") as f:
+                f.write(chapter_page)
+
+    for passage in passage_order:
+        book = passage["book"]
+        chapter = passage["chapter"]
+        section = passage["section"]
+        pid = passage["passage_id"]
+        chapter_dir = os.path.join(grammar_dir, str(book), str(chapter))
+        prefix = "../../../"
+        index = passage_index[pid]
+        prev_link = ""
+        if index > 0:
+            previous = passage_order[index - 1]
+            prev_link = (
+                f'<a href="{prefix}grammar/{previous["book"]}/{previous["chapter"]}/{previous["section"]}.html" '
+                f'class="nav-prev">&larr; {html.escape(previous["passage_id"])}</a>'
+            )
+        next_link = ""
+        if index < len(passage_order) - 1:
+            following = passage_order[index + 1]
+            next_link = (
+                f'<a href="{prefix}grammar/{following["book"]}/{following["chapter"]}/{following["section"]}.html" '
+                f'class="nav-next">{html.escape(following["passage_id"])} &rarr;</a>'
+            )
+        sentence_cards = "\n".join(
+            _render_grammar_sentence_card(sentence) for sentence in passage["sentences"]
+        )
+        page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{html.escape(title)} - Grammar {html.escape(pid)}</title>
+    <link rel="stylesheet" href="{prefix}css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{html.escape(title)}</h1>
+        <p>Grammar parses for passage {html.escape(pid)}</p>
+    </header>
+    {_site_nav(prefix, "grammar")}
+    <div class="container wide-container">
+        <div class="breadcrumb">
+            <a href="{prefix}grammar/index.html">Grammar</a> &rsaquo;
+            <a href="../index.html">Book {book}</a> &rsaquo;
+            <a href="index.html">Chapter {book}.{chapter}</a> &rsaquo;
+            {html.escape(pid)}
+        </div>
+        <div class="passage-nav-top">{prev_link}{next_link}</div>
+        <h2>Passage {html.escape(pid)}</h2>
+        <p><a href="{_translation_href_for_passage(pid, prefix)}">Open translation for this passage</a></p>
+        <div class="metric-strip">
+            <div><strong>{len(passage["sentences"]):,}</strong><span>sentences parsed</span></div>
+            <div><strong>{sum(len(sentence.get("tokens") or []) for sentence in passage["sentences"]):,}</strong><span>Greek tokens</span></div>
+            <div><strong>{int(passage.get("input_tokens") or 0):,}</strong><span>input tokens</span></div>
+            <div><strong>{int(passage.get("output_tokens") or 0):,}</strong><span>output tokens</span></div>
+        </div>
+        {sentence_cards}
+        <div class="passage-nav-bottom">{prev_link}{next_link}</div>
+        <footer>Generated on {timestamp} from the PostgreSQL database</footer>
+    </div>
+</body>
+</html>
+"""
+        with open(os.path.join(chapter_dir, f"{section}.html"), "w", encoding="utf-8") as f:
+            f.write(page)
+
+    print(
+        f"Grammar pages generated: {len(passages)} passages, "
+        f"{int(data.get('sentence_count') or 0)} sentences for {model}."
+    )
+
+
 def generate_translation_pages(
     passages,
     nouns_by_passage,
@@ -4591,6 +5484,7 @@ def generate_translation_pages(
     title,
     summaries=None,
     graphic_book_image_dir=None,
+    grammar_passage_ids=None,
 ):
     """Generate hierarchical translation pages: book > chapter > passage."""
 
@@ -4599,6 +5493,7 @@ def generate_translation_pages(
     translation_dir = os.path.join(output_dir, 'translation')
     os.makedirs(translation_dir, exist_ok=True)
     graphic_book_passage_ids = discover_graphic_book_passage_ids(graphic_book_image_dir)
+    grammar_passage_ids = set(grammar_passage_ids or [])
 
     # Parse all passage IDs into (book, chapter, section) tuples
     parsed = []
@@ -4850,6 +5745,13 @@ def generate_translation_pages(
                 f'\n            <p><a class="graphic-book-link" href="{graphic_href}">'
                 "Open graphic version of this passage</a></p>"
             )
+        grammar_link_html = ""
+        if pid in grammar_passage_ids:
+            grammar_href = f"{prefix}grammar/{book}/{chapter}/{section}.html"
+            grammar_link_html = (
+                f'\n            <p><a class="grammar-passage-link" href="{grammar_href}">'
+                "Open grammar parses for this passage</a></p>"
+            )
 
         # English translation
         english_html = ""
@@ -4902,6 +5804,7 @@ def generate_translation_pages(
         <div class="passage-links">
             <p>{sentence_link}</p>
             {graphic_book_link_html}
+            {grammar_link_html}
         </div>
 
         <div class="passage-nav-bottom">

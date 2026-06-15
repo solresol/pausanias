@@ -1,6 +1,9 @@
 import pytest
 
 from sentence_llm_grammar import (
+    effective_token_budget,
+    get_daily_token_usage,
+    get_sentences,
     tokens_to_conllu,
     tokenize_for_llm,
     validate_and_normalize_tokens,
@@ -111,3 +114,87 @@ def test_tokens_to_conllu_renders_expected_columns():
     )
 
     assert tokens_to_conllu(tokens) == "1\tλέγει\tλέγω\tVERB\tv3spia---\tMood=Ind\t0\troot\t_\t_\n"
+
+
+def test_effective_token_budget_respects_daily_remaining():
+    assert (
+        effective_token_budget(
+            token_budget=None,
+            daily_token_budget=1_000_000,
+            daily_tokens_used=250_000,
+        )
+        == 750_000
+    )
+    assert (
+        effective_token_budget(
+            token_budget=100_000,
+            daily_token_budget=1_000_000,
+            daily_tokens_used=250_000,
+        )
+        == 100_000
+    )
+    assert (
+        effective_token_budget(
+            token_budget=900_000,
+            daily_token_budget=1_000_000,
+            daily_tokens_used=250_000,
+        )
+        == 750_000
+    )
+    assert (
+        effective_token_budget(
+            token_budget=None,
+            daily_token_budget=1_000_000,
+            daily_tokens_used=1_250_000,
+        )
+        == 0
+    )
+
+
+class FakePsql:
+    def __init__(self, output):
+        self.output = output
+        self.sql = ""
+
+    def run(self, sql):
+        self.sql = sql
+        return self.output
+
+
+def test_get_daily_token_usage_counts_selected_model_prompt_day():
+    psql = FakePsql("token_count\n12345\n")
+
+    assert (
+        get_daily_token_usage(
+            psql,
+            model="gpt-5.4-mini",
+            prompt_version="greek-sentence-grammar-v1",
+            budget_timezone="Australia/Sydney",
+        )
+        == 12345
+    )
+    assert "a.model = 'gpt-5.4-mini'" in psql.sql
+    assert "a.prompt_version = 'greek-sentence-grammar-v1'" in psql.sql
+    assert "Australia/Sydney" in psql.sql
+
+
+def test_get_sentences_can_use_seeded_random_order_without_sample_size():
+    psql = FakePsql("passage_id,sentence_number,greek_sentence\n")
+
+    rows = get_sentences(
+        psql,
+        model="gpt-5.4-mini",
+        prompt_version="greek-sentence-grammar-v1",
+        overwrite=False,
+        excluded_books=[],
+        passage_id=None,
+        limit=10,
+        sample_size=None,
+        sample_seed="daily-seed",
+        random_order=True,
+    )
+
+    assert rows == []
+    assert "ORDER BY md5" in psql.sql
+    assert "'daily-seed'" in psql.sql
+    assert "LIMIT 10" in psql.sql

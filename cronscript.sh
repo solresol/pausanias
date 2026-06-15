@@ -23,6 +23,7 @@ uv run find_predictors.py
 uv run find_sentence_predictors.py
 uv run analyse_noun_network.py 
 ./sentence_tagging_daily.sh
+./sentence_llm_grammar_daily.sh
 uv run create_website.py --graphic-book-image-dir "$GRAPHIC_BOOK_IMAGE_DIR"
 uv run build_graphic_book.py --image-dir "$GRAPHIC_BOOK_IMAGE_DIR" --output-dir pausanias_site/graphic-book
 rsync -az pausanias_site/ merah:/var/www/vhosts/pausanias.symmachus.org/htdocs/

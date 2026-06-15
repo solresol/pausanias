@@ -90,6 +90,8 @@ RHETORIC_MARKER_WORDS = list(
     dict.fromkeys(RHETORIC_MARKER_LEMMAS + RHETORIC_MARKER_SURFACE_FORMS)
 )
 
+DEFAULT_LLM_GRAMMAR_MODEL = "gpt-5.4-mini"
+
 SEMANTIC_FIELD_ABLATIONS = [
     {
         "id": "genealogy-kinship",
@@ -2899,6 +2901,720 @@ def get_translation_page_data(conn):
                      for k, v in noun_passages.items()}
 
     return passages, nouns_by_passage, noun_passages
+
+
+def get_llm_grammar_page_data(conn, model=DEFAULT_LLM_GRAMMAR_MODEL):
+    """Get latest stored LLM grammar parses, grouped by passage for website pages."""
+    required_tables = [
+        "sentence_llm_grammar_analyses",
+        "sentence_llm_grammar_tokens",
+    ]
+    if not all(table_exists(conn, table_name) for table_name in required_tables):
+        return {
+            "model": model,
+            "passages": [],
+            "passage_ids": set(),
+            "sentence_count": 0,
+            "token_count": 0,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "prompt_versions": [],
+            "created_at_min": None,
+            "created_at_max": None,
+        }
+
+    with conn.cursor() as cursor:
+        cursor.execute(
+            """
+            WITH selected AS (
+                SELECT DISTINCT ON (passage_id, sentence_number)
+                    passage_id,
+                    sentence_number,
+                    model,
+                    prompt_version,
+                    run_id,
+                    greek_sentence,
+                    sentence_note,
+                    input_tokens,
+                    output_tokens,
+                    token_count,
+                    created_at
+                FROM sentence_llm_grammar_analyses
+                WHERE model = %s
+                ORDER BY
+                    passage_id,
+                    sentence_number,
+                    created_at::timestamptz DESC NULLS LAST,
+                    prompt_version DESC
+            )
+            SELECT
+                s.passage_id,
+                s.sentence_number,
+                s.model,
+                s.prompt_version,
+                s.run_id,
+                s.greek_sentence,
+                s.sentence_note,
+                s.input_tokens,
+                s.output_tokens,
+                s.token_count,
+                s.created_at,
+                t.token_order,
+                t.token_id,
+                t.form,
+                t.lemma,
+                t.upos,
+                t.xpos,
+                t.feats_raw,
+                t.feats,
+                t.head_token_id,
+                t.deprel,
+                t.confidence,
+                t.note
+            FROM selected s
+            LEFT JOIN sentence_llm_grammar_tokens t
+              ON t.passage_id = s.passage_id
+             AND t.sentence_number = s.sentence_number
+             AND t.model = s.model
+             AND t.prompt_version = s.prompt_version
+            ORDER BY
+                string_to_array(s.passage_id, '.')::int[],
+                s.sentence_number,
+                t.token_order
+            """,
+            (model,),
+        )
+        rows = cursor.fetchall()
+        columns = [column.name if hasattr(column, "name") else column[0] for column in cursor.description]
+
+    sentence_lookup = {}
+    passage_lookup = {}
+    prompt_versions = set()
+    created_at_values = []
+    for raw_row in rows:
+        row = dict(zip(columns, raw_row))
+        passage_id = row["passage_id"]
+        sentence_key = (passage_id, int(row["sentence_number"]))
+        prompt_versions.add(row["prompt_version"])
+        if row["created_at"]:
+            created_at_values.append(str(row["created_at"]))
+
+        sentence = sentence_lookup.get(sentence_key)
+        if sentence is None:
+            sentence = {
+                "passage_id": passage_id,
+                "sentence_number": int(row["sentence_number"]),
+                "model": row["model"],
+                "prompt_version": row["prompt_version"],
+                "run_id": row["run_id"],
+                "greek_sentence": row["greek_sentence"],
+                "sentence_note": row["sentence_note"] or "",
+                "input_tokens": int(row["input_tokens"] or 0),
+                "output_tokens": int(row["output_tokens"] or 0),
+                "token_count": int(row["token_count"] or 0),
+                "created_at": str(row["created_at"] or ""),
+                "tokens": [],
+            }
+            sentence_lookup[sentence_key] = sentence
+
+            passage = passage_lookup.get(passage_id)
+            if passage is None:
+                book, chapter, section = passage_id.split(".")
+                passage = {
+                    "passage_id": passage_id,
+                    "book": int(book),
+                    "chapter": int(chapter),
+                    "section": int(section),
+                    "sentences": [],
+                    "input_tokens": 0,
+                    "output_tokens": 0,
+                    "token_count": 0,
+                }
+                passage_lookup[passage_id] = passage
+            passage["sentences"].append(sentence)
+            passage["input_tokens"] += sentence["input_tokens"]
+            passage["output_tokens"] += sentence["output_tokens"]
+            passage["token_count"] += sentence["token_count"]
+
+        if row["token_order"] is not None:
+            sentence["tokens"].append(
+                {
+                    "token_order": int(row["token_order"]),
+                    "token_id": row["token_id"],
+                    "form": row["form"],
+                    "lemma": row["lemma"],
+                    "upos": row["upos"],
+                    "xpos": row["xpos"],
+                    "feats_raw": row["feats_raw"],
+                    "feats": row["feats"],
+                    "head_token_id": row["head_token_id"],
+                    "deprel": row["deprel"],
+                    "confidence": row["confidence"],
+                    "note": row["note"],
+                }
+            )
+
+    passages = sorted(
+        passage_lookup.values(),
+        key=lambda passage: (passage["book"], passage["chapter"], passage["section"]),
+    )
+    sentence_count = len(sentence_lookup)
+    return {
+        "model": model,
+        "passages": passages,
+        "passage_ids": set(passage_lookup),
+        "sentence_count": sentence_count,
+        "token_count": sum(len(sentence["tokens"]) for sentence in sentence_lookup.values()),
+        "input_tokens": sum(sentence["input_tokens"] for sentence in sentence_lookup.values()),
+        "output_tokens": sum(sentence["output_tokens"] for sentence in sentence_lookup.values()),
+        "prompt_versions": sorted(prompt_versions),
+        "created_at_min": min(created_at_values) if created_at_values else None,
+        "created_at_max": max(created_at_values) if created_at_values else None,
+    }
+
+
+STYLOMETRY_FEATURE_SETS = [
+    {
+        "id": "morphosyntax",
+        "label": "Morphosyntactic Grammar",
+        "description": "UPOS tags, dependency labels, morphological features, and head-dependent POS relations from the LLM grammar parser.",
+        "max_features": 180,
+    },
+    {
+        "id": "word_mfw",
+        "label": "Traditional Word MFW",
+        "description": "Most frequent Greek surface forms after casefolding.",
+        "max_features": 120,
+    },
+    {
+        "id": "char4gram",
+        "label": "Traditional Character 4-Grams",
+        "description": "Most frequent normalized Greek character 4-grams, a language-agnostic stylometry baseline.",
+        "max_features": 160,
+    },
+]
+
+STYLOMETRY_COMPARISONS = [
+    {
+        "id": "messenian_wars",
+        "label": "Messenian Wars vs. Other Parsed Passages",
+        "flag": "is_messenian_wars",
+        "positive_label": "Messenian Wars",
+        "negative_label": "Other parsed passages",
+        "description": "Passages from 4.4.1 through 4.27.1, the Book 4 Messenian Wars block discussed as a possible special target.",
+    },
+    {
+        "id": "book4",
+        "label": "Book 4 vs. Other Parsed Passages",
+        "flag": "is_book4",
+        "positive_label": "Book 4",
+        "negative_label": "Other parsed passages",
+        "description": "Whole-book check for whether Book 4 separates before narrowing to the Messenian Wars section.",
+    },
+    {
+        "id": "book8",
+        "label": "Book 8 vs. Other Parsed Passages",
+        "flag": "is_book8",
+        "positive_label": "Book 8",
+        "negative_label": "Other parsed passages",
+        "description": "Arcadian material in Book 8 against the rest of the parsed corpus.",
+    },
+]
+
+
+def _passage_tuple(passage_id):
+    try:
+        return tuple(int(part) for part in str(passage_id).split("."))
+    except (TypeError, ValueError):
+        return ()
+
+
+def _is_messenian_wars_passage(passage_id):
+    parts = _passage_tuple(passage_id)
+    return len(parts) == 3 and (4, 4, 1) <= parts <= (4, 27, 1)
+
+
+def _stylometry_normalize_token(text):
+    text = unicodedata.normalize("NFC", str(text or "").casefold()).strip()
+    return text
+
+
+def _stylometry_word_forms(tokens):
+    forms = []
+    for token in tokens:
+        upos = str(token.get("upos") or "").upper()
+        if upos == "PUNCT":
+            continue
+        form = _stylometry_normalize_token(token.get("form"))
+        if form and WORD_PATTERN.search(form):
+            forms.append(form)
+    return forms
+
+
+def _stylometry_char_ngrams(forms, n=4):
+    text = " ".join(forms)
+    text = re.sub(r"\s+", " ", text).strip()
+    if len(text) < n:
+        return []
+    return [text[index : index + n] for index in range(len(text) - n + 1)]
+
+
+def _stylometry_token_index(token):
+    raw = token.get("token_id") or token.get("token_order")
+    try:
+        return int(raw)
+    except (TypeError, ValueError):
+        return None
+
+
+def _iter_stylometry_feats(token):
+    raw = token.get("feats")
+    if isinstance(raw, dict):
+        for key, value in sorted(raw.items()):
+            if value in (None, "", "_"):
+                continue
+            if isinstance(value, (list, tuple, set)):
+                for item in sorted(value):
+                    if item not in (None, "", "_"):
+                        yield f"{key}={item}"
+            else:
+                yield f"{key}={value}"
+        return
+
+    raw = token.get("feats_raw") or raw
+    if raw in (None, "", "_"):
+        return
+    for piece in str(raw).split("|"):
+        piece = piece.strip()
+        if piece and piece != "_":
+            yield piece
+
+
+def _build_morphosyntax_counts(sentences):
+    counts = Counter()
+    for sentence in sentences:
+        tokens = sentence.get("tokens") or []
+        tokens_by_index = {
+            index: token
+            for token in tokens
+            if (index := _stylometry_token_index(token)) is not None
+        }
+        non_punct = [
+            token
+            for token in tokens
+            if str(token.get("upos") or "").upper() != "PUNCT"
+        ]
+        if non_punct:
+            length_bin = min(40, (len(non_punct) // 5) * 5)
+            counts[f"sentence_len_bin:{length_bin:02d}-{length_bin + 4:02d}"] += 1
+
+        for token in tokens:
+            upos = str(token.get("upos") or "").upper()
+            deprel = str(token.get("deprel") or "").lower()
+            if upos and upos != "PUNCT":
+                counts[f"upos:{upos}"] += 1
+            if deprel and deprel != "punct":
+                counts[f"deprel:{deprel}"] += 1
+            if upos and deprel and upos != "PUNCT" and deprel != "punct":
+                counts[f"deprel_upos:{deprel}:{upos}"] += 1
+            for feat in _iter_stylometry_feats(token):
+                counts[f"feat:{feat}"] += 1
+
+            child_index = _stylometry_token_index(token)
+            try:
+                head_index = int(token.get("head_token_id") or 0)
+            except (TypeError, ValueError):
+                head_index = 0
+            if child_index is None or head_index == 0:
+                if upos and upos != "PUNCT":
+                    counts[f"root_upos:{upos}"] += 1
+                continue
+            head = tokens_by_index.get(head_index)
+            head_upos = str((head or {}).get("upos") or "").upper()
+            if head_upos and upos and upos != "PUNCT" and deprel != "punct":
+                direction = "left" if head_index > child_index else "right"
+                counts[f"head_child_upos:{head_upos}>{upos}"] += 1
+                counts[f"head_direction:{deprel}:{direction}"] += 1
+    return counts
+
+
+def _build_stylometry_unit(passage):
+    passage_id = passage.get("passage_id")
+    sentences = passage.get("sentences") or []
+    tokens = [
+        token
+        for sentence in sentences
+        for token in (sentence.get("tokens") or [])
+    ]
+    forms = _stylometry_word_forms(tokens)
+    greek_text = " ".join(
+        str(sentence.get("greek_sentence") or "").strip()
+        for sentence in sentences
+        if sentence.get("greek_sentence")
+    )
+    word_counts = Counter(f"word:{form}" for form in forms)
+    char_counts = Counter(f"char4:{gram}" for gram in _stylometry_char_ngrams(forms))
+    morph_counts = _build_morphosyntax_counts(sentences)
+
+    return {
+        "passage_id": passage_id,
+        "book": int(passage.get("book") or 0),
+        "chapter": int(passage.get("chapter") or 0),
+        "section": int(passage.get("section") or 0),
+        "sentence_count": len(sentences),
+        "token_count": len(forms),
+        "raw_token_count": len(tokens),
+        "excerpt": greek_text[:180],
+        "is_messenian_wars": _is_messenian_wars_passage(passage_id),
+        "is_book4": int(passage.get("book") or 0) == 4,
+        "is_book8": int(passage.get("book") or 0) == 8,
+        "features": {
+            "morphosyntax": morph_counts,
+            "word_mfw": word_counts,
+            "char4gram": char_counts,
+        },
+    }
+
+
+def _select_stylometry_features(units, feature_set_id, max_features):
+    totals = Counter()
+    for unit in units:
+        totals.update(unit["features"].get(feature_set_id) or {})
+    return [feature for feature, _count in totals.most_common(max_features)]
+
+
+def _stylometry_feature_vector(unit, feature_set_id, features):
+    counts = unit["features"].get(feature_set_id) or Counter()
+    denominator = float(sum(counts.values()) or 1)
+    return np.asarray([counts.get(feature, 0) / denominator for feature in features], dtype=float)
+
+
+def _stylometry_distance_matrix(matrix):
+    if len(matrix) == 0:
+        return np.zeros((0, 0), dtype=float)
+    norms = np.linalg.norm(matrix, axis=1)
+    safe = matrix.copy()
+    nonzero = norms > 0
+    safe[nonzero] = safe[nonzero] / norms[nonzero, None]
+    similarities = np.clip(safe @ safe.T, -1.0, 1.0)
+    distances = 1.0 - similarities
+    np.fill_diagonal(distances, 0.0)
+    return distances
+
+
+def _stylometry_svd_projection(matrix, method="SVD fallback", note=""):
+    sample_count = len(matrix)
+    centered = matrix - matrix.mean(axis=0, keepdims=True)
+    try:
+        u, singular_values, _vh = np.linalg.svd(centered, full_matrices=False)
+        coords = u[:, :2] * singular_values[:2]
+        if coords.shape[1] == 0:
+            coords = np.column_stack([np.arange(sample_count, dtype=float), np.zeros(sample_count)])
+        elif coords.shape[1] == 1:
+            coords = np.column_stack([coords[:, 0], np.zeros(sample_count)])
+        return coords.tolist(), method, note
+    except np.linalg.LinAlgError as exc:
+        return (
+            [[float(index), 0.0] for index in range(sample_count)],
+            "ordinal fallback",
+            f"Projection failed, so passages are plotted in text order: {exc}",
+        )
+
+
+def _stylometry_projection(matrix):
+    sample_count = len(matrix)
+    if sample_count == 0:
+        return [], "unavailable", "No parsed passages are available for projection."
+    if sample_count == 1:
+        return [[0.0, 0.0]], "single-point", "Only one parsed passage is available."
+    if sample_count < 4:
+        return _stylometry_svd_projection(
+            matrix,
+            method="SVD fallback",
+            note="Fewer than four parsed passages are available, so this build uses the deterministic SVD fallback instead of UMAP.",
+        )
+
+    try:
+        import umap  # type: ignore
+
+        n_neighbors = max(2, min(15, sample_count - 1))
+        reducer = umap.UMAP(
+            n_components=2,
+            n_neighbors=n_neighbors,
+            min_dist=0.1,
+            metric="cosine",
+            random_state=42,
+        )
+        coords = reducer.fit_transform(matrix)
+        return coords.tolist(), "UMAP", ""
+    except Exception as exc:
+        return _stylometry_svd_projection(
+            matrix,
+            method="SVD fallback",
+            note=f"UMAP was unavailable for this build: {exc}",
+        )
+
+
+def _stylometry_neighbors(units, distances, limit=5):
+    if len(units) <= 1:
+        return []
+    rows = []
+    for index, unit in enumerate(units):
+        ordered = [
+            (other_index, float(distances[index, other_index]))
+            for other_index in range(len(units))
+            if other_index != index
+        ]
+        ordered.sort(key=lambda item: item[1])
+        rows.append(
+            {
+                "passage_id": unit["passage_id"],
+                "neighbors": [
+                    {
+                        "passage_id": units[other_index]["passage_id"],
+                        "distance": distance,
+                    }
+                    for other_index, distance in ordered[:limit]
+                ],
+            }
+        )
+    return rows
+
+
+def _stylometry_outliers(units, distances, limit=12):
+    if len(units) <= 1:
+        return []
+    k = min(5, len(units) - 1)
+    rows = []
+    for index, unit in enumerate(units):
+        nearest = sorted(
+            float(distances[index, other_index])
+            for other_index in range(len(units))
+            if other_index != index
+        )[:k]
+        rows.append(
+            {
+                "passage_id": unit["passage_id"],
+                "book": unit["book"],
+                "chapter": unit["chapter"],
+                "section": unit["section"],
+                "score": float(np.mean(nearest)) if nearest else 0.0,
+                "nearest_distance": float(nearest[0]) if nearest else 0.0,
+            }
+        )
+    rows.sort(key=lambda row: row["score"], reverse=True)
+    return rows[:limit]
+
+
+def _mean_distance(distances, indexes_a, indexes_b=None):
+    if indexes_b is None:
+        if len(indexes_a) < 2:
+            return None
+        values = [
+            float(distances[left, right])
+            for left, right in combinations(indexes_a, 2)
+        ]
+    else:
+        if not indexes_a or not indexes_b:
+            return None
+        values = [
+            float(distances[left, right])
+            for left in indexes_a
+            for right in indexes_b
+            if left != right
+        ]
+    if not values:
+        return None
+    return float(np.mean(values))
+
+
+def _stylometry_group_comparisons(units, distances, matrix, features):
+    comparisons = []
+    for spec in STYLOMETRY_COMPARISONS:
+        positive_indexes = [
+            index for index, unit in enumerate(units) if unit.get(spec["flag"])
+        ]
+        negative_indexes = [
+            index for index, unit in enumerate(units) if not unit.get(spec["flag"])
+        ]
+        result = {
+            "id": spec["id"],
+            "label": spec["label"],
+            "positive_label": spec["positive_label"],
+            "negative_label": spec["negative_label"],
+            "description": spec["description"],
+            "positive_count": len(positive_indexes),
+            "negative_count": len(negative_indexes),
+            "available": bool(positive_indexes and negative_indexes),
+            "message": "",
+            "within_positive": None,
+            "within_negative": None,
+            "between": None,
+            "separation": None,
+            "top_positive_features": [],
+            "top_negative_features": [],
+        }
+        if not result["available"]:
+            result["message"] = "Current parsed coverage does not contain both comparison groups."
+            comparisons.append(result)
+            continue
+
+        within_positive = _mean_distance(distances, positive_indexes)
+        within_negative = _mean_distance(distances, negative_indexes)
+        between = _mean_distance(distances, positive_indexes, negative_indexes)
+        within_values = [
+            value
+            for value in (within_positive, within_negative)
+            if value is not None
+        ]
+        result["within_positive"] = within_positive
+        result["within_negative"] = within_negative
+        result["between"] = between
+        if between is not None and within_values:
+            result["separation"] = between - float(np.mean(within_values))
+
+        positive_mean = matrix[positive_indexes].mean(axis=0)
+        negative_mean = matrix[negative_indexes].mean(axis=0)
+        deltas = positive_mean - negative_mean
+        feature_deltas = [
+            {
+                "feature": features[index],
+                "delta": float(deltas[index]),
+                "positive_mean": float(positive_mean[index]),
+                "negative_mean": float(negative_mean[index]),
+            }
+            for index in range(len(features))
+        ]
+        result["top_positive_features"] = sorted(
+            feature_deltas,
+            key=lambda row: row["delta"],
+            reverse=True,
+        )[:12]
+        result["top_negative_features"] = sorted(
+            feature_deltas,
+            key=lambda row: row["delta"],
+        )[:12]
+        comparisons.append(result)
+    return comparisons
+
+
+def _stylometry_label(unit):
+    labels = []
+    if unit["is_messenian_wars"]:
+        labels.append("Messenian Wars")
+    if unit["is_book4"]:
+        labels.append("Book 4")
+    if unit["is_book8"]:
+        labels.append("Book 8")
+    return labels
+
+
+def get_stylometry_page_data(conn=None, grammar_data=None, model=DEFAULT_LLM_GRAMMAR_MODEL):
+    """Build morphosyntactic and traditional stylometry summaries for the website."""
+    if grammar_data is None and conn is not None:
+        grammar_data = get_llm_grammar_page_data(conn, model)
+    grammar_data = grammar_data or {"model": model, "passages": []}
+
+    units = [
+        _build_stylometry_unit(passage)
+        for passage in grammar_data.get("passages", [])
+        if passage.get("sentences")
+    ]
+    units = [
+        unit
+        for unit in units
+        if any(sum(counter.values()) for counter in unit["features"].values())
+    ]
+    units.sort(key=lambda unit: (unit["book"], unit["chapter"], unit["section"]))
+
+    book_counts = Counter(unit["book"] for unit in units)
+    coverage_notes = []
+    if not any(unit["is_messenian_wars"] for unit in units):
+        coverage_notes.append("No current parsed passages fall inside the Messenian Wars target range 4.4.1-4.27.1.")
+    if not any(unit["is_book8"] for unit in units):
+        coverage_notes.append("No current parsed passages fall in Book 8.")
+    if len(units) < 2:
+        coverage_notes.append("At least two parsed passages are needed for distance and projection outputs.")
+
+    prepared_units = [
+        {
+            "passage_id": unit["passage_id"],
+            "book": unit["book"],
+            "chapter": unit["chapter"],
+            "section": unit["section"],
+            "sentence_count": unit["sentence_count"],
+            "token_count": unit["token_count"],
+            "raw_token_count": unit["raw_token_count"],
+            "excerpt": unit["excerpt"],
+            "labels": _stylometry_label(unit),
+            "is_messenian_wars": unit["is_messenian_wars"],
+            "is_book4": unit["is_book4"],
+            "is_book8": unit["is_book8"],
+        }
+        for unit in units
+    ]
+
+    feature_sets = []
+    for spec in STYLOMETRY_FEATURE_SETS:
+        features = _select_stylometry_features(units, spec["id"], spec["max_features"])
+        if features:
+            matrix = np.vstack([
+                _stylometry_feature_vector(unit, spec["id"], features)
+                for unit in units
+            ])
+        else:
+            matrix = np.zeros((len(units), 0), dtype=float)
+        distances = _stylometry_distance_matrix(matrix)
+        coords, projection_method, projection_note = _stylometry_projection(matrix)
+        points = []
+        for unit, coord in zip(prepared_units, coords):
+            points.append(
+                {
+                    **unit,
+                    "x": float(coord[0]) if coord else 0.0,
+                    "y": float(coord[1]) if len(coord) > 1 else 0.0,
+                }
+            )
+
+        feature_sets.append(
+            {
+                "id": spec["id"],
+                "label": spec["label"],
+                "description": spec["description"],
+                "feature_count": len(features),
+                "features": features[:30],
+                "projection_method": projection_method,
+                "projection_note": projection_note,
+                "points": points,
+                "nearest_neighbors": _stylometry_neighbors(prepared_units, distances),
+                "outliers": _stylometry_outliers(prepared_units, distances),
+                "comparisons": _stylometry_group_comparisons(units, distances, matrix, features),
+            }
+        )
+
+    return {
+        "available": bool(units),
+        "model": grammar_data.get("model") or model,
+        "unit_type": "passage",
+        "units": prepared_units,
+        "feature_sets": feature_sets,
+        "coverage_notes": coverage_notes,
+        "metrics": {
+            "passage_count": len(units),
+            "sentence_count": sum(unit["sentence_count"] for unit in units),
+            "token_count": sum(unit["token_count"] for unit in units),
+            "book_count": len(book_counts),
+            "messenian_wars_count": sum(1 for unit in units if unit["is_messenian_wars"]),
+            "book4_count": sum(1 for unit in units if unit["is_book4"]),
+            "book8_count": sum(1 for unit in units if unit["is_book8"]),
+        },
+        "book_counts": dict(sorted(book_counts.items())),
+        "method_notes": [
+            "This first website implementation uses each parsed passage as one stylometric unit because the current LLM grammar table is still growing.",
+            "The production parser target is gpt-5.4-mini; the older UDPipe-style parsers are retained only as historical scripts.",
+            "When grammar coverage is dense enough, the same feature families can be aggregated into larger rolling chunks for stronger authorship-style statistics.",
+        ],
+    }
 
 
 def get_passage_summaries(conn):
