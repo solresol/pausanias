@@ -15,6 +15,7 @@ dependencies = [
     "scikit-learn>=1.6.1",
     "scipy>=1.13.0",
     "ufal-udpipe>=1.4.0.1",
+    "umap-learn>=0.5.7",
 ]
 
 [tool.pytest.ini_options]
