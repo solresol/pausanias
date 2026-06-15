@@ -1,8 +1,10 @@
 #!/bin/sh
 
+set -eu
+
 export PATH="$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
 
-cd $(dirname $0)
+cd "$(dirname "$0")"
 git pull -q
 
 export PAUSANIAS_DATABASE_URL="${PAUSANIAS_DATABASE_URL:-dbname=pausanias}"
