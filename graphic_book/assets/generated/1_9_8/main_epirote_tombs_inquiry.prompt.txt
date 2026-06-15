@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: main panel art for a Pausanias graphic-book parchment atlas page
+Primary request: a richly detailed historical illustration of intact Epirote royal tombs in a rugged Greek landscape, with a restrained scholarly-historical mood: a Greek traveler-scholar and attendants examine the tomb precinct and a disputed scroll, while Macedonian/Epirote ancestry is implied by dignified funerary architecture, inscriptions as unreadable marks only, no legible text.
+Scene/backdrop: ancient Epirus, stone tholos and chamber tombs, cypress trees, mountain ridges, warm late-afternoon light, archaeological solemnity, no battle gore.
+Subject: intact royal tombs, a skeptical historian/traveler figure, a scroll as evidence, distant attendants and horses for scale.
+Style/medium: sophisticated coffee-table book historical watercolor and gouache, fine ink detail, rich painterly terrain, parchment-compatible palette, similar ambition to a premium illustrated historical atlas.
+Composition/framing: wide horizontal scene, strong depth, main tombs slightly right of center, scholar and scroll in lower left, open sky and mountains for label space, no labels or readable text.
+Lighting/mood: golden atmospheric light, serious and contemplative, high detail, finished art.
+Color palette: warm stone, olive, umber, muted blue mountains, aged parchment harmony.
+Constraints: no modern objects, no nudity, no gore, no cartoon style, no flat vector terrain, no map labels, no readable text, no watermark.

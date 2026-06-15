@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: scenic inset art for a Pausanias graphic-book parchment atlas page
+Primary request: a rich historical landscape of Cardia being replaced by Lysimacheia on the narrow isthmus of the Thracian Chersonese, showing an older coastal city partly abandoned and a planned Hellenistic foundation rising nearby, with surveyors, masons, harbor water, and low hills; no readable text.
+Scene/backdrop: Thracian Chersonese isthmus, coastal Greek city, Hellenistic construction, sea on one side and a protected harbor on the other, windswept Mediterranean light.
+Subject: Cardia's loss and Lysimacheia's foundation as the plausible grievance behind Hieronymus' hostility to Lysimachus.
+Style/medium: sophisticated historical atlas watercolor and gouache with fine ink detail, painterly terrain, high-quality coffee-table book art, parchment-compatible colors.
+Composition/framing: horizontal landscape for an inset, old city left, new foundation right, isthmus and water clearly visible, no labels or readable lettering.
+Lighting/mood: clear warm light, historically grounded, elegiac but not dramatic.
+Constraints: no modern objects, no flat vector style, no map labels, no readable text, no watermark, no cartoon or schematic look.
