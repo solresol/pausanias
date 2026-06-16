@@ -1,0 +1,12 @@
+Use case: historical-scene
+Asset type: main raster art panel for a Pausanias graphic-book page; no text should appear in the image.
+Primary request: Create a rich, historically grounded Hellenistic war-council scene showing Lysimachus deciding to strike first against Demetrius after news from Macedonia.
+Scene/backdrop: A late fourth/early third century BCE command hall or campaign pavilion on the Thrace-Macedon frontier, with a distant view of rugged Macedonian hills and the lower Strymon/Amphipolis region through an opening. Bronze lamps, parchment maps, wax tablets, spear racks, Macedonian shields, travel dust, and muted campaign equipment.
+Subject: An older Hellenistic king-general, Lysimachus, in practical royal armor and cloak, leans over a table map with senior officers; a messenger at one side gestures urgently as if reporting that Demetrius has seized Macedonia. No modern items, no written labels, no legible text.
+Style/medium: Sophisticated coffee-table historical illustration, painterly watercolor and gouache over fine ink texture, naturalistic anatomy and architecture, rich layered surfaces, archaeological plausibility, cinematic but restrained. Match the ambition of a finished illustrated historical atlas page, not a diagram.
+Composition/framing: Wide landscape composition, strong central table-map focal point, figures arranged around it, clear depth, room for later local labels in upper and lower margins. Avoid close crop.
+Lighting/mood: Warm late-afternoon light and lamplight, tense strategic atmosphere, serious but not violent.
+Color palette: Warm parchment golds, muted terracotta, bronze, dusty blue-gray hills, dark red and olive accents.
+Materials/textures: Linen, bronze, wood, parchment, stone, worn leather, painted shields.
+Constraints: No text, no labels, no captions, no watermark. No gore, no nudity, no caricature, no fantasy armor. Must look like finished raster artwork suitable for a high-end historical atlas spread.
+Avoid: flat vector style, classroom diagram, cartoon, icon figures, schematic map, empty sparse room, modern helmets, Roman imperial armor, medieval costumes, visible English or Greek lettering.

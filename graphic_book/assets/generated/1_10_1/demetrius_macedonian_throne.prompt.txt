@@ -1,0 +1,12 @@
+Use case: historical-scene
+Asset type: scenic inset raster art for a Pausanias graphic-book page; no text should appear in the image.
+Primary request: Create a compact historical scene of Demetrius son of Antigonus seizing the Macedonian throne after murdering Alexander son of Cassander, shown symbolically and without gore.
+Scene/backdrop: Hellenistic Macedonian palace interior at Pella or a Macedonian royal stronghold, columns, bronze shield trophies, royal dais, tense courtiers, guards at the edge, a fallen cloak and overturned stool implying sudden violence but no blood or corpse.
+Subject: Demetrius, an ambitious Hellenistic commander in ornate but plausible armor and cloak, steps onto or stands before the royal dais as anxious Macedonian nobles react; a shadowed doorway suggests the recently murdered Alexander offstage. The scene should communicate political usurpation, not battlefield action.
+Style/medium: Sophisticated painterly watercolor and gouache historical illustration with fine ink texture, rich art-book finish, naturalistic figures, historically grounded Hellenistic material culture.
+Composition/framing: Medium-wide rectangular composition, readable at inset size, central dais and Demetrius prominent, no empty foreground, no text space needed.
+Lighting/mood: Dramatic palace lamplight, tense and ominous, controlled not melodramatic.
+Color palette: Warm gold stone, bronze, muted crimson cloak, deep shadow, worn blue-gray accents.
+Materials/textures: Stone columns, bronze shields, linen, leather, parchment, polished wood, worn marble.
+Constraints: No text, no labels, no captions, no watermark. No blood, no gore, no visible corpse, no nudity, no fantasy elements. Must look like finished historical atlas art.
+Avoid: cartoon, flat vector, classroom diagram, symbolic icons, modern clothing, Roman imperial imagery, medieval throne room, legible lettering.
