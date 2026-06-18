@@ -1,0 +1,5 @@
+Source asset copied from graphic_book/assets/generated/1_9_7/main_ephesus_harbor_refoundation.png and reused as a high-quality generated raster base.
+
+Intended local use for passage 1.10.2: crop as a scenic inset for Demetrius crossing into Asia and the eastern campaign pressure that ends with Seleucus overcoming him. Exact caption and contextual labels are rendered locally by graphic_book/render_passage_1_10_2.py.
+
+Original-style requirements retained: painterly historical reconstruction, rich parchment-atlas compatibility, no baked text, no nudity, no gore, no schematic vector terrain.
