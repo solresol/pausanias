@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: main raster art for a Pausanias graphic-book page, later overlaid with local labels and callouts
+Primary request: Create a rich, historically grounded Hellenistic palace-court tableau for Pausanias 1.10.3: elderly King Lysimachus seated in a Thracian/Macedonian palace council chamber, Arsinoe standing nearby in controlled political tension, and Agathocles slightly apart as the threatened heir. No violence, no nudity, no eroticized posing.
+Scene/backdrop: late Hellenistic royal interior with stone columns, painted plaster, bronze lamps, table with wax tablets and sealed letters, distant glimpse of a fortified harbor or palace courtyard through an opening. Historically plausible Greek/Macedonian/Thracian details, not fantasy.
+Subject: court intrigue and succession anxiety; Arsinoe plotting against Agathocles while Lysimachus appears old, isolated, and surrounded by wary courtiers.
+Style/medium: sophisticated coffee-table historical illustration, painterly raster art, warm parchment-compatible palette, dense architectural and textile detail, believable human figures, atmospheric depth.
+Composition/framing: wide horizontal composition suitable for cropping into a large main panel; leave useful open areas near the upper center and corners for later labels; keep faces and gestures readable from a distance.
+Lighting/mood: late afternoon amber light through high windows, serious political tension, refined but ominous.
+Color palette: aged gold, sienna, muted lapis, dark bronze, ivory stone, deep red accents; should harmonize with parchment atlas pages.
+Text: no text, no labels, no inscriptions, no captions, no watermark.
+Constraints: high-quality finished art; avoid flat vector terrain, simple icons, cartoon style, classroom diagram, schematic map, modern objects, crowns that look medieval, excessive armor, gore, visible nudity, exposed breasts, exposed genitals, or eroticized bodies.

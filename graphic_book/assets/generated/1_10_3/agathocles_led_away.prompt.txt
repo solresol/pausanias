@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: scenic inset raster art for a Pausanias graphic-book page, later overlaid with local caption and frame
+Primary request: Create a refined Hellenistic palace-corridor scene showing Agathocles, a noble Macedonian prince, being quietly led away by guards after court intrigue. Non-violent, no gore, no execution scene.
+Scene/backdrop: stone palace corridor with columns, bronze lamps, painted wall bands, distant courtyard light, wax tablets and sealed letter in the foreground or on a side table to imply accusation and plot.
+Subject: political downfall and isolation of Agathocles; restrained guards and anxious courtiers, serious but dignified.
+Style/medium: sophisticated coffee-table historical illustration, painterly raster art, warm parchment-compatible palette, detailed architecture and textiles, historically plausible Hellenistic Greek/Macedonian costume.
+Composition/framing: horizontal inset composition; central figure and guards readable, with enough quiet background for later caption framing. No in-image text.
+Lighting/mood: low amber interior light, sombre, tense, tragic but not sensational.
+Color palette: ochre stone, deep red and blue textile accents, bronze lamp glow, muted shadows.
+Text: no text, no labels, no inscriptions, no captions, no watermark.
+Constraints: high-quality finished art; avoid flat vector, cartoon, classroom diagram, modern objects, medieval fantasy, explicit violence, gore, visible nudity, exposed breasts, exposed genitals, eroticized bodies.
