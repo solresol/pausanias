@@ -1,0 +1,12 @@
+Use case: historical-scene
+Asset type: Pausanias graphic-book scenic inset raster art, later overlaid with exact labels locally
+Primary request: Create a sophisticated historical illustration of Philetaerus taking control of Pergamum's treasury on the upper Caicus after the death of Agathocles, preparing to place the fortress and treasury at Seleucus' disposal.
+Scene/backdrop: Pergamum hilltop citadel and treasury chamber or terrace, overlooking rugged Anatolian hills and the Caicus valley. Heavy treasury chests, sealed jars, tablets, guards, and a herald ready to depart.
+Subject: Philetaerus as a serious Hellenistic treasurer/commander standing beside opened but orderly treasury chests and a messenger, with guards at the citadel gate. The scene should suggest political calculation and transfer of allegiance, not looting.
+Style/medium: rich painterly historical reconstruction, coffee-table book quality, textured naturalistic raster art, parchment-compatible palette, detailed architecture and landscape, no cartooning, no flat vector, no schematic iconography.
+Composition/framing: wide horizontal panel with fortress architecture and treasury objects foreground, valley vista behind, central figure and herald clearly readable, space near top and sides for local labels. No built-in border.
+Lighting/mood: clear Anatolian morning light, sober decisive mood, warm stone, bronze, muted teal shadows, aged gold.
+Materials/textures: cut stone, timber doors, bronze fittings, wax seals, leather satchels, coins only as subtle detail, wool cloaks, dust and sunlight.
+Text: no text, no labels, no letters, no inscriptions, no watermark.
+Constraints: historically grounded Hellenistic setting; clothed figures only; no nudity, no erotic poses, no gore, no modern objects; avoid looking like a treasure fantasy or pirate hoard; avoid simple map/diagram style.
+

@@ -1,0 +1,12 @@
+Use case: historical-scene
+Asset type: Pausanias graphic-book main panel raster art, later overlaid with exact labels locally
+Primary request: Create a sophisticated historical illustration of Lysandra and her companions arriving as fugitives at the court of Seleucus in Babylon after the killing of Agathocles. The scene should communicate exile, urgent petition, and Hellenistic royal politics without gore.
+Scene/backdrop: Babylonian royal approach or audience terrace, with warm stone architecture, columns, glazed brick color accents, distant ziggurat or city walls, desert light, and a hint of long travel from the western kingdoms.
+Subject: A dignified Hellenistic woman traveler with two children and a small group of Macedonian companions, including an Odrysian-linked young nobleman, presenting their plea to Seleucus or his officials. Guards, scrolls, travel cloaks, and pack animals may appear as supporting details.
+Style/medium: rich painterly historical reconstruction, coffee-table book quality, textured naturalistic raster art, classical-Hellenistic atmosphere, cinematic but restrained, no comic style, no flat vector, no schematic diagram.
+Composition/framing: wide horizontal panel, main figures in the lower middle and left, Babylon architecture and Seleucid court context visible behind them, clear space for later local labels near figures and background. No built-in border.
+Lighting/mood: warm late-afternoon light, sober political tension, refined antiquarian color palette with parchment-compatible ochres, muted blues, stone, bronze, and dusty rose.
+Materials/textures: linen, wool cloaks, bronze armor details, stone pavement, glazed brick, leather satchels, scrolls.
+Text: no text, no labels, no letters, no inscriptions, no watermark.
+Constraints: historically grounded Hellenistic/Babylonian setting; suitable for a professional general audience; clothed figures only; no nudity, no erotic poses, no gore, no severed heads, no caricature; avoid modern objects; avoid flat map graphics.
+
