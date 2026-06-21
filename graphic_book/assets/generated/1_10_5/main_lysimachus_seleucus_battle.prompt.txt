@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: Pausanias graphic-book main panel raster art, later overlaid with exact labels locally
+Primary request: Create a sophisticated historical illustration for Pausanias 1.10.5: elderly King Lysimachus has crossed into Asia and been decisively defeated by Seleucus in a Hellenistic battlefield. Show the turning point of battle with Seleucid troops advancing and Lysimachus' line breaking; Lysimachus may be shown fallen or being shielded by attendants, dignified and non-graphic, no gore.
+Scene/backdrop: open western Asia Minor battlefield near rolling dry hills and a dusty plain, with Hellenistic cavalry, pikes, standards, bronze shields, and a distant route back toward the Hellespont/Chersonese suggested by hills and light. Historically plausible Macedonian/Hellenistic armies, not Roman, not medieval.
+Subject: defeat and death of Lysimachus after his crossing into Asia; Seleucus' victory should be readable through battlefield motion and command presence without sensational violence.
+Style/medium: rich painterly historical reconstruction, coffee-table book quality, textured naturalistic raster art, parchment atlas compatible palette, atmospheric depth, detailed but not crowded, no comic style, no flat vector, no schematic diagram.
+Composition/framing: wide horizontal panel suitable for a large atlas page; main figures and army motion in the lower half, sky and hills in upper third; leave quiet areas near upper center and corners for later local title and labels. No built-in border.
+Lighting/mood: late afternoon dusty golden light, sober decisive mood, restrained tragedy, warm ochres, muted blue shadows, bronze and linen accents.
+Materials/textures: linen tunics, wool cloaks, bronze helmets and shields, leather harness, dust, dry grasses, rocky hills.
+Text: no text, no labels, no letters, no inscriptions, no watermark.
+Constraints: historically grounded Hellenistic setting; clothed figures only; no nudity, no erotic poses, no gore, no severed heads, no modern objects, no fantasy armor, no Roman legionary equipment, no cartooning, no map graphics.

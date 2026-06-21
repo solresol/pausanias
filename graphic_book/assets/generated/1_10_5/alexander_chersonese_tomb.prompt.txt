@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: Pausanias graphic-book scenic inset raster art, later overlaid with exact labels locally
+Primary request: Create a sophisticated historical illustration for Pausanias 1.10.5 showing Alexander, son of Lysimachus by Odrysis, receiving permission after many entreaties to recover Lysimachus' body and bury it on the Thracian Chersonese, where the tomb remained visible between Cardia and Pactye. The scene should emphasize dignified burial and geographic memory, not violence.
+Scene/backdrop: a windswept Thracian Chersonese ridge between two ancient settlements, overlooking the Hellespont/Marmara waters; a modest Hellenistic tomb mound or stone stele in the foreground, attendants placing a covered bier or funeral offerings, distant village walls/harbor hints at Cardia and Pactye on opposite sides.
+Subject: Alexander as a grieving nobleman directing a respectful burial for his father Lysimachus, with a small group of attendants and soldiers; covered body only, no visible corpse details.
+Style/medium: rich painterly historical reconstruction, coffee-table book quality, textured naturalistic raster art, parchment atlas compatible palette, detailed landscape, no comic style, no flat vector, no schematic map.
+Composition/framing: wide horizontal inset with tomb/stele in foreground, grieving Alexander and attendants beside it, Chersonese coastline and two distant settlements visible for orientation; leave quiet sky and margins for later local label. No built-in border.
+Lighting/mood: cool early morning after battle, restrained elegiac mood, sea haze, warm stone, muted teal water, dry grasses.
+Materials/textures: limestone stele, earth mound, linen shroud, wool cloaks, bronze fittings, weathered grass, coastal rock.
+Text: no text, no labels, no letters, no inscriptions, no watermark.
+Constraints: historically grounded Hellenistic setting; clothed figures only; no nudity, no erotic poses, no gore, no exposed body, no modern objects, no fantasy tomb, no Roman legionary equipment, no cartooning, no map graphics.
