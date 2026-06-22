@@ -1,0 +1,8 @@
+Use case: historical-scene
+Asset type: main scenic panel for a Pausanias graphic-book page, later overlaid with local labels and callouts
+Primary request: Create a rich, sophisticated raster illustration in the style of a coffee-table antiquarian atlas spread: Pausanias' Athens with a bronze statue of Pyrrhus of Epirus near the Odeion/Agora setting, using warm parchment-compatible colors, finished painterly detail, atmospheric Mediterranean light, and historically grounded Hellenistic/Roman-era architecture.
+Scene/backdrop: Athens, near a public monument setting with stone paving, colonnades, distant Acropolis/temple forms, bronze honor statue on a plinth, Epirote/Molossian lineage symbols subtly carved on the base, a few robed visitors for scale.
+Subject: a dignified bronze statue of Pyrrhus as an Epirote king and warrior, not Alexander, with helmet and cloak, presented as an object Pausanias sees in Athens. Include visual hints of lineage such as shield motifs and low-relief genealogy panels on the plinth, but no readable text.
+Style: high-detail historical illustration, painterly realism, antiquarian travel-book plate, refined ink-and-watercolor feel with deep art layer, textured stone, bronze patina, cypress and Attic hills, warm sky, suited to parchment framing.
+Composition: wide horizontal scene with the statue slightly left of center, open architecture and landscape on the right for future labels; clear focal points, no modern objects, no nudity, no gore, no readable or pseudo-readable text, no watermark.
+Avoid: flat vector terrain, classroom diagram, icon figures, cartoon style, simple silhouettes, schematic map, blank areas, invented readable inscriptions, eroticized bodies, exposed nudity.
