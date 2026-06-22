@@ -5,6 +5,7 @@ import os
 import html
 import math
 import re
+import numpy as np
 import pandas as pd
 from datetime import datetime
 from pathlib import Path
@@ -1788,6 +1789,10 @@ def _stylometry_feature_label(feature):
         "head_direction:": "Head direction ",
         "root_upos:": "Root UPOS ",
         "sentence_len_bin:": "Sentence length ",
+        "func:": "Function word ",
+        "func_upos:": "Function UPOS ",
+        "func_form_upos:": "Function form/UPOS ",
+        "func_deprel:": "Function DepRel ",
     }
     for prefix, label in prefixes.items():
         if feature.startswith(prefix):
@@ -2208,7 +2213,1683 @@ def generate_stylometry_pages(stylometry_data, output_dir, title):
     )
 
 
-def generate_analysis_pages(greta_analysis, output_dir, title):
+PEOPLE_CLASS_LABELS = {
+    "anonymous_female": "Anonymous female",
+    "named_female": "Named female",
+    "anonymous_male": "Anonymous male",
+    "named_male": "Named male",
+}
+
+PEOPLE_CLASS_COLORS = {
+    "anonymous_female": "#d56f7f",
+    "named_female": "#a23e73",
+    "anonymous_male": "#4f96a2",
+    "named_male": "#315f9f",
+}
+
+PEOPLE_BUCKET_LABELS = {
+    "mythic": "Mythic",
+    "historical": "Historical",
+    "other": "Other",
+}
+
+
+def _people_class_css(people_class):
+    return people_class.replace("_", "-")
+
+
+def _people_percent(value):
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError):
+        numeric = 0.0
+    if not math.isfinite(numeric):
+        numeric = 0.0
+    return f"{numeric:.1f}%"
+
+
+def _people_p_value(value):
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError):
+        return "n/a"
+    if not math.isfinite(numeric):
+        return "n/a"
+    if numeric < 0.001:
+        return f"{numeric:.2e}"
+    return f"{numeric:.4f}"
+
+
+def _render_people_legend(classes):
+    items = []
+    for people_class in classes:
+        items.append(
+            f"""
+            <span class="people-legend-item">
+                <span class="people-legend-swatch people-class-{_people_class_css(people_class)}"></span>
+                {html.escape(PEOPLE_CLASS_LABELS.get(people_class, people_class))}
+            </span>
+            """
+        )
+    return f"<div class=\"people-legend\">{''.join(items)}</div>"
+
+
+def _people_matrix_value(matrix, bucket, people_class, default=0):
+    return (matrix or {}).get(bucket, {}).get(people_class, default)
+
+
+def _render_people_percentage_table(analysis):
+    buckets = analysis.get("buckets", [])
+    classes = analysis.get("classes", [])
+    percentages = analysis.get("percentages", {})
+    counts = analysis.get("counts", {})
+    rows = []
+    for bucket in buckets:
+        row_total = sum(int(_people_matrix_value(counts, bucket, people_class, 0)) for people_class in classes)
+        cells = "".join(
+            f'<td class="num">{_people_percent(_people_matrix_value(percentages, bucket, people_class, 0.0))}</td>'
+            for people_class in classes
+        )
+        rows.append(
+            f"""
+            <tr>
+                <th>{html.escape(PEOPLE_BUCKET_LABELS.get(bucket, bucket.title()))}</th>
+                {cells}
+                <td class="num">{row_total:,}</td>
+            </tr>
+            """
+        )
+    header_cells = "".join(
+        f"<th>{html.escape(PEOPLE_CLASS_LABELS.get(people_class, people_class))}</th>"
+        for people_class in classes
+    )
+    return f"""
+        <table class="predictor-table people-table people-headline-table">
+            <thead>
+                <tr><th>Sentence bucket</th>{header_cells}<th>Gendered mention rows</th></tr>
+            </thead>
+            <tbody>{''.join(rows)}</tbody>
+        </table>
+    """
+
+
+def _render_people_count_table(analysis, key, final_column_label):
+    buckets = analysis.get("buckets", [])
+    classes = analysis.get("classes", [])
+    matrix = analysis.get(key, {})
+    rows = []
+    for bucket in buckets:
+        row_total = sum(int(_people_matrix_value(matrix, bucket, people_class, 0)) for people_class in classes)
+        cells = "".join(
+            f'<td class="num">{int(_people_matrix_value(matrix, bucket, people_class, 0)):,}</td>'
+            for people_class in classes
+        )
+        rows.append(
+            f"""
+            <tr>
+                <th>{html.escape(PEOPLE_BUCKET_LABELS.get(bucket, bucket.title()))}</th>
+                {cells}
+                <td class="num">{row_total:,}</td>
+            </tr>
+            """
+        )
+    header_cells = "".join(
+        f"<th>{html.escape(PEOPLE_CLASS_LABELS.get(people_class, people_class))}</th>"
+        for people_class in classes
+    )
+    return f"""
+        <table class="predictor-table people-table">
+            <thead>
+                <tr><th>Sentence bucket</th>{header_cells}<th>{html.escape(final_column_label)}</th></tr>
+            </thead>
+            <tbody>{''.join(rows)}</tbody>
+        </table>
+    """
+
+
+def _render_people_stacked_bars(analysis):
+    buckets = analysis.get("buckets", [])
+    classes = analysis.get("classes", [])
+    percentages = analysis.get("percentages", {})
+    counts = analysis.get("counts", {})
+    width = 760
+    height = 230
+    label_x = 24
+    chart_x = 130
+    chart_width = 500
+    total_x = chart_x + chart_width + 18
+    legend_y = 24
+    rows = []
+    legend_items = []
+    for index, people_class in enumerate(classes):
+        x = 24 + index * 175
+        label = PEOPLE_CLASS_LABELS.get(people_class, people_class)
+        color = PEOPLE_CLASS_COLORS.get(people_class, "#777")
+        legend_items.append(
+            f"""
+            <rect x="{x}" y="{legend_y}" width="12" height="12" rx="2" fill="{color}"></rect>
+            <text x="{x + 18}" y="{legend_y + 11}" font-size="13" fill="#333">{html.escape(label)}</text>
+            """
+        )
+    for bucket in buckets:
+        total = sum(int(_people_matrix_value(counts, bucket, people_class, 0)) for people_class in classes)
+        row_index = len(rows)
+        y = 72 + row_index * 42
+        x_cursor = chart_x
+        segments = [
+            f'<text x="{label_x}" y="{y + 21}" font-size="15" font-weight="700" fill="#4b4338">{html.escape(PEOPLE_BUCKET_LABELS.get(bucket, bucket.title()))}</text>',
+            f'<rect x="{chart_x}" y="{y}" width="{chart_width}" height="28" rx="4" fill="#ece6dd"></rect>',
+        ]
+        for people_class in classes:
+            value = float(_people_matrix_value(percentages, bucket, people_class, 0.0) or 0.0)
+            count = int(_people_matrix_value(counts, bucket, people_class, 0))
+            if value <= 0:
+                continue
+            segment_width = chart_width * value / 100.0
+            label = PEOPLE_CLASS_LABELS.get(people_class, people_class)
+            color = PEOPLE_CLASS_COLORS.get(people_class, "#777")
+            segments.append(
+                f"""
+                <rect x="{x_cursor:.2f}" y="{y}" width="{segment_width:.2f}" height="28" fill="{color}">
+                    <title>{html.escape(label)}: {_people_percent(value)} ({count:,})</title>
+                </rect>
+                """
+            )
+            if segment_width >= 45:
+                segments.append(
+                    f'<text x="{x_cursor + segment_width / 2:.2f}" y="{y + 19}" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">{_people_percent(value)}</text>'
+                )
+            x_cursor += segment_width
+        rows.append(
+            f"""
+            {''.join(segments)}
+            <text x="{total_x}" y="{y + 20}" font-size="14" font-weight="700" fill="#4b4338">{total:,}</text>
+            """
+        )
+    axis_y = 204
+    return f"""
+        <section class="people-viz-panel">
+            <h3>Class Composition by Sentence Bucket</h3>
+            <div class="people-svg-wrap">
+                <svg class="people-chart-svg" viewBox="0 0 {width} {height}" role="img" aria-label="Stacked percentage bars for people classes by sentence bucket">
+                    <title>Class composition by sentence bucket</title>
+                    {''.join(legend_items)}
+                    {''.join(rows)}
+                    <line x1="{chart_x}" y1="{axis_y}" x2="{chart_x + chart_width}" y2="{axis_y}" stroke="#c9c0b3"></line>
+                    <text x="{chart_x}" y="{axis_y + 18}" text-anchor="middle" font-size="12" fill="#776b5d">0%</text>
+                    <text x="{chart_x + chart_width / 2}" y="{axis_y + 18}" text-anchor="middle" font-size="12" fill="#776b5d">50%</text>
+                    <text x="{chart_x + chart_width}" y="{axis_y + 18}" text-anchor="middle" font-size="12" fill="#776b5d">100%</text>
+                    <text x="{total_x}" y="{axis_y + 18}" font-size="12" fill="#776b5d">rows</text>
+                </svg>
+            </div>
+        </section>
+    """
+
+
+def _render_people_share_bars(analysis):
+    shares = analysis.get("shares", {})
+    width = 760
+    height = 250
+    label_x = 24
+    chart_x = 130
+    chart_width = 500
+    rows = []
+    for bucket in analysis.get("buckets", []):
+        row_index = len(rows)
+        bucket_shares = shares.get(bucket, {})
+        female = float(bucket_shares.get("female_percent") or 0.0)
+        named = float(bucket_shares.get("named_percent") or 0.0)
+        y = 54 + row_index * 62
+        female_width = chart_width * female / 100.0
+        named_width = chart_width * named / 100.0
+        rows.append(
+            f"""
+            <text x="{label_x}" y="{y + 22}" font-size="15" font-weight="700" fill="#4b4338">{html.escape(PEOPLE_BUCKET_LABELS.get(bucket, bucket.title()))}</text>
+            <text x="{chart_x - 12}" y="{y + 9}" text-anchor="end" font-size="12" fill="#4b4338">Female</text>
+            <rect x="{chart_x}" y="{y}" width="{chart_width}" height="12" rx="6" fill="#ece6dd"></rect>
+            <rect x="{chart_x}" y="{y}" width="{female_width:.2f}" height="12" rx="6" fill="#a23e73"></rect>
+            <text x="{chart_x + chart_width + 18}" y="{y + 11}" font-size="13" font-weight="700" fill="#4b4338">{_people_percent(female)}</text>
+            <text x="{chart_x - 12}" y="{y + 34}" text-anchor="end" font-size="12" fill="#4b4338">Named</text>
+            <rect x="{chart_x}" y="{y + 25}" width="{chart_width}" height="12" rx="6" fill="#ece6dd"></rect>
+            <rect x="{chart_x}" y="{y + 25}" width="{named_width:.2f}" height="12" rx="6" fill="#315f9f"></rect>
+            <text x="{chart_x + chart_width + 18}" y="{y + 36}" font-size="13" font-weight="700" fill="#4b4338">{_people_percent(named)}</text>
+            """
+        )
+    axis_y = 226
+    return f"""
+        <section class="people-viz-panel">
+            <h3>Female and Named Shares</h3>
+            <div class="people-svg-wrap">
+                <svg class="people-chart-svg" viewBox="0 0 {width} {height}" role="img" aria-label="Female and named share bars by sentence bucket">
+                    <title>Female and named shares by sentence bucket</title>
+                    {''.join(rows)}
+                    <line x1="{chart_x}" y1="{axis_y}" x2="{chart_x + chart_width}" y2="{axis_y}" stroke="#c9c0b3"></line>
+                    <text x="{chart_x}" y="{axis_y + 18}" text-anchor="middle" font-size="12" fill="#776b5d">0%</text>
+                    <text x="{chart_x + chart_width / 2}" y="{axis_y + 18}" text-anchor="middle" font-size="12" fill="#776b5d">50%</text>
+                    <text x="{chart_x + chart_width}" y="{axis_y + 18}" text-anchor="middle" font-size="12" fill="#776b5d">100%</text>
+                </svg>
+            </div>
+        </section>
+    """
+
+
+def _residual_cell_style(value):
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError):
+        numeric = 0.0
+    if not math.isfinite(numeric) or numeric == 0:
+        return ""
+    intensity = min(abs(numeric) / 2.5, 1.0)
+    alpha = 0.12 + 0.32 * intensity
+    if numeric > 0:
+        return f' style="background-color: rgba(176, 64, 91, {alpha:.3f});"'
+    return f' style="background-color: rgba(49, 95, 159, {alpha:.3f});"'
+
+
+def _render_people_residual_heatmap(analysis):
+    chi_square = analysis.get("chi_square")
+    if not chi_square:
+        return '<p class="note">Not enough bucketed people rows are available for a chi-squared residual heatmap.</p>'
+    classes = analysis.get("classes", [])
+    rows = []
+    residuals = analysis.get("residuals", {})
+    for bucket in analysis.get("buckets", []):
+        cells = []
+        for people_class in classes:
+            value = float(_people_matrix_value(residuals, bucket, people_class, 0.0) or 0.0)
+            cells.append(
+                f'<td class="num"{_residual_cell_style(value)}>{value:+.2f}</td>'
+            )
+        rows.append(
+            f"""
+            <tr>
+                <th>{html.escape(PEOPLE_BUCKET_LABELS.get(bucket, bucket.title()))}</th>
+                {''.join(cells)}
+            </tr>
+            """
+        )
+    header_cells = "".join(
+        f"<th>{html.escape(PEOPLE_CLASS_LABELS.get(people_class, people_class))}</th>"
+        for people_class in classes
+    )
+    return f"""
+        <section class="people-viz-panel">
+            <h3>Standardized Residual Heatmap</h3>
+            <p>Positive cells are more frequent than expected under independence; negative cells are less frequent.</p>
+            <table class="predictor-table people-table people-residual-table">
+                <thead><tr><th>Sentence bucket</th>{header_cells}</tr></thead>
+                <tbody>{''.join(rows)}</tbody>
+            </table>
+        </section>
+    """
+
+
+def _render_people_pairwise_tests(analysis):
+    rows = []
+    for test in analysis.get("pairwise_tests", []):
+        rows.append(
+            f"""
+            <tr>
+                <td>{html.escape(test.get("comparison", ""))}</td>
+                <td class="num">{_format_optional_number(test.get("chi2"), 3)}</td>
+                <td class="num">{int(test.get("dof") or 0)}</td>
+                <td class="num">{_people_p_value(test.get("p_value"))}</td>
+                <td class="num">{_people_p_value(test.get("p_holm"))}</td>
+                <td class="num">{_format_optional_number(test.get("cramers_v"), 3)}</td>
+            </tr>
+            """
+        )
+    if not rows:
+        return ""
+    return f"""
+        <h3>Pairwise Bucket Tests</h3>
+        <table class="predictor-table people-table">
+            <thead>
+                <tr><th>Comparison</th><th>Chi2</th><th>dof</th><th>p</th><th>Holm p</th><th>Cramer's V</th></tr>
+            </thead>
+            <tbody>{''.join(rows)}</tbody>
+        </table>
+    """
+
+
+def _render_people_bucket_sample_table(analysis):
+    sample = analysis.get("bucket_sample", {})
+    rows = []
+    for bucket in analysis.get("buckets", []):
+        bucket_sample = sample.get(bucket, {})
+        rows.append(
+            f"""
+            <tr>
+                <th>{html.escape(PEOPLE_BUCKET_LABELS.get(bucket, bucket.title()))}</th>
+                <td class="num">{int(bucket_sample.get("sentences") or 0):,}</td>
+                <td class="num">{int(bucket_sample.get("sections") or 0):,}</td>
+            </tr>
+            """
+        )
+    return f"""
+        <table class="predictor-table people-table people-sample-table">
+            <thead><tr><th>Sentence bucket</th><th>Sentences in processed sections</th><th>Sections containing bucket</th></tr></thead>
+            <tbody>{''.join(rows)}</tbody>
+        </table>
+    """
+
+
+def _write_section_people_page(section_people_analysis, analysis_dir, title):
+    analysis = section_people_analysis or {}
+    summary = analysis.get("summary", {})
+    if analysis.get("available"):
+        chi_square = analysis.get("chi_square") or {}
+        chi_square_metrics = ""
+        if chi_square:
+            chi_square_metrics = f"""
+                <div><strong>{_people_p_value(chi_square.get("p_value"))}</strong><span>overall chi-squared p</span></div>
+                <div><strong>{_format_optional_number(chi_square.get("cramers_v"), 3)}</strong><span>Cramer's V</span></div>
+            """
+        body = f"""
+            <div class="metric-strip">
+                <div><strong>{int(summary.get("processed_sections") or 0):,}</strong><span>sections processed</span></div>
+                <div><strong>{int(summary.get("processed_sentences") or 0):,}</strong><span>sentences in those sections</span></div>
+                <div><strong>{int(summary.get("sentences_with_mentions") or 0):,}</strong><span>sentences with mentions</span></div>
+                <div><strong>{int(summary.get("mention_rows") or 0):,}</strong><span>mention rows, including unknown gender</span></div>
+                <div><strong>{int(summary.get("total_tokens") or 0):,}</strong><span>Batch API tokens used</span></div>
+                <div><strong>{_people_percent(summary.get("coverage_percent") or 0.0)}</strong><span>section coverage</span></div>
+                {chi_square_metrics}
+            </div>
+
+            <h2>Headline Percentages</h2>
+            <p>Percentages are by gendered mention row inside each sentence bucket.</p>
+            {_render_people_percentage_table(analysis)}
+
+            <div class="people-visual-grid">
+                {_render_people_stacked_bars(analysis)}
+                {_render_people_share_bars(analysis)}
+            </div>
+
+            <h2>Counts</h2>
+            <h3>Mention-Row Counts</h3>
+            {_render_people_count_table(analysis, "counts", "Total")}
+            <h3>Exact Person Totals</h3>
+            <p>Exact totals expand countable groups and count uncounted groups as zero.</p>
+            {_render_people_count_table(analysis, "exact_counts", "Exact total")}
+
+            <h2>Sample Shape</h2>
+            {_render_people_bucket_sample_table(analysis)}
+
+            <h2>Difference Tests</h2>
+            {_render_people_residual_heatmap(analysis)}
+            {_render_people_pairwise_tests(analysis)}
+        """
+    else:
+        message = analysis.get("message") or "No people extraction data is available yet."
+        body = f"""
+            <p class="note">{html.escape(message)}</p>
+            <p>The daily pipeline will publish this report once section people batches have completed and been fetched.</p>
+        """
+
+    page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{html.escape(title)} - People and Gender Mentions</title>
+    <link rel="stylesheet" href="../css/style.css?v=section-people-3">
+</head>
+<body>
+    <header>
+        <h1>{html.escape(title)}</h1>
+        <p>Named and anonymous people by sentence bucket</p>
+    </header>
+    {_site_nav("../", "analysis")}
+    <div class="container wide-container">
+        <div class="breadcrumb"><a href="index.html">Analyses</a> &rsaquo; People and Gender</div>
+        <h2>People and Gender Mentions</h2>
+        <p>This page reports section-by-section Batch API extraction using prompt <code>{html.escape(str(analysis.get("prompt_version") or ""))}</code>, joined to sentence buckets from <code>{html.escape(str(analysis.get("bucket_prompt_version") or ""))}</code>.</p>
+        {body}
+        <footer>{_generated_footer()}</footer>
+    </div>
+</body>
+</html>
+"""
+    with open(os.path.join(analysis_dir, "people-gender.html"), "w", encoding="utf-8") as f:
+        f.write(page)
+
+
+def _dict_summary(values):
+    if not values:
+        return ""
+    return ", ".join(
+        f"{html.escape(str(key))}: {int(value):,}"
+        for key, value in values.items()
+    )
+
+
+def _model_metric(metrics, key, digits=3):
+    if not metrics or metrics.get(key) is None:
+        return "n/a"
+    return _fmt_stylometry_number(metrics.get(key), digits)
+
+
+def _flatten_stylometric_classifier_rows(model_data):
+    rows = []
+    for result in model_data.get("classifiers") or []:
+        metrics = result.get("metrics") or {}
+        rows.append(
+            {
+                "source_id": result.get("source_id"),
+                "source_label": result.get("source_label"),
+                "task_id": result.get("task_id"),
+                "task_label": result.get("task_label"),
+                "feature_set_id": result.get("feature_set_id"),
+                "feature_set_label": result.get("feature_set_label"),
+                "available": bool(result.get("available")),
+                "message": result.get("message", ""),
+                "sample_count": result.get("sample_count", 0),
+                "label_counts": _dict_summary(result.get("label_counts")),
+                "feature_count": result.get("feature_count", 0),
+                "cv_folds": metrics.get("cv_folds"),
+                "accuracy": metrics.get("accuracy"),
+                "baseline_accuracy": metrics.get("baseline_accuracy"),
+                "accuracy_delta_vs_baseline": metrics.get("accuracy_delta_vs_baseline"),
+                "macro_f1": metrics.get("macro_f1"),
+                "weighted_f1": metrics.get("weighted_f1"),
+            }
+        )
+    return rows
+
+
+def _flatten_stylometric_classifier_feature_rows(model_data):
+    rows = []
+    for result in model_data.get("classifiers") or []:
+        for feature in result.get("top_features") or []:
+            rows.append(
+                {
+                    "source_id": result.get("source_id"),
+                    "source_label": result.get("source_label"),
+                    "task_id": result.get("task_id"),
+                    "task_label": result.get("task_label"),
+                    "feature_set_id": result.get("feature_set_id"),
+                    "feature_set_label": result.get("feature_set_label"),
+                    "class_label": feature.get("class_label"),
+                    "direction": feature.get("direction"),
+                    "feature": feature.get("feature"),
+                    "feature_label": _stylometry_feature_label(feature.get("feature")),
+                    "coefficient": feature.get("coefficient"),
+                }
+            )
+    return rows
+
+
+def _flatten_stylometric_regression_rows(model_data):
+    rows = []
+    for result in model_data.get("regressions") or []:
+        metrics = result.get("metrics") or {}
+        rows.append(
+            {
+                "variant_id": result.get("variant_id"),
+                "variant_label": result.get("variant_label"),
+                "include_books_4_8": bool(result.get("include_books_4_8")),
+                "feature_set_id": result.get("feature_set_id"),
+                "feature_set_label": result.get("feature_set_label"),
+                "available": bool(result.get("available")),
+                "message": result.get("message", ""),
+                "sample_count": result.get("sample_count", 0),
+                "book_count": result.get("book_count", 0),
+                "book_counts": _dict_summary(result.get("book_counts")),
+                "feature_count": result.get("feature_count", 0),
+                "cv_folds": metrics.get("cv_folds"),
+                "selected_alpha": metrics.get("selected_alpha"),
+                "r2": metrics.get("r2"),
+                "mae": metrics.get("mae"),
+                "baseline_mae": metrics.get("baseline_mae"),
+                "mae_improvement_vs_baseline": metrics.get("mae_improvement_vs_baseline"),
+                "rmse": metrics.get("rmse"),
+                "baseline_rmse": metrics.get("baseline_rmse"),
+                "rmse_improvement_vs_baseline": metrics.get("rmse_improvement_vs_baseline"),
+            }
+        )
+    return rows
+
+
+def _flatten_stylometric_regression_feature_rows(model_data):
+    rows = []
+    for result in model_data.get("regressions") or []:
+        for feature in result.get("top_features") or []:
+            rows.append(
+                {
+                    "variant_id": result.get("variant_id"),
+                    "variant_label": result.get("variant_label"),
+                    "include_books_4_8": bool(result.get("include_books_4_8")),
+                    "feature_set_id": result.get("feature_set_id"),
+                    "feature_set_label": result.get("feature_set_label"),
+                    "direction": feature.get("direction"),
+                    "feature": feature.get("feature"),
+                    "feature_label": _stylometry_feature_label(feature.get("feature")),
+                    "coefficient": feature.get("coefficient"),
+                }
+            )
+    return rows
+
+
+def _write_stylometric_model_csvs(model_data, analysis_dir):
+    data_dir = os.path.join(analysis_dir, "data")
+    os.makedirs(data_dir, exist_ok=True)
+    outputs = {
+        "stylometric_sentence_classifier_metrics.csv": _flatten_stylometric_classifier_rows(model_data),
+        "stylometric_sentence_classifier_features.csv": _flatten_stylometric_classifier_feature_rows(model_data),
+        "stylometric_book_regression_metrics.csv": _flatten_stylometric_regression_rows(model_data),
+        "stylometric_book_regression_features.csv": _flatten_stylometric_regression_feature_rows(model_data),
+    }
+    for filename, rows in outputs.items():
+        pd.DataFrame(rows).to_csv(os.path.join(data_dir, filename), index=False)
+
+
+def _render_stylometric_source_notes(model_data):
+    rows = []
+    for source in model_data.get("label_sources") or []:
+        rows.append(
+            f"""
+            <tr>
+                <td>{html.escape(source.get('label') or '')}</td>
+                <td>{html.escape(source.get('prompt_version') or '')}</td>
+                <td>{html.escape(source.get('model') or '')}</td>
+                <td>{int(source.get('label_count') or 0):,}</td>
+                <td>{_dict_summary(source.get('bucket_counts'))}</td>
+                <td>{html.escape(source.get('note') or '')}</td>
+            </tr>
+            """
+        )
+    if not rows:
+        return "<p>No label sources are available.</p>"
+    return f"""
+        <table class="predictor-table">
+            <thead><tr><th>Source</th><th>Version/source ID</th><th>Model</th><th>Labels</th><th>Buckets</th><th>Handling</th></tr></thead>
+            <tbody>{''.join(rows)}</tbody>
+        </table>
+    """
+
+
+def _render_stylometric_classifier_table(model_data):
+    rows = []
+    for result in model_data.get("classifiers") or []:
+        metrics = result.get("metrics") or {}
+        status = "ready" if result.get("available") else result.get("message", "unavailable")
+        rows.append(
+            f"""
+            <tr>
+                <td>{html.escape(result.get('source_label') or '')}</td>
+                <td>{html.escape(result.get('task_label') or '')}</td>
+                <td>{html.escape(result.get('feature_set_label') or '')}</td>
+                <td class="num">{int(result.get('sample_count') or 0):,}</td>
+                <td>{_dict_summary(result.get('label_counts'))}</td>
+                <td class="num">{int(result.get('feature_count') or 0):,}</td>
+                <td class="num">{_model_metric(metrics, 'accuracy')}</td>
+                <td class="num">{_model_metric(metrics, 'baseline_accuracy')}</td>
+                <td class="num">{_model_metric(metrics, 'accuracy_delta_vs_baseline')}</td>
+                <td class="num">{_model_metric(metrics, 'macro_f1')}</td>
+                <td>{html.escape(status)}</td>
+            </tr>
+            """
+        )
+    return f"""
+        <table class="predictor-table stylometry-comparison-table">
+            <thead>
+                <tr>
+                    <th>Label source</th><th>Task</th><th>Features</th><th>n</th><th>Label counts</th><th>Features</th>
+                    <th>Accuracy</th><th>Chance baseline</th><th>Delta</th><th>Macro F1</th><th>Status</th>
+                </tr>
+            </thead>
+            <tbody>{''.join(rows)}</tbody>
+        </table>
+    """
+
+
+def _render_compact_feature_list(features):
+    if not features:
+        return "n/a"
+    items = []
+    for feature in features[:8]:
+        items.append(
+            f"{html.escape(str(feature.get('class_label') or feature.get('direction') or ''))}: "
+            f"<code>{html.escape(_stylometry_feature_label(feature.get('feature')))}</code> "
+            f"({_fmt_stylometry_number(feature.get('coefficient'), 3)})"
+        )
+    return "<br>".join(items)
+
+
+def _render_stylometric_classifier_feature_table(model_data):
+    rows = []
+    for result in model_data.get("classifiers") or []:
+        if not result.get("available"):
+            continue
+        rows.append(
+            f"""
+            <tr>
+                <td>{html.escape(result.get('source_label') or '')}</td>
+                <td>{html.escape(result.get('task_label') or '')}</td>
+                <td>{html.escape(result.get('feature_set_label') or '')}</td>
+                <td>{_render_compact_feature_list(result.get('top_features'))}</td>
+            </tr>
+            """
+        )
+    if not rows:
+        return "<p>No classifier feature coefficients are available.</p>"
+    return f"""
+        <table class="predictor-table">
+            <thead><tr><th>Label source</th><th>Task</th><th>Feature family</th><th>Top coefficients</th></tr></thead>
+            <tbody>{''.join(rows)}</tbody>
+        </table>
+    """
+
+
+def _render_stylometric_regression_table(model_data):
+    rows = []
+    for result in model_data.get("regressions") or []:
+        metrics = result.get("metrics") or {}
+        status = "ready" if result.get("available") else result.get("message", "unavailable")
+        rows.append(
+            f"""
+            <tr>
+                <td>{html.escape(result.get('variant_label') or '')}</td>
+                <td>{html.escape(result.get('feature_set_label') or '')}</td>
+                <td class="num">{int(result.get('sample_count') or 0):,}</td>
+                <td>{_dict_summary(result.get('book_counts'))}</td>
+                <td class="num">{int(result.get('feature_count') or 0):,}</td>
+                <td class="num">{_model_metric(metrics, 'selected_alpha')}</td>
+                <td class="num">{_model_metric(metrics, 'r2')}</td>
+                <td class="num">{_model_metric(metrics, 'mae')}</td>
+                <td class="num">{_model_metric(metrics, 'baseline_mae')}</td>
+                <td class="num">{_model_metric(metrics, 'mae_improvement_vs_baseline')}</td>
+                <td class="num">{_model_metric(metrics, 'rmse')}</td>
+                <td>{html.escape(status)}</td>
+            </tr>
+            """
+        )
+    return f"""
+        <table class="predictor-table stylometry-comparison-table">
+            <thead>
+                <tr>
+                    <th>Variant</th><th>Features</th><th>n</th><th>Book counts</th><th>Features</th>
+                    <th>Alpha</th><th>R2</th><th>MAE</th><th>Chance MAE</th><th>MAE improvement</th><th>RMSE</th><th>Status</th>
+                </tr>
+            </thead>
+            <tbody>{''.join(rows)}</tbody>
+        </table>
+    """
+
+
+def _render_stylometric_regression_feature_table(model_data):
+    rows = []
+    for result in model_data.get("regressions") or []:
+        if not result.get("available"):
+            continue
+        rows.append(
+            f"""
+            <tr>
+                <td>{html.escape(result.get('variant_label') or '')}</td>
+                <td>{html.escape(result.get('feature_set_label') or '')}</td>
+                <td>{_render_compact_feature_list(result.get('top_features'))}</td>
+            </tr>
+            """
+        )
+    if not rows:
+        return "<p>No regression feature coefficients are available.</p>"
+    return f"""
+        <table class="predictor-table">
+            <thead><tr><th>Variant</th><th>Feature family</th><th>Largest standardized coefficients</th></tr></thead>
+            <tbody>{''.join(rows)}</tbody>
+        </table>
+    """
+
+
+def _render_stylometric_feature_family_notes(model_data):
+    cards = []
+    for feature_set in model_data.get("feature_sets") or []:
+        cards.append(
+            f"""
+            <section class="hub-card stylometry-feature-card">
+                <h3>{html.escape(feature_set.get('label') or '')}</h3>
+                <p>{html.escape(feature_set.get('description') or '')}</p>
+                <p>Maximum selected features: <strong>{int(feature_set.get('max_features') or 0):,}</strong>.</p>
+            </section>
+            """
+        )
+    return f'<div class="hub-grid">{"".join(cards)}</div>' if cards else ""
+
+
+def generate_stylometric_sentence_model_pages(model_data, output_dir, title):
+    """Generate sentence-level stylometric classifier and book-regression pages."""
+    analysis_dir = os.path.join(output_dir, "analysis")
+    os.makedirs(analysis_dir, exist_ok=True)
+    _write_stylometric_model_csvs(model_data or {}, analysis_dir)
+
+    data = model_data or {}
+    metrics = data.get("metrics") or {}
+    timestamp = datetime.now().strftime("%Y-%m-%d at %H:%M:%S")
+    notes = _render_stylometry_notes(data.get("coverage_notes"))
+    feature_notes = _render_stylometric_feature_family_notes(data)
+    source_notes = _render_stylometric_source_notes(data)
+
+    classifier_page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{html.escape(title)} - Sentence Stylometric Classifiers</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{html.escape(title)}</h1>
+        <p>Sentence-level stylometric classifiers</p>
+    </header>
+    {_site_nav("../", "analysis")}
+    <div class="container wide-container">
+        <div class="breadcrumb"><a href="index.html">Analyses</a> &rsaquo; <a href="stylometry.html">Stylometry</a> &rsaquo; Sentence Classifiers</div>
+        <h2>Mythic, Historical, and Other from Stylometric Features</h2>
+        <p>These models predict sentence labels using style-oriented feature families derived from the current <code>{html.escape(data.get('model') or 'gpt-5.4-mini')}</code> grammar parses. The evaluation is cross-validated on the parsed subset and compared with a majority-label chance baseline inside each fold.</p>
+        <div class="metric-strip">
+            <div><strong>{int(metrics.get('parsed_sentence_count') or 0):,}</strong><span>parsed sentences</span></div>
+            <div><strong>{int(metrics.get('token_count') or 0):,}</strong><span>word tokens</span></div>
+            <div><strong>{int(metrics.get('book_count') or 0):,}</strong><span>books represented</span></div>
+        </div>
+        {notes}
+        <p><a href="data/stylometric_sentence_classifier_metrics.csv">Download classifier metrics CSV</a> | <a href="data/stylometric_sentence_classifier_features.csv">Download classifier features CSV</a></p>
+
+        <h2>Label Sources</h2>
+        {source_notes}
+
+        <h2>Feature Families</h2>
+        {feature_notes}
+
+        <h2>Classifier Metrics</h2>
+        {_render_stylometric_classifier_table(data)}
+
+        <h2>Predictive Stylometric Features</h2>
+        {_render_stylometric_classifier_feature_table(data)}
+        <footer>Generated on {timestamp} from the PostgreSQL database</footer>
+    </div>
+</body>
+</html>
+"""
+    with open(os.path.join(analysis_dir, "stylometric-sentence-classifiers.html"), "w", encoding="utf-8") as f:
+        f.write(classifier_page)
+
+    regression_page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{html.escape(title)} - Stylometric Book Regression</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{html.escape(title)}</h1>
+        <p>Book-number regression from stylometric features</p>
+    </header>
+    {_site_nav("../", "analysis")}
+    <div class="container wide-container">
+        <div class="breadcrumb"><a href="index.html">Analyses</a> &rsaquo; <a href="stylometry.html">Stylometry</a> &rsaquo; Book Regression</div>
+        <h2>Can Stylometric Features Predict Book Number?</h2>
+        <p>This page uses Ridge regression, not classification, to predict the numeric book number of each grammar-parsed sentence. Chance is the per-fold training-set mean book number.</p>
+        {notes}
+        <p><a href="stylometric-book-feature-trends.html">Open feature trend diagnostics</a> | <a href="data/stylometric_book_regression_metrics.csv">Download regression metrics CSV</a> | <a href="data/stylometric_book_regression_features.csv">Download regression features CSV</a></p>
+
+        <h2>Regression Metrics</h2>
+        {_render_stylometric_regression_table(data)}
+
+        <h2>Predictive Stylometric Features</h2>
+        {_render_stylometric_regression_feature_table(data)}
+        <footer>Generated on {timestamp} from the PostgreSQL database</footer>
+    </div>
+</body>
+</html>
+"""
+    with open(os.path.join(analysis_dir, "stylometric-book-regression.html"), "w", encoding="utf-8") as f:
+        f.write(regression_page)
+
+    print(
+        f"Stylometric sentence model pages generated: "
+        f"{int(metrics.get('parsed_sentence_count') or 0):,} parsed sentences."
+    )
+
+
+def _flatten_book_feature_proportions(trend_data):
+    rows = []
+    for feature in trend_data.get("feature_trends") or []:
+        for point in feature.get("points") or []:
+            rows.append(
+                {
+                    "feature": feature.get("feature"),
+                    "feature_label": feature.get("feature_label"),
+                    "coefficient": feature.get("coefficient"),
+                    "direction": feature.get("direction"),
+                    "book": point.get("book"),
+                    "sentence_count": point.get("sentence_count"),
+                    "hit_count": point.get("hit_count"),
+                    "proportion": point.get("proportion"),
+                    "is_book4": point.get("is_book4"),
+                    "is_book8": point.get("is_book8"),
+                }
+            )
+    return rows
+
+
+def _flatten_book_feature_regressions(trend_data):
+    rows = []
+    for feature in trend_data.get("feature_trends") or []:
+        for variant_id, regression in (feature.get("regressions") or {}).items():
+            rows.append(
+                {
+                    "feature": feature.get("feature"),
+                    "feature_label": feature.get("feature_label"),
+                    "coefficient": feature.get("coefficient"),
+                    "direction": feature.get("direction"),
+                    "variant_id": variant_id,
+                    "available": regression.get("available"),
+                    "n_books": regression.get("n"),
+                    "slope": regression.get("slope"),
+                    "intercept": regression.get("intercept"),
+                    "r_squared": regression.get("r_squared"),
+                    "p_value": regression.get("p_value"),
+                    "stderr": regression.get("stderr"),
+                }
+            )
+    return rows
+
+
+def _flatten_sentence_length_books(trend_data):
+    rows = []
+    for book in (trend_data.get("length_distribution") or {}).get("books") or []:
+        rows.append(
+            {
+                "book": book.get("book"),
+                "count": book.get("count"),
+                "mean": book.get("mean"),
+                "median": book.get("median"),
+                "q1": book.get("q1"),
+                "q3": book.get("q3"),
+                "std": book.get("std"),
+                "min": book.get("min"),
+                "max": book.get("max"),
+                "is_book4": book.get("is_book4"),
+                "is_book8": book.get("is_book8"),
+            }
+        )
+    return rows
+
+
+def _flatten_sentence_length_tests(trend_data):
+    length_data = trend_data.get("length_distribution") or {}
+    rows = []
+    for test in length_data.get("tests") or []:
+        rows.append(
+            {
+                "type": "global_test",
+                "name": test.get("test"),
+                "variant_id": "",
+                "statistic": test.get("statistic"),
+                "p_value": test.get("p_value"),
+                "r_squared": "",
+                "slope": "",
+                "intercept": "",
+                "n": "",
+                "interpretation": test.get("interpretation"),
+            }
+        )
+    for variant_id, regression in (length_data.get("regressions") or {}).items():
+        rows.append(
+            {
+                "type": "length_regression",
+                "name": "Sentence length vs. book",
+                "variant_id": variant_id,
+                "statistic": "",
+                "p_value": regression.get("p_value"),
+                "r_squared": regression.get("r_squared"),
+                "slope": regression.get("slope"),
+                "intercept": regression.get("intercept"),
+                "n": regression.get("n"),
+                "interpretation": "OLS over individual parsed sentences.",
+            }
+        )
+    return rows
+
+
+def _write_book_feature_trend_csvs(trend_data, analysis_dir):
+    data_dir = os.path.join(analysis_dir, "data")
+    os.makedirs(data_dir, exist_ok=True)
+    outputs = {
+        "stylometric_book_feature_proportions.csv": _flatten_book_feature_proportions(trend_data),
+        "stylometric_book_feature_regressions.csv": _flatten_book_feature_regressions(trend_data),
+        "stylometric_sentence_length_by_book.csv": _flatten_sentence_length_books(trend_data),
+        "stylometric_sentence_length_tests.csv": _flatten_sentence_length_tests(trend_data),
+    }
+    for filename, rows in outputs.items():
+        pd.DataFrame(rows).to_csv(os.path.join(data_dir, filename), index=False)
+
+
+def _trend_book_color(book):
+    if int(book) == 4:
+        return "#9a762d"
+    if int(book) == 8:
+        return "#397d7a"
+    return "#5f6673"
+
+
+def _svg_scale(value, domain_min, domain_max, range_min, range_max):
+    if domain_max == domain_min:
+        return (range_min + range_max) / 2.0
+    return range_min + ((float(value) - domain_min) / (domain_max - domain_min)) * (range_max - range_min)
+
+
+def _trend_line_points(regression, x_values, y_domain, width, height, margin):
+    if not regression or not regression.get("available") or len(x_values) < 2:
+        return ""
+    x_start = min(x_values)
+    x_end = max(x_values)
+    y_start = regression["intercept"] + regression["slope"] * x_start
+    y_end = regression["intercept"] + regression["slope"] * x_end
+    return (
+        f'{_svg_scale(x_start, 1, 10, margin, width - margin):.1f},'
+        f'{_svg_scale(y_start, y_domain[0], y_domain[1], height - margin, margin):.1f} '
+        f'{_svg_scale(x_end, 1, 10, margin, width - margin):.1f},'
+        f'{_svg_scale(y_end, y_domain[0], y_domain[1], height - margin, margin):.1f}'
+    )
+
+
+def _render_feature_trend_svg(feature):
+    points = feature.get("points") or []
+    width = 560
+    height = 260
+    margin = 38
+    y_values = [point.get("proportion") or 0.0 for point in points]
+    regressions = feature.get("regressions") or {}
+    for regression in regressions.values():
+        if regression.get("available"):
+            for x in [1, 10]:
+                y_values.append(regression["intercept"] + regression["slope"] * x)
+    y_max = max(0.05, min(1.0, max(y_values or [0.0]) * 1.18))
+    y_domain = (0.0, y_max)
+    axis_lines = f"""
+        <line x1="{margin}" y1="{height - margin}" x2="{width - margin}" y2="{height - margin}" stroke="#c9c0b3" />
+        <line x1="{margin}" y1="{margin}" x2="{margin}" y2="{height - margin}" stroke="#c9c0b3" />
+    """
+    x_ticks = []
+    for book in range(1, 11):
+        x = _svg_scale(book, 1, 10, margin, width - margin)
+        x_ticks.append(
+            f'<text x="{x:.1f}" y="{height - 14}" text-anchor="middle" font-size="11" fill="#5c5142">{book}</text>'
+        )
+    y_ticks = []
+    for tick in [0.0, y_max / 2.0, y_max]:
+        y = _svg_scale(tick, y_domain[0], y_domain[1], height - margin, margin)
+        y_ticks.append(
+            f'<text x="{margin - 8}" y="{y + 4:.1f}" text-anchor="end" font-size="11" fill="#5c5142">{tick * 100:.0f}%</text>'
+        )
+    all_line = _trend_line_points(
+        regressions.get("all_books"),
+        [point["book"] for point in points],
+        y_domain,
+        width,
+        height,
+        margin,
+    )
+    excluding_line = _trend_line_points(
+        regressions.get("excluding_4_8"),
+        [point["book"] for point in points if point["book"] not in {4, 8}],
+        y_domain,
+        width,
+        height,
+        margin,
+    )
+    line_svg = ""
+    if all_line:
+        line_svg += f'<polyline points="{all_line}" fill="none" stroke="#b94a38" stroke-width="2.4" />'
+    if excluding_line:
+        line_svg += f'<polyline points="{excluding_line}" fill="none" stroke="#315c59" stroke-width="2.4" stroke-dasharray="6 4" />'
+
+    point_svg = []
+    for point in points:
+        x = _svg_scale(point["book"], 1, 10, margin, width - margin)
+        y = _svg_scale(point["proportion"], y_domain[0], y_domain[1], height - margin, margin)
+        point_svg.append(
+            f'<circle cx="{x:.1f}" cy="{y:.1f}" r="5.5" fill="{_trend_book_color(point["book"])}">'
+            f'<title>Book {point["book"]}: {point["hit_count"]}/{point["sentence_count"]} ({point["proportion"] * 100:.1f}%)</title>'
+            '</circle>'
+        )
+    return f"""
+        <svg viewBox="0 0 {width} {height}" role="img" aria-label="{html.escape(feature.get('feature_label') or '')} by book">
+            {axis_lines}
+            {''.join(x_ticks)}
+            {''.join(y_ticks)}
+            {line_svg}
+            {''.join(point_svg)}
+            <text x="{width / 2:.1f}" y="{height - 2}" text-anchor="middle" font-size="12" fill="#5c5142">Book</text>
+            <text x="14" y="{height / 2:.1f}" text-anchor="middle" transform="rotate(-90 14 {height / 2:.1f})" font-size="12" fill="#5c5142">Sentence proportion</text>
+        </svg>
+    """
+
+
+def _render_feature_regression_table(feature):
+    rows = []
+    for variant_id, label in (("all_books", "All books"), ("excluding_4_8", "Excluding Books 4 and 8")):
+        regression = (feature.get("regressions") or {}).get(variant_id) or {}
+        rows.append(
+            f"""
+            <tr>
+                <td>{label}</td>
+                <td class="num">{_fmt_stylometry_number(regression.get('slope'), 4)}</td>
+                <td class="num">{_fmt_stylometry_number(regression.get('r_squared'), 3)}</td>
+                <td class="num">{_people_p_value(regression.get('p_value'))}</td>
+                <td class="num">{int(regression.get('n') or 0)}</td>
+            </tr>
+            """
+        )
+    return f"""
+        <table class="predictor-table compact-table">
+            <thead><tr><th>Fit</th><th class="num">Slope per book</th><th class="num">R2</th><th class="num">p</th><th class="num">n books</th></tr></thead>
+            <tbody>{''.join(rows)}</tbody>
+        </table>
+    """
+
+
+def _render_feature_trend_cards(trend_data):
+    cards = []
+    for feature in trend_data.get("feature_trends") or []:
+        cards.append(
+            f"""
+            <section class="stylometry-delta-card">
+                <h3>{html.escape(feature.get('feature_label') or '')}</h3>
+                <p>Ridge coefficient: <strong>{_fmt_stylometry_number(feature.get('coefficient'), 3)}</strong>; direction in the model: <strong>{html.escape(str(feature.get('direction') or ''))}</strong>.</p>
+                {_render_feature_trend_svg(feature)}
+                <p class="stylometry-legend"><span class="legend-dot other"></span>Other books <span class="legend-dot book4"></span>Book 4 <span class="legend-dot book8"></span>Book 8 <span style="color:#b94a38;font-weight:bold;">solid</span> all-books regression <span style="color:#315c59;font-weight:bold;">dashed</span> excluding Books 4 and 8</p>
+                {_render_feature_regression_table(feature)}
+            </section>
+            """
+        )
+    return "".join(cards) or "<p>No morphosyntax feature trends are available.</p>"
+
+
+def _book_palette(book):
+    palette = {
+        1: "#4e79a7",
+        2: "#59a14f",
+        3: "#e15759",
+        4: "#9a762d",
+        5: "#76b7b2",
+        6: "#f28e2b",
+        7: "#af7aa1",
+        8: "#397d7a",
+        9: "#edc948",
+        10: "#8cd17d",
+    }
+    return palette.get(int(book), "#5f6673")
+
+
+def _render_kde_svg(length_data):
+    books = length_data.get("books") or []
+    if not books:
+        return "<p>No sentence-length density data is available.</p>"
+    width = 820
+    height = 360
+    margin = 44
+    x_values = [point["x"] for book in books for point in book.get("kde", [])]
+    y_values = [point["density"] for book in books for point in book.get("kde", [])]
+    x_min = min(x_values or [0.0])
+    x_max = max(x_values or [1.0])
+    y_max = max(y_values or [0.001]) * 1.12
+    paths = []
+    for book in books:
+        coords = []
+        for point in book.get("kde", []):
+            x = _svg_scale(point["x"], x_min, x_max, margin, width - margin)
+            y = _svg_scale(point["density"], 0, y_max, height - margin, margin)
+            coords.append(f"{x:.1f},{y:.1f}")
+        if coords:
+            paths.append(
+                f'<polyline points="{" ".join(coords)}" fill="none" stroke="{_book_palette(book["book"])}" stroke-width="2"><title>Book {book["book"]}</title></polyline>'
+            )
+    x_ticks = []
+    for tick in np.linspace(x_min, x_max, 6):
+        x = _svg_scale(tick, x_min, x_max, margin, width - margin)
+        x_ticks.append(f'<text x="{x:.1f}" y="{height - 14}" text-anchor="middle" font-size="11" fill="#5c5142">{tick:.0f}</text>')
+    legend = []
+    for book in books:
+        legend.append(
+            f'<span style="display:inline-flex;align-items:center;gap:4px;margin-right:10px;"><span class="legend-dot" style="background:{_book_palette(book["book"])}"></span>Book {book["book"]}</span>'
+        )
+    return f"""
+        <svg viewBox="0 0 {width} {height}" role="img" aria-label="Sentence length KDE by book">
+            <line x1="{margin}" y1="{height - margin}" x2="{width - margin}" y2="{height - margin}" stroke="#c9c0b3" />
+            <line x1="{margin}" y1="{margin}" x2="{margin}" y2="{height - margin}" stroke="#c9c0b3" />
+            {''.join(paths)}
+            {''.join(x_ticks)}
+            <text x="{width / 2:.1f}" y="{height - 2}" text-anchor="middle" font-size="12" fill="#5c5142">Sentence length, non-punctuation tokens</text>
+            <text x="15" y="{height / 2:.1f}" text-anchor="middle" transform="rotate(-90 15 {height / 2:.1f})" font-size="12" fill="#5c5142">Density</text>
+        </svg>
+        <p class="stylometry-legend">{''.join(legend)}</p>
+    """
+
+
+def _render_violin_svg(length_data):
+    books = length_data.get("books") or []
+    if not books:
+        return "<p>No sentence-length violin data is available.</p>"
+    width = 820
+    height = 420
+    margin = 46
+    all_lengths = [length for book in books for length in book.get("lengths", [])]
+    y_min = max(0, min(all_lengths or [0]) - 2)
+    y_max = max(all_lengths or [1]) + 2
+    step = (width - 2 * margin) / max(1, len(books) - 1)
+    violins = []
+    for index, book in enumerate(books):
+        center = margin + index * step
+        densities = [point["density"] for point in book.get("kde", [])]
+        max_density = max(densities or [0.0]) or 1.0
+        right = []
+        left = []
+        for point in book.get("kde", []):
+            y = _svg_scale(point["x"], y_min, y_max, height - margin, margin)
+            half_width = 30.0 * (point["density"] / max_density)
+            right.append(f"{center + half_width:.1f},{y:.1f}")
+            left.append(f"{center - half_width:.1f},{y:.1f}")
+        polygon = " ".join(right + list(reversed(left)))
+        q1_y = _svg_scale(book["q1"], y_min, y_max, height - margin, margin)
+        q3_y = _svg_scale(book["q3"], y_min, y_max, height - margin, margin)
+        median_y = _svg_scale(book["median"], y_min, y_max, height - margin, margin)
+        violins.append(
+            f"""
+            <polygon points="{polygon}" fill="{_book_palette(book['book'])}" fill-opacity="0.34" stroke="{_book_palette(book['book'])}" stroke-width="1.3" />
+            <line x1="{center:.1f}" x2="{center:.1f}" y1="{q1_y:.1f}" y2="{q3_y:.1f}" stroke="#333" stroke-width="3" />
+            <line x1="{center - 18:.1f}" x2="{center + 18:.1f}" y1="{median_y:.1f}" y2="{median_y:.1f}" stroke="#333" stroke-width="2" />
+            <text x="{center:.1f}" y="{height - 16}" text-anchor="middle" font-size="12" fill="#5c5142">{book['book']}</text>
+            """
+        )
+    y_ticks = []
+    for tick in np.linspace(y_min, y_max, 6):
+        y = _svg_scale(tick, y_min, y_max, height - margin, margin)
+        y_ticks.append(f'<text x="{margin - 8}" y="{y + 4:.1f}" text-anchor="end" font-size="11" fill="#5c5142">{tick:.0f}</text>')
+    return f"""
+        <svg viewBox="0 0 {width} {height}" role="img" aria-label="Sentence length violin plots by book">
+            <line x1="{margin}" y1="{height - margin}" x2="{width - margin}" y2="{height - margin}" stroke="#c9c0b3" />
+            <line x1="{margin}" y1="{margin}" x2="{margin}" y2="{height - margin}" stroke="#c9c0b3" />
+            {''.join(y_ticks)}
+            {''.join(violins)}
+            <text x="{width / 2:.1f}" y="{height - 2}" text-anchor="middle" font-size="12" fill="#5c5142">Book</text>
+            <text x="15" y="{height / 2:.1f}" text-anchor="middle" transform="rotate(-90 15 {height / 2:.1f})" font-size="12" fill="#5c5142">Sentence length</text>
+        </svg>
+    """
+
+
+def _render_length_stats_table(length_data):
+    rows = []
+    for book in length_data.get("books") or []:
+        rows.append(
+            f"""
+            <tr>
+                <td>Book {book.get('book')}</td>
+                <td class="num">{int(book.get('count') or 0):,}</td>
+                <td class="num">{_fmt_stylometry_number(book.get('mean'), 2)}</td>
+                <td class="num">{_fmt_stylometry_number(book.get('median'), 2)}</td>
+                <td class="num">{_fmt_stylometry_number(book.get('q1'), 2)}</td>
+                <td class="num">{_fmt_stylometry_number(book.get('q3'), 2)}</td>
+                <td class="num">{_fmt_stylometry_number(book.get('std'), 2)}</td>
+            </tr>
+            """
+        )
+    return f"""
+        <table class="predictor-table">
+            <thead><tr><th>Book</th><th class="num">n</th><th class="num">Mean</th><th class="num">Median</th><th class="num">Q1</th><th class="num">Q3</th><th class="num">SD</th></tr></thead>
+            <tbody>{''.join(rows)}</tbody>
+        </table>
+    """
+
+
+def _render_length_tests_table(length_data):
+    rows = []
+    for test in length_data.get("tests") or []:
+        rows.append(
+            f"""
+            <tr>
+                <td>{html.escape(test.get('test') or '')}</td>
+                <td class="num">{_fmt_stylometry_number(test.get('statistic'), 3)}</td>
+                <td class="num">{_people_p_value(test.get('p_value'))}</td>
+                <td>{html.escape(test.get('interpretation') or '')}</td>
+            </tr>
+            """
+        )
+    for variant_id, label in (("all_books", "Length ~ book, all books"), ("excluding_4_8", "Length ~ book, excluding Books 4 and 8")):
+        regression = (length_data.get("regressions") or {}).get(variant_id) or {}
+        rows.append(
+            f"""
+            <tr>
+                <td>{label}</td>
+                <td class="num">{_fmt_stylometry_number(regression.get('slope'), 3)}</td>
+                <td class="num">{_people_p_value(regression.get('p_value'))}</td>
+                <td>OLS slope in tokens per book; R2 {_fmt_stylometry_number(regression.get('r_squared'), 3)}, n {int(regression.get('n') or 0):,} sentences.</td>
+            </tr>
+            """
+        )
+    return f"""
+        <table class="predictor-table">
+            <thead><tr><th>Test</th><th class="num">Statistic / slope</th><th class="num">p</th><th>Interpretation</th></tr></thead>
+            <tbody>{''.join(rows)}</tbody>
+        </table>
+    """
+
+
+def generate_stylometric_book_feature_trend_page(trend_data, output_dir, title):
+    """Generate book-by-book morphosyntax feature trend diagnostics."""
+    analysis_dir = os.path.join(output_dir, "analysis")
+    os.makedirs(analysis_dir, exist_ok=True)
+    _write_book_feature_trend_csvs(trend_data or {}, analysis_dir)
+
+    data = trend_data or {}
+    metrics = data.get("metrics") or {}
+    length_data = data.get("length_distribution") or {}
+    timestamp = datetime.now().strftime("%Y-%m-%d at %H:%M:%S")
+    notes = _render_stylometry_notes(data.get("notes"))
+    page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{html.escape(title)} - Book Feature Trends</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{html.escape(title)}</h1>
+        <p>Book-level morphosyntax trends and sentence-length diagnostics</p>
+    </header>
+    {_site_nav("../", "analysis")}
+    <div class="container wide-container">
+        <div class="breadcrumb"><a href="index.html">Analyses</a> &rsaquo; <a href="stylometric-book-regression.html">Book Regression</a> &rsaquo; Feature Trends</div>
+        <h2>Morphosyntax Feature Trends by Book</h2>
+        <p>This page expands the top <code>excluding Books 4 and 8</code> morphosyntax regression coefficients into direct book-by-book prevalence checks. Each point is a book-level proportion of grammar-parsed sentences containing the feature at least once.</p>
+        <div class="metric-strip">
+            <div><strong>{int(metrics.get('parsed_sentence_count') or 0):,}</strong><span>parsed sentences</span></div>
+            <div><strong>{int(metrics.get('book_count') or 0):,}</strong><span>books represented</span></div>
+            <div><strong>{int(metrics.get('feature_count') or 0):,}</strong><span>features plotted</span></div>
+        </div>
+        {notes}
+        <p><a href="data/stylometric_book_feature_proportions.csv">Download feature proportions CSV</a> | <a href="data/stylometric_book_feature_regressions.csv">Download feature regressions CSV</a> | <a href="data/stylometric_sentence_length_by_book.csv">Download length summary CSV</a> | <a href="data/stylometric_sentence_length_tests.csv">Download length tests CSV</a></p>
+
+        <h2>Feature Proportions</h2>
+        {_render_feature_trend_cards(data)}
+
+        <h2>Sentence Length Distributions</h2>
+        <h3>KDE Overlay</h3>
+        {_render_kde_svg(length_data)}
+        <h3>Violin Plots</h3>
+        {_render_violin_svg(length_data)}
+        <h3>Book Summaries</h3>
+        {_render_length_stats_table(length_data)}
+        <h3>Length Tests</h3>
+        {_render_length_tests_table(length_data)}
+        <footer>Generated on {timestamp} from the PostgreSQL database</footer>
+    </div>
+</body>
+</html>
+"""
+    with open(os.path.join(analysis_dir, "stylometric-book-feature-trends.html"), "w", encoding="utf-8") as f:
+        f.write(page)
+
+    print(
+        f"Stylometric book feature trend page generated: "
+        f"{int(metrics.get('feature_count') or 0):,} features."
+    )
+
+
+DISCOURSE_MODE_COLORS = {
+    "route_locative_description": "#4e79a7",
+    "monument_catalogue": "#9a762d",
+    "historical_narrative": "#e15759",
+    "mythological_narrative": "#7f63b8",
+    "ritual_ethnographic_description": "#59a14f",
+    "sources_traditions_discussion": "#b66d3f",
+}
+
+
+def _flatten_discourse_unit_rows(analysis):
+    rows = []
+    for row in analysis.get("unit_rows") or []:
+        rows.append(
+            {
+                "passage_id": row.get("passage_id"),
+                "sentence_number": row.get("sentence_number"),
+                "book": row.get("book"),
+                "chapter": row.get("chapter"),
+                "section": row.get("section"),
+                "discourse_mode": row.get("discourse_mode"),
+                "discourse_mode_label": row.get("discourse_mode_label"),
+                "confidence": row.get("confidence"),
+                "has_aorist": row.get("has_aorist"),
+                "token_count": row.get("token_count"),
+                "excerpt": row.get("excerpt"),
+            }
+        )
+    return rows
+
+
+def _flatten_discourse_mode_aorist_rows(analysis):
+    rows = []
+    for trend in analysis.get("mode_trends") or []:
+        for point in trend.get("points") or []:
+            rows.append(
+                {
+                    "discourse_mode": trend.get("discourse_mode"),
+                    "discourse_mode_label": trend.get("discourse_mode_label"),
+                    "book": point.get("book"),
+                    "sentence_count": point.get("sentence_count"),
+                    "aorist_count": point.get("aorist_count"),
+                    "aorist_rate": point.get("aorist_rate"),
+                    "is_book4": point.get("is_book4"),
+                    "is_book8": point.get("is_book8"),
+                }
+            )
+    return rows
+
+
+def _flatten_discourse_regression_rows(analysis):
+    rows = []
+    for regression_id, regression in (analysis.get("adjusted_regressions") or {}).items():
+        rows.append(
+            {
+                "scope": regression_id,
+                "discourse_mode": "",
+                "discourse_mode_label": "",
+                "fit": "mode_adjusted" if "mode_adjusted" in regression_id else "book_only",
+                "available": regression.get("available"),
+                "n": regression.get("n"),
+                "book_count": regression.get("book_count"),
+                "mode_count": regression.get("mode_count"),
+                "slope": regression.get("slope"),
+                "intercept": regression.get("intercept"),
+                "r_squared": regression.get("r_squared"),
+                "p_value": regression.get("p_value"),
+                "stderr": regression.get("stderr"),
+            }
+        )
+    for trend in analysis.get("mode_trends") or []:
+        for fit_id, regression in (trend.get("regressions") or {}).items():
+            rows.append(
+                {
+                    "scope": fit_id,
+                    "discourse_mode": trend.get("discourse_mode"),
+                    "discourse_mode_label": trend.get("discourse_mode_label"),
+                    "fit": "within_mode",
+                    "available": regression.get("available"),
+                    "n": regression.get("n"),
+                    "book_count": regression.get("n"),
+                    "mode_count": 1,
+                    "slope": regression.get("slope"),
+                    "intercept": regression.get("intercept"),
+                    "r_squared": regression.get("r_squared"),
+                    "p_value": regression.get("p_value"),
+                    "stderr": regression.get("stderr"),
+                }
+            )
+    return rows
+
+
+def _write_discourse_mode_aorist_csvs(analysis, analysis_dir):
+    data_dir = os.path.join(analysis_dir, "data")
+    os.makedirs(data_dir, exist_ok=True)
+    outputs = {
+        "discourse_mode_aorist_sentences.csv": _flatten_discourse_unit_rows(analysis),
+        "discourse_mode_composition_by_book.csv": analysis.get("mode_composition") or [],
+        "discourse_mode_aorist_by_book.csv": _flatten_discourse_mode_aorist_rows(analysis),
+        "discourse_mode_aorist_regressions.csv": _flatten_discourse_regression_rows(analysis),
+        "discourse_mode_summary.csv": analysis.get("mode_summary") or [],
+        "discourse_mode_book_aorist.csv": analysis.get("book_aorist") or [],
+    }
+    for filename, rows in outputs.items():
+        pd.DataFrame(rows).to_csv(os.path.join(data_dir, filename), index=False)
+
+
+def _render_discourse_mode_summary_table(analysis):
+    rows = []
+    for row in analysis.get("mode_summary") or []:
+        rows.append(
+            f"""
+            <tr>
+                <td>{html.escape(row.get('discourse_mode_label') or '')}</td>
+                <td class="num">{int(row.get('sentence_count') or 0):,}</td>
+                <td class="num">{int(row.get('book_count') or 0):,}</td>
+                <td class="num">{int(row.get('aorist_count') or 0):,}</td>
+                <td class="num">{_fmt_stylometry_number((row.get('aorist_rate') or 0.0) * 100, 1)}%</td>
+            </tr>
+            """
+        )
+    return f"""
+        <table class="predictor-table compact-table">
+            <thead><tr><th>Discourse mode</th><th class="num">Sentences</th><th class="num">Books</th><th class="num">Aorist sentences</th><th class="num">Aorist rate</th></tr></thead>
+            <tbody>{''.join(rows)}</tbody>
+        </table>
+    """
+
+
+def _render_discourse_adjusted_regression_table(analysis):
+    labels = {
+        "book_only_all_books": "Book only, all books",
+        "mode_adjusted_all_books": "Mode-adjusted, all books",
+        "book_only_excluding_4_8": "Book only, excluding Books 4 and 8",
+        "mode_adjusted_excluding_4_8": "Mode-adjusted, excluding Books 4 and 8",
+    }
+    rows = []
+    for key, label in labels.items():
+        regression = (analysis.get("adjusted_regressions") or {}).get(key) or {}
+        rows.append(
+            f"""
+            <tr>
+                <td>{html.escape(label)}</td>
+                <td class="num">{int(regression.get('n') or 0):,}</td>
+                <td class="num">{int(regression.get('book_count') or 0):,}</td>
+                <td class="num">{int(regression.get('mode_count') or 0):,}</td>
+                <td class="num">{_fmt_stylometry_number(regression.get('slope'), 4)}</td>
+                <td class="num">{_fmt_stylometry_number(regression.get('r_squared'), 3)}</td>
+                <td class="num">{_people_p_value(regression.get('p_value'))}</td>
+            </tr>
+            """
+        )
+    return f"""
+        <table class="predictor-table compact-table">
+            <thead><tr><th>Fit</th><th class="num">n</th><th class="num">Books</th><th class="num">Modes</th><th class="num">Aorist slope / book</th><th class="num">R2</th><th class="num">p</th></tr></thead>
+            <tbody>{''.join(rows)}</tbody>
+        </table>
+    """
+
+
+def _render_discourse_mode_composition_svg(analysis):
+    composition = analysis.get("mode_composition") or []
+    modes = analysis.get("discourse_modes") or []
+    books = sorted({int(row["book"]) for row in composition if row.get("book") is not None})
+    if not composition or not books:
+        return "<p>No discourse-mode composition data is available.</p>"
+    width = 860
+    height = 360
+    margin_left = 44
+    chart_width = width - margin_left - 24
+    chart_height = 250
+    bar_gap = 8
+    bar_width = max(18, (chart_width - bar_gap * (len(books) - 1)) / max(1, len(books)))
+    parts = []
+    for book_index, book in enumerate(books):
+        x = margin_left + book_index * (bar_width + bar_gap)
+        y_cursor = 28 + chart_height
+        for mode in modes:
+            mode_id = mode.get("id")
+            row = next(
+                (
+                    item for item in composition
+                    if int(item.get("book") or 0) == book
+                    and item.get("discourse_mode") == mode_id
+                ),
+                None,
+            )
+            proportion = float((row or {}).get("proportion") or 0.0)
+            segment_height = chart_height * proportion
+            y_cursor -= segment_height
+            if segment_height <= 0:
+                continue
+            label = mode.get("label") or mode_id
+            count = int((row or {}).get("sentence_count") or 0)
+            color = DISCOURSE_MODE_COLORS.get(mode_id, "#777")
+            parts.append(
+                f"""
+                <rect x="{x:.1f}" y="{y_cursor:.1f}" width="{bar_width:.1f}" height="{segment_height:.1f}" fill="{color}">
+                    <title>Book {book}: {html.escape(label)} {proportion * 100:.1f}% ({count:,})</title>
+                </rect>
+                """
+            )
+        parts.append(
+            f'<text x="{x + bar_width / 2:.1f}" y="{height - 16}" text-anchor="middle" font-size="12" fill="#5c5142">{book}</text>'
+        )
+    legend = []
+    legend_x = margin_left
+    legend_y = 332
+    for mode_index, mode in enumerate(modes):
+        x = legend_x + (mode_index % 3) * 260
+        y = legend_y + (mode_index // 3) * 18
+        mode_id = mode.get("id")
+        label = mode.get("label") or mode_id
+        legend.append(
+            f'<rect x="{x}" y="{y}" width="11" height="11" fill="{DISCOURSE_MODE_COLORS.get(mode_id, "#777")}"></rect>'
+            f'<text x="{x + 16}" y="{y + 10}" font-size="12" fill="#4b4338">{html.escape(label)}</text>'
+        )
+    return f"""
+        <svg viewBox="0 0 {width} {height}" role="img" aria-label="Discourse-mode composition by book">
+            <line x1="{margin_left}" y1="{28 + chart_height}" x2="{width - 20}" y2="{28 + chart_height}" stroke="#c9c0b3"></line>
+            {''.join(parts)}
+            <text x="{width / 2:.1f}" y="{height - 2}" text-anchor="middle" font-size="12" fill="#5c5142">Book</text>
+            <text x="14" y="{28 + chart_height / 2:.1f}" text-anchor="middle" transform="rotate(-90 14 {28 + chart_height / 2:.1f})" font-size="12" fill="#5c5142">Mode share</text>
+            {''.join(legend)}
+        </svg>
+    """
+
+
+def _render_discourse_aorist_svg(trend):
+    points = trend.get("points") or []
+    if not points:
+        return "<p>No book-level aorist points are available for this mode.</p>"
+    feature = {
+        "feature_label": trend.get("discourse_mode_label"),
+        "points": [
+            {
+                "book": point.get("book"),
+                "sentence_count": point.get("sentence_count"),
+                "hit_count": point.get("aorist_count"),
+                "proportion": point.get("aorist_rate"),
+            }
+            for point in points
+        ],
+        "regressions": trend.get("regressions") or {},
+    }
+    return _render_feature_trend_svg(feature)
+
+
+def _render_discourse_within_mode_cards(analysis):
+    cards = []
+    for trend in analysis.get("mode_trends") or []:
+        all_fit = (trend.get("regressions") or {}).get("all_books") or {}
+        excluding_fit = (trend.get("regressions") or {}).get("excluding_4_8") or {}
+        cards.append(
+            f"""
+            <section class="stylometry-delta-card">
+                <h3>{html.escape(trend.get('discourse_mode_label') or '')}</h3>
+                <p><strong>{int(trend.get('sentence_count') or 0):,}</strong> tagged parsed sentences; <strong>{int(trend.get('aorist_count') or 0):,}</strong> contain at least one aorist-tagged token.</p>
+                {_render_discourse_aorist_svg(trend)}
+                <table class="predictor-table compact-table">
+                    <thead><tr><th>Fit</th><th class="num">Slope / book</th><th class="num">R2</th><th class="num">p</th><th class="num">n books</th></tr></thead>
+                    <tbody>
+                        <tr><td>All books</td><td class="num">{_fmt_stylometry_number(all_fit.get('slope'), 4)}</td><td class="num">{_fmt_stylometry_number(all_fit.get('r_squared'), 3)}</td><td class="num">{_people_p_value(all_fit.get('p_value'))}</td><td class="num">{int(all_fit.get('n') or 0)}</td></tr>
+                        <tr><td>Excluding Books 4 and 8</td><td class="num">{_fmt_stylometry_number(excluding_fit.get('slope'), 4)}</td><td class="num">{_fmt_stylometry_number(excluding_fit.get('r_squared'), 3)}</td><td class="num">{_people_p_value(excluding_fit.get('p_value'))}</td><td class="num">{int(excluding_fit.get('n') or 0)}</td></tr>
+                    </tbody>
+                </table>
+            </section>
+            """
+        )
+    return "".join(cards)
+
+
+def generate_discourse_mode_aorist_page(analysis, output_dir, title):
+    """Generate the discourse-mode control page for the aorist book trend."""
+    analysis_dir = os.path.join(output_dir, "analysis")
+    os.makedirs(analysis_dir, exist_ok=True)
+    _write_discourse_mode_aorist_csvs(analysis or {}, analysis_dir)
+
+    data = analysis or {}
+    metrics = data.get("metrics") or {}
+    timestamp = datetime.now().strftime("%Y-%m-%d at %H:%M:%S")
+    notes = _render_stylometry_notes(data.get("notes"))
+    if data.get("available"):
+        body = f"""
+        <p>This pilot controls the aorist trend by classifying parsed sentences into discourse modes, then asking whether <code>Feature Tense=Aor</code> still declines over book number within comparable modes.</p>
+        <div class="metric-strip">
+            <div><strong>{int(metrics.get('tagged_sentence_count') or 0):,}</strong><span>tagged parsed sentences</span></div>
+            <div><strong>{int(metrics.get('parsed_sentence_count') or 0):,}</strong><span>parsed sentences available</span></div>
+            <div><strong>{int(metrics.get('book_count') or 0):,}</strong><span>books represented</span></div>
+            <div><strong>{int(metrics.get('mode_count') or 0):,}</strong><span>modes represented</span></div>
+            <div><strong>{_fmt_stylometry_number((metrics.get('aorist_rate') or 0.0) * 100, 1)}%</strong><span>sentences with aorist</span></div>
+        </div>
+        {notes}
+        <p><a href="data/discourse_mode_aorist_regressions.csv">Download regression CSV</a> | <a href="data/discourse_mode_aorist_by_book.csv">Download by-mode aorist CSV</a> | <a href="data/discourse_mode_composition_by_book.csv">Download mode composition CSV</a> | <a href="data/discourse_mode_aorist_sentences.csv">Download sentence rows CSV</a></p>
+
+        <h2>Mode-Adjusted Aorist Slope</h2>
+        <p>The slope is the change in probability that a tagged parsed sentence contains at least one <code>Tense=Aor</code> token per book number.</p>
+        {_render_discourse_adjusted_regression_table(data)}
+
+        <h2>Discourse Mix by Book</h2>
+        {_render_discourse_mode_composition_svg(data)}
+
+        <h2>Aorist Rate by Mode</h2>
+        {_render_discourse_mode_summary_table(data)}
+
+        <h2>Within-Mode Aorist Trends</h2>
+        {_render_discourse_within_mode_cards(data)}
+        """
+    else:
+        body = f"""
+        <p class="note">No discourse-mode tags are available yet for prompt <code>{html.escape(str(data.get('prompt_version') or ''))}</code>.</p>
+        <p>The daily sentence-tagging pipeline will populate this page from grammar-parsed sentences under the 100k-token pilot budget.</p>
+        """
+
+    page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{html.escape(title)} - Discourse Mode Aorist Control</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{html.escape(title)}</h1>
+        <p>Aorist trend by discourse mode</p>
+    </header>
+    {_site_nav("../", "analysis")}
+    <div class="container wide-container">
+        <div class="breadcrumb"><a href="index.html">Analyses</a> &rsaquo; <a href="stylometric-book-feature-trends.html">Feature Trends</a> &rsaquo; Discourse Mode Control</div>
+        <h2>Is the Aorist Trend Stylistic or Content-Driven?</h2>
+        {body}
+        <footer>Generated on {timestamp} from the PostgreSQL database</footer>
+    </div>
+</body>
+</html>
+"""
+    with open(os.path.join(analysis_dir, "discourse-mode-aorist.html"), "w", encoding="utf-8") as f:
+        f.write(page)
+
+    print(
+        f"Discourse-mode aorist page generated: "
+        f"{int(metrics.get('tagged_sentence_count') or 0):,} tagged parsed sentences."
+    )
+
+
+def generate_analysis_pages(greta_analysis, section_people_analysis, discourse_aorist_analysis, output_dir, title):
     """Generate the analysis hub and current Greta logistic-regression variants."""
     analysis_dir = os.path.join(output_dir, "analysis")
     os.makedirs(analysis_dir, exist_ok=True)
@@ -2216,6 +3897,7 @@ def generate_analysis_pages(greta_analysis, output_dir, title):
     variants = greta_analysis.get("variants", []) if greta_analysis else []
     complementary = greta_analysis.get("complementary", {}) if greta_analysis else {}
     label_sensitivity = greta_analysis.get("label_sensitivity", {}) if greta_analysis else {}
+    _write_section_people_page(section_people_analysis, analysis_dir, title)
     _write_complementary_analysis_pages(complementary, analysis_dir, title)
     _write_label_sensitivity_page(label_sensitivity, analysis_dir, title)
     for variant in variants:
@@ -2351,6 +4033,39 @@ def generate_analysis_pages(greta_analysis, output_dir, title):
             <p>{html.escape(greta_analysis.get("message", "No Greta analysis data is available.") if greta_analysis else "No Greta analysis data is available.")}</p>
         """
 
+    people_summary = (section_people_analysis or {}).get("summary", {})
+    if section_people_analysis and section_people_analysis.get("available"):
+        people_blurb = (
+            f"{int(people_summary.get('processed_sections') or 0):,} sections and "
+            f"{int(people_summary.get('processed_sentences') or 0):,} numbered sentences processed; "
+            f"{int(people_summary.get('mention_rows') or 0):,} mention rows extracted."
+        )
+    else:
+        people_blurb = (
+            section_people_analysis.get("message")
+            if section_people_analysis
+            else "People extraction data is not available yet."
+        )
+    people_section = f"""
+        <h2>People Mentions</h2>
+        <div class="hub-grid">
+            <section class="hub-card">
+                <h3>People and Gender Mentions</h3>
+                <p>{html.escape(people_blurb)}</p>
+                <a href="people-gender.html">Open People Report</a>
+            </section>
+        </div>
+    """
+
+    discourse_metrics = (discourse_aorist_analysis or {}).get("metrics", {})
+    if discourse_aorist_analysis and discourse_aorist_analysis.get("available"):
+        discourse_blurb = (
+            f"{int(discourse_metrics.get('tagged_sentence_count') or 0):,} tagged parsed sentences "
+            f"across {int(discourse_metrics.get('mode_count') or 0):,} discourse modes."
+        )
+    else:
+        discourse_blurb = "Awaiting discourse-mode tags from the 100k-token parsed-sentence pilot."
+
     index_page = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2368,6 +4083,8 @@ def generate_analysis_pages(greta_analysis, output_dir, title):
     <div class="container wide-container">
         {greta_section}
 
+        {people_section}
+
         <h2>Morphosyntactic Stylometry</h2>
         <div class="hub-grid">
             <section class="hub-card">
@@ -2379,6 +4096,26 @@ def generate_analysis_pages(greta_analysis, output_dir, title):
                 <h3>Interactive Projection</h3>
                 <p>Feature-family projection display for comparing current parsed passages and mouseover neighbor context.</p>
                 <a href="stylometry-umap.html">Open Projection</a>
+            </section>
+            <section class="hub-card">
+                <h3>Sentence Classifiers</h3>
+                <p>Cross-validated mythic, historical, and other sentence classifiers using grammar-derived stylometric features.</p>
+                <a href="stylometric-sentence-classifiers.html">Open Classifiers</a>
+            </section>
+            <section class="hub-card">
+                <h3>Book Regression</h3>
+                <p>Ridge regressors that test whether stylometric features can predict sentence book number better than a mean-book baseline.</p>
+                <a href="stylometric-book-regression.html">Open Regression</a>
+            </section>
+            <section class="hub-card">
+                <h3>Feature Trends</h3>
+                <p>Book-by-book proportions for the strongest morphosyntax regression features, plus sentence-length KDE and violin diagnostics.</p>
+                <a href="stylometric-book-feature-trends.html">Open Trends</a>
+            </section>
+            <section class="hub-card">
+                <h3>Discourse Mode Control</h3>
+                <p>{html.escape(discourse_blurb)}</p>
+                <a href="discourse-mode-aorist.html">Open Mode Control</a>
             </section>
         </div>
 
@@ -6165,28 +7902,48 @@ def generate_progress_page(progress_data, output_dir, title):
 
     timestamp = datetime.now().strftime("%Y-%m-%d at %H:%M:%S")
 
+    def fmt_count(value):
+        if value is None:
+            return "n/a"
+        return f"{int(value):,}"
+
+    def fmt_text(value):
+        return html.escape(str(value or ""))
+
+    def progress_cell(percent):
+        if percent is None:
+            return '<span class="progress-na">n/a</span>'
+        if percent >= 100:
+            bar_class = "bar-complete"
+        elif percent >= 50:
+            bar_class = "bar-progress"
+        else:
+            bar_class = "bar-early"
+        return (
+            f'<div class="bar-container"><div class="{bar_class}" '
+            f'style="width:{min(percent,100):.0f}%"></div><span>{percent:.1f}%</span></div>'
+        )
+
     # Build task rows
     task_rows = ""
     for task in progress_data["tasks"]:
-        pct = task["percent"]
-        if pct >= 100:
+        pct = task.get("percent")
+        if pct is not None and pct >= 100:
             row_class = ' class="complete"'
-            bar_class = "bar-complete"
-        elif pct >= 50:
-            row_class = ""
-            bar_class = "bar-progress"
         else:
             row_class = ""
-            bar_class = "bar-early"
 
         task_rows += f"""            <tr{row_class}>
-                <td>{task["name"]}</td>
-                <td><code>{task["script"]}</code></td>
-                <td class="num">{task["batch_size"]}</td>
-                <td class="num">{task["done"]:,}</td>
-                <td class="num">{task["total"]:,}</td>
-                <td class="num"><div class="bar-container"><div class="{bar_class}" style="width:{min(pct,100):.0f}%"></div><span>{pct:.1f}%</span></div></td>
-                <td>{task["est_completion"]}</td>
+                <td>{fmt_text(task.get("area", ""))}</td>
+                <td>{fmt_text(task["name"])}</td>
+                <td><code>{fmt_text(task["script"])}</code></td>
+                <td>{fmt_text(task.get("cadence", task.get("batch_size", "")))}</td>
+                <td class="num">{fmt_count(task.get("done"))}</td>
+                <td class="num">{fmt_count(task.get("total"))}</td>
+                <td class="num">{progress_cell(pct)}</td>
+                <td>{fmt_text(task.get("status", ""))}</td>
+                <td>{fmt_text(task.get("est_completion", ""))}</td>
+                <td>{fmt_text(task.get("details", ""))}</td>
             </tr>
 """
 
@@ -6226,10 +7983,15 @@ def generate_progress_page(progress_data, output_dir, title):
             font-size: 0.9em;
             margin-bottom: 2em;
         }}
+        .progress-table-wrap {{
+            max-width: 100%;
+            overflow-x: auto;
+        }}
         .progress-table th, .progress-table td {{
             border: 1px solid #ddd;
             padding: 6px 10px;
             text-align: left;
+            vertical-align: top;
         }}
         .progress-table th {{
             background: #f5f0eb;
@@ -6248,6 +8010,7 @@ def generate_progress_page(progress_data, output_dir, title):
             background: #f0ebe5;
             padding: 1px 4px;
             border-radius: 3px;
+            white-space: nowrap;
         }}
         .bar-container {{
             position: relative;
@@ -6280,6 +8043,12 @@ def generate_progress_page(progress_data, output_dir, title):
             height: 100%;
             border-radius: 3px;
         }}
+        .progress-na {{
+            color: #666;
+            display: inline-block;
+            min-width: 80px;
+            text-align: center;
+        }}
     </style>
 </head>
 <body>
@@ -6288,17 +8057,20 @@ def generate_progress_page(progress_data, output_dir, title):
         <p>Pipeline Progress</p>
     </header>
     {_translation_nav("../", "progress")}
-    <div class="container">
+    <div class="container wide-container">
         <h2>Task Progress</h2>
+        <div class="progress-table-wrap">
         <table class="progress-table">
             <thead>
-                <tr><th>Task</th><th>Script</th><th>Batch/day</th><th>Done</th><th>Total</th><th>Progress</th><th>Est. completion</th></tr>
+                <tr><th>Area</th><th>Task</th><th>Script</th><th>Cadence</th><th>Done</th><th>Total</th><th>Progress</th><th>Status</th><th>Est. completion</th><th>Details</th></tr>
             </thead>
             <tbody>
 {task_rows}            </tbody>
         </table>
+        </div>
 
         <h2>Token Usage</h2>
+        <div class="progress-table-wrap">
         <table class="progress-table">
             <thead>
                 <tr><th>Source</th><th>Input tokens</th><th>Output tokens</th><th>Total</th></tr>
@@ -6306,6 +8078,7 @@ def generate_progress_page(progress_data, output_dir, title):
             <tbody>
 {token_rows}            </tbody>
         </table>
+        </div>
 
         <footer>Generated on {timestamp}</footer>
     </div>

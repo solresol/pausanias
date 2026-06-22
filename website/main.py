@@ -44,6 +44,10 @@ from .data import (
     get_extended_network_analysis,
     get_llm_grammar_page_data,
     get_stylometry_page_data,
+    get_stylometric_sentence_model_data,
+    get_stylometric_book_feature_trend_data,
+    get_discourse_mode_aorist_analysis,
+    get_section_people_analysis,
     calculate_translation_mythic_coefficient_relationship,
     add_phrase_translations,
 )
@@ -72,6 +76,9 @@ from .generators import (
     generate_translation_length_page,
     generate_llm_grammar_pages,
     generate_stylometry_pages,
+    generate_stylometric_sentence_model_pages,
+    generate_stylometric_book_feature_trend_page,
+    generate_discourse_mode_aorist_page,
     generate_progress_page,
     generate_network_analysis_pages,
 )
@@ -152,6 +159,23 @@ def main():
             grammar_data=llm_grammar_data,
             model=args.grammar_model,
         )
+        stylometric_sentence_model_data = get_stylometric_sentence_model_data(
+            conn,
+            grammar_data=llm_grammar_data,
+            model=args.grammar_model,
+        )
+        stylometric_book_feature_trends = get_stylometric_book_feature_trend_data(
+            conn,
+            grammar_data=llm_grammar_data,
+            model_data=stylometric_sentence_model_data,
+            model=args.grammar_model,
+        )
+        discourse_aorist_analysis = get_discourse_mode_aorist_analysis(
+            conn,
+            grammar_data=llm_grammar_data,
+            model=args.grammar_model,
+        )
+        section_people_analysis = get_section_people_analysis(conn)
         greta_analysis = get_greta_sentence_analysis_variants(conn)
         extended_network_analysis = get_extended_network_analysis(conn)
         sentence_mythic_predictors = get_sentence_mythicness_predictors(conn)
@@ -267,8 +291,17 @@ def main():
         generate_sentence_review_sample_page(sentence_review_sample_df, output_dir, args.title)
         generate_lemma_pages(sentence_lemmas_df, output_dir, args.title)
         generate_llm_grammar_pages(llm_grammar_data, output_dir, args.title)
-        generate_analysis_pages(greta_analysis, output_dir, args.title)
+        generate_analysis_pages(
+            greta_analysis,
+            section_people_analysis,
+            discourse_aorist_analysis,
+            output_dir,
+            args.title,
+        )
         generate_stylometry_pages(stylometry_data, output_dir, args.title)
+        generate_stylometric_sentence_model_pages(stylometric_sentence_model_data, output_dir, args.title)
+        generate_stylometric_book_feature_trend_page(stylometric_book_feature_trends, output_dir, args.title)
+        generate_discourse_mode_aorist_page(discourse_aorist_analysis, output_dir, args.title)
         generate_places_index(output_dir, args.title)
         generate_network_analysis_pages(extended_network_analysis, output_dir, args.title)
         generate_mythic_page(passages_df, mythic_color_map, mythic_class_map, proper_nouns_dict, output_dir, args.title)

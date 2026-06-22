@@ -12,14 +12,19 @@ from openai import OpenAI
 import numpy as np
 from scipy import stats
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.linear_model import LinearRegression, LogisticRegression, Ridge
+from sklearn.linear_model import LinearRegression, LogisticRegression, Ridge, RidgeCV
 from sklearn.metrics import (
     accuracy_score,
     confusion_matrix,
+    f1_score,
+    mean_absolute_error,
+    mean_squared_error,
     precision_recall_fscore_support,
     r2_score,
 )
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import KFold, StratifiedKFold, train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
 
 from lemma_text import (
     build_lemma_texts,
@@ -91,6 +96,31 @@ RHETORIC_MARKER_WORDS = list(
 )
 
 DEFAULT_LLM_GRAMMAR_MODEL = "gpt-5.4-mini"
+DISCOURSE_MODE_PROMPT_VERSION = "discourse-mode-v1"
+DISCOURSE_MODES = [
+    "route_locative_description",
+    "monument_catalogue",
+    "historical_narrative",
+    "mythological_narrative",
+    "ritual_ethnographic_description",
+    "sources_traditions_discussion",
+]
+DISCOURSE_MODE_LABELS = {
+    "route_locative_description": "Route and Locative Description",
+    "monument_catalogue": "Monument Catalogue",
+    "historical_narrative": "Historical Narrative",
+    "mythological_narrative": "Mythological Narrative",
+    "ritual_ethnographic_description": "Ritual or Ethnographic Description",
+    "sources_traditions_discussion": "Sources or Traditions Discussion",
+}
+SECTION_PEOPLE_PROMPT_VERSION = "section-people-v1"
+SECTION_PEOPLE_CLASSES = [
+    "anonymous_female",
+    "named_female",
+    "anonymous_male",
+    "named_male",
+]
+SECTION_PEOPLE_BUCKETS = ["mythic", "historical", "other"]
 
 SEMANTIC_FIELD_ABLATIONS = [
     {
@@ -1265,6 +1295,364 @@ def get_greta_sentence_analysis_variants(conn):
         "bucket_counts": bucket_counts,
         "book_counts": book_counts,
         "tagged_sentence_count": int(len(annotations)),
+    }
+
+
+def _holm_adjust(p_values):
+    order = sorted(range(len(p_values)), key=lambda i: p_values[i])
+    adjusted = [math.nan] * len(p_values)
+    running = 0.0
+    total = len(p_values)
+    for rank, index in enumerate(order):
+        value = min(1.0, p_values[index] * (total - rank))
+        running = max(running, value)
+        adjusted[index] = running
+    return adjusted
+
+
+def _section_people_empty_matrix(value=0):
+    return {
+        bucket: {people_class: value for people_class in SECTION_PEOPLE_CLASSES}
+        for bucket in SECTION_PEOPLE_BUCKETS
+    }
+
+
+def _section_people_matrix_from_frame(frame):
+    return {
+        bucket: {
+            people_class: int(frame.loc[bucket, people_class])
+            for people_class in SECTION_PEOPLE_CLASSES
+        }
+        for bucket in SECTION_PEOPLE_BUCKETS
+    }
+
+
+def _section_people_float_matrix_from_frame(frame, digits=None):
+    matrix = {}
+    for bucket in SECTION_PEOPLE_BUCKETS:
+        matrix[bucket] = {}
+        for people_class in SECTION_PEOPLE_CLASSES:
+            value = float(frame.loc[bucket, people_class])
+            matrix[bucket][people_class] = round(value, digits) if digits is not None else value
+    return matrix
+
+
+def get_section_people_analysis(
+    conn,
+    prompt_version=SECTION_PEOPLE_PROMPT_VERSION,
+    bucket_prompt_version=GRETA_SENTENCE_PROMPT_VERSION,
+):
+    """Build named/anonymous people and gender statistics for the analysis site."""
+    required_tables = [
+        "section_people_runs",
+        "section_people_batch_items",
+        "section_people_mentions",
+        "greek_sentences",
+        "sentence_greta_tags",
+    ]
+    missing_tables = [table for table in required_tables if not table_exists(conn, table)]
+    if missing_tables:
+        return {
+            "available": False,
+            "message": "Missing tables: " + ", ".join(missing_tables),
+            "prompt_version": prompt_version,
+            "bucket_prompt_version": bucket_prompt_version,
+            "classes": SECTION_PEOPLE_CLASSES,
+            "buckets": SECTION_PEOPLE_BUCKETS,
+        }
+
+    summary_query = """
+    WITH completed_sections AS (
+        SELECT DISTINCT bi.passage_id
+        FROM section_people_batch_items bi
+        JOIN section_people_runs r ON r.run_id = bi.run_id
+        WHERE r.prompt_version = %s
+          AND bi.status = 'completed'
+          AND r.status IN ('completed', 'completed_with_failures')
+    ), section_sentence_counts AS (
+        SELECT passage_id, count(*) AS sentence_count
+        FROM greek_sentences
+        GROUP BY passage_id
+    ), mention_summary AS (
+        SELECT
+            count(*) AS mention_rows,
+            count(*) FILTER (WHERE gender IN ('male', 'female')) AS gendered_mention_rows,
+            count(*) FILTER (WHERE gender = 'unknown') AS unknown_mention_rows,
+            count(DISTINCT passage_id) AS sections_with_mentions,
+            count(DISTINCT passage_id || ':' || sentence_number::text) AS sentences_with_mentions,
+            COALESCE(sum(CASE WHEN person_count > 0 THEN person_count ELSE 0 END), 0) AS exact_people
+        FROM section_people_mentions
+        WHERE prompt_version = %s
+    ), run_summary AS (
+        SELECT
+            count(*) AS runs,
+            COALESCE(sum(input_tokens), 0) AS input_tokens,
+            COALESCE(sum(output_tokens), 0) AS output_tokens,
+            max(submitted_at) AS latest_submitted_at,
+            max(retrieved_at) AS latest_retrieved_at
+        FROM section_people_runs
+        WHERE prompt_version = %s
+          AND status IN ('completed', 'completed_with_failures')
+    ), corpus_summary AS (
+        SELECT
+            (SELECT count(*) FROM passages) AS total_sections,
+            (SELECT count(*) FROM greek_sentences) AS total_sentences
+    )
+    SELECT
+        (SELECT count(*) FROM completed_sections) AS processed_sections,
+        COALESCE((SELECT sum(ssc.sentence_count)
+                  FROM completed_sections cs
+                  JOIN section_sentence_counts ssc ON ssc.passage_id = cs.passage_id), 0) AS processed_sentences,
+        m.mention_rows,
+        m.gendered_mention_rows,
+        m.unknown_mention_rows,
+        m.sections_with_mentions,
+        m.sentences_with_mentions,
+        m.exact_people,
+        r.runs,
+        r.input_tokens,
+        r.output_tokens,
+        r.latest_submitted_at,
+        r.latest_retrieved_at,
+        c.total_sections,
+        c.total_sentences
+    FROM mention_summary m
+    CROSS JOIN run_summary r
+    CROSS JOIN corpus_summary c
+    """
+    summary_df = read_sql_query(
+        summary_query,
+        conn,
+        (prompt_version, prompt_version, prompt_version),
+    )
+    summary = summary_df.iloc[0].to_dict() if len(summary_df) else {}
+    for key in (
+        "processed_sections",
+        "processed_sentences",
+        "mention_rows",
+        "gendered_mention_rows",
+        "unknown_mention_rows",
+        "sections_with_mentions",
+        "sentences_with_mentions",
+        "exact_people",
+        "runs",
+        "input_tokens",
+        "output_tokens",
+        "total_sections",
+        "total_sentences",
+    ):
+        summary[key] = int(summary.get(key) or 0)
+    summary["total_tokens"] = summary["input_tokens"] + summary["output_tokens"]
+    summary["coverage_percent"] = (
+        100 * summary["processed_sections"] / summary["total_sections"]
+        if summary["total_sections"]
+        else 0.0
+    )
+
+    bucket_sample_query = """
+    WITH completed_sections AS (
+        SELECT DISTINCT bi.passage_id
+        FROM section_people_batch_items bi
+        JOIN section_people_runs r ON r.run_id = bi.run_id
+        WHERE r.prompt_version = %s
+          AND bi.status = 'completed'
+          AND r.status IN ('completed', 'completed_with_failures')
+    )
+    SELECT
+        b.myth_history_bucket,
+        count(DISTINCT gs.passage_id) AS sections,
+        count(*) AS sentences
+    FROM greek_sentences gs
+    JOIN completed_sections cs ON cs.passage_id = gs.passage_id
+    JOIN sentence_greta_tags b
+      ON b.passage_id = gs.passage_id
+     AND b.sentence_number = gs.sentence_number
+     AND b.prompt_version = %s
+    GROUP BY b.myth_history_bucket
+    """
+    sample_df = read_sql_query(bucket_sample_query, conn, (prompt_version, bucket_prompt_version))
+    bucket_sample = {
+        bucket: {"sections": 0, "sentences": 0}
+        for bucket in SECTION_PEOPLE_BUCKETS
+    }
+    for row in sample_df.to_dict("records"):
+        bucket = row.get("myth_history_bucket")
+        if bucket in bucket_sample:
+            bucket_sample[bucket] = {
+                "sections": int(row.get("sections") or 0),
+                "sentences": int(row.get("sentences") or 0),
+            }
+
+    stats_query = """
+    WITH bucket_tags AS (
+        SELECT passage_id, sentence_number, myth_history_bucket
+        FROM sentence_greta_tags
+        WHERE prompt_version = %s
+    )
+    SELECT
+        b.myth_history_bucket,
+        CASE WHEN m.is_named THEN 'named' ELSE 'anonymous' END AS name_status,
+        m.gender,
+        count(*) AS mention_rows,
+        COALESCE(sum(CASE WHEN m.person_count > 0 THEN m.person_count ELSE 0 END), 0) AS exact_people,
+        count(DISTINCT m.passage_id) AS sections,
+        count(DISTINCT m.passage_id || ':' || m.sentence_number::text) AS sentences
+    FROM section_people_mentions m
+    JOIN bucket_tags b
+      ON b.passage_id = m.passage_id
+     AND b.sentence_number = m.sentence_number
+    WHERE m.prompt_version = %s
+      AND m.gender IN ('male', 'female')
+    GROUP BY b.myth_history_bucket, name_status, m.gender
+    ORDER BY b.myth_history_bucket, name_status, m.gender
+    """
+    stats_df = read_sql_query(stats_query, conn, (bucket_prompt_version, prompt_version))
+    empty_int_matrix = _section_people_empty_matrix(0)
+    if len(stats_df) == 0:
+        return {
+            "available": summary["processed_sections"] > 0,
+            "message": "No gendered people mentions are available yet.",
+            "prompt_version": prompt_version,
+            "bucket_prompt_version": bucket_prompt_version,
+            "classes": SECTION_PEOPLE_CLASSES,
+            "buckets": SECTION_PEOPLE_BUCKETS,
+            "summary": summary,
+            "bucket_sample": bucket_sample,
+            "counts": empty_int_matrix,
+            "percentages": _section_people_empty_matrix(0.0),
+            "exact_counts": empty_int_matrix,
+            "shares": {},
+            "chi_square": None,
+            "pairwise_tests": [],
+            "residuals": _section_people_empty_matrix(0.0),
+        }
+
+    stats_df["mention_rows"] = stats_df["mention_rows"].astype(int)
+    stats_df["exact_people"] = stats_df["exact_people"].astype(int)
+    stats_df["class"] = stats_df["name_status"] + "_" + stats_df["gender"]
+    counts_table = (
+        stats_df.pivot_table(
+            index="myth_history_bucket",
+            columns="class",
+            values="mention_rows",
+            aggfunc="sum",
+            fill_value=0,
+        )
+        .reindex(index=SECTION_PEOPLE_BUCKETS, columns=SECTION_PEOPLE_CLASSES, fill_value=0)
+        .astype(int)
+    )
+    exact_table = (
+        stats_df.pivot_table(
+            index="myth_history_bucket",
+            columns="class",
+            values="exact_people",
+            aggfunc="sum",
+            fill_value=0,
+        )
+        .reindex(index=SECTION_PEOPLE_BUCKETS, columns=SECTION_PEOPLE_CLASSES, fill_value=0)
+        .astype(int)
+    )
+    proportions = counts_table.div(
+        counts_table.sum(axis=1).replace(0, pd.NA),
+        axis=0,
+    ).fillna(0.0)
+    percentages = proportions * 100
+
+    shares = {}
+    for bucket in SECTION_PEOPLE_BUCKETS:
+        row = counts_table.loc[bucket]
+        total = int(row.sum())
+        named_total = int(row["named_female"] + row["named_male"])
+        anonymous_total = int(row["anonymous_female"] + row["anonymous_male"])
+        female_total = int(row["anonymous_female"] + row["named_female"])
+        shares[bucket] = {
+            "total": total,
+            "female_percent": 100 * female_total / total if total else 0.0,
+            "named_percent": 100 * named_total / total if total else 0.0,
+            "anonymous_percent": 100 * anonymous_total / total if total else 0.0,
+            "named_female_percent_of_named": (
+                100 * int(row["named_female"]) / named_total if named_total else 0.0
+            ),
+        }
+
+    chi_square = None
+    residual_matrix = pd.DataFrame(
+        0.0,
+        index=SECTION_PEOPLE_BUCKETS,
+        columns=SECTION_PEOPLE_CLASSES,
+    )
+    analysis_table = counts_table.loc[
+        counts_table.sum(axis=1) > 0,
+        counts_table.sum(axis=0) > 0,
+    ]
+    if analysis_table.shape[0] >= 2 and analysis_table.shape[1] >= 2:
+        chi2, p_value, dof, expected = stats.chi2_contingency(
+            analysis_table.to_numpy(),
+            correction=False,
+        )
+        n = int(analysis_table.to_numpy().sum())
+        denominator = n * min(analysis_table.shape[0] - 1, analysis_table.shape[1] - 1)
+        cramers_v = math.sqrt(chi2 / denominator) if denominator else 0.0
+        expected_frame = pd.DataFrame(
+            expected,
+            index=analysis_table.index,
+            columns=analysis_table.columns,
+        )
+        residuals = (analysis_table - expected_frame) / expected_frame.pow(0.5)
+        residual_matrix.loc[residuals.index, residuals.columns] = residuals
+        chi_square = {
+            "chi2": float(chi2),
+            "dof": int(dof),
+            "p_value": float(p_value),
+            "cramers_v": float(cramers_v),
+            "n": n,
+        }
+
+    pairwise_tests = []
+    p_values = []
+    for bucket_a, bucket_b in combinations(SECTION_PEOPLE_BUCKETS, 2):
+        sub = counts_table.loc[[bucket_a, bucket_b]]
+        sub = sub.loc[sub.sum(axis=1) > 0, sub.sum(axis=0) > 0]
+        if sub.shape[0] < 2 or sub.shape[1] < 2:
+            continue
+        chi2_pair, p_pair, dof_pair, _ = stats.chi2_contingency(
+            sub.to_numpy(),
+            correction=False,
+        )
+        n_pair = int(sub.to_numpy().sum())
+        denominator = n_pair * min(sub.shape[0] - 1, sub.shape[1] - 1)
+        v_pair = math.sqrt(chi2_pair / denominator) if denominator else 0.0
+        pairwise_tests.append(
+            {
+                "comparison": f"{bucket_a} vs {bucket_b}",
+                "bucket_a": bucket_a,
+                "bucket_b": bucket_b,
+                "chi2": float(chi2_pair),
+                "dof": int(dof_pair),
+                "p_value": float(p_pair),
+                "cramers_v": float(v_pair),
+            }
+        )
+        p_values.append(float(p_pair))
+    for row, adjusted in zip(pairwise_tests, _holm_adjust(p_values)):
+        row["p_holm"] = float(adjusted)
+
+    return {
+        "available": True,
+        "message": "",
+        "prompt_version": prompt_version,
+        "bucket_prompt_version": bucket_prompt_version,
+        "classes": SECTION_PEOPLE_CLASSES,
+        "buckets": SECTION_PEOPLE_BUCKETS,
+        "summary": summary,
+        "bucket_sample": bucket_sample,
+        "counts": _section_people_matrix_from_frame(counts_table),
+        "percentages": _section_people_float_matrix_from_frame(percentages, digits=3),
+        "exact_counts": _section_people_matrix_from_frame(exact_table),
+        "shares": shares,
+        "chi_square": chi_square,
+        "pairwise_tests": pairwise_tests,
+        "residuals": _section_people_float_matrix_from_frame(residual_matrix, digits=4),
     }
 
 
@@ -3617,6 +4005,1263 @@ def get_stylometry_page_data(conn=None, grammar_data=None, model=DEFAULT_LLM_GRA
     }
 
 
+SENTENCE_STYLOMETRIC_FEATURE_SETS = [
+    {
+        "id": "morphosyntax",
+        "label": "Morphosyntax",
+        "description": "UPOS, dependency labels, morphology, sentence-length bins, and head-dependent relations from the LLM grammar parser.",
+        "max_features": 240,
+    },
+    {
+        "id": "function_words",
+        "label": "Function Words",
+        "description": "Surface forms and UPOS/dependency profiles for grammatical tokens: articles, pronouns, prepositions, conjunctions, particles, and auxiliaries.",
+        "max_features": 160,
+    },
+    {
+        "id": "char4gram",
+        "label": "Character 4-Grams",
+        "description": "Traditional character 4-gram stylometric baseline over normalized Greek sentence text.",
+        "max_features": 220,
+    },
+]
+
+SENTENCE_STYLOMETRIC_CLASSIFIER_TASKS = [
+    {
+        "id": "three_way",
+        "label": "3-way classifier",
+        "description": "Predict mythic, historical, or other. Ambiguous both/mixed labels are excluded from strict three-way fitting.",
+    },
+    {
+        "id": "mythic_vs_historical",
+        "label": "2-way classifier, other dropped",
+        "description": "Predict mythic versus historical after dropping other and mixed/both rows.",
+        "positive_label": "mythic",
+        "negative_label": "historical",
+    },
+    {
+        "id": "historical_vs_all",
+        "label": "Historical vs. everything else",
+        "description": "Predict whether a sentence is historical. In the two-flag LLM lane, both counts as historical.",
+        "positive_label": "historical",
+        "negative_label": "not historical",
+    },
+    {
+        "id": "mythic_vs_all",
+        "label": "Mythic vs. everything else",
+        "description": "Predict whether a sentence is mythic. In the two-flag LLM lane, both counts as mythic.",
+        "positive_label": "mythic",
+        "negative_label": "not mythic",
+    },
+]
+
+FUNCTION_WORD_UPOS = {"ADP", "AUX", "CCONJ", "DET", "PART", "PRON", "SCONJ"}
+
+
+def _sentence_key(passage_id, sentence_number):
+    try:
+        sentence_number = int(sentence_number)
+    except (TypeError, ValueError):
+        sentence_number = 0
+    return (str(passage_id), sentence_number)
+
+
+def _build_function_word_counts(tokens):
+    counts = Counter()
+    for token in tokens:
+        upos = str(token.get("upos") or "").upper()
+        if upos not in FUNCTION_WORD_UPOS:
+            continue
+        form = _stylometry_normalize_token(token.get("form"))
+        deprel = str(token.get("deprel") or "").lower()
+        counts[f"func_upos:{upos}"] += 1
+        if form and WORD_PATTERN.search(form):
+            counts[f"func:{form}"] += 1
+            counts[f"func_form_upos:{form}:{upos}"] += 1
+        if deprel and deprel != "punct":
+            counts[f"func_deprel:{deprel}"] += 1
+    return counts
+
+
+def _build_sentence_stylometric_unit(passage, sentence):
+    passage_id = passage.get("passage_id")
+    sentence_number = int(sentence.get("sentence_number") or 0)
+    tokens = sentence.get("tokens") or []
+    forms = _stylometry_word_forms(tokens)
+    greek_text = str(sentence.get("greek_sentence") or sentence.get("sentence") or "").strip()
+    morph_counts = _build_morphosyntax_counts([sentence])
+    function_counts = _build_function_word_counts(tokens)
+    char_counts = Counter(f"char4:{gram}" for gram in _stylometry_char_ngrams(forms))
+    passage_parts = _passage_tuple(passage_id)
+
+    return {
+        "key": _sentence_key(passage_id, sentence_number),
+        "passage_id": passage_id,
+        "sentence_number": sentence_number,
+        "book": int(passage.get("book") or (passage_parts[0] if passage_parts else 0)),
+        "chapter": int(passage.get("chapter") or 0),
+        "section": int(passage.get("section") or 0),
+        "token_count": len(forms),
+        "raw_token_count": len(tokens),
+        "sentence": greek_text,
+        "excerpt": greek_text[:180],
+        "features": {
+            "morphosyntax": morph_counts,
+            "function_words": function_counts,
+            "char4gram": char_counts,
+        },
+    }
+
+
+def _build_sentence_stylometric_units(grammar_data):
+    units = []
+    for passage in grammar_data.get("passages", []):
+        for sentence in passage.get("sentences") or []:
+            unit = _build_sentence_stylometric_unit(passage, sentence)
+            if any(sum(counter.values()) for counter in unit["features"].values()):
+                units.append(unit)
+    units.sort(key=lambda unit: (unit["book"], unit["chapter"], unit["section"], unit["sentence_number"]))
+    return units
+
+
+def _load_sentence_stylometric_label_sources(conn):
+    sources = []
+
+    if conn is not None and table_exists(conn, "sentence_greta_tags"):
+        df = read_sql_query(
+            """
+            SELECT passage_id, sentence_number, prompt_version, model, myth_history_bucket
+            FROM sentence_greta_tags
+            WHERE prompt_version = %s
+            """,
+            conn,
+            (ORIGINAL_CLASSIFIER_VERSION,),
+        )
+        records = {}
+        for _, row in df.iterrows():
+            bucket = row["myth_history_bucket"]
+            records[_sentence_key(row["passage_id"], row["sentence_number"])] = {
+                "bucket": bucket,
+                "mythic": bucket == "mythic",
+                "historical": bucket == "historical",
+            }
+        sources.append(
+            {
+                "id": "llm_original",
+                "label": "LLM original three-way",
+                "prompt_version": ORIGINAL_CLASSIFIER_VERSION,
+                "model": str(df.iloc[0]["model"] or "") if len(df) else "",
+                "note": "Stored in sentence_greta_tags as mythic/historical/other.",
+                "records": records,
+            }
+        )
+
+    if conn is not None and table_exists(conn, "sentence_greta_both_tags"):
+        df = read_sql_query(
+            """
+            SELECT passage_id, sentence_number, prompt_version, model,
+                   references_mythic, references_historical, myth_history_bucket
+            FROM sentence_greta_both_tags
+            WHERE prompt_version = %s
+            """,
+            conn,
+            (GRETA_INSPIRED_CLASSIFIER_VERSION,),
+        )
+        records = {}
+        for _, row in df.iterrows():
+            bucket = row["myth_history_bucket"]
+            records[_sentence_key(row["passage_id"], row["sentence_number"])] = {
+                "bucket": bucket,
+                "mythic": bool(row["references_mythic"]),
+                "historical": bool(row["references_historical"]),
+            }
+        sources.append(
+            {
+                "id": "llm_greta_inspired",
+                "label": "LLM Greta-inspired flags",
+                "prompt_version": GRETA_INSPIRED_CLASSIFIER_VERSION,
+                "model": str(df.iloc[0]["model"] or "") if len(df) else "",
+                "note": "Stored as independent mythic/historical flags; strict three-way rows drop the rare both label.",
+                "records": records,
+            }
+        )
+
+    if conn is not None and table_exists(conn, "sentence_manual_tags"):
+        df = read_sql_query(
+            """
+            SELECT source_id, passage_id, sentence_number, manual_bucket,
+                   yellow_mythic, blue_historical, green_both
+            FROM sentence_manual_tags
+            WHERE source_id = %s
+            """,
+            conn,
+            (MANUAL_SENTENCE_SOURCE_ID,),
+        )
+        records = {}
+        for _, row in df.iterrows():
+            bucket = row["manual_bucket"]
+            is_mixed = bucket == "mixed_mythic_historical"
+            records[_sentence_key(row["passage_id"], row["sentence_number"])] = {
+                "bucket": "both" if is_mixed else bucket,
+                "mythic": bool(row["yellow_mythic"]) or bool(row["green_both"]) or bucket == "mythic" or is_mixed,
+                "historical": bool(row["blue_historical"]) or bool(row["green_both"]) or bucket == "historical" or is_mixed,
+            }
+        sources.append(
+            {
+                "id": "manual_book3",
+                "label": "Book 3 manual Greta/Rosie",
+                "prompt_version": MANUAL_SENTENCE_SOURCE_ID,
+                "model": "manual",
+                "note": "Book 3 hand labels; strict three-way rows drop mixed mythic/historical labels.",
+                "records": records,
+            }
+        )
+
+    return sources
+
+
+def _source_metadata(label_sources):
+    metadata = []
+    for source in label_sources:
+        buckets = Counter(record["bucket"] for record in source.get("records", {}).values())
+        metadata.append(
+            {
+                "id": source.get("id"),
+                "label": source.get("label"),
+                "prompt_version": source.get("prompt_version"),
+                "model": source.get("model"),
+                "note": source.get("note", ""),
+                "label_count": int(sum(buckets.values())),
+                "bucket_counts": dict(sorted(buckets.items())),
+            }
+        )
+    return metadata
+
+
+def _select_sentence_stylometric_features(units, feature_set_id, max_features, min_count=2):
+    totals = Counter()
+    for unit in units:
+        totals.update(unit["features"].get(feature_set_id) or {})
+    features = [
+        feature
+        for feature, count in totals.most_common()
+        if count >= min_count
+    ][:max_features]
+    if not features and totals:
+        features = [feature for feature, _count in totals.most_common(max_features)]
+    return features
+
+
+def _sentence_stylometric_matrix(units, feature_set_id, features):
+    if not units or not features:
+        return np.zeros((len(units), 0), dtype=float)
+    rows = []
+    for unit in units:
+        counts = unit["features"].get(feature_set_id) or Counter()
+        denominator = float(sum(counts.values()) or 1)
+        rows.append([counts.get(feature, 0) / denominator for feature in features])
+    return np.asarray(rows, dtype=float)
+
+
+def _classifier_labels_for_task(units, source, task):
+    rows = []
+    task_id = task["id"]
+    for unit in units:
+        record = source.get("records", {}).get(unit["key"])
+        if not record:
+            continue
+        bucket = record.get("bucket")
+        label = None
+        if task_id == "three_way":
+            if bucket in {"mythic", "historical", "other"}:
+                label = bucket
+        elif task_id == "mythic_vs_historical":
+            if bucket == "mythic":
+                label = 1
+            elif bucket == "historical":
+                label = 0
+        elif task_id == "historical_vs_all":
+            label = 1 if record.get("historical") else 0
+        elif task_id == "mythic_vs_all":
+            label = 1 if record.get("mythic") else 0
+
+        if label is None:
+            continue
+        rows.append((unit, label))
+    return rows
+
+
+def _label_count_dict(labels, task):
+    counts = Counter(labels)
+    if task["id"] == "three_way":
+        order = ["historical", "mythic", "other"]
+        return {label: int(counts.get(label, 0)) for label in order if counts.get(label, 0)}
+    if task["id"] == "mythic_vs_historical":
+        return {
+            task["negative_label"]: int(counts.get(0, 0)),
+            task["positive_label"]: int(counts.get(1, 0)),
+        }
+    return {
+        task["negative_label"]: int(counts.get(0, 0)),
+        task["positive_label"]: int(counts.get(1, 0)),
+    }
+
+
+def _classification_feature_rows(model, feature_names, task, limit=10):
+    logreg = model.named_steps["logreg"]
+    classes = list(logreg.classes_)
+    coefficients = logreg.coef_
+    rows = []
+
+    if len(classes) == 2 and task["id"] != "three_way":
+        coefs = coefficients[0]
+        for index in np.argsort(coefs)[-limit:][::-1]:
+            rows.append(
+                {
+                    "class_label": task["positive_label"],
+                    "direction": "positive",
+                    "feature": feature_names[index],
+                    "coefficient": float(coefs[index]),
+                }
+            )
+        for index in np.argsort(coefs)[:limit]:
+            rows.append(
+                {
+                    "class_label": task["negative_label"],
+                    "direction": "negative",
+                    "feature": feature_names[index],
+                    "coefficient": float(coefs[index]),
+                }
+            )
+        return rows
+
+    for class_index, class_label in enumerate(classes):
+        coefs = coefficients[class_index]
+        for index in np.argsort(coefs)[-limit:][::-1]:
+            rows.append(
+                {
+                    "class_label": str(class_label),
+                    "direction": "positive",
+                    "feature": feature_names[index],
+                    "coefficient": float(coefs[index]),
+                }
+            )
+    return rows
+
+
+def _fit_sentence_stylometric_classifier(source, task, feature_spec, units):
+    labeled_rows = _classifier_labels_for_task(units, source, task)
+    labeled_units = [row[0] for row in labeled_rows]
+    labels = [row[1] for row in labeled_rows]
+    label_counts = _label_count_dict(labels, task)
+    feature_names = _select_sentence_stylometric_features(
+        labeled_units,
+        feature_spec["id"],
+        feature_spec["max_features"],
+    )
+    result = {
+        "id": f"{source['id']}:{task['id']}:{feature_spec['id']}",
+        "source_id": source["id"],
+        "source_label": source["label"],
+        "task_id": task["id"],
+        "task_label": task["label"],
+        "task_description": task["description"],
+        "feature_set_id": feature_spec["id"],
+        "feature_set_label": feature_spec["label"],
+        "sample_count": int(len(labeled_units)),
+        "label_counts": label_counts,
+        "feature_count": int(len(feature_names)),
+        "available": False,
+        "message": "",
+        "metrics": {},
+        "top_features": [],
+    }
+    if len(labeled_units) < 10:
+        result["message"] = "Not enough grammar-parsed labeled sentences."
+        return result
+    if len(set(labels)) < 2:
+        result["message"] = "Only one label is present in the parsed subset."
+        return result
+    min_class_count = min(Counter(labels).values())
+    if min_class_count < 2:
+        result["message"] = "At least two examples per class are needed for cross-validation."
+        return result
+    if not feature_names:
+        result["message"] = "No repeated stylometric features survived feature selection."
+        return result
+
+    x = _sentence_stylometric_matrix(labeled_units, feature_spec["id"], feature_names)
+    y = np.asarray(labels)
+    n_splits = min(5, min_class_count)
+    cv = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
+    y_true = []
+    y_pred = []
+    y_baseline = []
+    for train_index, test_index in cv.split(x, y):
+        train_y = y[train_index]
+        majority = Counter(train_y).most_common(1)[0][0]
+        model = Pipeline([
+            ("scaler", StandardScaler()),
+            ("logreg", LogisticRegression(max_iter=2000, class_weight="balanced", random_state=42)),
+        ])
+        model.fit(x[train_index], train_y)
+        fold_pred = model.predict(x[test_index])
+        y_true.extend(y[test_index].tolist())
+        y_pred.extend(fold_pred.tolist())
+        y_baseline.extend([majority] * len(test_index))
+
+    final_model = Pipeline([
+        ("scaler", StandardScaler()),
+        ("logreg", LogisticRegression(max_iter=2000, class_weight="balanced", random_state=42)),
+    ])
+    final_model.fit(x, y)
+
+    result.update(
+        {
+            "available": True,
+            "metrics": {
+                "cv_folds": int(n_splits),
+                "accuracy": float(accuracy_score(y_true, y_pred)),
+                "baseline_accuracy": float(accuracy_score(y_true, y_baseline)),
+                "accuracy_delta_vs_baseline": float(accuracy_score(y_true, y_pred) - accuracy_score(y_true, y_baseline)),
+                "macro_f1": float(f1_score(y_true, y_pred, average="macro", zero_division=0)),
+                "weighted_f1": float(f1_score(y_true, y_pred, average="weighted", zero_division=0)),
+            },
+            "top_features": _classification_feature_rows(final_model, feature_names, task),
+        }
+    )
+    return result
+
+
+def _fit_sentence_book_regressor(feature_spec, units, *, include_books_4_8):
+    selected_units = [
+        unit for unit in units
+        if include_books_4_8 or unit["book"] not in {4, 8}
+    ]
+    feature_names = _select_sentence_stylometric_features(
+        selected_units,
+        feature_spec["id"],
+        feature_spec["max_features"],
+    )
+    book_counts = Counter(unit["book"] for unit in selected_units)
+    variant_label = "Including Books 4 and 8" if include_books_4_8 else "Excluding Books 4 and 8"
+    result = {
+        "id": f"{'all_books' if include_books_4_8 else 'excluding_4_8'}:{feature_spec['id']}",
+        "variant_id": "all_books" if include_books_4_8 else "excluding_4_8",
+        "variant_label": variant_label,
+        "include_books_4_8": bool(include_books_4_8),
+        "feature_set_id": feature_spec["id"],
+        "feature_set_label": feature_spec["label"],
+        "sample_count": int(len(selected_units)),
+        "book_counts": {str(book): int(count) for book, count in sorted(book_counts.items())},
+        "book_count": int(len(book_counts)),
+        "feature_count": int(len(feature_names)),
+        "available": False,
+        "message": "",
+        "metrics": {},
+        "top_features": [],
+    }
+    if len(selected_units) < 10 or len(book_counts) < 2:
+        result["message"] = "Not enough grammar-parsed sentences across books."
+        return result
+    if not feature_names:
+        result["message"] = "No repeated stylometric features survived feature selection."
+        return result
+
+    x = _sentence_stylometric_matrix(selected_units, feature_spec["id"], feature_names)
+    y = np.asarray([unit["book"] for unit in selected_units], dtype=float)
+    n_splits = min(5, len(selected_units))
+    cv = KFold(n_splits=n_splits, shuffle=True, random_state=42)
+    y_true = []
+    y_pred = []
+    y_baseline = []
+    for train_index, test_index in cv.split(x):
+        train_y = y[train_index]
+        baseline_value = float(np.mean(train_y))
+        model = Pipeline([
+            ("scaler", StandardScaler()),
+            ("ridge", RidgeCV(alphas=np.logspace(-2, 4, 13))),
+        ])
+        model.fit(x[train_index], train_y)
+        fold_pred = model.predict(x[test_index])
+        y_true.extend(y[test_index].tolist())
+        y_pred.extend(fold_pred.tolist())
+        y_baseline.extend([baseline_value] * len(test_index))
+
+    final_model = Pipeline([
+        ("scaler", StandardScaler()),
+        ("ridge", RidgeCV(alphas=np.logspace(-2, 4, 13))),
+    ])
+    final_model.fit(x, y)
+    coefs = final_model.named_steps["ridge"].coef_
+    feature_rows = []
+    for index in np.argsort(np.abs(coefs))[-16:][::-1]:
+        feature_rows.append(
+            {
+                "direction": "later_books" if coefs[index] > 0 else "earlier_books",
+                "feature": feature_names[index],
+                "coefficient": float(coefs[index]),
+            }
+        )
+
+    rmse = math.sqrt(mean_squared_error(y_true, y_pred))
+    baseline_rmse = math.sqrt(mean_squared_error(y_true, y_baseline))
+    mae = mean_absolute_error(y_true, y_pred)
+    baseline_mae = mean_absolute_error(y_true, y_baseline)
+    result.update(
+        {
+            "available": True,
+            "metrics": {
+                "cv_folds": int(n_splits),
+                "selected_alpha": float(final_model.named_steps["ridge"].alpha_),
+                "r2": float(r2_score(y_true, y_pred)),
+                "mae": float(mae),
+                "baseline_mae": float(baseline_mae),
+                "mae_improvement_vs_baseline": float(baseline_mae - mae),
+                "rmse": float(rmse),
+                "baseline_rmse": float(baseline_rmse),
+                "rmse_improvement_vs_baseline": float(baseline_rmse - rmse),
+            },
+            "top_features": feature_rows,
+        }
+    )
+    return result
+
+
+def get_stylometric_sentence_model_data(
+    conn=None,
+    grammar_data=None,
+    label_sources=None,
+    model=DEFAULT_LLM_GRAMMAR_MODEL,
+):
+    """Build sentence-level stylometric classifiers and book-number regressors."""
+    if grammar_data is None and conn is not None:
+        grammar_data = get_llm_grammar_page_data(conn, model)
+    grammar_data = grammar_data or {"model": model, "passages": []}
+    units = _build_sentence_stylometric_units(grammar_data)
+    label_sources = label_sources if label_sources is not None else _load_sentence_stylometric_label_sources(conn)
+    units_by_book = Counter(unit["book"] for unit in units)
+
+    classifiers = []
+    for source in label_sources:
+        for task in SENTENCE_STYLOMETRIC_CLASSIFIER_TASKS:
+            for feature_spec in SENTENCE_STYLOMETRIC_FEATURE_SETS:
+                classifiers.append(
+                    _fit_sentence_stylometric_classifier(source, task, feature_spec, units)
+                )
+
+    regressions = []
+    for include_books in [True, False]:
+        for feature_spec in SENTENCE_STYLOMETRIC_FEATURE_SETS:
+            regressions.append(
+                _fit_sentence_book_regressor(
+                    feature_spec,
+                    units,
+                    include_books_4_8=include_books,
+                )
+            )
+
+    coverage_notes = [
+        "These models use only sentences with current LLM grammar-token rows, so the sample is smaller than the full annotation corpus.",
+        "Strict three-way and mythic-vs-historical tasks drop rare both/mixed rows; one-vs-rest tasks use the available mythic/historical flags where present.",
+        "Character 4-grams are included as a traditional baseline; morphosyntax is the primary non-lexical stylometric family.",
+    ]
+    if not units:
+        coverage_notes.append("No grammar-parsed sentences are available.")
+
+    return {
+        "available": bool(units),
+        "model": grammar_data.get("model") or model,
+        "unit_type": "sentence",
+        "feature_sets": [
+            {
+                "id": spec["id"],
+                "label": spec["label"],
+                "description": spec["description"],
+                "max_features": spec["max_features"],
+            }
+            for spec in SENTENCE_STYLOMETRIC_FEATURE_SETS
+        ],
+        "label_sources": _source_metadata(label_sources),
+        "classifiers": classifiers,
+        "regressions": regressions,
+        "coverage_notes": coverage_notes,
+        "metrics": {
+            "parsed_sentence_count": int(len(units)),
+            "token_count": int(sum(unit["token_count"] for unit in units)),
+            "book_count": int(len(units_by_book)),
+        },
+        "book_counts": {str(book): int(count) for book, count in sorted(units_by_book.items())},
+    }
+
+
+BOOK_FEATURE_TREND_LIMIT = 8
+
+
+def _stylometry_feature_display_label(feature):
+    feature = str(feature or "")
+    prefixes = {
+        "word:": "word ",
+        "char4:": "char 4-gram ",
+        "upos:": "UPOS ",
+        "deprel:": "DepRel ",
+        "deprel_upos:": "DepRel/UPOS ",
+        "feat:": "Feature ",
+        "head_child_upos:": "Head>child ",
+        "head_direction:": "Head direction ",
+        "root_upos:": "Root UPOS ",
+        "sentence_len_bin:": "Sentence length ",
+        "func:": "Function word ",
+        "func_upos:": "Function UPOS ",
+        "func_form_upos:": "Function form/UPOS ",
+        "func_deprel:": "Function DepRel ",
+    }
+    for prefix, label in prefixes.items():
+        if feature.startswith(prefix):
+            return label + feature[len(prefix) :]
+    return feature
+
+
+def _weighted_regression(x_values, y_values, weights):
+    x = np.asarray(x_values, dtype=float)
+    y = np.asarray(y_values, dtype=float)
+    w = np.asarray(weights, dtype=float)
+    finite = np.isfinite(x) & np.isfinite(y) & np.isfinite(w) & (w > 0)
+    x = x[finite]
+    y = y[finite]
+    w = w[finite]
+    if len(x) < 3 or len(np.unique(x)) < 2:
+        return {
+            "available": False,
+            "n": int(len(x)),
+            "slope": None,
+            "intercept": None,
+            "r_squared": None,
+            "p_value": None,
+            "stderr": None,
+        }
+
+    design = np.column_stack([np.ones(len(x)), x])
+    weighted_design = design * w[:, None]
+    xtwx = design.T @ weighted_design
+    try:
+        beta = np.linalg.solve(xtwx, design.T @ (w * y))
+    except np.linalg.LinAlgError:
+        return {
+            "available": False,
+            "n": int(len(x)),
+            "slope": None,
+            "intercept": None,
+            "r_squared": None,
+            "p_value": None,
+            "stderr": None,
+        }
+    yhat = design @ beta
+    residual = y - yhat
+    weighted_mean = float(np.average(y, weights=w))
+    sse = float(np.sum(w * residual ** 2))
+    sst = float(np.sum(w * (y - weighted_mean) ** 2))
+    dof = len(x) - 2
+    sigma2 = sse / dof if dof > 0 else math.nan
+    try:
+        covariance = sigma2 * np.linalg.inv(xtwx)
+        stderr = float(math.sqrt(covariance[1, 1]))
+    except (ValueError, np.linalg.LinAlgError):
+        stderr = math.nan
+    slope = float(beta[1])
+    if stderr and np.isfinite(stderr) and stderr > 0 and dof > 0:
+        t_stat = slope / stderr
+        p_value = float(2.0 * stats.t.sf(abs(t_stat), dof))
+    else:
+        p_value = math.nan
+    return {
+        "available": True,
+        "n": int(len(x)),
+        "slope": slope,
+        "intercept": float(beta[0]),
+        "r_squared": float(1.0 - (sse / sst)) if sst > 0 else 0.0,
+        "p_value": p_value,
+        "stderr": stderr,
+    }
+
+
+def _plain_regression(x_values, y_values):
+    x = np.asarray(x_values, dtype=float)
+    y = np.asarray(y_values, dtype=float)
+    finite = np.isfinite(x) & np.isfinite(y)
+    x = x[finite]
+    y = y[finite]
+    if len(x) < 3 or len(np.unique(x)) < 2:
+        return {
+            "available": False,
+            "n": int(len(x)),
+            "slope": None,
+            "intercept": None,
+            "r_squared": None,
+            "p_value": None,
+            "stderr": None,
+        }
+    result = stats.linregress(x, y)
+    return {
+        "available": True,
+        "n": int(len(x)),
+        "slope": float(result.slope),
+        "intercept": float(result.intercept),
+        "r_squared": float(result.rvalue ** 2),
+        "p_value": float(result.pvalue),
+        "stderr": float(result.stderr) if result.stderr is not None else None,
+    }
+
+
+def _book_feature_trend_rows(units, selected_features):
+    by_book = defaultdict(list)
+    for unit in units:
+        by_book[unit["book"]].append(unit)
+
+    trend_features = []
+    for feature in selected_features:
+        per_book = []
+        for book, book_units in sorted(by_book.items()):
+            hit_count = sum(
+                1
+                for unit in book_units
+                if (unit["features"].get("morphosyntax") or {}).get(feature["feature"], 0) > 0
+            )
+            sentence_count = len(book_units)
+            proportion = hit_count / sentence_count if sentence_count else 0.0
+            per_book.append(
+                {
+                    "book": int(book),
+                    "sentence_count": int(sentence_count),
+                    "hit_count": int(hit_count),
+                    "proportion": float(proportion),
+                    "is_book4": int(book) == 4,
+                    "is_book8": int(book) == 8,
+                }
+            )
+
+        all_fit = _weighted_regression(
+            [row["book"] for row in per_book],
+            [row["proportion"] for row in per_book],
+            [row["sentence_count"] for row in per_book],
+        )
+        excluding_rows = [row for row in per_book if row["book"] not in {4, 8}]
+        excluding_fit = _weighted_regression(
+            [row["book"] for row in excluding_rows],
+            [row["proportion"] for row in excluding_rows],
+            [row["sentence_count"] for row in excluding_rows],
+        )
+        trend_features.append(
+            {
+                **feature,
+                "points": per_book,
+                "regressions": {
+                    "all_books": all_fit,
+                    "excluding_4_8": excluding_fit,
+                },
+            }
+        )
+    return trend_features
+
+
+def _kde_points(values, grid):
+    values = np.asarray(values, dtype=float)
+    if len(values) < 2 or float(np.std(values)) == 0.0:
+        return [0.0 for _ in grid]
+    try:
+        kde = stats.gaussian_kde(values)
+        densities = kde(np.asarray(grid, dtype=float))
+    except Exception:
+        return [0.0 for _ in grid]
+    return [float(value) for value in densities]
+
+
+def _sentence_length_distribution_data(units):
+    by_book = defaultdict(list)
+    for unit in units:
+        by_book[unit["book"]].append(int(unit["token_count"]))
+
+    all_lengths = [length for lengths in by_book.values() for length in lengths]
+    if all_lengths:
+        grid = np.linspace(max(0, min(all_lengths) - 2), max(all_lengths) + 2, 140)
+    else:
+        grid = np.linspace(0, 1, 20)
+
+    books = []
+    for book, lengths in sorted(by_book.items()):
+        values = np.asarray(lengths, dtype=float)
+        if len(values):
+            q1, median, q3 = np.percentile(values, [25, 50, 75])
+            mean = float(np.mean(values))
+            std = float(np.std(values, ddof=1)) if len(values) > 1 else 0.0
+            minimum = int(np.min(values))
+            maximum = int(np.max(values))
+        else:
+            q1 = median = q3 = mean = std = 0.0
+            minimum = maximum = 0
+        books.append(
+            {
+                "book": int(book),
+                "lengths": [int(value) for value in lengths],
+                "count": int(len(lengths)),
+                "mean": mean,
+                "median": float(median),
+                "q1": float(q1),
+                "q3": float(q3),
+                "std": std,
+                "min": minimum,
+                "max": maximum,
+                "is_book4": int(book) == 4,
+                "is_book8": int(book) == 8,
+                "kde": [
+                    {"x": float(x), "density": density}
+                    for x, density in zip(grid, _kde_points(values, grid))
+                ],
+            }
+        )
+
+    grouped_lengths = [book["lengths"] for book in books if len(book["lengths"]) > 1]
+    tests = []
+    if len(grouped_lengths) >= 2:
+        has_variation = len({length for group in grouped_lengths for length in group}) > 1
+        has_within_group_variation = any(float(np.std(group)) > 0.0 for group in grouped_lengths)
+        try:
+            if has_variation and has_within_group_variation:
+                anova = stats.f_oneway(*grouped_lengths)
+                tests.append(
+                    {
+                        "test": "One-way ANOVA",
+                        "statistic": float(anova.statistic),
+                        "p_value": float(anova.pvalue),
+                        "interpretation": "Tests equality of mean sentence length across books.",
+                    }
+                )
+        except Exception:
+            pass
+        try:
+            if has_variation:
+                kruskal = stats.kruskal(*grouped_lengths)
+                tests.append(
+                    {
+                        "test": "Kruskal-Wallis",
+                        "statistic": float(kruskal.statistic),
+                        "p_value": float(kruskal.pvalue),
+                        "interpretation": "Non-parametric test for distribution/median differences across books.",
+                    }
+                )
+        except Exception:
+            pass
+        try:
+            if has_variation and has_within_group_variation:
+                levene = stats.levene(*grouped_lengths)
+                tests.append(
+                    {
+                        "test": "Levene",
+                        "statistic": float(levene.statistic),
+                        "p_value": float(levene.pvalue),
+                        "interpretation": "Tests equality of sentence-length variance across books.",
+                    }
+                )
+        except Exception:
+            pass
+
+    sentence_books = []
+    sentence_lengths = []
+    for book in books:
+        for length in book["lengths"]:
+            sentence_books.append(book["book"])
+            sentence_lengths.append(length)
+    all_regression = _plain_regression(sentence_books, sentence_lengths)
+    excluding_pairs = [
+        (book, length)
+        for book, length in zip(sentence_books, sentence_lengths)
+        if book not in {4, 8}
+    ]
+    excluding_regression = _plain_regression(
+        [book for book, _length in excluding_pairs],
+        [length for _book, length in excluding_pairs],
+    )
+
+    return {
+        "books": books,
+        "grid": [float(x) for x in grid],
+        "tests": tests,
+        "regressions": {
+            "all_books": all_regression,
+            "excluding_4_8": excluding_regression,
+        },
+    }
+
+
+def get_stylometric_book_feature_trend_data(
+    conn=None,
+    grammar_data=None,
+    model_data=None,
+    model=DEFAULT_LLM_GRAMMAR_MODEL,
+):
+    """Build book-by-book trend plots for morphosyntax regression features."""
+    if grammar_data is None and conn is not None:
+        grammar_data = get_llm_grammar_page_data(conn, model)
+    grammar_data = grammar_data or {"model": model, "passages": []}
+    if model_data is None:
+        model_data = get_stylometric_sentence_model_data(
+            conn,
+            grammar_data=grammar_data,
+            model=model,
+        )
+
+    units = _build_sentence_stylometric_units(grammar_data)
+    target_regression = next(
+        (
+            regression
+            for regression in (model_data or {}).get("regressions", [])
+            if regression.get("variant_id") == "excluding_4_8"
+            and regression.get("feature_set_id") == "morphosyntax"
+            and regression.get("available")
+        ),
+        None,
+    )
+    selected_features = []
+    if target_regression:
+        for row in (target_regression.get("top_features") or [])[:BOOK_FEATURE_TREND_LIMIT]:
+            selected_features.append(
+                {
+                    "feature": row.get("feature"),
+                    "feature_label": _stylometry_feature_display_label(row.get("feature")),
+                    "coefficient": float(row.get("coefficient") or 0.0),
+                    "direction": row.get("direction"),
+                }
+            )
+
+    by_book = Counter(unit["book"] for unit in units)
+    return {
+        "available": bool(units),
+        "model": grammar_data.get("model") or model,
+        "unit_type": "sentence",
+        "source_regression": {
+            "variant_id": "excluding_4_8",
+            "feature_set_id": "morphosyntax",
+            "sample_count": target_regression.get("sample_count") if target_regression else 0,
+            "metrics": target_regression.get("metrics") if target_regression else {},
+        },
+        "feature_trends": _book_feature_trend_rows(units, selected_features),
+        "length_distribution": _sentence_length_distribution_data(units),
+        "book_counts": {str(book): int(count) for book, count in sorted(by_book.items())},
+        "metrics": {
+            "parsed_sentence_count": int(len(units)),
+            "book_count": int(len(by_book)),
+            "feature_count": int(len(selected_features)),
+        },
+        "notes": [
+            "Feature proportions are sentence-level rates: a sentence counts once if the selected morphosyntax feature appears at least once.",
+            "Regression lines are weighted by parsed sentence count per book; the dashed line refits after excluding Books 4 and 8.",
+            "Sentence-length tests use individual parsed sentences and should be read as diagnostics over current grammar coverage.",
+        ],
+    }
+
+
+def _load_discourse_mode_records(conn, prompt_version=DISCOURSE_MODE_PROMPT_VERSION):
+    if conn is None or not table_exists(conn, "sentence_discourse_mode_tags"):
+        return {}
+    df = read_sql_query(
+        """
+        SELECT passage_id, sentence_number, prompt_version, model, discourse_mode,
+               confidence, rationale
+        FROM sentence_discourse_mode_tags
+        WHERE prompt_version = %s
+        """,
+        conn,
+        (prompt_version,),
+    )
+    records = {}
+    for _, row in df.iterrows():
+        mode = row["discourse_mode"]
+        if mode not in DISCOURSE_MODES:
+            continue
+        records[_sentence_key(row["passage_id"], row["sentence_number"])] = {
+            "mode": mode,
+            "confidence": row["confidence"],
+            "rationale": row["rationale"],
+            "model": row["model"],
+            "prompt_version": row["prompt_version"],
+        }
+    return records
+
+
+def _linear_probability_book_fit(rows, *, include_modes, exclude_books=()):
+    selected = [row for row in rows if row["book"] not in set(exclude_books)]
+    if len(selected) < 4 or len({row["book"] for row in selected}) < 2:
+        return {
+            "available": False,
+            "n": int(len(selected)),
+            "slope": None,
+            "intercept": None,
+            "r_squared": None,
+            "p_value": None,
+            "stderr": None,
+            "mode_count": int(len({row["mode"] for row in selected})),
+            "book_count": int(len({row["book"] for row in selected})),
+        }
+
+    modes = sorted({row["mode"] for row in selected})
+    mode_columns = modes[1:] if include_modes else []
+    design = []
+    y = []
+    for row in selected:
+        design.append(
+            [1.0, float(row["book"])]
+            + [1.0 if row["mode"] == mode else 0.0 for mode in mode_columns]
+        )
+        y.append(1.0 if row["has_aorist"] else 0.0)
+    x = np.asarray(design, dtype=float)
+    y = np.asarray(y, dtype=float)
+    if x.shape[0] <= x.shape[1]:
+        return {
+            "available": False,
+            "n": int(len(selected)),
+            "slope": None,
+            "intercept": None,
+            "r_squared": None,
+            "p_value": None,
+            "stderr": None,
+            "mode_count": int(len(modes)),
+            "book_count": int(len({row["book"] for row in selected})),
+        }
+
+    beta, *_ = np.linalg.lstsq(x, y, rcond=None)
+    fitted = x @ beta
+    residual = y - fitted
+    sse = float(np.sum(residual ** 2))
+    sst = float(np.sum((y - float(np.mean(y))) ** 2))
+    dof = int(x.shape[0] - x.shape[1])
+    sigma2 = sse / dof if dof > 0 else math.nan
+    try:
+        covariance = sigma2 * np.linalg.pinv(x.T @ x)
+        stderr = float(math.sqrt(covariance[1, 1]))
+    except (ValueError, np.linalg.LinAlgError):
+        stderr = math.nan
+    slope = float(beta[1])
+    if stderr and np.isfinite(stderr) and stderr > 0 and dof > 0:
+        p_value = float(2.0 * stats.t.sf(abs(slope / stderr), dof))
+    else:
+        p_value = math.nan
+    return {
+        "available": True,
+        "n": int(len(selected)),
+        "slope": slope,
+        "intercept": float(beta[0]),
+        "r_squared": float(1.0 - sse / sst) if sst > 0 else 0.0,
+        "p_value": p_value,
+        "stderr": stderr,
+        "mode_count": int(len(modes)),
+        "book_count": int(len({row["book"] for row in selected})),
+        "mode_columns": mode_columns,
+    }
+
+
+def _aorist_book_rows(rows):
+    by_book = defaultdict(list)
+    for row in rows:
+        by_book[row["book"]].append(row)
+    output = []
+    for book, book_rows in sorted(by_book.items()):
+        hit_count = sum(1 for row in book_rows if row["has_aorist"])
+        sentence_count = len(book_rows)
+        output.append(
+            {
+                "book": int(book),
+                "sentence_count": int(sentence_count),
+                "aorist_count": int(hit_count),
+                "aorist_rate": float(hit_count / sentence_count) if sentence_count else 0.0,
+                "is_book4": int(book) == 4,
+                "is_book8": int(book) == 8,
+            }
+        )
+    return output
+
+
+def _mode_composition_rows(rows):
+    by_book = defaultdict(list)
+    for row in rows:
+        by_book[row["book"]].append(row)
+    output = []
+    for book, book_rows in sorted(by_book.items()):
+        counts = Counter(row["mode"] for row in book_rows)
+        total = len(book_rows)
+        for mode in DISCOURSE_MODES:
+            count = counts.get(mode, 0)
+            output.append(
+                {
+                    "book": int(book),
+                    "discourse_mode": mode,
+                    "discourse_mode_label": DISCOURSE_MODE_LABELS.get(mode, mode),
+                    "sentence_count": int(count),
+                    "book_sentence_count": int(total),
+                    "proportion": float(count / total) if total else 0.0,
+                    "is_book4": int(book) == 4,
+                    "is_book8": int(book) == 8,
+                }
+            )
+    return output
+
+
+def _mode_aorist_trend_rows(rows):
+    by_mode = defaultdict(list)
+    for row in rows:
+        by_mode[row["mode"]].append(row)
+
+    output = []
+    for mode in DISCOURSE_MODES:
+        mode_rows = by_mode.get(mode, [])
+        by_book = defaultdict(list)
+        for row in mode_rows:
+            by_book[row["book"]].append(row)
+        points = []
+        for book, book_rows in sorted(by_book.items()):
+            hit_count = sum(1 for row in book_rows if row["has_aorist"])
+            sentence_count = len(book_rows)
+            points.append(
+                {
+                    "book": int(book),
+                    "sentence_count": int(sentence_count),
+                    "aorist_count": int(hit_count),
+                    "aorist_rate": float(hit_count / sentence_count) if sentence_count else 0.0,
+                    "is_book4": int(book) == 4,
+                    "is_book8": int(book) == 8,
+                }
+            )
+        excluding_points = [point for point in points if point["book"] not in {4, 8}]
+        output.append(
+            {
+                "discourse_mode": mode,
+                "discourse_mode_label": DISCOURSE_MODE_LABELS.get(mode, mode),
+                "sentence_count": int(len(mode_rows)),
+                "aorist_count": int(sum(1 for row in mode_rows if row["has_aorist"])),
+                "book_count": int(len(by_book)),
+                "points": points,
+                "regressions": {
+                    "all_books": _weighted_regression(
+                        [point["book"] for point in points],
+                        [point["aorist_rate"] for point in points],
+                        [point["sentence_count"] for point in points],
+                    ),
+                    "excluding_4_8": _weighted_regression(
+                        [point["book"] for point in excluding_points],
+                        [point["aorist_rate"] for point in excluding_points],
+                        [point["sentence_count"] for point in excluding_points],
+                    ),
+                },
+            }
+        )
+    return output
+
+
+def get_discourse_mode_aorist_analysis(
+    conn=None,
+    grammar_data=None,
+    discourse_records=None,
+    model=DEFAULT_LLM_GRAMMAR_MODEL,
+    prompt_version=DISCOURSE_MODE_PROMPT_VERSION,
+):
+    """Control the aorist book trend by sentence-level discourse mode."""
+    if grammar_data is None and conn is not None:
+        grammar_data = get_llm_grammar_page_data(conn, model)
+    grammar_data = grammar_data or {"model": model, "passages": []}
+    units = _build_sentence_stylometric_units(grammar_data)
+    if discourse_records is None:
+        discourse_records = _load_discourse_mode_records(conn, prompt_version)
+
+    rows = []
+    for unit in units:
+        record = discourse_records.get(unit["key"])
+        if not record:
+            continue
+        mode = record.get("mode")
+        if mode not in DISCOURSE_MODES:
+            continue
+        features = unit["features"].get("morphosyntax") or {}
+        rows.append(
+            {
+                "passage_id": unit["passage_id"],
+                "sentence_number": int(unit["sentence_number"]),
+                "book": int(unit["book"]),
+                "chapter": int(unit["chapter"]),
+                "section": int(unit["section"]),
+                "discourse_mode": mode,
+                "discourse_mode_label": DISCOURSE_MODE_LABELS.get(mode, mode),
+                "mode": mode,
+                "confidence": record.get("confidence", ""),
+                "has_aorist": bool(features.get("feat:Tense=Aor", 0) > 0),
+                "token_count": int(unit["token_count"]),
+                "excerpt": unit["excerpt"],
+            }
+        )
+
+    mode_counts = Counter(row["mode"] for row in rows)
+    mode_summary = []
+    for mode in DISCOURSE_MODES:
+        mode_rows = [row for row in rows if row["mode"] == mode]
+        aorist_count = sum(1 for row in mode_rows if row["has_aorist"])
+        mode_summary.append(
+            {
+                "discourse_mode": mode,
+                "discourse_mode_label": DISCOURSE_MODE_LABELS.get(mode, mode),
+                "sentence_count": int(len(mode_rows)),
+                "aorist_count": int(aorist_count),
+                "aorist_rate": float(aorist_count / len(mode_rows)) if mode_rows else 0.0,
+                "book_count": int(len({row["book"] for row in mode_rows})),
+            }
+        )
+
+    adjusted_regressions = {
+        "book_only_all_books": _linear_probability_book_fit(rows, include_modes=False),
+        "mode_adjusted_all_books": _linear_probability_book_fit(rows, include_modes=True),
+        "book_only_excluding_4_8": _linear_probability_book_fit(
+            rows,
+            include_modes=False,
+            exclude_books={4, 8},
+        ),
+        "mode_adjusted_excluding_4_8": _linear_probability_book_fit(
+            rows,
+            include_modes=True,
+            exclude_books={4, 8},
+        ),
+    }
+
+    return {
+        "available": bool(rows),
+        "model": grammar_data.get("model") or model,
+        "prompt_version": prompt_version,
+        "discourse_modes": [
+            {"id": mode, "label": DISCOURSE_MODE_LABELS.get(mode, mode)}
+            for mode in DISCOURSE_MODES
+        ],
+        "unit_rows": rows,
+        "mode_summary": mode_summary,
+        "book_aorist": _aorist_book_rows(rows),
+        "mode_composition": _mode_composition_rows(rows),
+        "mode_trends": _mode_aorist_trend_rows(rows),
+        "adjusted_regressions": adjusted_regressions,
+        "metrics": {
+            "parsed_sentence_count": int(len(units)),
+            "tagged_sentence_count": int(len(rows)),
+            "book_count": int(len({row["book"] for row in rows})),
+            "mode_count": int(len([mode for mode, count in mode_counts.items() if count > 0])),
+            "aorist_sentence_count": int(sum(1 for row in rows if row["has_aorist"])),
+            "aorist_rate": (
+                float(sum(1 for row in rows if row["has_aorist"]) / len(rows))
+                if rows
+                else 0.0
+            ),
+        },
+        "notes": [
+            "This is a content-control pilot over sentences that have both LLM grammar parses and discourse-mode tags.",
+            "The mode-adjusted fits are linear probability diagnostics for a sentence containing at least one Tense=Aor token.",
+            "Within-mode trend lines use book-level aorist proportions weighted by the number of tagged parsed sentences in that mode/book cell.",
+        ],
+    }
+
+
 def get_passage_summaries(conn):
     """Get one-line summaries for passages (from passage_summaries table)."""
     cursor = conn.cursor()
@@ -4381,80 +6026,461 @@ def get_progress_data(conn):
     cursor = conn.cursor()
     today = date.today()
 
-    # Total passages
-    cursor.execute("SELECT COUNT(*) FROM passages")
-    total_passages = cursor.fetchone()[0]
+    def fetch_scalar(sql, params=None, default=0):
+        cursor.execute(sql, params or ())
+        row = cursor.fetchone()
+        if not row:
+            return default
+        value = row[0]
+        return default if value is None else value
 
-    # Sentences: count and passages that have been split
-    cursor.execute("SELECT COUNT(*) FROM greek_sentences")
-    total_sentences = cursor.fetchone()[0]
-    cursor.execute("SELECT COUNT(DISTINCT passage_id) FROM greek_sentences")
-    passages_with_sentences = cursor.fetchone()[0]
+    def has_tables(*table_names):
+        return all(table_exists(conn, table_name) for table_name in table_names)
 
-    # Estimate total sentences based on average per passage
-    if passages_with_sentences > 0:
-        avg_sentences_per_passage = total_sentences / passages_with_sentences
-        estimated_total_sentences = int(total_passages * avg_sentences_per_passage)
+    def count_if_table(table_name, sql, params=None):
+        if not table_exists(conn, table_name):
+            return None
+        return fetch_scalar(sql, params)
+
+    def status_counts(table_name, where="", params=None):
+        if not table_exists(conn, table_name):
+            return []
+        where_sql = f"WHERE {where}" if where else ""
+        cursor.execute(
+            f"""
+            SELECT status, COUNT(*) AS runs
+            FROM {table_name}
+            {where_sql}
+            GROUP BY status
+            ORDER BY status
+            """,
+            params or (),
+        )
+        return [(status, int(count)) for status, count in cursor.fetchall()]
+
+    def format_status_counts(counts):
+        if not counts:
+            return ""
+        return "; ".join(
+            f"{status.replace('_', ' ')}: {count:,}" for status, count in counts
+        )
+
+    def predictor_done(*table_names):
+        done = 0
+        for table_name in table_names:
+            if table_exists(conn, table_name) and fetch_scalar(f"SELECT COUNT(*) FROM {table_name}") > 0:
+                done += 1
+        return done
+
+    def add_task(
+        *,
+        name,
+        area,
+        script,
+        done,
+        total,
+        batch_size=None,
+        cadence=None,
+        status=None,
+        details="",
+    ):
+        if done is None:
+            done = 0
+        if total is not None and total > 0:
+            percent = round(100 * done / total, 1)
+        else:
+            percent = None
+
+        if status is None:
+            if total is None:
+                status = "Tracking"
+            elif total <= 0:
+                status = "No target rows"
+            elif done >= total:
+                status = "Complete"
+            elif done > 0:
+                status = "In progress"
+            else:
+                status = "Not started"
+
+        if total is None or total <= 0:
+            est_completion = "n/a"
+        else:
+            remaining = total - done
+            if remaining <= 0:
+                est_completion = "Done"
+            elif isinstance(batch_size, (int, float)) and batch_size > 0:
+                days_needed = ceil(remaining / batch_size)
+                est_completion = (today + timedelta(days=days_needed)).isoformat()
+            else:
+                est_completion = "Unknown"
+
+        tasks.append(
+            {
+                "name": name,
+                "area": area,
+                "script": script,
+                "batch_size": batch_size,
+                "cadence": cadence or (f"{batch_size:,}/day" if batch_size else "ad hoc"),
+                "total": total,
+                "done": int(done),
+                "percent": percent,
+                "status": status,
+                "details": details,
+                "est_completion": est_completion,
+            }
+        )
+
+    total_passages = fetch_scalar("SELECT COUNT(*) FROM passages")
+    total_sentences = count_if_table("greek_sentences", "SELECT COUNT(*) FROM greek_sentences") or 0
+    passages_with_sentences = count_if_table(
+        "greek_sentences",
+        "SELECT COUNT(DISTINCT passage_id) FROM greek_sentences",
+    ) or 0
+    total_nouns = count_if_table(
+        "proper_nouns",
+        "SELECT COUNT(DISTINCT reference_form || '|' || entity_type) FROM proper_nouns",
+    ) or 0
+
+    if passages_with_sentences and total_sentences:
+        sentence_total_target = total_sentences
     else:
-        estimated_total_sentences = total_passages  # fallback estimate
+        sentence_total_target = total_passages
 
-    # Total unique proper nouns
-    cursor.execute("SELECT COUNT(DISTINCT reference_form || '|' || entity_type) FROM proper_nouns")
-    total_nouns = cursor.fetchone()[0]
-
-    # Task progress
     tasks = []
 
-    # 1. Mythic/skeptic analysis
-    cursor.execute("SELECT COUNT(*) FROM passages WHERE references_mythic_era IS NOT NULL")
-    done = cursor.fetchone()[0]
-    tasks.append({"name": "Mythic/skeptic analysis", "script": "mythic_sceptic_analyser.py",
-                  "batch_size": 50, "total": total_passages, "done": done})
+    add_task(
+        name="Passage mythic/skeptic labels",
+        area="Core labels",
+        script="mythic_sceptic_analyser.py",
+        batch_size=50,
+        done=fetch_scalar("SELECT COUNT(*) FROM passages WHERE references_mythic_era IS NOT NULL"),
+        total=total_passages,
+        details="Passage-level mythic-era and scepticism flags.",
+    )
+    add_task(
+        name="Proper-noun extraction",
+        area="Names and places",
+        script="extract_proper_nouns.py",
+        batch_size=50,
+        done=count_if_table(
+            "noun_extraction_status",
+            "SELECT COUNT(*) FROM noun_extraction_status WHERE is_processed",
+        ),
+        total=total_passages,
+        details="Sections processed for proper nouns.",
+    )
+    add_task(
+        name="Wikidata linking",
+        area="Names and places",
+        script="link_wikidata.py",
+        batch_size=100,
+        done=count_if_table("wikidata_links", "SELECT COUNT(*) FROM wikidata_links"),
+        total=total_nouns,
+        details="Unique name/type pairs linked or reviewed.",
+    )
+    add_task(
+        name="Translation",
+        area="Text preparation",
+        script="translate_pausanias.py",
+        batch_size=50,
+        done=count_if_table(
+            "translations",
+            """
+            SELECT COUNT(*)
+            FROM translations
+            WHERE english_translation IS NOT NULL
+              AND btrim(english_translation) <> ''
+            """,
+        ),
+        total=total_passages,
+        details="Passage-level English translations.",
+    )
+    add_task(
+        name="Sentence splitting",
+        area="Text preparation",
+        script="split_sentences.py",
+        batch_size=200,
+        done=passages_with_sentences,
+        total=total_passages,
+        details=f"{total_sentences:,} aligned Greek/English sentences available.",
+    )
+    add_task(
+        name="Passage summaries",
+        area="Text preparation",
+        script="summarise_passages.py",
+        batch_size=50,
+        done=count_if_table("passage_summaries", "SELECT COUNT(*) FROM passage_summaries"),
+        total=total_passages,
+        details="Short summaries used on reader pages.",
+    )
 
-    # 2. Proper noun extraction
-    cursor.execute("SELECT COUNT(*) FROM noun_extraction_status")
-    done = cursor.fetchone()[0]
-    tasks.append({"name": "Proper noun extraction", "script": "extract_proper_nouns.py",
-                  "batch_size": 50, "total": total_passages, "done": done})
+    passage_predictor_tables = (
+        "mythicness_predictors",
+        "skepticism_predictors",
+        "simplified_mythicness_predictors",
+        "simplified_skepticism_predictors",
+    )
+    add_task(
+        name="Passage predictor models",
+        area="Statistical models",
+        script="find_predictors.py",
+        done=predictor_done(*passage_predictor_tables),
+        total=len(passage_predictor_tables),
+        cadence="refresh",
+        details="Full and simplified passage-level TF-IDF models.",
+    )
 
-    # 3. Wikidata linking
-    cursor.execute("SELECT COUNT(*) FROM wikidata_links")
-    done = cursor.fetchone()[0]
-    tasks.append({"name": "Wikidata linking", "script": "link_wikidata.py",
-                  "batch_size": 100, "total": total_nouns, "done": done})
+    sentence_predictor_tables = (
+        "sentence_mythicness_predictors",
+        "sentence_skepticism_predictors",
+        "sentence_simplified_mythicness_predictors",
+        "sentence_simplified_skepticism_predictors",
+    )
+    add_task(
+        name="Sentence predictor models",
+        area="Statistical models",
+        script="find_sentence_predictors.py",
+        done=predictor_done(*sentence_predictor_tables),
+        total=len(sentence_predictor_tables),
+        cadence="refresh",
+        details="Sentence-level TF-IDF model artifacts.",
+    )
+    add_task(
+        name="Proper-noun network",
+        area="Names and places",
+        script="analyse_noun_network.py",
+        done=count_if_table(
+            "noun_centrality",
+            "SELECT COUNT(DISTINCT reference_form || '|' || entity_type) FROM noun_centrality",
+        ),
+        total=total_nouns,
+        cadence="refresh",
+        details="Co-occurrence network and centrality rows.",
+    )
 
-    # 4. Translation
-    cursor.execute("SELECT COUNT(*) FROM translations")
-    done = cursor.fetchone()[0]
-    tasks.append({"name": "Translation", "script": "translate_pausanias.py",
-                  "batch_size": 50, "total": total_passages, "done": done})
+    greta_both_status = format_status_counts(
+        status_counts(
+            "sentence_tagging_runs",
+            "mode = %s AND prompt_version = %s",
+            ("greta-both-batch", GRETA_INSPIRED_CLASSIFIER_VERSION),
+        )
+    )
+    add_task(
+        name="Greta-inspired sentence tags",
+        area="Sentence labels",
+        script="sentence_tagging_daily.sh",
+        batch_size=max(1, 1_500_000 // 680),
+        cadence="Batch API, ~2,205/day",
+        done=count_if_table(
+            "sentence_greta_both_tags",
+            "SELECT COUNT(*) FROM sentence_greta_both_tags WHERE prompt_version = %s",
+            (GRETA_INSPIRED_CLASSIFIER_VERSION,),
+        ),
+        total=sentence_total_target,
+        details=greta_both_status or "Calibrated two-flag production sentence tagger.",
+    )
+    greta_status = format_status_counts(
+        status_counts(
+            "sentence_tagging_runs",
+            "mode = %s AND prompt_version = %s",
+            ("greta-batch", ORIGINAL_CLASSIFIER_VERSION),
+        )
+    )
+    add_task(
+        name="Original sentence tags",
+        area="Sentence labels",
+        script="sentence_tagging_daily.sh",
+        batch_size=max(1, 500_000 // 545),
+        cadence="Batch API, ~917/day",
+        done=count_if_table(
+            "sentence_greta_tags",
+            "SELECT COUNT(*) FROM sentence_greta_tags WHERE prompt_version = %s",
+            (ORIGINAL_CLASSIFIER_VERSION,),
+        ),
+        total=sentence_total_target,
+        details=greta_status or "Original single-bucket production comparison tagger.",
+    )
+    legacy_status = format_status_counts(
+        status_counts(
+            "sentence_tagging_runs",
+            "mode = %s",
+            ("legacy-batch",),
+        )
+    )
+    add_task(
+        name="Legacy sentence classifier",
+        area="Sentence labels",
+        script="sentence_tagging_daily.sh",
+        batch_size=5,
+        cadence="5/day comparison",
+        done=count_if_table(
+            "greek_sentences",
+            "SELECT COUNT(*) FROM greek_sentences WHERE references_mythic_era IS NOT NULL",
+        ),
+        total=sentence_total_target,
+        details=legacy_status or "Slow legacy boolean classifier retained for comparison.",
+    )
 
-    # 5. Sentence splitting
-    tasks.append({"name": "Sentence splitting", "script": "split_sentences.py",
-                  "batch_size": 20, "total": total_passages, "done": passages_with_sentences})
+    grammar_done = count_if_table(
+        "sentence_llm_grammar_analyses",
+        """
+        SELECT COUNT(*)
+        FROM sentence_llm_grammar_analyses
+        WHERE model = %s
+          AND prompt_version = %s
+        """,
+        (DEFAULT_LLM_GRAMMAR_MODEL, "greek-sentence-grammar-v1"),
+    )
+    grammar_tokens = 0
+    if table_exists(conn, "sentence_llm_grammar_analyses"):
+        grammar_tokens = fetch_scalar(
+            """
+            SELECT COALESCE(SUM(input_tokens + output_tokens), 0)
+            FROM sentence_llm_grammar_analyses
+            WHERE model = %s
+              AND prompt_version = %s
+            """,
+            (DEFAULT_LLM_GRAMMAR_MODEL, "greek-sentence-grammar-v1"),
+        )
+    grammar_batch_size = 400
+    if grammar_done and grammar_tokens:
+        grammar_batch_size = max(1, int(1_000_000 // max(1, grammar_tokens / grammar_done)))
+    grammar_status = format_status_counts(
+        status_counts(
+            "sentence_llm_grammar_runs",
+            "model = %s AND prompt_version = %s",
+            (DEFAULT_LLM_GRAMMAR_MODEL, "greek-sentence-grammar-v1"),
+        )
+    )
+    add_task(
+        name="LLM grammar analysis",
+        area="Grammar",
+        script="sentence_llm_grammar_daily.sh",
+        batch_size=grammar_batch_size,
+        cadence=f"1M tokens/day, ~{grammar_batch_size:,}/day",
+        done=grammar_done,
+        total=sentence_total_target,
+        details=grammar_status or "LLM-generated CoNLL-U-style grammar parses.",
+    )
 
-    # 6. Summarisation
-    cursor.execute("SELECT COUNT(*) FROM passage_summaries")
-    done = cursor.fetchone()[0]
-    tasks.append({"name": "Passage summarisation", "script": "summarise_passages.py",
-                  "batch_size": 50, "total": total_passages, "done": done})
+    discourse_status = format_status_counts(
+        status_counts(
+            "sentence_tagging_runs",
+            "mode = %s AND prompt_version = %s",
+            ("discourse-batch", DISCOURSE_MODE_PROMPT_VERSION),
+        )
+    )
+    add_task(
+        name="Discourse mode sentence tags",
+        area="Sentence labels",
+        script="sentence_tagging_daily.sh",
+        batch_size=max(1, 100_000 // 1000),
+        cadence="Batch API, 100k tokens/day",
+        done=count_if_table(
+            "sentence_discourse_mode_tags",
+            "SELECT COUNT(*) FROM sentence_discourse_mode_tags WHERE prompt_version = %s",
+            (DISCOURSE_MODE_PROMPT_VERSION,),
+        ),
+        total=grammar_done,
+        details=(
+            discourse_status
+            or "Pilot classifier over the grammar-parsed subset for aorist content controls."
+        ),
+    )
 
-    # 7. Sentence classification (total is estimated based on avg sentences per passage)
-    cursor.execute("SELECT COUNT(*) FROM greek_sentences WHERE references_mythic_era IS NOT NULL")
-    done = cursor.fetchone()[0]
-    tasks.append({"name": "Sentence classification", "script": "sentence_mythic_sceptic_analyser.py",
-                  "batch_size": 25, "total": estimated_total_sentences, "done": done})
+    if has_tables("sentence_udpipe_analyses"):
+        add_task(
+            name="UDPipe grammar analysis",
+            area="Grammar",
+            script="sentence_udpipe.py",
+            cadence="parser pass",
+            done=count_if_table(
+                "sentence_udpipe_analyses",
+                "SELECT COUNT(*) FROM sentence_udpipe_analyses",
+            ),
+            total=sentence_total_target,
+            details=format_status_counts(status_counts("sentence_udpipe_runs")),
+        )
+    if has_tables("sentence_trankit_analyses"):
+        add_task(
+            name="Trankit grammar analysis",
+            area="Grammar",
+            script="sentence_trankit.py",
+            cadence="parser pass",
+            done=count_if_table(
+                "sentence_trankit_analyses",
+                "SELECT COUNT(*) FROM sentence_trankit_analyses",
+            ),
+            total=sentence_total_target,
+            details=format_status_counts(status_counts("sentence_trankit_runs")),
+        )
 
-    # Calculate percentages and estimated completion
-    for task in tasks:
-        task["percent"] = round(100 * task["done"] / task["total"], 1) if task["total"] > 0 else 0
-        remaining = task["total"] - task["done"]
-        if remaining <= 0:
-            task["est_completion"] = "Done"
-        else:
-            days_needed = ceil(remaining / task["batch_size"])
-            est_date = today + timedelta(days=days_needed)
-            task["est_completion"] = est_date.isoformat()
+    if has_tables("sentence_lemmatizations"):
+        add_task(
+            name="Sentence lemmatization",
+            area="Lemmas",
+            script="sentence_lemmatizer.py",
+            cadence="auxiliary LLM pass",
+            done=count_if_table(
+                "sentence_lemmatizations",
+                "SELECT COUNT(*) FROM sentence_lemmatizations",
+            ),
+            total=sentence_total_target,
+            details=format_status_counts(status_counts("sentence_lemmatization_runs")),
+        )
+    if has_tables("greek_word_lemmas"):
+        word_status = format_status_counts(status_counts("word_lemmatization_runs"))
+        add_task(
+            name="Word-form lemmatization",
+            area="Lemmas",
+            script="word_lemmatizer.py",
+            cadence="Batch API/ad hoc",
+            done=count_if_table("greek_word_lemmas", "SELECT COUNT(*) FROM greek_word_lemmas"),
+            total=None,
+            status="Tracking",
+            details=word_status or "Distinct Greek surface forms with lemma choices.",
+        )
+
+    people_status = format_status_counts(
+        status_counts(
+            "section_people_runs",
+            "prompt_version = %s",
+            (SECTION_PEOPLE_PROMPT_VERSION,),
+        )
+    )
+    people_mentions = count_if_table(
+        "section_people_mentions",
+        "SELECT COUNT(*) FROM section_people_mentions WHERE prompt_version = %s",
+        (SECTION_PEOPLE_PROMPT_VERSION,),
+    )
+    people_done = None
+    if has_tables("section_people_batch_items", "section_people_runs"):
+        people_done = fetch_scalar(
+            """
+            SELECT COUNT(DISTINCT bi.passage_id)
+            FROM section_people_batch_items bi
+            JOIN section_people_runs r ON r.run_id = bi.run_id
+            WHERE bi.status = 'completed'
+              AND r.prompt_version = %s
+              AND r.status IN ('completed', 'completed_with_failures')
+            """,
+            (SECTION_PEOPLE_PROMPT_VERSION,),
+        )
+    add_task(
+        name="People/name analysis",
+        area="Names and gender",
+        script="section_people_daily.sh",
+        batch_size=max(1, 100_000 // 2_500),
+        cadence="Batch API, ~40 sections/day",
+        done=people_done,
+        total=total_passages,
+        details=(
+            f"{people_status}; {int(people_mentions or 0):,} mention rows"
+            if people_status or people_mentions
+            else "Named and anonymous person mentions by sentence."
+        ),
+    )
 
     # Token usage by source
     token_sources = [
@@ -4463,16 +6489,31 @@ def get_progress_data(conn):
         ("Translation", "translations"),
         ("Summarisation", "passage_summaries"),
         ("Phrase translation", "phrase_translations"),
+        ("Sentence tagging", "sentence_tagging_runs"),
+        ("LLM grammar", "sentence_llm_grammar_runs"),
+        ("Sentence lemmatization", "sentence_lemmatization_runs"),
+        ("Word lemmatization", "word_lemmatization_runs"),
+        ("Section people extraction", "section_people_runs"),
     ]
     token_usage = []
     for label, table in token_sources:
-        try:
-            cursor.execute(f"SELECT COALESCE(SUM(input_tokens),0), COALESCE(SUM(output_tokens),0) FROM {table}")
-            inp, out = cursor.fetchone()
-            token_usage.append({"name": label, "input_tokens": inp, "output_tokens": out,
-                                "total_tokens": inp + out})
-        except Exception:
-            pass
+        if not table_exists(conn, table):
+            continue
+        cursor.execute(
+            f"""
+            SELECT COALESCE(SUM(input_tokens),0), COALESCE(SUM(output_tokens),0)
+            FROM {table}
+            """
+        )
+        inp, out = cursor.fetchone()
+        token_usage.append(
+            {
+                "name": label,
+                "input_tokens": int(inp or 0),
+                "output_tokens": int(out or 0),
+                "total_tokens": int((inp or 0) + (out or 0)),
+            }
+        )
 
     return {"tasks": tasks, "token_usage": token_usage}
 

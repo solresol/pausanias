@@ -49,3 +49,12 @@ run_batch \
   --stop-after 5 \
   --priority-books-last 4,8 \
   --skip-if-submitted-hours 6
+
+run_batch \
+  --mode discourse \
+  --use-batch-api \
+  --model gpt-5.4-mini \
+  --token-budget 100000 \
+  --random-order \
+  --sample-seed discourse-mode-v1 \
+  --skip-if-submitted-hours 18

@@ -27,10 +27,23 @@ GRETA_BATCH_PROMPT_VERSION = "original-myth-history-other"
 GRETA_BOTH_BATCH_PROMPT_VERSION = "greta-inspired-myth-history-other"
 DEFAULT_GRETA_MODEL = "gpt-5.4-mini"
 DEFAULT_LEGACY_MODEL = "gpt-5"
+DEFAULT_DISCOURSE_MODEL = "gpt-5.4-mini"
 DEFAULT_GRETA_TOKENS_PER_SENTENCE = 545
 DEFAULT_GRETA_BOTH_TOKENS_PER_SENTENCE = 680
 DEFAULT_LEGACY_TOKENS_PER_SENTENCE = 540
+DEFAULT_DISCOURSE_TOKENS_PER_SENTENCE = 1000
+DISCOURSE_MODE_PROMPT_VERSION = "discourse-mode-v1"
+DEFAULT_GRAMMAR_MODEL = "gpt-5.4-mini"
+DEFAULT_GRAMMAR_PROMPT_VERSION = "greek-sentence-grammar-v1"
 GRETA_MODES = {"greta", "greta-both"}
+DISCOURSE_MODES = [
+    "route_locative_description",
+    "monument_catalogue",
+    "historical_narrative",
+    "mythological_narrative",
+    "ritual_ethnographic_description",
+    "sources_traditions_discussion",
+]
 TERMINAL_RUN_STATUSES = (
     "completed",
     "completed_with_failures",
@@ -106,7 +119,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument("--openai-api-key-file", default="~/.openai.key")
     parser.add_argument(
         "--mode",
-        choices=("greta", "greta-both", "legacy"),
+        choices=("greta", "greta-both", "legacy", "discourse"),
         default="greta",
     )
     parser.add_argument("--model", default=None)
@@ -129,6 +142,14 @@ def parse_arguments() -> argparse.Namespace:
         default="4,8",
         help="Comma-separated book numbers to leave until other books are submitted.",
     )
+    parser.add_argument(
+        "--random-order",
+        action="store_true",
+        help="Process untagged sentences in seeded pseudo-random order.",
+    )
+    parser.add_argument("--sample-seed", default=DISCOURSE_MODE_PROMPT_VERSION)
+    parser.add_argument("--grammar-model", default=DEFAULT_GRAMMAR_MODEL)
+    parser.add_argument("--grammar-prompt-version", default=DEFAULT_GRAMMAR_PROMPT_VERSION)
     parser.add_argument("--batch-file", default=None)
     parser.add_argument("--batch-run-id", default=None)
     parser.add_argument("--use-batch-api", action="store_true")
@@ -147,6 +168,8 @@ def parse_arguments() -> argparse.Namespace:
 def mode_model(args: argparse.Namespace) -> str:
     if args.model:
         return args.model
+    if args.mode == "discourse":
+        return DEFAULT_DISCOURSE_MODEL
     return DEFAULT_GRETA_MODEL if args.mode in GRETA_MODES else DEFAULT_LEGACY_MODEL
 
 
@@ -157,6 +180,8 @@ def mode_prompt_version(args: argparse.Namespace) -> str:
         return GRETA_BATCH_PROMPT_VERSION
     if args.mode == "greta-both":
         return GRETA_BOTH_BATCH_PROMPT_VERSION
+    if args.mode == "discourse":
+        return DISCOURSE_MODE_PROMPT_VERSION
     return LEGACY_PROMPT_VERSION
 
 
@@ -167,6 +192,8 @@ def mode_tokens_per_sentence(args: argparse.Namespace) -> int:
         return DEFAULT_GRETA_TOKENS_PER_SENTENCE
     if args.mode == "greta-both":
         return DEFAULT_GRETA_BOTH_TOKENS_PER_SENTENCE
+    if args.mode == "discourse":
+        return DEFAULT_DISCOURSE_TOKENS_PER_SENTENCE
     return DEFAULT_LEGACY_TOKENS_PER_SENTENCE
 
 
@@ -266,6 +293,37 @@ def greta_both_tool() -> list[dict]:
     ]
 
 
+def discourse_tool() -> list[dict]:
+    return [
+        {
+            "type": "function",
+            "function": {
+                "name": "save_discourse_mode_tag",
+                "description": "Save the main discourse mode for one Pausanias sentence.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "discourse_mode": {
+                            "type": "string",
+                            "enum": DISCOURSE_MODES,
+                            "description": "The sentence's primary discourse mode.",
+                        },
+                        "confidence": {
+                            "type": "string",
+                            "enum": ["high", "medium", "low"],
+                        },
+                        "rationale": {
+                            "type": "string",
+                            "description": "One short reason for the mode choice.",
+                        },
+                    },
+                    "required": ["discourse_mode", "confidence", "rationale"],
+                },
+            },
+        }
+    ]
+
+
 def greta_completion_body(
     *, model: str, passage_id: str, sentence_number: int, sentence: str, english_sentence: str
 ) -> dict:
@@ -351,6 +409,54 @@ def greta_both_completion_body(
     }
 
 
+def discourse_completion_body(
+    *, model: str, passage_id: str, sentence_number: int, sentence: str, english_sentence: str
+) -> dict:
+    system_prompt = (
+        "You are classifying single sentences of Pausanias by discourse mode. "
+        "Choose exactly one primary mode for THIS sentence only, using the Greek "
+        "and English together. Do not inherit a mode from neighboring sentences.\n\n"
+        "Available modes:\n"
+        "- route_locative_description: route sequence, distance, direction, topography, "
+        "location, or physical/geographical description whose main work is orienting the reader.\n"
+        "- monument_catalogue: bare notice, catalogue, attribution, dedication, inscription, "
+        "artist note, or physical description of temples, statues, tombs, altars, images, "
+        "buildings, offerings, or other monuments.\n"
+        "- historical_narrative: narration or assertion of post-roughly-500-BCE human, "
+        "political, military, institutional, biographical, or dedicatory events.\n"
+        "- mythological_narrative: narration or assertion involving gods, heroes, mythic "
+        "genealogy, foundation legend, heroic deed, divine action, or mythic etiology.\n"
+        "- ritual_ethnographic_description: ritual procedure, cult practice, festival, "
+        "sacrifice, local custom, ethnographic description, or social practice, without "
+        "primarily narrating an event.\n"
+        "- sources_traditions_discussion: explicit discussion of sources, variants, local "
+        "traditions, reports, sayings, Pausanias' judgment, disagreement, or source reliability.\n\n"
+        "If a sentence mentions a monument while mainly narrating why it exists, choose "
+        "the narrative or sources mode. If it simply says what is there or who made/dedicated "
+        "it, choose monument_catalogue. If it mainly tells how to move through or locate "
+        "places, choose route_locative_description. When genuinely unsure, choose the mode "
+        "that best describes the sentence's main rhetorical job and use medium or low confidence."
+    )
+    user_content = (
+        f"Passage {passage_id}, sentence {sentence_number}:\n\n"
+        f"Greek:\n{sentence}\n\nEnglish:\n{english_sentence}\n\n"
+        "Classify this sentence using the save_discourse_mode_tag function."
+    )
+    return {
+        "model": model,
+        "temperature": 0,
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_content},
+        ],
+        "tools": discourse_tool(),
+        "tool_choice": {
+            "type": "function",
+            "function": {"name": "save_discourse_mode_tag"},
+        },
+    }
+
+
 def legacy_completion_body(
     *, model: str, passage_id: str, sentence_number: int, sentence: str, english_sentence: str
 ) -> dict:
@@ -388,6 +494,8 @@ def completion_body(args: argparse.Namespace, row: dict) -> dict:
         return greta_completion_body(**kwargs)
     if args.mode == "greta-both":
         return greta_both_completion_body(**kwargs)
+    if args.mode == "discourse":
+        return discourse_completion_body(**kwargs)
     return legacy_completion_body(**kwargs)
 
 
@@ -448,10 +556,16 @@ def unprocessed_sql(args: argparse.Namespace) -> str:
     prompt_version = mode_prompt_version(args)
     limit = request_limit(args)
     limit_clause = f"LIMIT {int(limit)}" if limit else ""
-    order_by = priority_order_sql(
-        parse_list(args.priority_books_first),
-        parse_list(args.priority_books_last),
-    )
+    if args.random_order:
+        order_by = (
+            "md5(s.passage_id || ':' || s.sentence_number::text || ':' || "
+            f"{sql_string(args.sample_seed)})"
+        )
+    else:
+        order_by = priority_order_sql(
+            parse_list(args.priority_books_first),
+            parse_list(args.priority_books_last),
+        )
     terminal_statuses = pending_status_sql()
     pending_clause = f"""
       AND NOT EXISTS (
@@ -483,6 +597,24 @@ def unprocessed_sql(args: argparse.Namespace) -> str:
       AND NOT EXISTS (
           SELECT 1
           FROM sentence_greta_both_tags t
+          WHERE t.passage_id = s.passage_id
+            AND t.sentence_number = s.sentence_number
+            AND t.prompt_version = {sql_string(prompt_version)}
+      )
+"""
+    elif args.mode == "discourse":
+        work_clause = f"""
+      AND EXISTS (
+          SELECT 1
+          FROM sentence_llm_grammar_analyses g
+          WHERE g.passage_id = s.passage_id
+            AND g.sentence_number = s.sentence_number
+            AND g.model = {sql_string(args.grammar_model)}
+            AND g.prompt_version = {sql_string(args.grammar_prompt_version)}
+      )
+      AND NOT EXISTS (
+          SELECT 1
+          FROM sentence_discourse_mode_tags t
           WHERE t.passage_id = s.passage_id
             AND t.sentence_number = s.sentence_number
             AND t.prompt_version = {sql_string(prompt_version)}
@@ -784,7 +916,8 @@ COPY (
       AND mode IN (
           'greta-batch',
           'greta-both-batch',
-          'legacy-batch'
+          'legacy-batch',
+          'discourse-batch'
       )
       AND openai_batch_id IS NOT NULL
       AND retrieved_at IS NULL
@@ -983,6 +1116,45 @@ SET model = EXCLUDED.model,
 
 WITH payload AS (
     SELECT ${tag}${payload_json}${tag}$::jsonb AS j
+)
+INSERT INTO sentence_discourse_mode_tags (
+    passage_id, sentence_number, prompt_version, model, discourse_mode,
+    confidence, rationale, input_tokens, output_tokens, run_id, created_at
+)
+SELECT
+    x.passage_id,
+    x.sentence_number,
+    j->'run'->>'prompt_version',
+    j->'run'->>'model',
+    x.discourse_mode,
+    x.confidence,
+    x.rationale,
+    x.input_tokens,
+    x.output_tokens,
+    j->'run'->>'run_id',
+    j->'run'->>'completed_at'
+FROM payload,
+     jsonb_to_recordset(j->'discourse_tags') AS x(
+        passage_id text,
+        sentence_number integer,
+        discourse_mode text,
+        confidence text,
+        rationale text,
+        input_tokens integer,
+        output_tokens integer
+     )
+ON CONFLICT (passage_id, sentence_number, prompt_version) DO UPDATE
+SET model = EXCLUDED.model,
+    discourse_mode = EXCLUDED.discourse_mode,
+    confidence = EXCLUDED.confidence,
+    rationale = EXCLUDED.rationale,
+    input_tokens = EXCLUDED.input_tokens,
+    output_tokens = EXCLUDED.output_tokens,
+    run_id = EXCLUDED.run_id,
+    created_at = EXCLUDED.created_at;
+
+WITH payload AS (
+    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
 ), legacy_rows AS (
     SELECT x.*
     FROM payload,
@@ -1055,6 +1227,7 @@ def fetch_batches(
         item_updates = []
         greta_tags = []
         greta_both_tags = []
+        discourse_tags = []
         legacy_tags = []
         failures = []
         seen_requests = set()
@@ -1106,6 +1279,24 @@ def fetch_batches(
                                 references_mythic, references_historical
                             ),
                             "confidence": args.get("confidence") or "low",
+                            "rationale": args.get("rationale") or "",
+                            "input_tokens": input_tokens,
+                            "output_tokens": output_tokens,
+                        }
+                    )
+                elif output_mode == "discourse":
+                    discourse_mode = args.get("discourse_mode")
+                    if discourse_mode not in set(DISCOURSE_MODES):
+                        raise ValueError(f"Invalid discourse mode: {discourse_mode}")
+                    confidence = args.get("confidence")
+                    if confidence not in {"high", "medium", "low"}:
+                        confidence = "low"
+                    discourse_tags.append(
+                        {
+                            "passage_id": source["passage_id"],
+                            "sentence_number": source["sentence_number"],
+                            "discourse_mode": discourse_mode,
+                            "confidence": confidence,
                             "rationale": args.get("rationale") or "",
                             "input_tokens": input_tokens,
                             "output_tokens": output_tokens,
@@ -1173,6 +1364,7 @@ def fetch_batches(
         processed_count = (
             len(greta_tags)
             + len(greta_both_tags)
+            + len(discourse_tags)
             + len(legacy_tags)
         )
         status = "completed" if not failures else "completed_with_failures"
@@ -1196,6 +1388,7 @@ def fetch_batches(
             "items": item_updates,
             "greta_tags": greta_tags,
             "greta_both_tags": greta_both_tags,
+            "discourse_tags": discourse_tags,
             "legacy_tags": legacy_tags,
         }
         write_results(psql, payload)

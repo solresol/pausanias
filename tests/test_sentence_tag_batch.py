@@ -2,6 +2,7 @@ import argparse
 import unittest
 
 from sentence_tag_batch import (
+    DISCOURSE_MODE_PROMPT_VERSION,
     GRETA_BATCH_PROMPT_VERSION,
     GRETA_BOTH_BATCH_PROMPT_VERSION,
     bucket_from_flags,
@@ -21,6 +22,10 @@ def args_for_mode(mode):
         token_budget=None,
         priority_books_first="",
         priority_books_last="4,8",
+        random_order=False,
+        sample_seed="test-seed",
+        grammar_model="gpt-5.4-mini",
+        grammar_prompt_version="greek-sentence-grammar-v1",
     )
 
 
@@ -92,7 +97,7 @@ class SentenceTagBatchTests(unittest.TestCase):
             import argparse as _ap
 
             parser = _ap.ArgumentParser()
-            parser.add_argument("--mode", choices=("greta", "greta-both", "legacy"))
+            parser.add_argument("--mode", choices=("greta", "greta-both", "legacy", "discourse"))
             parser.parse_args(["--mode", "greta-both-context"])
 
     def test_priority_books_first_order_is_before_natural_order(self):
@@ -105,6 +110,28 @@ class SentenceTagBatchTests(unittest.TestCase):
             sql.index("ARRAY['3']"),
             sql.index("split_part(s.passage_id, '.', 1)::integer"),
         )
+
+    def test_discourse_completion_and_unprocessed_sql_use_grammar_subset(self):
+        args = args_for_mode("discourse")
+        body = completion_body(
+            args,
+            {
+                "passage_id": "7.1.1",
+                "sentence_number": 2,
+                "sentence": "Greek",
+                "english_sentence": "English",
+            },
+        )
+        tool = body["tools"][0]["function"]
+        self.assertEqual(mode_prompt_version(args), DISCOURSE_MODE_PROMPT_VERSION)
+        self.assertEqual(tool["name"], "save_discourse_mode_tag")
+        self.assertIn("route_locative_description", tool["parameters"]["properties"]["discourse_mode"]["enum"])
+        self.assertEqual(body["temperature"], 0)
+
+        sql = unprocessed_sql(args)
+        self.assertIn("sentence_llm_grammar_analyses", sql)
+        self.assertIn("sentence_discourse_mode_tags", sql)
+        self.assertIn("greek-sentence-grammar-v1", sql)
 
 
 if __name__ == "__main__":

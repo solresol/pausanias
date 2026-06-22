@@ -3,6 +3,7 @@
 set -eu
 
 export PATH="$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
+export PYTHONUNBUFFERED="${PYTHONUNBUFFERED:-1}"
 
 cd "$(dirname "$0")"
 
