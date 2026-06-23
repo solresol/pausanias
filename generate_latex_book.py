@@ -405,7 +405,11 @@ def generate_greek_book_preamble():
   ItalicFont={FreeSerifItalic.otf},
   BoldItalicFont={FreeSerifBoldItalic.otf}
 ]
-\setsansfont{FreeSans.otf}
+\setsansfont{FreeSans.otf}[
+  BoldFont={FreeSansBold.otf},
+  ItalicFont={FreeSansOblique.otf},
+  BoldItalicFont={FreeSansBoldOblique.otf}
+]
 \setmonofont{lmmono10-regular.otf}
 
 \usepackage{microtype}
@@ -423,7 +427,7 @@ def generate_greek_book_preamble():
 \definecolor{pausaniasblue}{HTML}{1F4E5F}
 \definecolor{passagegray}{HTML}{666666}
 
-\setlrmarginsandblock{0.95in}{1.15in}{*}
+\setlrmarginsandblock{0.75in}{0.85in}{*}
 \setulmarginsandblock{1.0in}{1.05in}{*}
 \checkandfixthelayout
 
@@ -434,10 +438,12 @@ def generate_greek_book_preamble():
 
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{0.55\baselineskip}
+\emergencystretch=4em
+\tolerance=2500
 \newcommand{\passageheading}[1]{%
   \par\needspace{3\baselineskip}%
   \phantomsection%
-  {\small\bfseries\color{pausaniasblue}\texttt{#1}}\quad%
+  {\small\color{pausaniasblue}\texttt{#1}}\quad%
 }
 \newcommand{\greektext}[1]{{\large #1\par}}
 
