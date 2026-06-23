@@ -119,6 +119,38 @@ class GraphicBookReaderTests(unittest.TestCase):
             self.assertNotIn("grammar/1/1/4.html", unlinked_html)
             self.assertNotIn("Open grammar parses for this passage", unlinked_html)
 
+    def test_translation_pages_do_not_show_passage_classifier_badges(self):
+        with TemporaryDirectory() as tmpdir:
+            output_dir = Path(tmpdir) / "site"
+            (output_dir / "css").mkdir(parents=True)
+
+            passages = [
+                {
+                    "id": "1.1.3",
+                    "greek": "Greek text 3",
+                    "english": "English text 3",
+                    "is_mythic": True,
+                    "is_skeptical": False,
+                },
+            ]
+
+            generate_translation_pages(
+                passages,
+                nouns_by_passage={},
+                noun_passages={},
+                output_dir=output_dir,
+                title="Pausanias",
+            )
+
+            passage_html = (output_dir / "translation" / "1" / "1" / "3.html").read_text(
+                encoding="utf-8"
+            )
+
+            self.assertNotIn("classification-badges", passage_html)
+            self.assertNotIn("badge-mythic", passage_html)
+            self.assertNotIn("Mythic", passage_html)
+            self.assertNotIn("Non-skeptical", passage_html)
+
     def test_generates_passage_level_grammar_pages(self):
         with TemporaryDirectory() as tmpdir:
             output_dir = Path(tmpdir) / "site"

@@ -619,6 +619,21 @@ def generate_texts_index(output_dir, title):
                 <a href="../pausanias.pdf">Open Text PDF</a>
             </section>
             <section class="hub-card">
+                <h3>Greek Text PDF</h3>
+                <p>Continuous Greek text with book maps, table of contents, passage index, and name indices.</p>
+                <a href="../pausanias-greek.pdf">Open Greek Text PDF</a>
+            </section>
+            <section class="hub-card">
+                <h3>Greek Checklist PDF</h3>
+                <p>Greek sentence review sheet with passage IDs, annotation boxes, and April tags.</p>
+                <a href="../pausanias-greek-checklist.pdf">Open Greek Checklist PDF</a>
+            </section>
+            <section class="hub-card">
+                <h3>Greek-English Parallel PDF</h3>
+                <p>Aligned Greek and English sentence table for the full text.</p>
+                <a href="../pausanias-greek-english-parallel.pdf">Open Parallel PDF</a>
+            </section>
+            <section class="hub-card">
                 <h3>Graphic Book HTML</h3>
                 <p>Illustrated passage-by-passage graphic-book reader.</p>
                 <a href="../graphic-book/index.html">Open Graphic Book</a>
@@ -7387,18 +7402,6 @@ def generate_translation_pages(
             nb, nc, ns, np_ = passage_order[idx + 1]
             next_link = f'<a href="{prefix}translation/{nb}/{nc}/{ns}.html" class="nav-next">{np_["id"]} &rarr;</a>'
 
-        # Classification badges
-        badges = []
-        if passage["is_mythic"] is not None:
-            label = "Mythic" if passage["is_mythic"] else "Historical"
-            css_class = "badge-mythic" if passage["is_mythic"] else "badge-historical"
-            badges.append(f'<span class="badge {css_class}">{label}</span>')
-        if passage["is_skeptical"] is not None:
-            label = "Skeptical" if passage["is_skeptical"] else "Non-skeptical"
-            css_class = "badge-skeptical" if passage["is_skeptical"] else "badge-non-skeptical"
-            badges.append(f'<span class="badge {css_class}">{label}</span>')
-        badges_html = " ".join(badges)
-
         # Proper nouns
         nouns = nouns_by_passage.get(pid, [])
         nouns_html = ""
@@ -7531,7 +7534,6 @@ def generate_translation_pages(
         </div>
 
         <h2>Passage {pid}{f": {html.escape(summaries[pid])}" if summaries and pid in summaries else ""}</h2>
-        <div class="classification-badges">{badges_html}</div>
 
         <div class="translation-greek">
             <h3>Greek Text</h3>
@@ -7586,20 +7588,6 @@ def generate_translation_pages(
 .nav-prev:hover, .nav-next:hover {
     background-color: #eee9e3;
 }
-.classification-badges {
-    margin-bottom: 15px;
-}
-.badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 12px;
-    font-size: 0.85em;
-    margin-right: 8px;
-}
-.badge-mythic { background-color: #fde8e4; color: #cc3300; }
-.badge-historical { background-color: #e4eefb; color: #0066cc; }
-.badge-skeptical { background-color: #e4f5e9; color: #009933; }
-.badge-non-skeptical { background-color: #fef3e4; color: #cc6600; }
 .translation-greek, .translation-english {
     margin-bottom: 20px;
 }
