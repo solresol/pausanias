@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: scenic inset for a Pausanias graphic-book page
+Primary request: create a refined historical landscape illustration of Cestrinus leading consenting Epeirotes across the river Thyamis into the territory beyond it, while Pielus remains in Epirus. Show a rugged north-west Greek river valley, mountains, stone track, small Epirote settlement, modest traveling group with pack animals, and a sense of divided inheritance after Helenus' death. Historically grounded Hellenistic/Epirote clothing and shields; figures modest and secondary to the landscape.
+Style/medium: sophisticated watercolor and gouache historical atlas art on parchment, rich and atmospheric, high-detail terrain and river light, coffee-table book quality.
+Composition/framing: wide landscape inset, 4:3 or 16:9, river diagonal with ford or crossing, settlement and mountains for orientation, clean sky/riverbank areas for later local labels.
+Lighting/mood: warm morning light, clear mountain air, dignified migration rather than battle.
+Color palette: parchment gold, olive greens, gray limestone, blue-green river, muted bronze and red accents.
+Text: none.
+Constraints: no written labels, no inscriptions, no maps, no modern objects, no visible nudity, no gore, no cartoon styling, no flat vector terrain, no classroom diagram, no watermark.

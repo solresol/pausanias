@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: main art panel for a Pausanias graphic-book page
+Primary request: create a rich, historically grounded illustrated scene of Pergamus, son of Pyrrhus and Andromache, arriving in Teuthrania in Mysia after a single combat over sovereignty. The city that will become Pergamum rises on a steep acropolis above a river plain in western Anatolia; a defeated local ruler's standard and bronze arms lie near the foreground, while Pergamus and a small Epirote-Trojan retinue stand with restrained dignity. Include Andromache nearby as an older royal woman in modest draped clothing, no nudity. The scene should provide clear spatial orientation: fortified hill-city, lower settlement, Anatolian mountains, road from the coast, and a distant Aegean/Mysian landscape.
+Style/medium: sophisticated painterly historical illustration, watercolor and gouache over parchment, archaeological reconstruction, coffee-table atlas quality; comparable in ambition to a richly illustrated historical atlas page, not a comic or diagram.
+Composition/framing: wide landscape view, 16:9, high-detail city approach; foreground figures small enough that the city/topography dominates. Leave clean areas in sky and land where local labels can be overlaid later.
+Lighting/mood: warm late afternoon Mediterranean light, atmospheric mountains, realistic stone, bronze, dust, cypress and scrub.
+Color palette: parchment ochres, muted greens, stone, bronze, blue-gray distant hills; refined, varied, not monochrome.
+Text: none.
+Constraints: no written labels, no inscriptions, no maps, no modern objects, no visible nudity, no eroticized poses, no gore, no cartoon styling, no flat vector terrain, no classroom diagram, no watermark.
