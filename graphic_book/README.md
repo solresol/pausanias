@@ -62,19 +62,34 @@ Use:
 ./sync_graphic_book_images.sh pull
 ```
 
-If an S3 primary is configured later, set:
+The S3 mirror for graphic-book image assets is:
 
 ```bash
-PAUSANIAS_GRAPHIC_BOOK_S3_URI=s3://bucket-or-prefix
+PAUSANIAS_GRAPHIC_BOOK_S3_URI=s3://pausanias-graphic-book-assets-849621205733
 ```
 
-and `sync_graphic_book_images.sh push` will also sync the image tree to S3.
+The finished page images under `graphic_book/images/` still sync with:
 
-The renderer source files and the smaller generated component artwork under
-`graphic_book/assets/generated/` are tracked in Git because they are needed to
-rebuild a passage page. The completed passage pages under `graphic_book/images/`
-remain ignored and externally mirrored because the final image corpus is the
-bulk output.
+```bash
+./sync_graphic_book_images.sh push
+./sync_graphic_book_images.sh pull
+```
+
+The source/component image binaries under `graphic_book/assets/generated/` and
+the PDF title page image under `graphic_book/assets/pausanias-title-page.png`
+are S3-backed local cache files, not Git-tracked source. Hydrate or publish that
+cache with:
+
+```bash
+./sync_graphic_book_assets.sh pull
+./sync_graphic_book_assets.sh push
+./sync_graphic_book_assets.sh verify
+```
+
+`graphic_book/assets/manifest.jsonl` is the Git-tracked checksum manifest for
+those cached image files. Renderer source files, prompt text, page plans, and
+generation reports remain tracked in Git because they explain how a page was
+built and reviewed.
 
 ## Visual Quality Baseline
 

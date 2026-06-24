@@ -88,8 +88,12 @@ psql "$PAUSANIAS_DATABASE_URL" -c "INSERT INTO manual_stopwords(word) VALUES ('A
 
 - Generated site: `pausanias_site/` → rsynced to
   `merah:/var/www/vhosts/pausanias.symmachus.org/htdocs/`.
-- Graphic-book images live outside the repo and sync via
+- Finished graphic-book pages live outside the repo and sync via
   `sync_graphic_book_images.sh [push|pull]` (rsync to raksasa, optional S3).
+- Graphic-book source/component image binaries are an S3-backed local cache
+  managed by `sync_graphic_book_assets.sh [push|pull|verify]`; keep prompt text,
+  page plans, render scripts, and `graphic_book/assets/manifest.jsonl` in Git,
+  but do not track `graphic_book/assets/generated/**/*.png|jpg|jpeg|webp`.
 
 ## Code style
 

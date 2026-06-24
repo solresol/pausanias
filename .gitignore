@@ -12,6 +12,11 @@ models/trankit-oga/
 transcripts/
 graphic_book/images/
 graphic_book/output/
+graphic_book/assets/generated/**/*.jpeg
+graphic_book/assets/generated/**/*.jpg
+graphic_book/assets/generated/**/*.png
+graphic_book/assets/generated/**/*.webp
+graphic_book/assets/pausanias-title-page.png
 documentation/pausanias_project_presentation.aux
 documentation/pausanias_project_presentation.fdb_latexmk
 documentation/pausanias_project_presentation.fls
