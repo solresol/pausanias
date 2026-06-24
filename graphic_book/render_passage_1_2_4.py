@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import math
+import sqlite3
 import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -12,9 +13,7 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from pausanias_db import connect
-
-from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageOps
+from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont, ImageOps
 
 
 WIDTH = 1402
@@ -52,14 +51,25 @@ def root_dir() -> Path:
 
 
 def load_translation() -> str:
-    with connect() as conn:
+    db_path = root_dir() / "pausanias.sqlite"
+    if not db_path.exists():
+        raise RuntimeError(f"Missing local SQLite database: {db_path}")
+    with sqlite3.connect(db_path) as conn:
         row = conn.execute(
-            "SELECT english_translation FROM translations WHERE passage_id = %s",
+            "SELECT english_translation FROM translations WHERE passage_id = ?",
             (PASSAGE_ID,),
         ).fetchone()
     if not row or not row[0]:
         raise RuntimeError(f"Missing translation for passage {PASSAGE_ID}")
     return " ".join(row[0].split())
+
+
+def validate_fit_records(records: list[FitRecord]) -> None:
+    for record in records:
+        rx0, ry0, rx1, ry1 = record.rect
+        bx0, by0, bx1, by1 = record.text_bbox
+        if bx0 < rx0 or by0 < ry0 or bx1 > rx1 or by1 > ry1:
+            raise RuntimeError(f"{record.name}: measured text bbox escapes target rect")
 
 
 def make_parchment(size: tuple[int, int]) -> Image.Image:
@@ -363,7 +373,23 @@ def make_locator_map(records: list[FitRecord]) -> Image.Image:
     )
 
     map_rect = (22, 70, panel.width - 22, 246)
-    draw.rounded_rectangle(map_rect, radius=16, fill="#efe0ba", outline="#aa8651", width=2)
+    map_size = (map_rect[2] - map_rect[0], map_rect[3] - map_rect[1])
+    locator_base = crop_to_fill(
+        root_dir() / "graphic_book/assets/generated/1_2_4/main_kerameikos_entry.png",
+        map_size,
+        centering=(0.44, 0.54),
+    )
+    locator_base = locator_base.filter(ImageFilter.GaussianBlur(1.6))
+    locator_base = ImageEnhance.Color(locator_base).enhance(0.54)
+    locator_base = ImageEnhance.Contrast(locator_base).enhance(0.88)
+    parchment_wash = Image.new("RGB", map_size, "#ead6a8")
+    locator_base = Image.blend(locator_base, parchment_wash, 0.42)
+    grain = Image.effect_noise(map_size, 10).convert("L")
+    grain = ImageOps.autocontrast(grain)
+    grain_rgb = ImageOps.colorize(grain, black="#8f7143", white="#fff0cb")
+    locator_base = Image.blend(locator_base, grain_rgb, 0.08)
+    panel.paste(locator_base, (map_rect[0], map_rect[1]))
+    draw.rounded_rectangle(map_rect, radius=16, outline="#aa8651", width=2)
 
     # River and open low ground beyond the walls.
     river = [
@@ -374,7 +400,8 @@ def make_locator_map(records: list[FitRecord]) -> Image.Image:
         (map_rect[0] + 168, map_rect[1] + 110),
         (map_rect[0] + 212, map_rect[1] + 96),
     ]
-    draw.line(river, fill=SEA, width=6)
+    draw.line(river, fill="#5f8795", width=8)
+    draw.line(river, fill="#d4e0d2", width=2)
 
     # City wall segment.
     wall_points = [
@@ -383,7 +410,7 @@ def make_locator_map(records: list[FitRecord]) -> Image.Image:
         (map_rect[0] + 98, map_rect[1] + 152),
         (map_rect[0] + 142, map_rect[1] + 176),
     ]
-    draw.line(wall_points, fill=WALL, width=10)
+    draw.line(wall_points, fill=WALL, width=11)
     draw.line([(p[0] + 8, p[1] + 8) for p in wall_points], fill="#ccb07a", width=2)
 
     dipylon_gate = (map_rect[0] + 90, map_rect[1] + 64, map_rect[0] + 126, map_rect[1] + 96)
@@ -406,10 +433,10 @@ def make_locator_map(records: list[FitRecord]) -> Image.Image:
 
     panathenaic_way = [(dipylon_gate[2], dipylon_gate[1] + 8), (map_rect[0] + 234, map_rect[1] + 76), (map_rect[0] + 330, map_rect[1] + 154)]
     sacred_way = [(sacred_gate[2], sacred_gate[1] + 12), (map_rect[0] + 212, map_rect[1] + 140), (map_rect[0] + 300, map_rect[1] + 170)]
-    draw.line(panathenaic_way, fill=ROAD, width=10)
-    draw.line(sacred_way, fill=ROAD, width=8)
-    draw.line(panathenaic_way, fill=ROAD_LIGHT, width=3)
-    draw.line(sacred_way, fill=ROAD_LIGHT, width=2)
+    draw.line(panathenaic_way, fill="#8f6231", width=11)
+    draw.line(sacred_way, fill="#8f6231", width=9)
+    draw.line(panathenaic_way, fill=ROAD_LIGHT, width=4)
+    draw.line(sacred_way, fill=ROAD_LIGHT, width=3)
 
     for x, y in [(272, 76), (284, 76), (296, 76), (280, 106), (292, 106), (304, 106)]:
         draw.ellipse((map_rect[0] + x - 3, map_rect[1] + y - 3, map_rect[0] + x + 3, map_rect[1] + y + 3), fill=BRONZE)
@@ -544,7 +571,7 @@ def render_page(output_path: Path) -> dict[str, object]:
 
     labels = [
         ("ACROPOLIS", (1048, 114, 1276, 166)),
-        ("PANATHENAIC WAY", (706, 520, 1068, 576)),
+        ("PANATHENAIC WAY", (612, 520, 962, 576)),
         ("DIPYLON GATE", (542, 246, 788, 300)),
         ("SACRED GATE", (482, 340, 720, 394)),
         ("POMPEION", (760, 236, 960, 288)),
@@ -602,6 +629,7 @@ def render_page(output_path: Path) -> dict[str, object]:
     add_border(draw)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
+    validate_fit_records(records)
     page.convert("RGB").save(output_path, quality=95)
 
     report = {

@@ -1,0 +1,27 @@
+{
+  "passage_id": "1.2.4",
+  "run_date": "2026-06-25",
+  "approved_reference_pages": [
+    "graphic_book/images/1/1/4.png",
+    "graphic_book/images/1/1/5.png"
+  ],
+  "art_assets": [
+    {
+      "path": "graphic_book/assets/generated/1_2_4/main_kerameikos_entry.png",
+      "role": "main panel",
+      "quality_check": "accepted: rich historical reconstruction, spatially legible Kerameikos entry, not schematic"
+    },
+    {
+      "path": "graphic_book/assets/generated/1_2_4/demeter_sanctuary.png",
+      "role": "scenic inset",
+      "quality_check": "accepted: specific Demeter, Kore, and Iacchus sanctuary subject with no relied-on readable text"
+    },
+    {
+      "path": "graphic_book/assets/generated/1_2_4/poseidon_polybotes.png",
+      "role": "scenic inset",
+      "quality_check": "accepted: specific mounted Poseidon/Polybotes monument, historically grounded civic setting"
+    }
+  ],
+  "orientation_strategy": "dominant city-approach reconstruction plus subordinate Kerameikos locator map and feature callouts",
+  "text_strategy": "local deterministic Pillow text fitting for passage text, labels, captions, and callouts"
+}
