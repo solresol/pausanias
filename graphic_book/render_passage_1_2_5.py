@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import math
+import sqlite3
 import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -11,8 +12,6 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
-
-from pausanias_db import connect
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageOps
 
@@ -52,14 +51,25 @@ def root_dir() -> Path:
 
 
 def load_translation() -> str:
-    with connect() as conn:
+    db_path = root_dir() / "pausanias.sqlite"
+    if not db_path.exists():
+        raise RuntimeError(f"Missing local SQLite database: {db_path}")
+    with sqlite3.connect(db_path) as conn:
         row = conn.execute(
-            "SELECT english_translation FROM translations WHERE passage_id = %s",
+            "SELECT english_translation FROM translations WHERE passage_id = ?",
             (PASSAGE_ID,),
         ).fetchone()
     if not row or not row[0]:
         raise RuntimeError(f"Missing translation for passage {PASSAGE_ID}")
     return " ".join(row[0].split())
+
+
+def validate_fit_records(records: list[FitRecord]) -> None:
+    for record in records:
+        rx0, ry0, rx1, ry1 = record.rect
+        bx0, by0, bx1, by1 = record.text_bbox
+        if bx0 < rx0 or by0 < ry0 or bx1 > rx1 or by1 > ry1:
+            raise RuntimeError(f"{record.name}: measured text bbox escapes target rect")
 
 
 def make_parchment(size: tuple[int, int]) -> Image.Image:
@@ -363,7 +373,18 @@ def make_locator_map(records: list[FitRecord]) -> Image.Image:
     )
 
     map_rect = (22, 70, panel.width - 22, 246)
-    draw.rounded_rectangle(map_rect, radius=16, fill="#efe0ba", outline="#aa8651", width=2)
+    map_size = (map_rect[2] - map_rect[0], map_rect[3] - map_rect[1])
+    relief = Image.effect_noise(map_size, 34).convert("L")
+    relief = ImageOps.autocontrast(relief)
+    relief = relief.filter(ImageFilter.GaussianBlur(0.7))
+    base = ImageOps.colorize(relief, black="#947644", white="#f3ddb0").convert("RGBA")
+    wash = Image.new("RGBA", map_size, (247, 229, 187, 94))
+    base = Image.alpha_composite(base, wash)
+    mask = Image.new("L", map_size, 0)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, map_size[0] - 1, map_size[1] - 1), radius=16, fill=255)
+    base.putalpha(mask)
+    panel.alpha_composite(base, map_rect[:2])
+    draw.rounded_rectangle(map_rect, radius=16, outline="#aa8651", width=2)
 
     wall_points = [
         (map_rect[0] + 54, map_rect[1] + 28),
@@ -493,7 +514,7 @@ def render_page(output_path: Path) -> dict[str, object]:
     )
     paste_with_shadow(page, left_panel, (left_panel_rect[0], left_panel_rect[1]))
 
-    title_rect = (634, 42, 1166, 118)
+    title_rect = (760, 50, 1262, 112)
     title_panel = make_label("THE STOAS OF DIONYSUS", title_rect, records, font_path=TITLE_FONT)
     paste_with_shadow(page, title_panel, (title_rect[0], title_rect[1]))
 
@@ -529,10 +550,10 @@ def render_page(output_path: Path) -> dict[str, object]:
     amphictyon_xy = (964, 734)
 
     labels = [
-        ("ACROPOLIS", (1048, 114, 1278, 166)),
+        ("ACROPOLIS", (506, 126, 720, 176)),
         ("STOA OF GODS", (802, 286, 1080, 338)),
         ("GYMNASIUM OF HERMES", (556, 398, 908, 452)),
-        ("HOUSE OF POLYTION", (980, 462, 1308, 514)),
+        ("HOUSE OF POLYTION", (1002, 638, 1310, 690)),
         ("DIONYSUS PRECINCT", (988, 344, 1304, 396)),
     ]
     label_panels: list[tuple[Image.Image, tuple[int, int]]] = []
@@ -556,20 +577,12 @@ def render_page(output_path: Path) -> dict[str, object]:
     )
     cult_xy = (990, 530)
 
-    pegasus_panel = make_note_panel(
-        "Pausanias closes with Pegasus of Eleutherae, remembered as the figure who brought the god to Athens under Delphic prompting from old Icaria.",
-        (392, 96),
-        "callout:pegasus",
-        records,
-    )
-    pegasus_xy = (934, 636)
-
     draw = ImageDraw.Draw(page)
-    draw_dashed_route(draw, (1120, 374), (1158, 164), dash=16, gap=11, width=4)
+    draw_dashed_route(draw, (626, 144), (616, 174), dash=10, gap=7, width=4)
     draw_dashed_route(draw, (720, 430), (1120, 470), dash=12, gap=9, width=3)
     draw_polyline_leader(draw, [(944, 310), (944, 450), (978, 450)])
     draw_polyline_leader(draw, [(1132, 370), (1160, 370), (1160, 578), (990, 578)])
-    draw_polyline_leader(draw, [(1112, 488), (1112, 680), (934, 680)])
+    draw_polyline_leader(draw, [(1112, 520), (1112, 638)])
     draw_leader(draw, (1098, 360), (akratos_xy[0] + akratos_panel.width // 2, akratos_xy[1]))
     draw_leader(draw, (1078, 484), (amphictyon_xy[0], amphictyon_xy[1] + 152))
     draw_leader(draw, (598, 434), (locator_xy[0] + locator_panel.width, locator_xy[1] + 66))
@@ -581,8 +594,8 @@ def render_page(output_path: Path) -> dict[str, object]:
         paste_with_shadow(page, label, xy)
     paste_with_shadow(page, overview_panel, overview_xy)
     paste_with_shadow(page, cult_panel, cult_xy)
-    paste_with_shadow(page, pegasus_panel, pegasus_xy)
 
+    validate_fit_records(records)
     add_border(draw)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
