@@ -10,7 +10,7 @@ translate it, run statistical/network analyses, and generate a static website
 plus a graphic book. The research goal is stylometric and content analysis —
 e.g. how "mythic" vs. historical and how skeptical each passage/sentence is, and
 testing whether sections like Book 4 (Messenian Wars) are stylistic outliers.
-See `to-do.txt` for the live research agenda.
+See `TODO.md` for the live research agenda.
 
 ## Running scripts
 
