@@ -7,6 +7,7 @@ from sentence_llm_grammar import (
     tokens_to_conllu,
     tokenize_for_llm,
     validate_and_normalize_tokens,
+    write_payload,
 )
 
 
@@ -198,3 +199,61 @@ def test_get_sentences_can_use_seeded_random_order_without_sample_size():
     assert "ORDER BY md5" in psql.sql
     assert "'daily-seed'" in psql.sql
     assert "LIMIT 10" in psql.sql
+
+
+def test_write_payload_removes_nul_chars_before_postgres_jsonb():
+    psql = FakePsql("")
+    payload = {
+        "run": {
+            "run_id": "11111111-2222-3333-4444-555555555555",
+            "started_at": "2026-06-26T00:00:00+00:00",
+            "completed_at": "2026-06-26T00:01:00+00:00",
+            "model": "gpt-5.4-mini",
+            "prompt_version": "greek-sentence-grammar-v1",
+            "status": "completed",
+            "input_tokens": 1,
+            "output_tokens": 1,
+            "processed_count": 1,
+            "token_count": 1,
+            "failure_count": 0,
+            "notes": "nul\x00removed",
+        },
+        "results": [
+            {
+                "passage_id": "1.1.1",
+                "sentence_number": 1,
+                "greek_sentence": "λόγος",
+                "conllu": "1\tλόγος\tλόγος\tNOUN\t_\x00\t_\t0\troot\t_\t_\n",
+                "response_json": {"note": "ok\x00"},
+                "sentence_note": None,
+                "input_tokens": 1,
+                "output_tokens": 1,
+                "token_count": 1,
+                "tokens": [
+                    {
+                        "token_order": 1,
+                        "token_id": "1",
+                        "form": "λόγος",
+                        "lemma": "λόγος",
+                        "upos": "NOUN",
+                        "xpos": "_",
+                        "feats_raw": "_",
+                        "feats": {},
+                        "head_token_id": "0",
+                        "deprel": "root",
+                        "confidence": "high",
+                        "note": "clean\x00me",
+                        "is_multiword_token": False,
+                        "is_empty_node": False,
+                    }
+                ],
+            }
+        ],
+        "failures": [],
+    }
+
+    write_payload(psql, payload)
+
+    assert "\\u0000" not in psql.sql
+    assert "nulremoved" in psql.sql
+    assert "cleanme" in psql.sql

@@ -59,6 +59,19 @@ def sql_string(value: str) -> str:
     return "'" + value.replace("'", "''") + "'"
 
 
+def remove_postgres_nul_chars(value: Any) -> Any:
+    if isinstance(value, str):
+        return value.replace("\x00", "")
+    if isinstance(value, list):
+        return [remove_postgres_nul_chars(item) for item in value]
+    if isinstance(value, dict):
+        return {
+            remove_postgres_nul_chars(key): remove_postgres_nul_chars(item)
+            for key, item in value.items()
+        }
+    return value
+
+
 def parse_list(value: str) -> list[str]:
     return [part.strip() for part in value.split(",") if part.strip()]
 
@@ -579,7 +592,7 @@ COPY (
 
 def write_payload(psql: PsqlRunner, payload: dict) -> None:
     tag = f"json_{payload['run']['run_id'].replace('-', '_')}"
-    payload_json = json.dumps(payload, ensure_ascii=False)
+    payload_json = json.dumps(remove_postgres_nul_chars(payload), ensure_ascii=False)
     sql = f"""
 WITH payload AS (
     SELECT ${tag}${payload_json}${tag}$::jsonb AS j
