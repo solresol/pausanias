@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import sqlite3
 import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -10,8 +11,6 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
-
-from pausanias_db import connect
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageOps
 
@@ -48,14 +47,25 @@ def root_dir() -> Path:
 
 
 def load_translation() -> str:
-    with connect() as conn:
+    db_path = root_dir() / "pausanias.sqlite"
+    if not db_path.exists():
+        raise RuntimeError(f"Missing local SQLite database: {db_path}")
+    with sqlite3.connect(db_path) as conn:
         row = conn.execute(
-            "SELECT english_translation FROM translations WHERE passage_id = %s",
+            "SELECT english_translation FROM translations WHERE passage_id = ?",
             (PASSAGE_ID,),
         ).fetchone()
     if not row or not row[0]:
         raise RuntimeError(f"Missing translation for passage {PASSAGE_ID}")
     return " ".join(row[0].split())
+
+
+def validate_fit_records(records: list[FitRecord]) -> None:
+    for record in records:
+        rx0, ry0, rx1, ry1 = record.rect
+        bx0, by0, bx1, by1 = record.text_bbox
+        if bx0 < rx0 or by0 < ry0 or bx1 > rx1 or by1 > ry1:
+            raise RuntimeError(f"{record.name}: measured text bbox escapes target rect")
 
 
 def make_parchment(size: tuple[int, int]) -> Image.Image:
@@ -536,6 +546,7 @@ def render_page(output_path: Path) -> dict[str, object]:
     paste_with_shadow(page, erichthonius_panel, erichthonius_xy)
 
     add_border(draw)
+    validate_fit_records(records)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     page.convert("RGB").save(output_path, quality=95)
