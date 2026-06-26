@@ -36,6 +36,8 @@ from pausanias_db import add_database_argument, connect, initialize_schema
 
 
 DEFAULT_PAUSANIAS_CUTOFF_YEAR = 180
+MAX_TEXT_ANALYSIS_CHARS = 50000
+MAX_RAW_CELL_CHARS = 100000
 MANTO_ID_RE = re.compile(
     r"(?:object|objects|classification|classifications|source|sources)[/_:-]?(\d+)",
     re.IGNORECASE,
@@ -97,8 +99,12 @@ def normalize_text(value: Any) -> str:
     if value is None:
         return ""
     if isinstance(value, str):
-        return " ".join(value.split())
-    return " ".join(str(value).split())
+        text = value
+    else:
+        text = str(value)
+    if len(text) > MAX_TEXT_ANALYSIS_CHARS:
+        text = text[:MAX_TEXT_ANALYSIS_CHARS]
+    return " ".join(text.split())
 
 
 def normalize_manto_id(value: Any) -> str | None:
@@ -288,6 +294,48 @@ def json_records(value: Any) -> Iterator[dict[str, Any]]:
             yield value
 
 
+def csv_header_likely(row: list[str]) -> bool:
+    normalized = {normalize_key(value) for value in row}
+    known = {
+        "id",
+        "nodegoatid",
+        "objectid",
+        "name",
+        "classificationid",
+        "sourceobjectid",
+        "targetobjectid",
+    }
+    return bool(normalized & known) or any(value.endswith("objectid") for value in normalized)
+
+
+def relation_label_from_path(path: str) -> str:
+    stem = Path(path).stem
+    stem = re.sub(r"_object_definitions_\d+$", "", stem)
+    stem = re.sub(r"_+", " ", stem).strip()
+    return stem[:1].upper() + stem[1:] if stem else "Related object"
+
+
+def fallback_csv_headers(path: str, width: int) -> list[str]:
+    relation_label = relation_label_from_path(path)
+    headers = [
+        "nodegoat ID",
+        "Object ID",
+        "Name",
+        f"{relation_label} - Object ID",
+        relation_label,
+    ]
+    while len(headers) < width:
+        headers.append(f"Column {len(headers) + 1}")
+    return headers[:width]
+
+
+def csv_record_from_row(headers: list[str], row: list[str]) -> dict[str, Any]:
+    record = {header: row[index] if index < len(row) else "" for index, header in enumerate(headers)}
+    if len(row) > len(headers):
+        record["_extra_columns"] = row[len(headers) :]
+    return record
+
+
 def iter_zip_records(zip_path: Path) -> Iterator[tuple[str, str, int, dict[str, Any]]]:
     with zipfile.ZipFile(zip_path) as archive:
         for info in archive.infolist():
@@ -299,12 +347,51 @@ def iter_zip_records(zip_path: Path) -> Iterator[tuple[str, str, int, dict[str, 
             with archive.open(info) as raw_handle:
                 if suffix == ".csv":
                     text_handle = io.TextIOWrapper(raw_handle, encoding="utf-8-sig", newline="")
-                    for number, row in enumerate(csv.DictReader(text_handle), start=1):
-                        yield info.filename, "csv", number, dict(row)
+                    reader = csv.reader(text_handle)
+                    try:
+                        first_row = next(reader)
+                    except StopIteration:
+                        continue
+                    if csv_header_likely(first_row):
+                        headers = first_row
+                    else:
+                        headers = fallback_csv_headers(info.filename, len(first_row))
+                        yield info.filename, "csv", 1, csv_record_from_row(headers, first_row)
+                    for number, row in enumerate(reader, start=1 if csv_header_likely(first_row) else 2):
+                        yield info.filename, "csv", number, csv_record_from_row(headers, row)
                 else:
                     data = json.load(io.TextIOWrapper(raw_handle, encoding="utf-8-sig"))
                     for number, row in enumerate(json_records(data), start=1):
                         yield info.filename, "json", number, row
+
+
+def compact_record_for_storage(record: dict[str, Any]) -> dict[str, Any]:
+    compacted: dict[str, Any] = {}
+    truncated_fields: dict[str, int] = {}
+    for key, value in record.items():
+        if isinstance(value, str) and len(value) > MAX_RAW_CELL_CHARS:
+            compacted[key] = value[:MAX_RAW_CELL_CHARS]
+            truncated_fields[key] = len(value)
+        elif isinstance(value, list):
+            compacted[key] = [
+                item[:MAX_RAW_CELL_CHARS] if isinstance(item, str) and len(item) > MAX_RAW_CELL_CHARS else item
+                for item in value
+            ]
+            for index, item in enumerate(value):
+                if isinstance(item, str) and len(item) > MAX_RAW_CELL_CHARS:
+                    truncated_fields[f"{key}[{index}]"] = len(item)
+        else:
+            compacted[key] = value
+    if truncated_fields:
+        compacted["_truncated_fields"] = truncated_fields
+        compacted["_truncation_note"] = (
+            f"Values longer than {MAX_RAW_CELL_CHARS} characters are truncated in raw storage."
+        )
+    return compacted
+
+
+def record_data_json(record: dict[str, Any]) -> Jsonb:
+    return Jsonb(compact_record_for_storage(record))
 
 
 def id_value_by_key(record: dict[str, Any], accepted_keys: Iterable[str]) -> str | None:
@@ -398,7 +485,7 @@ def raw_record_tuple(
         record_label(record) or None,
         source_label or None,
         latest_year,
-        Jsonb(record),
+        record_data_json(record),
         imported_at,
     )
 
@@ -419,7 +506,7 @@ def entity_tuple(
         first_by_normalized_key(record, ["type", "object type", "classification type"]) or None,
         source_label or None,
         latest_year,
-        Jsonb(record),
+        record_data_json(record),
         imported_at,
     )
 
@@ -458,7 +545,7 @@ def edge_tuples(
                 latest_year,
                 is_pre,
                 reason,
-                Jsonb(record),
+                record_data_json(record),
                 imported_at,
             )
         )

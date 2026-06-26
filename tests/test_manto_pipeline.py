@@ -1,9 +1,14 @@
 import unittest
+import zipfile
+from tempfile import TemporaryDirectory
 
 from manto_importer import (
+    MAX_RAW_CELL_CHARS,
     candidate_date_text,
+    compact_record_for_storage,
     edge_candidates,
     extract_latest_year,
+    iter_zip_records,
     source_filter_status,
 )
 from manto_release import release_from_zenodo_record
@@ -91,6 +96,39 @@ class MantoPipelineTests(unittest.TestCase):
             edge_candidates(record, "8188398"),
         )
         self.assertIn("480-450 BCE", candidate_date_text(record, ""))
+
+    def test_iter_zip_records_handles_no_header_object_definition_csv(self):
+        with TemporaryDirectory() as tmpdir:
+            zip_path = f"{tmpdir}/manto.zip"
+            csv_text = (
+                'nodegoat-key,8182080,"Aigisthos",11299338,'
+                '"[object=6580_10159511]Tomb[/object]"\n'
+            )
+            with zipfile.ZipFile(zip_path, "w") as archive:
+                archive.writestr(
+                    "data/entity_6580/related_entities_object_definitions_27385.csv",
+                    csv_text,
+                )
+
+            records = list(iter_zip_records(zip_path))
+
+        self.assertEqual(len(records), 1)
+        _, _, record_number, record = records[0]
+        self.assertEqual(record_number, 1)
+        self.assertEqual(record["Object ID"], "8182080")
+        self.assertEqual(record["Related entities - Object ID"], "11299338")
+        self.assertIn(
+            ("8182080", "11299338", "related_entities"),
+            edge_candidates(record, "8182080"),
+        )
+
+    def test_compact_record_for_storage_truncates_large_cells(self):
+        large_value = "x" * (MAX_RAW_CELL_CHARS + 10)
+        compacted = compact_record_for_storage({"Object ID": "1", "Large": large_value})
+
+        self.assertEqual(compacted["Object ID"], "1")
+        self.assertEqual(len(compacted["Large"]), MAX_RAW_CELL_CHARS)
+        self.assertEqual(compacted["_truncated_fields"]["Large"], len(large_value))
 
 
 if __name__ == "__main__":
