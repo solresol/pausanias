@@ -40,6 +40,11 @@ def parse_arguments() -> argparse.Namespace:
             "the graph has more nodes than this limit."
         ),
     )
+    parser.add_argument(
+        "--skip-clustering",
+        action="store_true",
+        help="Set clustering coefficients to 0.0 instead of computing weighted clustering.",
+    )
     return parser.parse_args()
 
 
@@ -178,16 +183,22 @@ def build_feature_rows(
     pre_pausanias_only: bool,
     betweenness_sample: int,
     community_node_limit: int,
+    skip_clustering: bool,
 ) -> list[tuple]:
     timestamp = now_iso()
+    print("Computing degree centrality...", flush=True)
     degree_centrality = nx.degree_centrality(graph) if graph.number_of_nodes() > 1 else {}
+    print("Computing PageRank...", flush=True)
     pagerank = nx.pagerank(graph, weight="weight") if graph.number_of_edges() else {
         node: 0.0 for node in graph.nodes
     }
+    print("Computing betweenness centrality...", flush=True)
     betweenness = safe_betweenness(graph, betweenness_sample)
-    clustering = nx.clustering(graph, weight="weight") if graph.number_of_edges() else {
+    print("Computing clustering coefficients...", flush=True)
+    clustering = {} if skip_clustering else nx.clustering(graph, weight="weight") if graph.number_of_edges() else {
         node: 0.0 for node in graph.nodes
     }
+    print("Computing components and communities...", flush=True)
     components = component_sizes(graph)
     communities = community_sizes(graph, node_limit=community_node_limit)
     sorted_pagerank = sorted(pagerank.values(), reverse=True)
@@ -308,8 +319,11 @@ def main() -> None:
     with connect(args.database_url) as conn:
         initialize_schema(conn)
         release_id = args.release_record_id or latest_release_id(conn)
+        print("Loading MANTO edges...", flush=True)
         edges = load_edges(conn, release_id, pre_pausanias_only=pre_pausanias_only)
+        print("Loading Pausanias-MANTO links...", flush=True)
         links = load_links(conn, release_id)
+        print("Building graph...", flush=True)
         graph = build_graph(edges, links)
         rows = build_feature_rows(
             release_id=release_id,
@@ -319,7 +333,9 @@ def main() -> None:
             pre_pausanias_only=pre_pausanias_only,
             betweenness_sample=args.betweenness_sample,
             community_node_limit=args.community_node_limit,
+            skip_clustering=args.skip_clustering,
         )
+        print("Saving feature rows...", flush=True)
         save_rows(
             conn,
             release_id=release_id,
