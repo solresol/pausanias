@@ -15,6 +15,7 @@ import hashlib
 import io
 import json
 import re
+import sys
 import zipfile
 from collections.abc import Iterable, Iterator
 from pathlib import Path
@@ -44,6 +45,20 @@ DATE_OR_SOURCE_RE = re.compile(
     r"\b(?:BCE|BC|CE|AD|Pausanias|Periegesis|start-attributes)\b",
     re.I,
 )
+
+
+def configure_csv_field_limit() -> None:
+    """Allow unusually large MANTO CSV cells without assuming platform limits."""
+    limit = sys.maxsize
+    while limit > 131072:
+        try:
+            csv.field_size_limit(limit)
+            return
+        except OverflowError:
+            limit //= 10
+
+
+configure_csv_field_limit()
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -618,7 +633,22 @@ def main() -> None:
             local_zip_path=zip_path,
             status="importing",
         )
-        counts = import_release(conn, release=release, zip_path=zip_path, args=args)
+        try:
+            counts = import_release(conn, release=release, zip_path=zip_path, args=args)
+        except Exception:
+            failed_at = now_iso()
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    """
+                    UPDATE manto_releases
+                    SET import_status = 'failed',
+                        updated_at = %s
+                    WHERE record_id = %s
+                    """,
+                    (failed_at, release.record_id),
+                )
+            conn.commit()
+            raise
     print(
         f"Imported MANTO release {release.record_id}: "
         f"{counts['raw_records']:,} raw rows, "
