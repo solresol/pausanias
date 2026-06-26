@@ -39,6 +39,11 @@ PostgreSQL, `dbname=pausanias`, user `gregb`. The **live** database is on
   EXISTS`); `pausanias_db.initialize_schema()` applies it. Shared helpers
   (`connect`, `read_sql_query`, `add_database_argument`, `table_exists`,
   `column_exists`) live in `pausanias_db.py` — reuse them instead of reconnecting ad hoc.
+- Greg dislikes using PostgreSQL `JSON` or `JSONB` as an application-data escape
+  hatch. Do not add new JSON/JSONB columns, JSONB staging CTEs, or
+  `jsonb_to_recordset` write paths unless he explicitly approves that design.
+  Prefer normal relational tables with typed columns, foreign keys, and indexes;
+  use child tables or typed raw-text columns for variable key/value data.
 - The root `pausanias.sqlite` is a legacy artifact; `migrate_sqlite_to_postgres.py`
   was the one-time migration. Current work is Postgres-only.
 

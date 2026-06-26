@@ -255,5 +255,7 @@ def test_write_payload_removes_nul_chars_before_postgres_jsonb():
     write_payload(psql, payload)
 
     assert "\\u0000" not in psql.sql
+    assert "jsonb_to_recordset" not in psql.sql
+    assert "WITH payload AS" not in psql.sql
     assert "nulremoved" in psql.sql
     assert "cleanme" in psql.sql

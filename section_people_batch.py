@@ -44,7 +44,25 @@ def now_iso() -> str:
 
 
 def sql_string(value: str) -> str:
-    return "'" + value.replace("'", "''") + "'"
+    return "'" + postgres_text(value).replace("'", "''") + "'"
+
+
+def postgres_text(value: Any) -> str:
+    return str(value).replace("\x00", "")
+
+
+def sql_nullable_text(value: Any) -> str:
+    if value is None:
+        return "NULL"
+    return sql_string(postgres_text(value))
+
+
+def sql_integer(value: Any) -> str:
+    return str(int(value or 0))
+
+
+def sql_bool(value: Any) -> str:
+    return "TRUE" if bool(value) else "FALSE"
 
 
 def load_openai_api_key(key_file: str) -> str:
@@ -391,36 +409,34 @@ def validate_batch_file(path: Path) -> None:
 
 
 def write_submission(psql: PsqlRunner, payload: dict[str, Any]) -> None:
-    tag = f"json_{payload['run']['run_id'].replace('-', '_')}"
-    payload_json = json.dumps(payload, ensure_ascii=False)
+    run = payload["run"]
+    items = payload.get("items") or []
+    run_values = ", ".join(
+        [
+            sql_string(run["run_id"]),
+            sql_string(run["started_at"]),
+            sql_nullable_text(run.get("completed_at")),
+            sql_string(run["model"]),
+            sql_string(run["prompt_version"]),
+            sql_string(run["status"]),
+            sql_integer(run.get("token_budget")),
+            sql_integer(run.get("tokens_per_section_estimate")),
+            "0",
+            "0",
+            "0",
+            "'batch'",
+            sql_integer(run.get("request_count")),
+            sql_nullable_text(run.get("random_seed")),
+            sql_nullable_text(run.get("notes")),
+        ]
+    )
     sql = f"""
-WITH payload AS (
-    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
-), run_row AS (
-    SELECT j->'run' AS r FROM payload
-)
 INSERT INTO section_people_runs (
     run_id, started_at, completed_at, model, prompt_version, status,
     token_budget, tokens_per_section_estimate, input_tokens, output_tokens,
     processed_count, api_mode, request_count, random_seed, notes
 )
-SELECT
-    r->>'run_id',
-    r->>'started_at',
-    NULLIF(r->>'completed_at', ''),
-    r->>'model',
-    r->>'prompt_version',
-    r->>'status',
-    (r->>'token_budget')::integer,
-    (r->>'tokens_per_section_estimate')::integer,
-    0,
-    0,
-    0,
-    'batch',
-    (r->>'request_count')::integer,
-    r->>'random_seed',
-    r->>'notes'
-FROM run_row
+VALUES ({run_values})
 ON CONFLICT (run_id) DO UPDATE
 SET status = EXCLUDED.status,
     token_budget = EXCLUDED.token_budget,
@@ -429,30 +445,36 @@ SET status = EXCLUDED.status,
     request_count = EXCLUDED.request_count,
     random_seed = EXCLUDED.random_seed,
     notes = EXCLUDED.notes;
+"""
+    if items:
+        item_values = []
+        for item in items:
+            item_values.append(
+                "("
+                + ", ".join(
+                    [
+                        sql_string(run["run_id"]),
+                        sql_integer(item["request_number"]),
+                        sql_string(item["passage_id"]),
+                        sql_integer(item["estimated_tokens"]),
+                        "0",
+                        "0",
+                        "'submitted'",
+                        "NULL",
+                        sql_string(run["started_at"]),
+                    ]
+                )
+                + ")"
+            )
+        item_sql_values = ",\n    ".join(item_values)
+        sql += f"""
 
-WITH payload AS (
-    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
-)
 INSERT INTO section_people_batch_items (
     run_id, request_number, passage_id, estimated_tokens, input_tokens,
     output_tokens, status, error, created_at
 )
-SELECT
-    j->'run'->>'run_id',
-    x.request_number,
-    x.passage_id,
-    x.estimated_tokens,
-    0,
-    0,
-    'submitted',
-    NULL,
-    j->'run'->>'started_at'
-FROM payload,
-     jsonb_to_recordset(j->'items') AS x(
-        request_number integer,
-        passage_id text,
-        estimated_tokens integer
-     )
+VALUES
+    {item_sql_values}
 ON CONFLICT (run_id, request_number) DO UPDATE
 SET passage_id = EXCLUDED.passage_id,
     estimated_tokens = EXCLUDED.estimated_tokens,
@@ -728,74 +750,78 @@ def normalize_person(row: dict[str, Any], *, mention_order: int, source: dict[st
 
 
 def write_results(psql: PsqlRunner, payload: dict[str, Any]) -> None:
-    tag = f"json_{payload['run']['run_id'].replace('-', '_')}"
-    payload_json = json.dumps(payload, ensure_ascii=False)
-    sql = f"""
-WITH payload AS (
-    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
-), item_rows AS (
-    SELECT x.*
-    FROM payload,
-         jsonb_to_recordset(j->'items') AS x(
-            request_number integer,
-            input_tokens integer,
-            output_tokens integer,
-            status text,
-            error text
-         )
+    run = payload["run"]
+    items = payload.get("items") or []
+    mentions = payload.get("mentions") or []
+    sql = ""
+    if items:
+        item_values = []
+        for item in items:
+            item_values.append(
+                "("
+                + ", ".join(
+                    [
+                        sql_integer(item["request_number"]),
+                        sql_integer(item.get("input_tokens")),
+                        sql_integer(item.get("output_tokens")),
+                        sql_string(item.get("status") or ""),
+                        sql_nullable_text(item.get("error")),
+                    ]
+                )
+                + ")"
+            )
+        item_sql_values = ",\n    ".join(item_values)
+        sql += f"""
+WITH item_rows(request_number, input_tokens, output_tokens, status, error) AS (
+    VALUES
+    {item_sql_values}
 )
 UPDATE section_people_batch_items bi
 SET input_tokens = item_rows.input_tokens,
     output_tokens = item_rows.output_tokens,
     status = item_rows.status,
     error = item_rows.error
-FROM item_rows, payload
-WHERE bi.run_id = j->'run'->>'run_id'
+FROM item_rows
+WHERE bi.run_id = {sql_string(run["run_id"])}
   AND bi.request_number = item_rows.request_number;
+"""
+    if mentions:
+        mention_values = []
+        for mention in mentions:
+            mention_values.append(
+                "("
+                + ", ".join(
+                    [
+                        sql_string(mention["passage_id"]),
+                        sql_integer(mention["sentence_number"]),
+                        sql_string(run["prompt_version"]),
+                        sql_string(run["model"]),
+                        sql_string(run["run_id"]),
+                        sql_integer(mention["mention_order"]),
+                        sql_string(mention["mention_text"]),
+                        sql_string(mention.get("canonical_name") or ""),
+                        sql_bool(mention.get("is_named")),
+                        sql_nullable_text(mention.get("gender")),
+                        sql_nullable_text(mention.get("person_category")),
+                        sql_nullable_text(mention.get("count_kind")),
+                        sql_integer(mention.get("person_count")),
+                        sql_nullable_text(mention.get("confidence")),
+                        sql_string(mention.get("rationale") or ""),
+                        sql_string(run["completed_at"]),
+                    ]
+                )
+                + ")"
+            )
+        mention_sql_values = ",\n    ".join(mention_values)
+        sql += f"""
 
-WITH payload AS (
-    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
-), mention_rows AS (
-    SELECT x.*
-    FROM payload,
-         jsonb_to_recordset(j->'mentions') AS x(
-            passage_id text,
-            sentence_number integer,
-            mention_order integer,
-            mention_text text,
-            canonical_name text,
-            is_named boolean,
-            gender text,
-            person_category text,
-            count_kind text,
-            person_count integer,
-            confidence text,
-            rationale text
-         )
-)
 INSERT INTO section_people_mentions (
     passage_id, sentence_number, prompt_version, model, run_id, mention_order,
     mention_text, canonical_name, is_named, gender, person_category, count_kind,
     person_count, confidence, rationale, created_at
 )
-SELECT
-    x.passage_id,
-    x.sentence_number,
-    j->'run'->>'prompt_version',
-    j->'run'->>'model',
-    j->'run'->>'run_id',
-    x.mention_order,
-    x.mention_text,
-    COALESCE(x.canonical_name, ''),
-    x.is_named,
-    x.gender,
-    x.person_category,
-    x.count_kind,
-    x.person_count,
-    x.confidence,
-    COALESCE(x.rationale, ''),
-    j->'run'->>'completed_at'
-FROM payload, mention_rows x
+VALUES
+    {mention_sql_values}
 ON CONFLICT (passage_id, sentence_number, prompt_version, mention_order) DO UPDATE
 SET model = EXCLUDED.model,
     run_id = EXCLUDED.run_id,
@@ -809,26 +835,22 @@ SET model = EXCLUDED.model,
     confidence = EXCLUDED.confidence,
     rationale = EXCLUDED.rationale,
     created_at = EXCLUDED.created_at;
+"""
+    sql += f"""
 
-WITH payload AS (
-    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
-), run_row AS (
-    SELECT j->'run' AS r FROM payload
-)
 UPDATE section_people_runs
-SET completed_at = r->>'completed_at',
-    status = r->>'status',
-    input_tokens = (r->>'input_tokens')::integer,
-    output_tokens = (r->>'output_tokens')::integer,
-    processed_count = (r->>'processed_count')::integer,
+SET completed_at = {sql_string(run["completed_at"])},
+    status = {sql_string(run["status"])},
+    input_tokens = {sql_integer(run.get("input_tokens"))},
+    output_tokens = {sql_integer(run.get("output_tokens"))},
+    processed_count = {sql_integer(run.get("processed_count"))},
     api_mode = 'batch',
-    request_count = (r->>'request_count')::integer,
-    openai_output_file_id = r->>'openai_output_file_id',
-    openai_error_file_id = r->>'openai_error_file_id',
-    retrieved_at = r->>'retrieved_at',
-    notes = r->>'notes'
-FROM run_row
-WHERE section_people_runs.run_id = r->>'run_id';
+    request_count = {sql_integer(run.get("request_count"))},
+    openai_output_file_id = {sql_nullable_text(run.get("openai_output_file_id"))},
+    openai_error_file_id = {sql_nullable_text(run.get("openai_error_file_id"))},
+    retrieved_at = {sql_nullable_text(run.get("retrieved_at"))},
+    notes = {sql_nullable_text(run.get("notes"))}
+WHERE section_people_runs.run_id = {sql_string(run["run_id"])};
 """
     psql.run(sql)
 

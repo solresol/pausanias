@@ -88,7 +88,25 @@ def now_iso() -> str:
 
 
 def sql_string(value: str) -> str:
-    return "'" + value.replace("'", "''") + "'"
+    return "'" + postgres_text(value).replace("'", "''") + "'"
+
+
+def postgres_text(value) -> str:
+    return str(value).replace("\x00", "")
+
+
+def sql_nullable_text(value) -> str:
+    if value is None:
+        return "NULL"
+    return sql_string(postgres_text(value))
+
+
+def sql_integer(value) -> str:
+    return str(int(value or 0))
+
+
+def sql_bool(value) -> str:
+    return "TRUE" if bool(value) else "FALSE"
 
 
 def parse_list(value: str) -> list[str]:
@@ -880,70 +898,73 @@ def validate_batch_file(path: Path) -> None:
 
 
 def write_submission(psql: PsqlRunner, payload: dict) -> None:
-    tag = f"json_{payload['run']['run_id'].replace('-', '_')}"
-    payload_json = json.dumps(payload, ensure_ascii=False)
+    run = payload["run"]
+    items = payload.get("items") or []
+    run_values = ", ".join(
+        [
+            sql_string(run["run_id"]),
+            sql_string(run["started_at"]),
+            sql_nullable_text(run.get("completed_at")),
+            sql_string(run["mode"]),
+            sql_string(run["model"]),
+            sql_string(run["prompt_version"]),
+            sql_string(run["status"]),
+            sql_integer(run.get("token_budget")),
+            "0",
+            "0",
+            "0",
+            "0",
+            "'batch'",
+            sql_integer(run.get("request_count")),
+            sql_nullable_text(run.get("notes")),
+        ]
+    )
     sql = f"""
-WITH payload AS (
-    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
-), run_row AS (
-    SELECT j->'run' AS r FROM payload
-)
 INSERT INTO sentence_tagging_runs (
     run_id, started_at, completed_at, mode, model, prompt_version, status,
     token_budget, input_tokens, output_tokens, processed_count, discrepancy_count,
     api_mode, request_count, notes
 )
-SELECT
-    r->>'run_id',
-    r->>'started_at',
-    NULLIF(r->>'completed_at', ''),
-    r->>'mode',
-    r->>'model',
-    r->>'prompt_version',
-    r->>'status',
-    (r->>'token_budget')::integer,
-    0,
-    0,
-    0,
-    0,
-    'batch',
-    (r->>'request_count')::integer,
-    r->>'notes'
-FROM run_row
+VALUES ({run_values})
 ON CONFLICT (run_id) DO UPDATE
 SET status = EXCLUDED.status,
     token_budget = EXCLUDED.token_budget,
     api_mode = 'batch',
     request_count = EXCLUDED.request_count,
     notes = EXCLUDED.notes;
+"""
+    if items:
+        item_values = []
+        for item in items:
+            item_values.append(
+                "("
+                + ", ".join(
+                    [
+                        sql_string(run["run_id"]),
+                        sql_integer(item["request_number"]),
+                        sql_string(run["mode"]),
+                        sql_string(run["prompt_version"]),
+                        sql_string(item["passage_id"]),
+                        sql_integer(item["sentence_number"]),
+                        sql_integer(item["estimated_tokens"]),
+                        "0",
+                        "0",
+                        "'submitted'",
+                        "NULL",
+                        sql_string(run["started_at"]),
+                    ]
+                )
+                + ")"
+            )
+        item_sql_values = ",\n    ".join(item_values)
+        sql += f"""
 
-WITH payload AS (
-    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
-)
 INSERT INTO sentence_tagging_batch_items (
     run_id, request_number, mode, prompt_version, passage_id, sentence_number,
     estimated_tokens, input_tokens, output_tokens, status, error, created_at
 )
-SELECT
-    j->'run'->>'run_id',
-    x.request_number,
-    j->'run'->>'mode',
-    j->'run'->>'prompt_version',
-    x.passage_id,
-    x.sentence_number,
-    x.estimated_tokens,
-    0,
-    0,
-    'submitted',
-    NULL,
-    j->'run'->>'started_at'
-FROM payload,
-     jsonb_to_recordset(j->'items') AS x(
-        request_number integer,
-        passage_id text,
-        sentence_number integer,
-        estimated_tokens integer
-     )
+VALUES
+    {item_sql_values}
 ON CONFLICT (run_id, request_number) DO UPDATE
 SET passage_id = EXCLUDED.passage_id,
     sentence_number = EXCLUDED.sentence_number,
