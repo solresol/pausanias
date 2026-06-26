@@ -56,6 +56,16 @@ def extract_pleiades_id(data) -> str:
     return match.group(1) if match else ""
 
 
+def graph_manto_id(raw_manto_id: str, data: dict) -> str:
+    for key in ("Object ID", "object_id", "object id", "ID", "id"):
+        value = data.get(key) if isinstance(data, dict) else None
+        if value:
+            text = str(value).strip()
+            if text:
+                return text
+    return raw_manto_id
+
+
 def load_places(conn) -> list[dict]:
     with conn.cursor() as cursor:
         cursor.execute(
@@ -102,12 +112,13 @@ def load_manto_entities(conn, release_id: int) -> list[dict]:
         rows = cursor.fetchall()
     entities = []
     for manto_id, label, entity_kind, data in rows:
+        data = data or {}
         entities.append(
             {
-                "manto_id": manto_id,
+                "manto_id": graph_manto_id(manto_id, data),
                 "label": label or "",
                 "entity_kind": entity_kind or "",
-                "pleiades_id": extract_pleiades_id(data or {}),
+                "pleiades_id": extract_pleiades_id(data),
                 "norm_label": normalize_name(label),
             }
         )
@@ -154,6 +165,14 @@ def save_links(conn, release_id: int, links: list[tuple]) -> None:
     if not links:
         return
     with conn.cursor() as cursor:
+        cursor.execute(
+            """
+            DELETE FROM manto_place_links
+            WHERE release_record_id = %s
+              AND reviewed = FALSE
+            """,
+            (release_id,),
+        )
         cursor.executemany(
             """
             INSERT INTO manto_place_links (
