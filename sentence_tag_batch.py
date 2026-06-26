@@ -28,11 +28,14 @@ GRETA_BOTH_BATCH_PROMPT_VERSION = "greta-inspired-myth-history-other"
 DEFAULT_GRETA_MODEL = "gpt-5.4-mini"
 DEFAULT_LEGACY_MODEL = "gpt-5"
 DEFAULT_DISCOURSE_MODEL = "gpt-5.4-mini"
+DEFAULT_PLACE_STATE_MODEL = "gpt-5.4-mini"
 DEFAULT_GRETA_TOKENS_PER_SENTENCE = 545
 DEFAULT_GRETA_BOTH_TOKENS_PER_SENTENCE = 680
 DEFAULT_LEGACY_TOKENS_PER_SENTENCE = 540
 DEFAULT_DISCOURSE_TOKENS_PER_SENTENCE = 1000
+DEFAULT_PLACE_STATE_TOKENS_PER_SENTENCE = 1300
 DISCOURSE_MODE_PROMPT_VERSION = "discourse-mode-v1"
+PLACE_STATE_PROMPT_VERSION = "place-state-v1"
 DEFAULT_GRAMMAR_MODEL = "gpt-5.4-mini"
 DEFAULT_GRAMMAR_PROMPT_VERSION = "greek-sentence-grammar-v1"
 GRETA_MODES = {"greta", "greta-both"}
@@ -44,6 +47,31 @@ DISCOURSE_MODES = [
     "ritual_ethnographic_description",
     "sources_traditions_discussion",
 ]
+PLACE_STATE_STATUSES = [
+    "inhabited_still_exists",
+    "extant_uninhabited",
+    "ruined_or_remains",
+    "abandoned_or_deserted",
+    "destroyed_no_trace",
+    "renamed_refounded_or_transferred",
+    "unclear",
+]
+PLACE_STATE_TEMPORAL_SCOPES = [
+    "pausanias_present",
+    "past_before_pausanias",
+    "mythic_past",
+    "later_commentary",
+    "unclear",
+]
+PLACE_STATE_TARGET_LABELS = {
+    "inhabited_still_exists": "survives",
+    "extant_uninhabited": "survives",
+    "ruined_or_remains": "does_not_survive",
+    "abandoned_or_deserted": "does_not_survive",
+    "destroyed_no_trace": "does_not_survive",
+    "renamed_refounded_or_transferred": "exclude",
+    "unclear": "exclude",
+}
 TERMINAL_RUN_STATUSES = (
     "completed",
     "completed_with_failures",
@@ -119,7 +147,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument("--openai-api-key-file", default="~/.openai.key")
     parser.add_argument(
         "--mode",
-        choices=("greta", "greta-both", "legacy", "discourse"),
+        choices=("greta", "greta-both", "legacy", "discourse", "place-state"),
         default="greta",
     )
     parser.add_argument("--model", default=None)
@@ -168,6 +196,8 @@ def parse_arguments() -> argparse.Namespace:
 def mode_model(args: argparse.Namespace) -> str:
     if args.model:
         return args.model
+    if args.mode == "place-state":
+        return DEFAULT_PLACE_STATE_MODEL
     if args.mode == "discourse":
         return DEFAULT_DISCOURSE_MODEL
     return DEFAULT_GRETA_MODEL if args.mode in GRETA_MODES else DEFAULT_LEGACY_MODEL
@@ -182,6 +212,8 @@ def mode_prompt_version(args: argparse.Namespace) -> str:
         return GRETA_BOTH_BATCH_PROMPT_VERSION
     if args.mode == "discourse":
         return DISCOURSE_MODE_PROMPT_VERSION
+    if args.mode == "place-state":
+        return PLACE_STATE_PROMPT_VERSION
     return LEGACY_PROMPT_VERSION
 
 
@@ -194,6 +226,8 @@ def mode_tokens_per_sentence(args: argparse.Namespace) -> int:
         return DEFAULT_GRETA_BOTH_TOKENS_PER_SENTENCE
     if args.mode == "discourse":
         return DEFAULT_DISCOURSE_TOKENS_PER_SENTENCE
+    if args.mode == "place-state":
+        return DEFAULT_PLACE_STATE_TOKENS_PER_SENTENCE
     return DEFAULT_LEGACY_TOKENS_PER_SENTENCE
 
 
@@ -318,6 +352,100 @@ def discourse_tool() -> list[dict]:
                         },
                     },
                     "required": ["discourse_mode", "confidence", "rationale"],
+                },
+            },
+        }
+    ]
+
+
+def place_state_tool() -> list[dict]:
+    return [
+        {
+            "type": "function",
+            "function": {
+                "name": "save_place_state_review",
+                "description": (
+                    "Save explicit Pausanias claims about whether places still "
+                    "exist, remain only as ruins, or are deserted/destroyed."
+                ),
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "has_place_state_claim": {
+                            "type": "boolean",
+                            "description": (
+                                "True only if this sentence explicitly makes a "
+                                "survival, habitation, ruin, abandonment, destruction, "
+                                "renaming, refoundation, or transfer claim about a place."
+                            ),
+                        },
+                        "summary": {
+                            "type": "string",
+                            "description": (
+                                "Short summary of the sentence-level decision. Use an empty "
+                                "string when there is nothing to summarize."
+                            ),
+                        },
+                        "claims": {
+                            "type": "array",
+                            "description": (
+                                "One item per explicit place-state claim. Leave empty when "
+                                "has_place_state_claim is false."
+                            ),
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "exact_place_text": {
+                                        "type": "string",
+                                        "description": "The place wording in the sentence.",
+                                    },
+                                    "canonical_place_name": {
+                                        "type": "string",
+                                        "description": (
+                                            "A normalized English/Greek-compatible place name."
+                                        ),
+                                    },
+                                    "place_status": {
+                                        "type": "string",
+                                        "enum": PLACE_STATE_STATUSES,
+                                    },
+                                    "temporal_scope": {
+                                        "type": "string",
+                                        "enum": PLACE_STATE_TEMPORAL_SCOPES,
+                                        "description": (
+                                            "Use pausanias_present only for claims about the "
+                                            "state of the place in Pausanias' own time."
+                                        ),
+                                    },
+                                    "evidence_quote": {
+                                        "type": "string",
+                                        "description": (
+                                            "The shortest exact Greek or English phrase that "
+                                            "supports the status."
+                                        ),
+                                    },
+                                    "confidence": {
+                                        "type": "string",
+                                        "enum": ["high", "medium", "low"],
+                                    },
+                                    "rationale": {
+                                        "type": "string",
+                                        "description": "One short reason for this claim.",
+                                    },
+                                },
+                                "required": [
+                                    "exact_place_text",
+                                    "canonical_place_name",
+                                    "place_status",
+                                    "temporal_scope",
+                                    "evidence_quote",
+                                    "confidence",
+                                    "rationale",
+                                ],
+                            },
+                        },
+                    },
+                    "required": ["has_place_state_claim", "summary", "claims"],
                 },
             },
         }
@@ -457,6 +585,56 @@ def discourse_completion_body(
     }
 
 
+def place_state_completion_body(
+    *, model: str, passage_id: str, sentence_number: int, sentence: str, english_sentence: str
+) -> dict:
+    system_prompt = (
+        "You are extracting explicit place-state claims from single sentences of "
+        "Pausanias. Identify only claims where Pausanias says or directly implies "
+        "that a named or clearly delimited place still exists, is inhabited, remains "
+        "only as ruins/remains, is abandoned/deserted, has been destroyed with no trace, "
+        "or has been renamed/refounded/transferred. Do not infer a survival status merely "
+        "because a place is named, appears on a route, has a monument, or is the setting "
+        "for a myth or historical episode.\n\n"
+        "Use temporal_scope='pausanias_present' only for the place's status in Pausanias' "
+        "own time. Claims about mythic time, earlier history, or later commentary must not "
+        "be treated as Pausanias-present evidence.\n\n"
+        "Status guide:\n"
+        "- inhabited_still_exists: Pausanias presents the place as a continuing inhabited "
+        "settlement/city/village in his time.\n"
+        "- extant_uninhabited: the place, site, sanctuary, or settlement remains materially "
+        "present, but habitation is absent or not asserted.\n"
+        "- ruined_or_remains: Pausanias says only ruins/remains/traces are present.\n"
+        "- abandoned_or_deserted: Pausanias says it is deserted, uninhabited, empty, or "
+        "abandoned.\n"
+        "- destroyed_no_trace: Pausanias says the place has been destroyed, vanished, or has "
+        "no surviving trace.\n"
+        "- renamed_refounded_or_transferred: the state claim is mainly that the place changed "
+        "name, was refounded, or its population/site moved.\n"
+        "- unclear: there is a real state claim, but the status is uncertain.\n\n"
+        "Return every explicit place-state claim in the sentence. If there is no such claim, "
+        "set has_place_state_claim=false and claims=[]."
+    )
+    user_content = (
+        f"Passage {passage_id}, sentence {sentence_number}:\n\n"
+        f"Greek:\n{sentence}\n\nEnglish:\n{english_sentence}\n\n"
+        "Extract place-state claims using the save_place_state_review function."
+    )
+    return {
+        "model": model,
+        "temperature": 0,
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_content},
+        ],
+        "tools": place_state_tool(),
+        "tool_choice": {
+            "type": "function",
+            "function": {"name": "save_place_state_review"},
+        },
+    }
+
+
 def legacy_completion_body(
     *, model: str, passage_id: str, sentence_number: int, sentence: str, english_sentence: str
 ) -> dict:
@@ -496,6 +674,8 @@ def completion_body(args: argparse.Namespace, row: dict) -> dict:
         return greta_both_completion_body(**kwargs)
     if args.mode == "discourse":
         return discourse_completion_body(**kwargs)
+    if args.mode == "place-state":
+        return place_state_completion_body(**kwargs)
     return legacy_completion_body(**kwargs)
 
 
@@ -615,6 +795,16 @@ def unprocessed_sql(args: argparse.Namespace) -> str:
       AND NOT EXISTS (
           SELECT 1
           FROM sentence_discourse_mode_tags t
+          WHERE t.passage_id = s.passage_id
+            AND t.sentence_number = s.sentence_number
+            AND t.prompt_version = {sql_string(prompt_version)}
+      )
+"""
+    elif args.mode == "place-state":
+        work_clause = f"""
+      AND NOT EXISTS (
+          SELECT 1
+          FROM sentence_place_state_reviews t
           WHERE t.passage_id = s.passage_id
             AND t.sentence_number = s.sentence_number
             AND t.prompt_version = {sql_string(prompt_version)}
@@ -917,7 +1107,8 @@ COPY (
           'greta-batch',
           'greta-both-batch',
           'legacy-batch',
-          'discourse-batch'
+          'discourse-batch',
+          'place-state-batch'
       )
       AND openai_batch_id IS NOT NULL
       AND retrieved_at IS NULL
@@ -977,6 +1168,12 @@ def request_counts_text(result) -> str:
         f"{getattr(counts, 'completed', 0)}/{getattr(counts, 'total', 0)} complete, "
         f"{getattr(counts, 'failed', 0)} failed"
     )
+
+
+def place_state_target_label(place_status: str, temporal_scope: str) -> str:
+    if temporal_scope != "pausanias_present":
+        return "exclude"
+    return PLACE_STATE_TARGET_LABELS.get(place_status, "exclude")
 
 
 def check_batches(psql: PsqlRunner, client: OpenAI, batch_run_id: str | None) -> None:
@@ -1155,6 +1352,116 @@ SET model = EXCLUDED.model,
 
 WITH payload AS (
     SELECT ${tag}${payload_json}${tag}$::jsonb AS j
+)
+INSERT INTO sentence_place_state_reviews (
+    passage_id, sentence_number, prompt_version, model, has_place_state_claim,
+    summary, input_tokens, output_tokens, run_id, created_at
+)
+SELECT
+    x.passage_id,
+    x.sentence_number,
+    j->'run'->>'prompt_version',
+    j->'run'->>'model',
+    x.has_place_state_claim,
+    x.summary,
+    x.input_tokens,
+    x.output_tokens,
+    j->'run'->>'run_id',
+    j->'run'->>'completed_at'
+FROM payload,
+     jsonb_to_recordset(j->'place_state_reviews') AS x(
+        passage_id text,
+        sentence_number integer,
+        has_place_state_claim boolean,
+        summary text,
+        input_tokens integer,
+        output_tokens integer
+     )
+ON CONFLICT (passage_id, sentence_number, prompt_version) DO UPDATE
+SET model = EXCLUDED.model,
+    has_place_state_claim = EXCLUDED.has_place_state_claim,
+    summary = EXCLUDED.summary,
+    input_tokens = EXCLUDED.input_tokens,
+    output_tokens = EXCLUDED.output_tokens,
+    run_id = EXCLUDED.run_id,
+    created_at = EXCLUDED.created_at;
+
+WITH payload AS (
+    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
+), review_rows AS (
+    SELECT x.*
+    FROM payload,
+         jsonb_to_recordset(j->'place_state_reviews') AS x(
+            passage_id text,
+            sentence_number integer
+         )
+)
+DELETE FROM place_state_mentions m
+USING review_rows, payload
+WHERE m.passage_id = review_rows.passage_id
+  AND m.sentence_number = review_rows.sentence_number
+  AND m.prompt_version = j->'run'->>'prompt_version';
+
+WITH payload AS (
+    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
+)
+INSERT INTO place_state_mentions (
+    passage_id, sentence_number, prompt_version, model, claim_index,
+    exact_place_text, canonical_place_name, place_status, temporal_scope,
+    evidence_quote, confidence, rationale, target_label, input_tokens,
+    output_tokens, run_id, created_at
+)
+SELECT
+    x.passage_id,
+    x.sentence_number,
+    j->'run'->>'prompt_version',
+    j->'run'->>'model',
+    x.claim_index,
+    x.exact_place_text,
+    x.canonical_place_name,
+    x.place_status,
+    x.temporal_scope,
+    x.evidence_quote,
+    x.confidence,
+    x.rationale,
+    x.target_label,
+    x.input_tokens,
+    x.output_tokens,
+    j->'run'->>'run_id',
+    j->'run'->>'completed_at'
+FROM payload,
+     jsonb_to_recordset(j->'place_state_mentions') AS x(
+        passage_id text,
+        sentence_number integer,
+        claim_index integer,
+        exact_place_text text,
+        canonical_place_name text,
+        place_status text,
+        temporal_scope text,
+        evidence_quote text,
+        confidence text,
+        rationale text,
+        target_label text,
+        input_tokens integer,
+        output_tokens integer
+     )
+ON CONFLICT (passage_id, sentence_number, prompt_version, claim_index) DO UPDATE
+SET model = EXCLUDED.model,
+    exact_place_text = EXCLUDED.exact_place_text,
+    canonical_place_name = EXCLUDED.canonical_place_name,
+    place_status = EXCLUDED.place_status,
+    temporal_scope = EXCLUDED.temporal_scope,
+    evidence_quote = EXCLUDED.evidence_quote,
+    confidence = EXCLUDED.confidence,
+    rationale = EXCLUDED.rationale,
+    target_label = EXCLUDED.target_label,
+    input_tokens = EXCLUDED.input_tokens,
+    output_tokens = EXCLUDED.output_tokens,
+    run_id = EXCLUDED.run_id,
+    created_at = EXCLUDED.created_at;
+
+WITH payload AS (
+    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
 ), legacy_rows AS (
     SELECT x.*
     FROM payload,
@@ -1228,6 +1535,8 @@ def fetch_batches(
         greta_tags = []
         greta_both_tags = []
         discourse_tags = []
+        place_state_reviews = []
+        place_state_mentions = []
         legacy_tags = []
         failures = []
         seen_requests = set()
@@ -1302,6 +1611,54 @@ def fetch_batches(
                             "output_tokens": output_tokens,
                         }
                     )
+                elif output_mode == "place-state":
+                    claims = args.get("claims") or []
+                    if not isinstance(claims, list):
+                        raise ValueError("place-state claims must be a list")
+                    has_place_state_claim = bool(args.get("has_place_state_claim"))
+                    if has_place_state_claim and not claims:
+                        raise ValueError("has_place_state_claim is true but claims is empty")
+                    if claims and not has_place_state_claim:
+                        raise ValueError("claims are present but has_place_state_claim is false")
+                    place_state_reviews.append(
+                        {
+                            "passage_id": source["passage_id"],
+                            "sentence_number": source["sentence_number"],
+                            "has_place_state_claim": has_place_state_claim,
+                            "summary": args.get("summary") or "",
+                            "input_tokens": input_tokens,
+                            "output_tokens": output_tokens,
+                        }
+                    )
+                    for claim_index, claim in enumerate(claims, start=1):
+                        place_status = claim.get("place_status")
+                        if place_status not in set(PLACE_STATE_STATUSES):
+                            raise ValueError(f"Invalid place status: {place_status}")
+                        temporal_scope = claim.get("temporal_scope")
+                        if temporal_scope not in set(PLACE_STATE_TEMPORAL_SCOPES):
+                            raise ValueError(f"Invalid temporal scope: {temporal_scope}")
+                        confidence = claim.get("confidence")
+                        if confidence not in {"high", "medium", "low"}:
+                            confidence = "low"
+                        place_state_mentions.append(
+                            {
+                                "passage_id": source["passage_id"],
+                                "sentence_number": source["sentence_number"],
+                                "claim_index": claim_index,
+                                "exact_place_text": claim.get("exact_place_text") or "",
+                                "canonical_place_name": claim.get("canonical_place_name") or "",
+                                "place_status": place_status,
+                                "temporal_scope": temporal_scope,
+                                "evidence_quote": claim.get("evidence_quote") or "",
+                                "confidence": confidence,
+                                "rationale": claim.get("rationale") or "",
+                                "target_label": place_state_target_label(
+                                    place_status, temporal_scope
+                                ),
+                                "input_tokens": input_tokens,
+                                "output_tokens": output_tokens,
+                            }
+                        )
                 elif output_mode == "legacy":
                     legacy_tags.append(
                         {
@@ -1365,6 +1722,7 @@ def fetch_batches(
             len(greta_tags)
             + len(greta_both_tags)
             + len(discourse_tags)
+            + len(place_state_reviews)
             + len(legacy_tags)
         )
         status = "completed" if not failures else "completed_with_failures"
@@ -1389,6 +1747,8 @@ def fetch_batches(
             "greta_tags": greta_tags,
             "greta_both_tags": greta_both_tags,
             "discourse_tags": discourse_tags,
+            "place_state_reviews": place_state_reviews,
+            "place_state_mentions": place_state_mentions,
             "legacy_tags": legacy_tags,
         }
         write_results(psql, payload)

@@ -58,3 +58,11 @@ run_batch \
   --random-order \
   --sample-seed discourse-mode-v1 \
   --skip-if-submitted-hours 18
+
+run_batch \
+  --mode place-state \
+  --use-batch-api \
+  --model gpt-5.4-mini \
+  --token-budget 250000 \
+  --priority-books-last 4,8 \
+  --skip-if-submitted-hours 18

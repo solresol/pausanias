@@ -95,6 +95,52 @@ The review importer chooses the dominant completed-prose spelling for each
 entity, with a small set of explicit overrides where a base name and compound
 name would otherwise fight each other.
 
+## MANTO import and place-survival modelling
+
+MANTO is imported from the public Zenodo data release rather than scraped from
+the browser interface. The raw ZIP stays out of Git under `tmp/manto-releases/`.
+
+Check the latest public release:
+
+```bash
+uv run manto_release_check.py --json
+```
+
+Download and record the release locally:
+
+```bash
+uv run manto_release_check.py --download --record-known
+```
+
+Import the cached release into PostgreSQL:
+
+```bash
+uv run manto_importer.py
+```
+
+The importer stores raw CSV/JSON rows in `manto_raw_records`, then builds
+best-effort `manto_entities` and `manto_edges`. For prediction, use the strict
+pre-Pausanias graph only: `manto_edges.is_pre_pausanias = TRUE`. Edges from
+Pausanias, sources dated to Pausanias or later, and unknown-date sources are
+excluded from the default modelling graph to avoid leaking both Pausanias' own
+evidence and future evidence.
+
+After Wikidata/Pleiades linking has run, link Pausanias places to MANTO and
+build network features:
+
+```bash
+uv run link_manto_places.py
+uv run manto_place_network_features.py
+```
+
+The place-state LLM sweep is part of `sentence_tagging_daily.sh` as
+`--mode place-state`. Once enough `place_state_mentions` have Pausanias-present
+labels, train the first explainable model:
+
+```bash
+uv run predict_place_survival.py
+```
+
 ## UDPipe grammar annotations
 
 Sentence-level grammar annotations are stored separately from the LLM
