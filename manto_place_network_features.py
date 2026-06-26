@@ -45,6 +45,11 @@ def parse_arguments() -> argparse.Namespace:
         action="store_true",
         help="Set clustering coefficients to 0.0 instead of computing weighted clustering.",
     )
+    parser.add_argument(
+        "--skip-components",
+        action="store_true",
+        help="Set component/community sizes to 1 instead of walking connected components.",
+    )
     return parser.parse_args()
 
 
@@ -198,6 +203,7 @@ def build_feature_rows(
     betweenness_sample: int,
     community_node_limit: int,
     skip_clustering: bool,
+    skip_components: bool,
 ) -> list[tuple]:
     timestamp = now_iso()
     print("Computing degree centrality...", flush=True)
@@ -214,13 +220,19 @@ def build_feature_rows(
     }
     target_nodes = {link["manto_id"] for link in links}
     print("Computing target components and communities...", flush=True)
-    components = component_sizes_for_targets(graph, target_nodes)
-    communities = community_sizes(
-        graph,
-        node_limit=community_node_limit,
-        target_nodes=target_nodes,
-        component_fallback=components,
-    )
+    if skip_components:
+        components = {node: 1 for node in target_nodes}
+        communities = {node: 1 for node in target_nodes}
+        component_mode = "skipped"
+    else:
+        components = component_sizes_for_targets(graph, target_nodes)
+        communities = community_sizes(
+            graph,
+            node_limit=community_node_limit,
+            target_nodes=target_nodes,
+            component_fallback=components,
+        )
+        component_mode = "target_nodes"
     sorted_pagerank = sorted(pagerank.values(), reverse=True)
     top_count = max(1, min(50, int(len(sorted_pagerank) * 0.05) or 1))
     top_nodes = {
@@ -252,6 +264,9 @@ def build_feature_rows(
             "shared_neighbor_high_centrality_score": float(shared_score),
             "graph_node_count": int(graph.number_of_nodes()),
             "graph_edge_count": int(graph.number_of_edges()),
+            "component_mode": component_mode,
+            "clustering_skipped": bool(skip_clustering),
+            "betweenness_sample": int(betweenness_sample),
         }
         rows.append(
             (
@@ -354,6 +369,7 @@ def main() -> None:
             betweenness_sample=args.betweenness_sample,
             community_node_limit=args.community_node_limit,
             skip_clustering=args.skip_clustering,
+            skip_components=args.skip_components,
         )
         print("Saving feature rows...", flush=True)
         save_rows(
