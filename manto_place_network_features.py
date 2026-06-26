@@ -31,6 +31,15 @@ def parse_arguments() -> argparse.Namespace:
         help="Use all MANTO edges. Default is strict pre-Pausanias-only edges.",
     )
     parser.add_argument("--betweenness-sample", type=int, default=200)
+    parser.add_argument(
+        "--community-node-limit",
+        type=int,
+        default=50000,
+        help=(
+            "Use connected-component size instead of greedy modularity when "
+            "the graph has more nodes than this limit."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -121,9 +130,11 @@ def component_sizes(graph: nx.Graph) -> dict[str, int]:
     return sizes
 
 
-def community_sizes(graph: nx.Graph) -> dict[str, int]:
+def community_sizes(graph: nx.Graph, *, node_limit: int) -> dict[str, int]:
     if graph.number_of_edges() == 0:
         return {node: 1 for node in graph.nodes}
+    if graph.number_of_nodes() > node_limit:
+        return component_sizes(graph)
     communities = nx.algorithms.community.greedy_modularity_communities(
         graph,
         weight="weight",
@@ -138,6 +149,8 @@ def community_sizes(graph: nx.Graph) -> dict[str, int]:
 
 def safe_betweenness(graph: nx.Graph, sample_size: int) -> dict[str, float]:
     if graph.number_of_nodes() <= 1:
+        return {node: 0.0 for node in graph.nodes}
+    if sample_size <= 0:
         return {node: 0.0 for node in graph.nodes}
     if graph.number_of_nodes() > sample_size:
         return nx.betweenness_centrality(
@@ -164,6 +177,7 @@ def build_feature_rows(
     links: list[dict],
     pre_pausanias_only: bool,
     betweenness_sample: int,
+    community_node_limit: int,
 ) -> list[tuple]:
     timestamp = now_iso()
     degree_centrality = nx.degree_centrality(graph) if graph.number_of_nodes() > 1 else {}
@@ -175,7 +189,7 @@ def build_feature_rows(
         node: 0.0 for node in graph.nodes
     }
     components = component_sizes(graph)
-    communities = community_sizes(graph)
+    communities = community_sizes(graph, node_limit=community_node_limit)
     sorted_pagerank = sorted(pagerank.values(), reverse=True)
     top_count = max(1, min(50, int(len(sorted_pagerank) * 0.05) or 1))
     top_nodes = {
@@ -304,6 +318,7 @@ def main() -> None:
             links=links,
             pre_pausanias_only=pre_pausanias_only,
             betweenness_sample=args.betweenness_sample,
+            community_node_limit=args.community_node_limit,
         )
         save_rows(
             conn,
