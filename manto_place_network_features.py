@@ -126,20 +126,32 @@ def build_graph(edges: list[tuple], links: list[dict]) -> nx.Graph:
     return graph
 
 
-def component_sizes(graph: nx.Graph) -> dict[str, int]:
+def component_sizes_for_targets(graph: nx.Graph, target_nodes: set[str]) -> dict[str, int]:
     sizes = {}
-    for component in nx.connected_components(graph):
+    remaining = {node for node in target_nodes if node in graph}
+    while remaining:
+        node = next(iter(remaining))
+        component = nx.node_connected_component(graph, node)
         size = len(component)
-        for node in component:
-            sizes[node] = size
+        for target in target_nodes & component:
+            sizes[target] = size
+        remaining -= component
+    for node in target_nodes:
+        sizes.setdefault(node, 1)
     return sizes
 
 
-def community_sizes(graph: nx.Graph, *, node_limit: int) -> dict[str, int]:
+def community_sizes(
+    graph: nx.Graph,
+    *,
+    node_limit: int,
+    target_nodes: set[str],
+    component_fallback: dict[str, int],
+) -> dict[str, int]:
     if graph.number_of_edges() == 0:
-        return {node: 1 for node in graph.nodes}
+        return {node: 1 for node in target_nodes}
     if graph.number_of_nodes() > node_limit:
-        return component_sizes(graph)
+        return dict(component_fallback)
     communities = nx.algorithms.community.greedy_modularity_communities(
         graph,
         weight="weight",
@@ -147,8 +159,10 @@ def community_sizes(graph: nx.Graph, *, node_limit: int) -> dict[str, int]:
     sizes = {}
     for community in communities:
         size = len(community)
-        for node in community:
+        for node in target_nodes & set(community):
             sizes[node] = size
+    for node in target_nodes:
+        sizes.setdefault(node, component_fallback.get(node, 1))
     return sizes
 
 
@@ -198,9 +212,15 @@ def build_feature_rows(
     clustering = {} if skip_clustering else nx.clustering(graph, weight="weight") if graph.number_of_edges() else {
         node: 0.0 for node in graph.nodes
     }
-    print("Computing components and communities...", flush=True)
-    components = component_sizes(graph)
-    communities = community_sizes(graph, node_limit=community_node_limit)
+    target_nodes = {link["manto_id"] for link in links}
+    print("Computing target components and communities...", flush=True)
+    components = component_sizes_for_targets(graph, target_nodes)
+    communities = community_sizes(
+        graph,
+        node_limit=community_node_limit,
+        target_nodes=target_nodes,
+        component_fallback=components,
+    )
     sorted_pagerank = sorted(pagerank.values(), reverse=True)
     top_count = max(1, min(50, int(len(sorted_pagerank) * 0.05) or 1))
     top_nodes = {
