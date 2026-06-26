@@ -38,6 +38,7 @@ from pausanias_db import add_database_argument, connect, initialize_schema
 DEFAULT_PAUSANIAS_CUTOFF_YEAR = 180
 MAX_TEXT_ANALYSIS_CHARS = 50000
 MAX_RAW_CELL_CHARS = 100000
+MANTO_IMPORT_ADVISORY_LOCK_ID = 19446254
 MANTO_ID_RE = re.compile(
     r"(?:object|objects|classification|classifications|source|sources)[/_:-]?(\d+)",
     re.IGNORECASE,
@@ -394,6 +395,17 @@ def record_data_json(record: dict[str, Any]) -> Jsonb:
     return Jsonb(compact_record_for_storage(record))
 
 
+def acquire_import_lock(conn) -> bool:
+    with conn.cursor() as cursor:
+        cursor.execute("SELECT pg_try_advisory_lock(%s)", (MANTO_IMPORT_ADVISORY_LOCK_ID,))
+        return bool(cursor.fetchone()[0])
+
+
+def release_import_lock(conn) -> None:
+    with conn.cursor() as cursor:
+        cursor.execute("SELECT pg_advisory_unlock(%s)", (MANTO_IMPORT_ADVISORY_LOCK_ID,))
+
+
 def id_value_by_key(record: dict[str, Any], accepted_keys: Iterable[str]) -> str | None:
     accepted = {normalize_key(key) for key in accepted_keys}
     for key, value in record.items():
@@ -714,28 +726,33 @@ def main() -> None:
 
     with connect(args.database_url) as conn:
         initialize_schema(conn)
-        upsert_release(
-            conn,
-            release,
-            local_zip_path=zip_path,
-            status="importing",
-        )
+        if not acquire_import_lock(conn):
+            raise SystemExit("Another MANTO import is already running.")
         try:
-            counts = import_release(conn, release=release, zip_path=zip_path, args=args)
-        except Exception:
-            failed_at = now_iso()
-            with conn.cursor() as cursor:
-                cursor.execute(
-                    """
-                    UPDATE manto_releases
-                    SET import_status = 'failed',
-                        updated_at = %s
-                    WHERE record_id = %s
-                    """,
-                    (failed_at, release.record_id),
-                )
-            conn.commit()
-            raise
+            upsert_release(
+                conn,
+                release,
+                local_zip_path=zip_path,
+                status="importing",
+            )
+            try:
+                counts = import_release(conn, release=release, zip_path=zip_path, args=args)
+            except Exception:
+                failed_at = now_iso()
+                with conn.cursor() as cursor:
+                    cursor.execute(
+                        """
+                        UPDATE manto_releases
+                        SET import_status = 'failed',
+                            updated_at = %s
+                        WHERE record_id = %s
+                        """,
+                        (failed_at, release.record_id),
+                    )
+                conn.commit()
+                raise
+        finally:
+            release_import_lock(conn)
     print(
         f"Imported MANTO release {release.record_id}: "
         f"{counts['raw_records']:,} raw rows, "
