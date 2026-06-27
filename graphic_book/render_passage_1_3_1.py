@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import math
+import sqlite3
 import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -11,8 +12,6 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
-
-from pausanias_db import connect
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageOps
 
@@ -53,9 +52,12 @@ def root_dir() -> Path:
 
 
 def load_translation() -> str:
-    with connect() as conn:
+    db_path = root_dir() / "pausanias.sqlite"
+    if not db_path.exists():
+        raise RuntimeError(f"Missing local SQLite database: {db_path}")
+    with sqlite3.connect(db_path) as conn:
         row = conn.execute(
-            "SELECT english_translation FROM translations WHERE passage_id = %s",
+            "SELECT english_translation FROM translations WHERE passage_id = ?",
             (PASSAGE_ID,),
         ).fetchone()
     if not row or not row[0]:
@@ -477,31 +479,31 @@ def render_page(output_path: Path) -> dict[str, object]:
 
     theseus_art = crop_to_fill(
         root_dir() / "graphic_book/assets/generated/1_3_1/theseus_sciron.png",
-        (420, 214),
+        (420, 198),
         centering=(0.5, 0.48),
     )
     theseus_panel = make_inset_panel(
         theseus_art,
-        "On the baked-clay roof Pausanias saw Theseus casting Sciron into the sea: civic architecture carrying heroic action across the skyline.",
-        118,
+        "On the baked-clay roof Pausanias saw Theseus casting Sciron into the sea, turning civic architecture into heroic display.",
+        98,
         "caption:theseus",
         records,
     )
-    theseus_xy = (468, 742)
+    theseus_xy = (468, 744)
 
     dawn_art = crop_to_fill(
         root_dir() / "graphic_book/assets/generated/1_3_1/dawn_cephalus.png",
-        (388, 230),
+        (388, 206),
         centering=(0.5, 0.42),
     )
     dawn_panel = make_inset_panel(
         dawn_art,
-        "Another roof group showed Dawn carrying off Cephalus; Pausanias adds Cephalus' son Phaethon and notes that Hesiod also told the tale.",
-        108,
+        "Another roof group showed Dawn carrying off Cephalus; Pausanias adds Phaethon and Hesiod's parallel account.",
+        98,
         "caption:dawn",
         records,
     )
-    dawn_xy = (964, 736)
+    dawn_xy = (964, 740)
 
     labels = [
         ("ACROPOLIS", (982, 106, 1238, 160)),
