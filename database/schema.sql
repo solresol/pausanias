@@ -527,13 +527,10 @@ CREATE TABLE IF NOT EXISTS sentence_udpipe_tokens (
     upos TEXT,
     xpos TEXT,
     feats_raw TEXT NOT NULL DEFAULT '_',
-    feats JSONB NOT NULL DEFAULT '{}'::JSONB,
     head_token_id TEXT,
     deprel TEXT,
     deps_raw TEXT NOT NULL DEFAULT '_',
-    deps JSONB NOT NULL DEFAULT '[]'::JSONB,
     misc_raw TEXT NOT NULL DEFAULT '_',
-    misc JSONB NOT NULL DEFAULT '{}'::JSONB,
     is_multiword_token BOOLEAN NOT NULL DEFAULT FALSE,
     is_empty_node BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TEXT NOT NULL,
@@ -597,13 +594,10 @@ CREATE TABLE IF NOT EXISTS sentence_trankit_tokens (
     pos TEXT,
     xpos TEXT,
     feats_raw TEXT NOT NULL DEFAULT '_',
-    feats JSONB NOT NULL DEFAULT '{}'::JSONB,
     head_token_id TEXT,
     deprel TEXT,
     deps_raw TEXT NOT NULL DEFAULT '_',
-    deps JSONB NOT NULL DEFAULT '[]'::JSONB,
     misc_raw TEXT NOT NULL DEFAULT '_',
-    misc JSONB NOT NULL DEFAULT '{}'::JSONB,
     is_multiword_token BOOLEAN NOT NULL DEFAULT FALSE,
     is_empty_node BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TEXT NOT NULL,
@@ -646,7 +640,6 @@ CREATE TABLE IF NOT EXISTS sentence_llm_grammar_analyses (
         ON DELETE CASCADE,
     greek_sentence TEXT NOT NULL,
     conllu TEXT NOT NULL,
-    response_json JSONB NOT NULL DEFAULT '{}'::JSONB,
     sentence_note TEXT NOT NULL DEFAULT '',
     input_tokens INTEGER NOT NULL DEFAULT 0,
     output_tokens INTEGER NOT NULL DEFAULT 0,
@@ -670,7 +663,6 @@ CREATE TABLE IF NOT EXISTS sentence_llm_grammar_tokens (
     upos TEXT,
     xpos TEXT,
     feats_raw TEXT NOT NULL DEFAULT '_',
-    feats JSONB NOT NULL DEFAULT '{}'::JSONB,
     head_token_id TEXT,
     deprel TEXT,
     confidence TEXT NOT NULL DEFAULT 'medium',
@@ -831,7 +823,6 @@ CREATE TABLE IF NOT EXISTS manto_releases (
     downloaded_at TEXT,
     imported_at TEXT,
     import_status TEXT NOT NULL DEFAULT 'discovered',
-    metadata JSONB NOT NULL DEFAULT '{}'::JSONB,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL
 );
@@ -846,7 +837,6 @@ CREATE TABLE IF NOT EXISTS manto_raw_records (
     label TEXT,
     evidence_source_label TEXT,
     evidence_latest_year INTEGER,
-    data JSONB NOT NULL,
     imported_at TEXT NOT NULL,
     PRIMARY KEY (release_record_id, file_path, record_number)
 );
@@ -864,7 +854,6 @@ CREATE TABLE IF NOT EXISTS manto_entities (
     type_label TEXT,
     evidence_source_label TEXT,
     evidence_latest_year INTEGER,
-    data JSONB NOT NULL,
     imported_at TEXT NOT NULL,
     PRIMARY KEY (release_record_id, manto_id)
 );
@@ -884,7 +873,6 @@ CREATE TABLE IF NOT EXISTS manto_edges (
     evidence_latest_year INTEGER,
     is_pre_pausanias BOOLEAN NOT NULL DEFAULT FALSE,
     excluded_reason TEXT,
-    data JSONB NOT NULL,
     imported_at TEXT NOT NULL,
     PRIMARY KEY (release_record_id, edge_id)
 );
@@ -941,7 +929,6 @@ CREATE TABLE IF NOT EXISTS manto_place_network_features (
     high_centrality_neighbor_count INTEGER NOT NULL,
     max_neighbor_pagerank DOUBLE PRECISION NOT NULL,
     shared_neighbor_high_centrality_score DOUBLE PRECISION NOT NULL,
-    features JSONB NOT NULL,
     created_at TEXT NOT NULL,
     PRIMARY KEY (release_record_id, feature_set_version, reference_form, entity_type, manto_id)
 );

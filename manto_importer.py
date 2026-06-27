@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 """Import a public MANTO release ZIP into PostgreSQL.
 
-The importer is intentionally conservative. It stores every public CSV/JSON row
-as raw JSONB, then builds best-effort entity and edge tables from recognizable
-identifier columns. Network features should use only `manto_edges` rows whose
-`is_pre_pausanias` flag is true.
+The importer is intentionally conservative. It reads every public CSV/JSON row
+from the release ZIP, then stores typed best-effort raw-record summaries,
+entities, and edges from recognizable identifier columns. Network features
+should use only `manto_edges` rows whose `is_pre_pausanias` flag is true.
 """
 
 from __future__ import annotations
@@ -21,8 +21,6 @@ from collections.abc import Iterable, Iterator
 from pathlib import Path
 from typing import Any
 
-from psycopg.types.json import Jsonb
-
 from manto_release import (
     DEFAULT_CACHE_DIR,
     MANTO_CONCEPT_RECORD_ID,
@@ -37,7 +35,6 @@ from pausanias_db import add_database_argument, connect, initialize_schema
 
 DEFAULT_PAUSANIAS_CUTOFF_YEAR = 180
 MAX_TEXT_ANALYSIS_CHARS = 50000
-MAX_RAW_CELL_CHARS = 100000
 MANTO_IMPORT_ADVISORY_LOCK_ID = 19446254
 MANTO_ID_RE = re.compile(
     r"(?:object|objects|classification|classifications|source|sources)[/_:-]?(\d+)",
@@ -366,35 +363,6 @@ def iter_zip_records(zip_path: Path) -> Iterator[tuple[str, str, int, dict[str, 
                         yield info.filename, "json", number, row
 
 
-def compact_record_for_storage(record: dict[str, Any]) -> dict[str, Any]:
-    compacted: dict[str, Any] = {}
-    truncated_fields: dict[str, int] = {}
-    for key, value in record.items():
-        if isinstance(value, str) and len(value) > MAX_RAW_CELL_CHARS:
-            compacted[key] = value[:MAX_RAW_CELL_CHARS]
-            truncated_fields[key] = len(value)
-        elif isinstance(value, list):
-            compacted[key] = [
-                item[:MAX_RAW_CELL_CHARS] if isinstance(item, str) and len(item) > MAX_RAW_CELL_CHARS else item
-                for item in value
-            ]
-            for index, item in enumerate(value):
-                if isinstance(item, str) and len(item) > MAX_RAW_CELL_CHARS:
-                    truncated_fields[f"{key}[{index}]"] = len(item)
-        else:
-            compacted[key] = value
-    if truncated_fields:
-        compacted["_truncated_fields"] = truncated_fields
-        compacted["_truncation_note"] = (
-            f"Values longer than {MAX_RAW_CELL_CHARS} characters are truncated in raw storage."
-        )
-    return compacted
-
-
-def record_data_json(record: dict[str, Any]) -> Jsonb:
-    return Jsonb(compact_record_for_storage(record))
-
-
 def acquire_import_lock(conn) -> bool:
     with conn.cursor() as cursor:
         cursor.execute("SELECT pg_try_advisory_lock(%s)", (MANTO_IMPORT_ADVISORY_LOCK_ID,))
@@ -497,7 +465,6 @@ def raw_record_tuple(
         record_label(record) or None,
         source_label or None,
         latest_year,
-        record_data_json(record),
         imported_at,
     )
 
@@ -518,7 +485,6 @@ def entity_tuple(
         first_by_normalized_key(record, ["type", "object type", "classification type"]) or None,
         source_label or None,
         latest_year,
-        record_data_json(record),
         imported_at,
     )
 
@@ -557,7 +523,6 @@ def edge_tuples(
                 latest_year,
                 is_pre,
                 reason,
-                record_data_json(record),
                 imported_at,
             )
         )
@@ -574,9 +539,9 @@ def execute_batch(conn, sql: str, rows: list[tuple]) -> None:
 RAW_SQL = """
 INSERT INTO manto_raw_records (
     release_record_id, file_path, record_number, file_format, record_id,
-    record_kind, label, evidence_source_label, evidence_latest_year, data, imported_at
+    record_kind, label, evidence_source_label, evidence_latest_year, imported_at
 )
-VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
 ON CONFLICT (release_record_id, file_path, record_number) DO UPDATE
 SET file_format = EXCLUDED.file_format,
     record_id = EXCLUDED.record_id,
@@ -584,23 +549,21 @@ SET file_format = EXCLUDED.file_format,
     label = EXCLUDED.label,
     evidence_source_label = EXCLUDED.evidence_source_label,
     evidence_latest_year = EXCLUDED.evidence_latest_year,
-    data = EXCLUDED.data,
     imported_at = EXCLUDED.imported_at
 """
 
 ENTITY_SQL = """
 INSERT INTO manto_entities (
     release_record_id, manto_id, entity_kind, label, type_label,
-    evidence_source_label, evidence_latest_year, data, imported_at
+    evidence_source_label, evidence_latest_year, imported_at
 )
-VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
 ON CONFLICT (release_record_id, manto_id) DO UPDATE
 SET entity_kind = EXCLUDED.entity_kind,
     label = COALESCE(EXCLUDED.label, manto_entities.label),
     type_label = COALESCE(EXCLUDED.type_label, manto_entities.type_label),
     evidence_source_label = COALESCE(EXCLUDED.evidence_source_label, manto_entities.evidence_source_label),
     evidence_latest_year = COALESCE(EXCLUDED.evidence_latest_year, manto_entities.evidence_latest_year),
-    data = EXCLUDED.data,
     imported_at = EXCLUDED.imported_at
 """
 
@@ -608,9 +571,9 @@ EDGE_SQL = """
 INSERT INTO manto_edges (
     release_record_id, edge_id, source_manto_id, target_manto_id, relation_type,
     evidence_source_label, evidence_latest_year, is_pre_pausanias, excluded_reason,
-    data, imported_at
+    imported_at
 )
-VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
 ON CONFLICT (release_record_id, edge_id) DO UPDATE
 SET source_manto_id = EXCLUDED.source_manto_id,
     target_manto_id = EXCLUDED.target_manto_id,
@@ -619,7 +582,6 @@ SET source_manto_id = EXCLUDED.source_manto_id,
     evidence_latest_year = EXCLUDED.evidence_latest_year,
     is_pre_pausanias = EXCLUDED.is_pre_pausanias,
     excluded_reason = EXCLUDED.excluded_reason,
-    data = EXCLUDED.data,
     imported_at = EXCLUDED.imported_at
 """
 

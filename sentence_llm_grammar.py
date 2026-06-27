@@ -648,7 +648,6 @@ SET completed_at = EXCLUDED.completed_at,
                         sql_string(run["run_id"]),
                         sql_string(result["greek_sentence"]),
                         sql_string(result["conllu"]),
-                        "'{}'::jsonb",
                         sql_string(result.get("sentence_note") or ""),
                         sql_integer(result.get("input_tokens")),
                         sql_integer(result.get("output_tokens")),
@@ -686,7 +685,6 @@ SET completed_at = EXCLUDED.completed_at,
                             sql_nullable_text(token.get("upos")),
                             sql_nullable_text(token.get("xpos")),
                             sql_string(token.get("feats_raw") or "_"),
-                            "'{}'::jsonb",
                             sql_nullable_text(token.get("head_token_id")),
                             sql_nullable_text(token.get("deprel")),
                             sql_string(token.get("confidence") or "medium"),
@@ -704,7 +702,7 @@ SET completed_at = EXCLUDED.completed_at,
         sql += f"""
 INSERT INTO sentence_llm_grammar_analyses (
     passage_id, sentence_number, model, prompt_version, run_id, greek_sentence,
-    conllu, response_json, sentence_note, input_tokens, output_tokens, token_count,
+    conllu, sentence_note, input_tokens, output_tokens, token_count,
     created_at
 )
 VALUES
@@ -713,7 +711,6 @@ ON CONFLICT (passage_id, sentence_number, model, prompt_version) DO UPDATE
 SET run_id = EXCLUDED.run_id,
     greek_sentence = EXCLUDED.greek_sentence,
     conllu = EXCLUDED.conllu,
-    response_json = EXCLUDED.response_json,
     sentence_note = EXCLUDED.sentence_note,
     input_tokens = EXCLUDED.input_tokens,
     output_tokens = EXCLUDED.output_tokens,
@@ -736,7 +733,7 @@ WHERE t.passage_id = rows.passage_id
             sql += f"""
 INSERT INTO sentence_llm_grammar_tokens (
     passage_id, sentence_number, model, prompt_version, token_order, token_id,
-    form, lemma, upos, xpos, feats_raw, feats, head_token_id, deprel, confidence,
+    form, lemma, upos, xpos, feats_raw, head_token_id, deprel, confidence,
     note, is_multiword_token, is_empty_node, created_at
 )
 VALUES

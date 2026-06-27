@@ -7,8 +7,6 @@ import argparse
 import json
 from pathlib import Path
 
-from psycopg.types.json import Jsonb
-
 from manto_release import (
     DEFAULT_CACHE_DIR,
     MANTO_CONCEPT_RECORD_ID,
@@ -80,13 +78,13 @@ def upsert_release(conn, release, *, local_zip_path: Path | None = None, status:
                 record_id, concept_record_id, doi, concept_doi, version, title,
                 zenodo_created_at, zenodo_modified_at, license_id, file_key,
                 file_size, file_checksum, file_url, local_zip_path, downloaded_at,
-                import_status, metadata, created_at, updated_at
+                import_status, created_at, updated_at
             )
             VALUES (
                 %(record_id)s, %(concept_record_id)s, %(doi)s, %(concept_doi)s,
                 %(version)s, %(title)s, %(created)s, %(modified)s, %(license_id)s,
                 %(file_key)s, %(file_size)s, %(file_checksum)s, %(file_url)s,
-                %(local_zip_path)s, %(downloaded_at)s, %(status)s, %(metadata)s,
+                %(local_zip_path)s, %(downloaded_at)s, %(status)s,
                 %(timestamp)s, %(timestamp)s
             )
             ON CONFLICT (record_id) DO UPDATE
@@ -109,7 +107,6 @@ def upsert_release(conn, release, *, local_zip_path: Path | None = None, status:
                         THEN manto_releases.import_status
                     ELSE EXCLUDED.import_status
                 END,
-                metadata = EXCLUDED.metadata,
                 updated_at = EXCLUDED.updated_at
             """,
             {
@@ -129,7 +126,6 @@ def upsert_release(conn, release, *, local_zip_path: Path | None = None, status:
                 "local_zip_path": str(local_zip_path) if local_zip_path else None,
                 "downloaded_at": timestamp if local_zip_path else None,
                 "status": status,
-                "metadata": Jsonb(release.metadata),
                 "timestamp": timestamp,
             },
         )

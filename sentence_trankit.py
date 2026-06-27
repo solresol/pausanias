@@ -472,13 +472,10 @@ def write_results(psql: PsqlRunner, run: dict, results: list[dict]) -> None:
                         sql_nullable_text(token.get("pos")),
                         sql_nullable_text(token.get("xpos")),
                         sql_string(token.get("feats_raw") or "_"),
-                        "'{}'::jsonb",
                         sql_nullable_text(token.get("head_token_id")),
                         sql_nullable_text(token.get("deprel")),
                         sql_string(token.get("deps_raw") or "_"),
-                        "'[]'::jsonb",
                         sql_string(token.get("misc_raw") or "_"),
-                        "'{}'::jsonb",
                         sql_bool(token.get("is_multiword_token")),
                         sql_bool(token.get("is_empty_node")),
                         sql_string(run.get("completed_at") or ""),
@@ -517,8 +514,8 @@ WHERE t.passage_id = rows.passage_id
         sql += f"""
 INSERT INTO sentence_trankit_tokens (
     passage_id, sentence_number, model_name, token_order, token_id, form,
-    lemma, pos, xpos, feats_raw, feats, head_token_id, deprel, deps_raw,
-    deps, misc_raw, misc, is_multiword_token, is_empty_node, created_at
+    lemma, pos, xpos, feats_raw, head_token_id, deprel, deps_raw,
+    misc_raw, is_multiword_token, is_empty_node, created_at
 )
 VALUES
     {token_sql_values};

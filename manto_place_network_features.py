@@ -8,7 +8,6 @@ import json
 from datetime import datetime, timezone
 
 import networkx as nx
-from psycopg.types.json import Jsonb
 
 from pausanias_db import add_database_argument, connect, initialize_schema
 
@@ -288,7 +287,6 @@ def build_feature_rows(
                 features["high_centrality_neighbor_count"],
                 features["max_neighbor_pagerank"],
                 features["shared_neighbor_high_centrality_score"],
-                Jsonb(features),
                 timestamp,
             )
         )
@@ -321,9 +319,9 @@ def save_rows(
                 degree, degree_centrality, pagerank, betweenness_centrality,
                 clustering_coefficient, component_size, community_size,
                 high_centrality_neighbor_count, max_neighbor_pagerank,
-                shared_neighbor_high_centrality_score, features, created_at
+                shared_neighbor_high_centrality_score, created_at
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ON CONFLICT (
                 release_record_id, feature_set_version, reference_form, entity_type, manto_id
             ) DO UPDATE
@@ -340,7 +338,6 @@ def save_rows(
                 high_centrality_neighbor_count = EXCLUDED.high_centrality_neighbor_count,
                 max_neighbor_pagerank = EXCLUDED.max_neighbor_pagerank,
                 shared_neighbor_high_centrality_score = EXCLUDED.shared_neighbor_high_centrality_score,
-                features = EXCLUDED.features,
                 created_at = EXCLUDED.created_at
             """,
             rows,
