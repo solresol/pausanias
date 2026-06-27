@@ -37,7 +37,25 @@ def now_iso() -> str:
 
 
 def sql_string(value: str) -> str:
-    return "'" + value.replace("'", "''") + "'"
+    return "'" + postgres_text(value).replace("'", "''") + "'"
+
+
+def postgres_text(value) -> str:
+    return str(value).replace("\x00", "")
+
+
+def sql_nullable_text(value) -> str:
+    if value is None:
+        return "NULL"
+    return sql_string(postgres_text(value))
+
+
+def sql_integer(value) -> str:
+    return str(int(value or 0))
+
+
+def sql_bool(value) -> str:
+    return "TRUE" if bool(value) else "FALSE"
 
 
 def parse_list(value: str) -> list[str]:
@@ -366,34 +384,32 @@ COPY (
 
 
 def write_run(psql: PsqlRunner, run: dict) -> None:
-    tag = f"json_{run['run_id'].replace('-', '_')}"
-    payload_json = json.dumps(run, ensure_ascii=False)
+    run_values = ", ".join(
+        [
+            sql_string(run["run_id"]),
+            sql_string(run["started_at"]),
+            sql_nullable_text(run.get("completed_at")),
+            sql_string(run["model_name"]),
+            sql_string(run["model_path"]),
+            sql_string(run["source_path"]),
+            sql_string(run["model_sha256"]),
+            sql_string(run["trankit_version"]),
+            sql_string(run["python_version"]),
+            sql_string(run["annotation_scheme"]),
+            sql_string(run["status"]),
+            sql_integer(run.get("processed_count")),
+            sql_integer(run.get("token_count")),
+            sql_integer(run.get("failure_count")),
+            sql_nullable_text(run.get("notes"))
+        ]
+    )
     sql = f"""
-WITH payload AS (
-    SELECT ${tag}${payload_json}${tag}$::jsonb AS r
-)
 INSERT INTO sentence_trankit_runs (
     run_id, started_at, completed_at, model_name, model_path, source_path,
     model_sha256, trankit_version, python_version, annotation_scheme, status,
     processed_count, token_count, failure_count, notes
 )
-SELECT
-    r->>'run_id',
-    r->>'started_at',
-    NULLIF(r->>'completed_at', ''),
-    r->>'model_name',
-    r->>'model_path',
-    r->>'source_path',
-    r->>'model_sha256',
-    r->>'trankit_version',
-    r->>'python_version',
-    r->>'annotation_scheme',
-    r->>'status',
-    (r->>'processed_count')::integer,
-    (r->>'token_count')::integer,
-    (r->>'failure_count')::integer,
-    r->>'notes'
-FROM payload
+VALUES ({run_values})
 ON CONFLICT (run_id) DO UPDATE
 SET completed_at = EXCLUDED.completed_at,
     status = EXCLUDED.status,
@@ -408,39 +424,77 @@ SET completed_at = EXCLUDED.completed_at,
 def write_results(psql: PsqlRunner, run: dict, results: list[dict]) -> None:
     if not results:
         return
-    payload = {"run": run, "results": results}
-    tag = f"json_{run['run_id'].replace('-', '_')}"
-    payload_json = json.dumps(payload, ensure_ascii=False)
+    analysis_values = []
+    key_values = []
+    token_values = []
+    for result in results:
+        passage_id = result["passage_id"]
+        sentence_number = result["sentence_number"]
+        analysis_values.append(
+            "("
+            + ", ".join(
+                [
+                    sql_string(passage_id),
+                    sql_integer(sentence_number),
+                    sql_string(run["model_name"]),
+                    sql_string(run["run_id"]),
+                    sql_string(result["greek_sentence"]),
+                    sql_string(result["conllu"]),
+                    sql_integer(result.get("token_count")),
+                    sql_string(run.get("completed_at") or ""),
+                ]
+            )
+            + ")"
+        )
+        key_values.append(
+            "("
+            + ", ".join(
+                [
+                    sql_string(passage_id),
+                    sql_integer(sentence_number),
+                    sql_string(run["model_name"]),
+                ]
+            )
+            + ")"
+        )
+        for token in result.get("tokens") or []:
+            token_values.append(
+                "("
+                + ", ".join(
+                    [
+                        sql_string(passage_id),
+                        sql_integer(sentence_number),
+                        sql_string(run["model_name"]),
+                        sql_integer(token["token_order"]),
+                        sql_string(token["token_id"]),
+                        sql_string(token["form"]),
+                        sql_nullable_text(token.get("lemma")),
+                        sql_nullable_text(token.get("pos")),
+                        sql_nullable_text(token.get("xpos")),
+                        sql_string(token.get("feats_raw") or "_"),
+                        "'{}'::jsonb",
+                        sql_nullable_text(token.get("head_token_id")),
+                        sql_nullable_text(token.get("deprel")),
+                        sql_string(token.get("deps_raw") or "_"),
+                        "'[]'::jsonb",
+                        sql_string(token.get("misc_raw") or "_"),
+                        "'{}'::jsonb",
+                        sql_bool(token.get("is_multiword_token")),
+                        sql_bool(token.get("is_empty_node")),
+                        sql_string(run.get("completed_at") or ""),
+                    ]
+                )
+                + ")"
+            )
+    analysis_sql_values = ",\n    ".join(analysis_values)
+    key_sql_values = ",\n    ".join(key_values)
     sql = f"""
-WITH payload AS (
-    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
-), run_row AS (
-    SELECT j->'run' AS r FROM payload
-), rows AS (
-    SELECT *
-    FROM jsonb_to_recordset((SELECT j->'results' FROM payload)) AS x(
-        passage_id text,
-        sentence_number integer,
-        greek_sentence text,
-        conllu text,
-        token_count integer,
-        tokens jsonb
-    )
-)
 INSERT INTO sentence_trankit_analyses (
     passage_id, sentence_number, model_name, run_id, greek_sentence,
     conllu, token_count, created_at
 )
-SELECT
-    rows.passage_id,
-    rows.sentence_number,
-    run_row.r->>'model_name',
-    run_row.r->>'run_id',
-    rows.greek_sentence,
-    rows.conllu,
-    rows.token_count,
-    run_row.r->>'completed_at'
-FROM rows CROSS JOIN run_row
+VALUES
+    {analysis_sql_values}
 ON CONFLICT (passage_id, sentence_number, model_name) DO UPDATE
 SET run_id = EXCLUDED.run_id,
     greek_sentence = EXCLUDED.greek_sentence,
@@ -448,82 +502,26 @@ SET run_id = EXCLUDED.run_id,
     token_count = EXCLUDED.token_count,
     created_at = EXCLUDED.created_at;
 
-WITH payload AS (
-    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
-), run_row AS (
-    SELECT j->'run' AS r FROM payload
-), rows AS (
-    SELECT x.passage_id, x.sentence_number, run_row.r->>'model_name' AS model_name
-    FROM run_row,
-         jsonb_to_recordset((SELECT j->'results' FROM payload)) AS x(
-            passage_id text,
-            sentence_number integer
-         )
+WITH rows(passage_id, sentence_number, model_name) AS (
+    VALUES
+    {key_sql_values}
 )
 DELETE FROM sentence_trankit_tokens t
 USING rows
 WHERE t.passage_id = rows.passage_id
   AND t.sentence_number = rows.sentence_number
   AND t.model_name = rows.model_name;
-
-WITH payload AS (
-    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
-), run_row AS (
-    SELECT j->'run' AS r FROM payload
-), rows AS (
-    SELECT *
-    FROM jsonb_to_recordset((SELECT j->'results' FROM payload)) AS x(
-        passage_id text,
-        sentence_number integer,
-        tokens jsonb
-    )
-)
+"""
+    if token_values:
+        token_sql_values = ",\n    ".join(token_values)
+        sql += f"""
 INSERT INTO sentence_trankit_tokens (
     passage_id, sentence_number, model_name, token_order, token_id, form,
     lemma, pos, xpos, feats_raw, feats, head_token_id, deprel, deps_raw,
     deps, misc_raw, misc, is_multiword_token, is_empty_node, created_at
 )
-SELECT
-    rows.passage_id,
-    rows.sentence_number,
-    run_row.r->>'model_name',
-    tok.token_order,
-    tok.token_id,
-    tok.form,
-    tok.lemma,
-    tok.pos,
-    tok.xpos,
-    tok.feats_raw,
-    tok.feats,
-    tok.head_token_id,
-    tok.deprel,
-    tok.deps_raw,
-    tok.deps,
-    tok.misc_raw,
-    tok.misc,
-    tok.is_multiword_token,
-    tok.is_empty_node,
-    run_row.r->>'completed_at'
-FROM rows
-CROSS JOIN run_row
-CROSS JOIN LATERAL jsonb_to_recordset(rows.tokens) AS tok(
-    token_order integer,
-    token_id text,
-    form text,
-    lemma text,
-    pos text,
-    xpos text,
-    feats_raw text,
-    feats jsonb,
-    head_token_id text,
-    deprel text,
-    deps_raw text,
-    deps jsonb,
-    misc_raw text,
-    misc jsonb,
-    is_multiword_token boolean,
-    is_empty_node boolean
-);
+VALUES
+    {token_sql_values};
 """
     psql.run(sql)
 

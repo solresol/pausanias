@@ -33,6 +33,24 @@ def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+def postgres_text(value) -> str:
+    return str(value).replace("\x00", "")
+
+
+def sql_string(value: str) -> str:
+    return "'" + postgres_text(value).replace("'", "''") + "'"
+
+
+def sql_nullable_integer(value) -> str:
+    if value is None:
+        return "NULL"
+    return str(int(value))
+
+
+def sql_integer(value) -> str:
+    return str(int(value or 0))
+
+
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Lemmatize Greek Pausanias sentences with the OpenAI API."
@@ -314,33 +332,31 @@ def lemmatize_sentence(
 
 
 def write_payload_to_database(psql: PsqlRunner, payload: dict) -> None:
-    tag = f"json_{payload['run']['run_id'].replace('-', '_')}"
-    payload_json = json.dumps(payload, ensure_ascii=False)
+    run = payload["run"]
+    results = payload.get("results") or []
+    run_values = ", ".join(
+        [
+            sql_string(run["run_id"]),
+            sql_string(run["started_at"]),
+            sql_string(run.get("completed_at") or ""),
+            sql_string(run["model"]),
+            sql_string(run["prompt_version"]),
+            sql_string(run["status"]),
+            sql_nullable_integer(run.get("token_budget")),
+            sql_integer(run.get("input_tokens")),
+            sql_integer(run.get("output_tokens")),
+            sql_integer(run.get("processed_count")),
+            sql_integer(run.get("token_count")),
+            sql_integer(run.get("failure_count")),
+            sql_string(run.get("notes") or ""),
+        ]
+    )
     sql = f"""
-WITH payload AS (
-    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
-), run_row AS (
-    SELECT j->'run' AS r FROM payload
-)
 INSERT INTO sentence_lemmatization_runs (
     run_id, started_at, completed_at, model, prompt_version, status, token_budget,
     input_tokens, output_tokens, processed_count, token_count, failure_count, notes
 )
-SELECT
-    r->>'run_id',
-    r->>'started_at',
-    r->>'completed_at',
-    r->>'model',
-    r->>'prompt_version',
-    r->>'status',
-    NULLIF(r->>'token_budget', 'null')::integer,
-    (r->>'input_tokens')::integer,
-    (r->>'output_tokens')::integer,
-    (r->>'processed_count')::integer,
-    (r->>'token_count')::integer,
-    (r->>'failure_count')::integer,
-    r->>'notes'
-FROM run_row
+VALUES ({run_values})
 ON CONFLICT (run_id) DO UPDATE
 SET completed_at = EXCLUDED.completed_at,
     status = EXCLUDED.status,
@@ -350,38 +366,68 @@ SET completed_at = EXCLUDED.completed_at,
     token_count = EXCLUDED.token_count,
     failure_count = EXCLUDED.failure_count,
     notes = EXCLUDED.notes;
-
-WITH payload AS (
-    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
-), rows AS (
-    SELECT *
-    FROM jsonb_to_recordset((SELECT j->'results' FROM payload)) AS x(
-        passage_id text,
-        sentence_number integer,
-        greek_sentence text,
-        token_count integer,
-        input_tokens integer,
-        output_tokens integer
-    )
-), run_row AS (
-    SELECT j->'run' AS r FROM payload
-)
+"""
+    if results:
+        analysis_values = []
+        key_values = []
+        token_values = []
+        for result in results:
+            passage_id = result["passage_id"]
+            sentence_number = result["sentence_number"]
+            analysis_values.append(
+                "("
+                + ", ".join(
+                    [
+                        sql_string(passage_id),
+                        sql_integer(sentence_number),
+                        sql_string(run["prompt_version"]),
+                        sql_string(run["model"]),
+                        sql_string(run["run_id"]),
+                        sql_string(result["greek_sentence"]),
+                        sql_integer(result.get("token_count")),
+                        sql_integer(result.get("input_tokens")),
+                        sql_integer(result.get("output_tokens")),
+                        sql_string(run.get("completed_at") or ""),
+                    ]
+                )
+                + ")"
+            )
+            key_values.append(
+                "("
+                + ", ".join(
+                    [
+                        sql_string(passage_id),
+                        sql_integer(sentence_number),
+                        sql_string(run["prompt_version"]),
+                    ]
+                )
+                + ")"
+            )
+            for token in result.get("tokens") or []:
+                token_values.append(
+                    "("
+                    + ", ".join(
+                        [
+                            sql_string(passage_id),
+                            sql_integer(sentence_number),
+                            sql_string(run["prompt_version"]),
+                            sql_integer(token["token_index"]),
+                            sql_string(token["surface_form"]),
+                            sql_string(token["lemma"]),
+                            sql_string(run.get("completed_at") or ""),
+                        ]
+                    )
+                    + ")"
+                )
+        analysis_sql_values = ",\n    ".join(analysis_values)
+        key_sql_values = ",\n    ".join(key_values)
+        sql += f"""
 INSERT INTO sentence_lemmatizations (
     passage_id, sentence_number, prompt_version, model, run_id, greek_sentence,
     token_count, input_tokens, output_tokens, created_at
 )
-SELECT
-    rows.passage_id,
-    rows.sentence_number,
-    run_row.r->>'prompt_version',
-    run_row.r->>'model',
-    run_row.r->>'run_id',
-    rows.greek_sentence,
-    rows.token_count,
-    rows.input_tokens,
-    rows.output_tokens,
-    run_row.r->>'completed_at'
-FROM rows CROSS JOIN run_row
+VALUES
+    {analysis_sql_values}
 ON CONFLICT (passage_id, sentence_number, prompt_version) DO UPDATE
 SET model = EXCLUDED.model,
     run_id = EXCLUDED.run_id,
@@ -391,51 +437,25 @@ SET model = EXCLUDED.model,
     output_tokens = EXCLUDED.output_tokens,
     created_at = EXCLUDED.created_at;
 
-WITH payload AS (
-    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
-), run_row AS (
-    SELECT j->'run' AS r FROM payload
-), rows AS (
-    SELECT x.passage_id, x.sentence_number, run_row.r->>'prompt_version' AS prompt_version
-    FROM run_row,
-         jsonb_to_recordset((SELECT j->'results' FROM payload)) AS x(
-            passage_id text,
-            sentence_number integer
-         )
+WITH rows(passage_id, sentence_number, prompt_version) AS (
+    VALUES
+    {key_sql_values}
 )
 DELETE FROM sentence_lemma_tokens t
 USING rows
 WHERE t.passage_id = rows.passage_id
   AND t.sentence_number = rows.sentence_number
   AND t.prompt_version = rows.prompt_version;
-
-WITH payload AS (
-    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
-), run_row AS (
-    SELECT j->'run' AS r FROM payload
-), rows AS (
-    SELECT *
-    FROM jsonb_to_recordset((SELECT j->'results' FROM payload)) AS x(
-        passage_id text,
-        sentence_number integer,
-        tokens jsonb
-    )
-)
+"""
+        if token_values:
+            token_sql_values = ",\n    ".join(token_values)
+            sql += f"""
 INSERT INTO sentence_lemma_tokens (
     passage_id, sentence_number, prompt_version, token_index,
     surface_form, lemma, created_at
 )
-SELECT
-    rows.passage_id,
-    rows.sentence_number,
-    run_row.r->>'prompt_version',
-    (tok.value->>'token_index')::integer,
-    tok.value->>'surface_form',
-    tok.value->>'lemma',
-    run_row.r->>'completed_at'
-FROM rows
-CROSS JOIN run_row
-CROSS JOIN LATERAL jsonb_array_elements(rows.tokens) AS tok(value);
+VALUES
+    {token_sql_values};
 """
     psql.run(sql)
 

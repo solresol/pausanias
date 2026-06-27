@@ -34,6 +34,34 @@ def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+def postgres_text(value) -> str:
+    return str(value).replace("\x00", "")
+
+
+def sql_string(value: str) -> str:
+    return "'" + postgres_text(value).replace("'", "''") + "'"
+
+
+def sql_nullable_text(value) -> str:
+    if value is None:
+        return "NULL"
+    return sql_string(postgres_text(value))
+
+
+def sql_integer(value) -> str:
+    return str(int(value or 0))
+
+
+def sql_bool(value) -> str:
+    return "TRUE" if bool(value) else "FALSE"
+
+
+def sql_text_array(values) -> str:
+    if not values:
+        return "ARRAY[]::text[]"
+    return "ARRAY[" + ", ".join(sql_string(value) for value in values) + "]::text[]"
+
+
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Lemmatize distinct Greek surface forms with the OpenAI API."
@@ -331,44 +359,43 @@ def lemmatize_batch(client: OpenAI, *, model: str, batch: list[dict]) -> dict:
 
 
 def write_payload(psql: PsqlRunner, payload: dict) -> None:
-    tag = f"json_{payload['run']['run_id'].replace('-', '_')}"
-    payload_json = json.dumps(payload, ensure_ascii=False)
+    run = payload["run"]
+    batches = payload.get("batches") or []
+    items = payload.get("items") or []
+    run_values = ", ".join(
+        [
+            sql_string(run["run_id"]),
+            sql_string(run["started_at"]),
+            sql_string(run.get("completed_at") or ""),
+            sql_string(run["model"]),
+            sql_string(run["prompt_version"]),
+            sql_string(run["status"]),
+            sql_string(run["source_scope"]),
+            sql_integer(run.get("batch_size")),
+            sql_integer(run.get("surface_form_count")),
+            sql_integer(run.get("occurrence_count")),
+            sql_integer(run.get("input_tokens")),
+            sql_integer(run.get("output_tokens")),
+            sql_integer(run.get("failure_count")),
+            sql_string(run.get("api_mode") or "direct"),
+            sql_integer(run.get("request_count")),
+            sql_nullable_text(run.get("openai_batch_id")),
+            sql_nullable_text(run.get("openai_input_file_id")),
+            sql_nullable_text(run.get("openai_output_file_id")),
+            sql_nullable_text(run.get("openai_error_file_id")),
+            sql_nullable_text(run.get("submitted_at")),
+            sql_nullable_text(run.get("retrieved_at")),
+            sql_nullable_text(run.get("notes")),
+        ]
+    )
     sql = f"""
-WITH payload AS (
-    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
-), run_row AS (
-    SELECT j->'run' AS r FROM payload
-)
 INSERT INTO word_lemmatization_runs (
     run_id, started_at, completed_at, model, prompt_version, status, source_scope,
     batch_size, surface_form_count, occurrence_count, input_tokens, output_tokens,
     failure_count, api_mode, request_count, openai_batch_id, openai_input_file_id,
     openai_output_file_id, openai_error_file_id, submitted_at, retrieved_at, notes
 )
-SELECT
-    r->>'run_id',
-    r->>'started_at',
-    r->>'completed_at',
-    r->>'model',
-    r->>'prompt_version',
-    r->>'status',
-    r->>'source_scope',
-    (r->>'batch_size')::integer,
-    (r->>'surface_form_count')::integer,
-    (r->>'occurrence_count')::integer,
-    (r->>'input_tokens')::integer,
-    (r->>'output_tokens')::integer,
-    (r->>'failure_count')::integer,
-    COALESCE(r->>'api_mode', 'direct'),
-    COALESCE((r->>'request_count')::integer, 0),
-    r->>'openai_batch_id',
-    r->>'openai_input_file_id',
-    r->>'openai_output_file_id',
-    r->>'openai_error_file_id',
-    r->>'submitted_at',
-    r->>'retrieved_at',
-    r->>'notes'
-FROM run_row
+VALUES ({run_values})
 ON CONFLICT (run_id) DO UPDATE
 SET completed_at = EXCLUDED.completed_at,
     status = EXCLUDED.status,
@@ -386,62 +413,67 @@ SET completed_at = EXCLUDED.completed_at,
     submitted_at = COALESCE(EXCLUDED.submitted_at, word_lemmatization_runs.submitted_at),
     retrieved_at = COALESCE(EXCLUDED.retrieved_at, word_lemmatization_runs.retrieved_at),
     notes = EXCLUDED.notes;
-
-WITH payload AS (
-    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
-)
+"""
+    if batches:
+        batch_values = []
+        for batch in batches:
+            batch_values.append(
+                "("
+                + ", ".join(
+                    [
+                        sql_string(run["run_id"]),
+                        sql_integer(batch["batch_number"]),
+                        sql_integer(batch.get("item_count")),
+                        sql_integer(batch.get("input_tokens")),
+                        sql_integer(batch.get("output_tokens")),
+                        sql_string(run.get("completed_at") or ""),
+                    ]
+                )
+                + ")"
+            )
+        batch_sql_values = ",\n    ".join(batch_values)
+        sql += f"""
 INSERT INTO word_lemmatization_batches (
     run_id, batch_number, item_count, input_tokens, output_tokens, created_at
 )
-SELECT
-    j->'run'->>'run_id',
-    x.batch_number,
-    x.item_count,
-    x.input_tokens,
-    x.output_tokens,
-    j->'run'->>'completed_at'
-FROM payload,
-     jsonb_to_recordset(j->'batches') AS x(
-        batch_number integer,
-        item_count integer,
-        input_tokens integer,
-        output_tokens integer
-     )
+VALUES
+    {batch_sql_values}
 ON CONFLICT (run_id, batch_number) DO UPDATE
 SET item_count = EXCLUDED.item_count,
     input_tokens = EXCLUDED.input_tokens,
     output_tokens = EXCLUDED.output_tokens,
     created_at = EXCLUDED.created_at;
-
-WITH payload AS (
-    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
-)
+"""
+    if items:
+        item_values = []
+        for item in items:
+            item_values.append(
+                "("
+                + ", ".join(
+                    [
+                        sql_string(item["surface_form"]),
+                        sql_string(run["prompt_version"]),
+                        sql_string(run["model"]),
+                        sql_string(run["run_id"]),
+                        sql_string(item["example_form"]),
+                        sql_integer(item.get("occurrence_count")),
+                        sql_string(item["lemma"]),
+                        sql_string(item["confidence"]),
+                        sql_bool(item.get("is_ambiguous")),
+                        sql_text_array(item.get("alternatives") or []),
+                        sql_string(run.get("completed_at") or ""),
+                    ]
+                )
+                + ")"
+            )
+        item_sql_values = ",\n    ".join(item_values)
+        sql += f"""
 INSERT INTO greek_word_lemmas (
     surface_form, prompt_version, model, run_id, example_form, occurrence_count,
     lemma, confidence, is_ambiguous, alternatives, created_at
 )
-SELECT
-    x.surface_form,
-    j->'run'->>'prompt_version',
-    j->'run'->>'model',
-    j->'run'->>'run_id',
-    x.example_form,
-    x.occurrence_count,
-    x.lemma,
-    x.confidence,
-    x.is_ambiguous,
-    COALESCE(x.alternatives, ARRAY[]::text[]),
-    j->'run'->>'completed_at'
-FROM payload,
-     jsonb_to_recordset(j->'items') AS x(
-        surface_form text,
-        example_form text,
-        occurrence_count integer,
-        lemma text,
-        confidence text,
-        is_ambiguous boolean,
-        alternatives text[]
-     )
+VALUES
+    {item_sql_values}
 ON CONFLICT (surface_form, prompt_version) DO UPDATE
 SET model = EXCLUDED.model,
     run_id = EXCLUDED.run_id,
@@ -493,37 +525,36 @@ def validate_batch_requests(batch_file_path: Path) -> None:
 
 
 def write_batch_submission(psql: PsqlRunner, payload: dict) -> None:
-    tag = f"json_{payload['run']['run_id'].replace('-', '_')}"
-    payload_json = json.dumps(payload, ensure_ascii=False)
+    run = payload["run"]
+    batches = payload.get("batches") or []
+    batch_items = payload.get("batch_items") or []
+    run_values = ", ".join(
+        [
+            sql_string(run["run_id"]),
+            sql_string(run["started_at"]),
+            sql_nullable_text(run.get("completed_at")),
+            sql_string(run["model"]),
+            sql_string(run["prompt_version"]),
+            sql_string(run["status"]),
+            sql_string(run["source_scope"]),
+            sql_integer(run.get("batch_size")),
+            sql_integer(run.get("surface_form_count")),
+            sql_integer(run.get("occurrence_count")),
+            "0",
+            "0",
+            "0",
+            "'batch'",
+            sql_integer(run.get("request_count")),
+            sql_nullable_text(run.get("notes")),
+        ]
+    )
     sql = f"""
-WITH payload AS (
-    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
-), run_row AS (
-    SELECT j->'run' AS r FROM payload
-)
 INSERT INTO word_lemmatization_runs (
     run_id, started_at, completed_at, model, prompt_version, status, source_scope,
     batch_size, surface_form_count, occurrence_count, input_tokens, output_tokens,
     failure_count, api_mode, request_count, notes
 )
-SELECT
-    r->>'run_id',
-    r->>'started_at',
-    NULLIF(r->>'completed_at', ''),
-    r->>'model',
-    r->>'prompt_version',
-    r->>'status',
-    r->>'source_scope',
-    (r->>'batch_size')::integer,
-    (r->>'surface_form_count')::integer,
-    (r->>'occurrence_count')::integer,
-    0,
-    0,
-    0,
-    'batch',
-    (r->>'request_count')::integer,
-    r->>'notes'
-FROM run_row
+VALUES ({run_values})
 ON CONFLICT (run_id) DO UPDATE
 SET status = EXCLUDED.status,
     source_scope = EXCLUDED.source_scope,
@@ -532,50 +563,59 @@ SET status = EXCLUDED.status,
     api_mode = 'batch',
     request_count = EXCLUDED.request_count,
     notes = EXCLUDED.notes;
-
-WITH payload AS (
-    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
-)
+"""
+    if batches:
+        batch_values = []
+        for batch in batches:
+            batch_values.append(
+                "("
+                + ", ".join(
+                    [
+                        sql_string(run["run_id"]),
+                        sql_integer(batch["batch_number"]),
+                        sql_integer(batch.get("item_count")),
+                        "0",
+                        "0",
+                        sql_string(run["started_at"]),
+                    ]
+                )
+                + ")"
+            )
+        batch_sql_values = ",\n    ".join(batch_values)
+        sql += f"""
 INSERT INTO word_lemmatization_batches (
     run_id, batch_number, item_count, input_tokens, output_tokens, created_at
 )
-SELECT
-    j->'run'->>'run_id',
-    x.batch_number,
-    x.item_count,
-    0,
-    0,
-    j->'run'->>'started_at'
-FROM payload,
-     jsonb_to_recordset(j->'batches') AS x(
-        batch_number integer,
-        item_count integer
-     )
+VALUES
+    {batch_sql_values}
 ON CONFLICT (run_id, batch_number) DO UPDATE
 SET item_count = EXCLUDED.item_count,
     created_at = EXCLUDED.created_at;
-
-WITH payload AS (
-    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
-)
+"""
+    if batch_items:
+        item_values = []
+        for item in batch_items:
+            item_values.append(
+                "("
+                + ", ".join(
+                    [
+                        sql_string(run["run_id"]),
+                        sql_integer(item["batch_number"]),
+                        sql_integer(item["word_index"]),
+                        sql_string(item["surface_form"]),
+                        sql_string(item["example_form"]),
+                        sql_integer(item.get("occurrence_count")),
+                    ]
+                )
+                + ")"
+            )
+        item_sql_values = ",\n    ".join(item_values)
+        sql += f"""
 INSERT INTO word_lemmatization_batch_items (
     run_id, batch_number, word_index, surface_form, example_form, occurrence_count
 )
-SELECT
-    j->'run'->>'run_id',
-    x.batch_number,
-    x.word_index,
-    x.surface_form,
-    x.example_form,
-    x.occurrence_count
-FROM payload,
-     jsonb_to_recordset(j->'batch_items') AS x(
-        batch_number integer,
-        word_index integer,
-        surface_form text,
-        example_form text,
-        occurrence_count integer
-     )
+VALUES
+    {item_sql_values}
 ON CONFLICT (run_id, batch_number, word_index) DO UPDATE
 SET surface_form = EXCLUDED.surface_form,
     example_form = EXCLUDED.example_form,

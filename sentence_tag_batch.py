@@ -1219,63 +1219,89 @@ def check_batches(psql: PsqlRunner, client: OpenAI, batch_run_id: str | None) ->
 
 
 def write_results(psql: PsqlRunner, payload: dict) -> None:
-    tag = f"json_{payload['run']['run_id'].replace('-', '_')}"
-    payload_json = json.dumps(payload, ensure_ascii=False)
-    sql = f"""
-WITH payload AS (
-    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
-), item_rows AS (
-    SELECT x.*
-    FROM payload,
-         jsonb_to_recordset(j->'items') AS x(
-            request_number integer,
-            input_tokens integer,
-            output_tokens integer,
-            status text,
-            error text
-         )
+    run = payload["run"]
+    sql = ""
+    items = payload.get("items") or []
+    if items:
+        item_values = []
+        for item in items:
+            item_values.append(
+                "("
+                + ", ".join(
+                    [
+                        sql_integer(item["request_number"]),
+                        sql_integer(item.get("input_tokens")),
+                        sql_integer(item.get("output_tokens")),
+                        sql_string(item.get("status") or ""),
+                        sql_nullable_text(item.get("error")),
+                    ]
+                )
+                + ")"
+            )
+        item_sql_values = ",\n    ".join(item_values)
+        sql += f"""
+WITH item_rows(request_number, input_tokens, output_tokens, status, error) AS (
+    VALUES
+    {item_sql_values}
 )
 UPDATE sentence_tagging_batch_items bi
 SET input_tokens = item_rows.input_tokens,
     output_tokens = item_rows.output_tokens,
     status = item_rows.status,
     error = item_rows.error
-FROM item_rows, payload
-WHERE bi.run_id = j->'run'->>'run_id'
+FROM item_rows
+WHERE bi.run_id = {sql_string(run["run_id"])}
   AND bi.request_number = item_rows.request_number;
+"""
 
-WITH payload AS (
-    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
-)
-INSERT INTO sentence_greta_tags (
-    passage_id, sentence_number, prompt_version, model, myth_history_bucket,
-    expresses_scepticism, confidence, rationale, input_tokens, output_tokens,
-    run_id, created_at
-)
-SELECT
-    x.passage_id,
-    x.sentence_number,
-    j->'run'->>'prompt_version',
-    j->'run'->>'model',
-    x.myth_history_bucket,
-    FALSE,
-    x.confidence,
-    x.rationale,
-    x.input_tokens,
-    x.output_tokens,
-    j->'run'->>'run_id',
-    j->'run'->>'completed_at'
-FROM payload,
-     jsonb_to_recordset(j->'greta_tags') AS x(
-        passage_id text,
-        sentence_number integer,
-        myth_history_bucket text,
-        confidence text,
-        rationale text,
-        input_tokens integer,
-        output_tokens integer
-     )
-ON CONFLICT (passage_id, sentence_number, prompt_version) DO UPDATE
+    def append_insert(rows: list[dict], *, table: str, columns: list[str], values_for_row, conflict: str) -> None:
+        nonlocal sql
+        if not rows:
+            return
+        row_values = []
+        for row in rows:
+            row_values.append("(" + ", ".join(values_for_row(row)) + ")")
+        sql_values = ",\n    ".join(row_values)
+        column_list = ", ".join(columns)
+        sql += f"""
+INSERT INTO {table} ({column_list})
+VALUES
+    {sql_values}
+{conflict}
+"""
+
+    append_insert(
+        payload.get("greta_tags") or [],
+        table="sentence_greta_tags",
+        columns=[
+            "passage_id",
+            "sentence_number",
+            "prompt_version",
+            "model",
+            "myth_history_bucket",
+            "expresses_scepticism",
+            "confidence",
+            "rationale",
+            "input_tokens",
+            "output_tokens",
+            "run_id",
+            "created_at",
+        ],
+        values_for_row=lambda row: [
+            sql_string(row["passage_id"]),
+            sql_integer(row["sentence_number"]),
+            sql_string(run["prompt_version"]),
+            sql_string(run["model"]),
+            sql_string(row["myth_history_bucket"]),
+            "FALSE",
+            sql_string(row["confidence"]),
+            sql_string(row["rationale"]),
+            sql_integer(row["input_tokens"]),
+            sql_integer(row["output_tokens"]),
+            sql_string(run["run_id"]),
+            sql_string(run["completed_at"]),
+        ],
+        conflict="""ON CONFLICT (passage_id, sentence_number, prompt_version) DO UPDATE
 SET model = EXCLUDED.model,
     myth_history_bucket = EXCLUDED.myth_history_bucket,
     expresses_scepticism = EXCLUDED.expresses_scepticism,
@@ -1285,42 +1311,42 @@ SET model = EXCLUDED.model,
     output_tokens = EXCLUDED.output_tokens,
     run_id = EXCLUDED.run_id,
     created_at = EXCLUDED.created_at;
-
-WITH payload AS (
-    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
-)
-INSERT INTO sentence_greta_both_tags (
-    passage_id, sentence_number, prompt_version, model, references_mythic,
-    references_historical, myth_history_bucket, confidence, rationale,
-    input_tokens, output_tokens, run_id, created_at
-)
-SELECT
-    x.passage_id,
-    x.sentence_number,
-    j->'run'->>'prompt_version',
-    j->'run'->>'model',
-    x.references_mythic,
-    x.references_historical,
-    x.myth_history_bucket,
-    x.confidence,
-    x.rationale,
-    x.input_tokens,
-    x.output_tokens,
-    j->'run'->>'run_id',
-    j->'run'->>'completed_at'
-FROM payload,
-     jsonb_to_recordset(j->'greta_both_tags') AS x(
-        passage_id text,
-        sentence_number integer,
-        references_mythic boolean,
-        references_historical boolean,
-        myth_history_bucket text,
-        confidence text,
-        rationale text,
-        input_tokens integer,
-        output_tokens integer
-     )
-ON CONFLICT (passage_id, sentence_number, prompt_version) DO UPDATE
+""",
+    )
+    append_insert(
+        payload.get("greta_both_tags") or [],
+        table="sentence_greta_both_tags",
+        columns=[
+            "passage_id",
+            "sentence_number",
+            "prompt_version",
+            "model",
+            "references_mythic",
+            "references_historical",
+            "myth_history_bucket",
+            "confidence",
+            "rationale",
+            "input_tokens",
+            "output_tokens",
+            "run_id",
+            "created_at",
+        ],
+        values_for_row=lambda row: [
+            sql_string(row["passage_id"]),
+            sql_integer(row["sentence_number"]),
+            sql_string(run["prompt_version"]),
+            sql_string(run["model"]),
+            sql_bool(row["references_mythic"]),
+            sql_bool(row["references_historical"]),
+            sql_string(row["myth_history_bucket"]),
+            sql_string(row["confidence"]),
+            sql_string(row["rationale"]),
+            sql_integer(row["input_tokens"]),
+            sql_integer(row["output_tokens"]),
+            sql_string(run["run_id"]),
+            sql_string(run["completed_at"]),
+        ],
+        conflict="""ON CONFLICT (passage_id, sentence_number, prompt_version) DO UPDATE
 SET model = EXCLUDED.model,
     references_mythic = EXCLUDED.references_mythic,
     references_historical = EXCLUDED.references_historical,
@@ -1331,37 +1357,38 @@ SET model = EXCLUDED.model,
     output_tokens = EXCLUDED.output_tokens,
     run_id = EXCLUDED.run_id,
     created_at = EXCLUDED.created_at;
-
-WITH payload AS (
-    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
-)
-INSERT INTO sentence_discourse_mode_tags (
-    passage_id, sentence_number, prompt_version, model, discourse_mode,
-    confidence, rationale, input_tokens, output_tokens, run_id, created_at
-)
-SELECT
-    x.passage_id,
-    x.sentence_number,
-    j->'run'->>'prompt_version',
-    j->'run'->>'model',
-    x.discourse_mode,
-    x.confidence,
-    x.rationale,
-    x.input_tokens,
-    x.output_tokens,
-    j->'run'->>'run_id',
-    j->'run'->>'completed_at'
-FROM payload,
-     jsonb_to_recordset(j->'discourse_tags') AS x(
-        passage_id text,
-        sentence_number integer,
-        discourse_mode text,
-        confidence text,
-        rationale text,
-        input_tokens integer,
-        output_tokens integer
-     )
-ON CONFLICT (passage_id, sentence_number, prompt_version) DO UPDATE
+""",
+    )
+    append_insert(
+        payload.get("discourse_tags") or [],
+        table="sentence_discourse_mode_tags",
+        columns=[
+            "passage_id",
+            "sentence_number",
+            "prompt_version",
+            "model",
+            "discourse_mode",
+            "confidence",
+            "rationale",
+            "input_tokens",
+            "output_tokens",
+            "run_id",
+            "created_at",
+        ],
+        values_for_row=lambda row: [
+            sql_string(row["passage_id"]),
+            sql_integer(row["sentence_number"]),
+            sql_string(run["prompt_version"]),
+            sql_string(run["model"]),
+            sql_string(row["discourse_mode"]),
+            sql_string(row["confidence"]),
+            sql_string(row["rationale"]),
+            sql_integer(row["input_tokens"]),
+            sql_integer(row["output_tokens"]),
+            sql_string(run["run_id"]),
+            sql_string(run["completed_at"]),
+        ],
+        conflict="""ON CONFLICT (passage_id, sentence_number, prompt_version) DO UPDATE
 SET model = EXCLUDED.model,
     discourse_mode = EXCLUDED.discourse_mode,
     confidence = EXCLUDED.confidence,
@@ -1370,35 +1397,37 @@ SET model = EXCLUDED.model,
     output_tokens = EXCLUDED.output_tokens,
     run_id = EXCLUDED.run_id,
     created_at = EXCLUDED.created_at;
-
-WITH payload AS (
-    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
-)
-INSERT INTO sentence_place_state_reviews (
-    passage_id, sentence_number, prompt_version, model, has_place_state_claim,
-    summary, input_tokens, output_tokens, run_id, created_at
-)
-SELECT
-    x.passage_id,
-    x.sentence_number,
-    j->'run'->>'prompt_version',
-    j->'run'->>'model',
-    x.has_place_state_claim,
-    x.summary,
-    x.input_tokens,
-    x.output_tokens,
-    j->'run'->>'run_id',
-    j->'run'->>'completed_at'
-FROM payload,
-     jsonb_to_recordset(j->'place_state_reviews') AS x(
-        passage_id text,
-        sentence_number integer,
-        has_place_state_claim boolean,
-        summary text,
-        input_tokens integer,
-        output_tokens integer
-     )
-ON CONFLICT (passage_id, sentence_number, prompt_version) DO UPDATE
+""",
+    )
+    place_state_reviews = payload.get("place_state_reviews") or []
+    append_insert(
+        place_state_reviews,
+        table="sentence_place_state_reviews",
+        columns=[
+            "passage_id",
+            "sentence_number",
+            "prompt_version",
+            "model",
+            "has_place_state_claim",
+            "summary",
+            "input_tokens",
+            "output_tokens",
+            "run_id",
+            "created_at",
+        ],
+        values_for_row=lambda row: [
+            sql_string(row["passage_id"]),
+            sql_integer(row["sentence_number"]),
+            sql_string(run["prompt_version"]),
+            sql_string(run["model"]),
+            sql_bool(row["has_place_state_claim"]),
+            sql_string(row["summary"]),
+            sql_integer(row["input_tokens"]),
+            sql_integer(row["output_tokens"]),
+            sql_string(run["run_id"]),
+            sql_string(run["completed_at"]),
+        ],
+        conflict="""ON CONFLICT (passage_id, sentence_number, prompt_version) DO UPDATE
 SET model = EXCLUDED.model,
     has_place_state_claim = EXCLUDED.has_place_state_claim,
     summary = EXCLUDED.summary,
@@ -1406,67 +1435,68 @@ SET model = EXCLUDED.model,
     output_tokens = EXCLUDED.output_tokens,
     run_id = EXCLUDED.run_id,
     created_at = EXCLUDED.created_at;
-
-WITH payload AS (
-    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
-), review_rows AS (
-    SELECT x.*
-    FROM payload,
-         jsonb_to_recordset(j->'place_state_reviews') AS x(
-            passage_id text,
-            sentence_number integer
-         )
+""",
+    )
+    if place_state_reviews:
+        review_values = ",\n    ".join(
+            "("
+            + ", ".join([sql_string(row["passage_id"]), sql_integer(row["sentence_number"])])
+            + ")"
+            for row in place_state_reviews
+        )
+        sql += f"""
+WITH review_rows(passage_id, sentence_number) AS (
+    VALUES
+    {review_values}
 )
 DELETE FROM place_state_mentions m
-USING review_rows, payload
+USING review_rows
 WHERE m.passage_id = review_rows.passage_id
   AND m.sentence_number = review_rows.sentence_number
-  AND m.prompt_version = j->'run'->>'prompt_version';
-
-WITH payload AS (
-    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
-)
-INSERT INTO place_state_mentions (
-    passage_id, sentence_number, prompt_version, model, claim_index,
-    exact_place_text, canonical_place_name, place_status, temporal_scope,
-    evidence_quote, confidence, rationale, target_label, input_tokens,
-    output_tokens, run_id, created_at
-)
-SELECT
-    x.passage_id,
-    x.sentence_number,
-    j->'run'->>'prompt_version',
-    j->'run'->>'model',
-    x.claim_index,
-    x.exact_place_text,
-    x.canonical_place_name,
-    x.place_status,
-    x.temporal_scope,
-    x.evidence_quote,
-    x.confidence,
-    x.rationale,
-    x.target_label,
-    x.input_tokens,
-    x.output_tokens,
-    j->'run'->>'run_id',
-    j->'run'->>'completed_at'
-FROM payload,
-     jsonb_to_recordset(j->'place_state_mentions') AS x(
-        passage_id text,
-        sentence_number integer,
-        claim_index integer,
-        exact_place_text text,
-        canonical_place_name text,
-        place_status text,
-        temporal_scope text,
-        evidence_quote text,
-        confidence text,
-        rationale text,
-        target_label text,
-        input_tokens integer,
-        output_tokens integer
-     )
-ON CONFLICT (passage_id, sentence_number, prompt_version, claim_index) DO UPDATE
+  AND m.prompt_version = {sql_string(run["prompt_version"])};
+"""
+    append_insert(
+        payload.get("place_state_mentions") or [],
+        table="place_state_mentions",
+        columns=[
+            "passage_id",
+            "sentence_number",
+            "prompt_version",
+            "model",
+            "claim_index",
+            "exact_place_text",
+            "canonical_place_name",
+            "place_status",
+            "temporal_scope",
+            "evidence_quote",
+            "confidence",
+            "rationale",
+            "target_label",
+            "input_tokens",
+            "output_tokens",
+            "run_id",
+            "created_at",
+        ],
+        values_for_row=lambda row: [
+            sql_string(row["passage_id"]),
+            sql_integer(row["sentence_number"]),
+            sql_string(run["prompt_version"]),
+            sql_string(run["model"]),
+            sql_integer(row["claim_index"]),
+            sql_string(row["exact_place_text"]),
+            sql_string(row["canonical_place_name"]),
+            sql_string(row["place_status"]),
+            sql_string(row["temporal_scope"]),
+            sql_string(row["evidence_quote"]),
+            sql_string(row["confidence"]),
+            sql_string(row["rationale"]),
+            sql_string(row["target_label"]),
+            sql_integer(row["input_tokens"]),
+            sql_integer(row["output_tokens"]),
+            sql_string(run["run_id"]),
+            sql_string(run["completed_at"]),
+        ],
+        conflict="""ON CONFLICT (passage_id, sentence_number, prompt_version, claim_index) DO UPDATE
 SET model = EXCLUDED.model,
     exact_place_text = EXCLUDED.exact_place_text,
     canonical_place_name = EXCLUDED.canonical_place_name,
@@ -1480,18 +1510,29 @@ SET model = EXCLUDED.model,
     output_tokens = EXCLUDED.output_tokens,
     run_id = EXCLUDED.run_id,
     created_at = EXCLUDED.created_at;
-
-WITH payload AS (
-    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
-), legacy_rows AS (
-    SELECT x.*
-    FROM payload,
-         jsonb_to_recordset(j->'legacy_tags') AS x(
-            passage_id text,
-            sentence_number integer,
-            references_mythic_era boolean,
-            expresses_scepticism boolean
-         )
+""",
+    )
+    legacy_tags = payload.get("legacy_tags") or []
+    if legacy_tags:
+        legacy_values = ",\n    ".join(
+            "("
+            + ", ".join(
+                [
+                    sql_string(row["passage_id"]),
+                    sql_integer(row["sentence_number"]),
+                    sql_bool(row["references_mythic_era"]),
+                    sql_bool(row["expresses_scepticism"]),
+                ]
+            )
+            + ")"
+            for row in legacy_tags
+        )
+        sql += f"""
+WITH legacy_rows(
+    passage_id, sentence_number, references_mythic_era, expresses_scepticism
+) AS (
+    VALUES
+    {legacy_values}
 )
 UPDATE greek_sentences s
 SET references_mythic_era = legacy_rows.references_mythic_era,
@@ -1499,26 +1540,21 @@ SET references_mythic_era = legacy_rows.references_mythic_era,
 FROM legacy_rows
 WHERE s.passage_id = legacy_rows.passage_id
   AND s.sentence_number = legacy_rows.sentence_number;
-
-WITH payload AS (
-    SELECT ${tag}${payload_json}${tag}$::jsonb AS j
-), run_row AS (
-    SELECT j->'run' AS r FROM payload
-)
+"""
+    sql += f"""
 UPDATE sentence_tagging_runs
-SET completed_at = r->>'completed_at',
-    status = r->>'status',
-    input_tokens = (r->>'input_tokens')::integer,
-    output_tokens = (r->>'output_tokens')::integer,
-    processed_count = (r->>'processed_count')::integer,
+SET completed_at = {sql_string(run["completed_at"])},
+    status = {sql_string(run["status"])},
+    input_tokens = {sql_integer(run.get("input_tokens"))},
+    output_tokens = {sql_integer(run.get("output_tokens"))},
+    processed_count = {sql_integer(run.get("processed_count"))},
     api_mode = 'batch',
-    request_count = (r->>'request_count')::integer,
-    openai_output_file_id = r->>'openai_output_file_id',
-    openai_error_file_id = r->>'openai_error_file_id',
-    retrieved_at = r->>'retrieved_at',
-    notes = r->>'notes'
-FROM run_row
-WHERE sentence_tagging_runs.run_id = r->>'run_id';
+    request_count = {sql_integer(run.get("request_count"))},
+    openai_output_file_id = {sql_nullable_text(run.get("openai_output_file_id"))},
+    openai_error_file_id = {sql_nullable_text(run.get("openai_error_file_id"))},
+    retrieved_at = {sql_nullable_text(run.get("retrieved_at"))},
+    notes = {sql_nullable_text(run.get("notes"))}
+WHERE sentence_tagging_runs.run_id = {sql_string(run["run_id"])};
 """
     psql.run(sql)
 
