@@ -63,6 +63,6 @@ run_batch \
   --mode place-state \
   --use-batch-api \
   --model gpt-5.4-mini \
-  --token-budget 250000 \
+  --token-budget 1000000 \
   --priority-books-last 4,8 \
   --skip-if-submitted-hours 18
