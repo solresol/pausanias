@@ -369,18 +369,26 @@ def main():
         progress_data = get_progress_data(conn)
         generate_progress_page(progress_data, output_dir, args.title)
 
-        # Copy generated text PDFs if they exist.
-        pdf_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "pausanias_book")
-        for pdf_name in (
+        # Copy fixed text collateral if it exists. New fixed artifacts live in
+        # website/static/; older generated book PDFs may still only exist in
+        # pausanias_book/. None of these are rebuilt by the daily site run.
+        repo_root = os.path.dirname(os.path.dirname(__file__))
+        static_text_dir = os.path.join(repo_root, "website", "static")
+        text_output_dir = os.path.join(repo_root, "pausanias_book")
+        for file_name in (
             "pausanias.pdf",
             "pausanias-greek.pdf",
+            "pausanias-greek-markup.pdf",
+            "pausanias-greek-markup.docx",
             "pausanias-greek-checklist.pdf",
             "pausanias-greek-english-parallel.pdf",
         ):
-            pdf_source = os.path.join(pdf_dir, pdf_name)
-            if os.path.exists(pdf_source):
-                shutil.copy2(pdf_source, os.path.join(output_dir, pdf_name))
-                print(f"{pdf_name} copied to website.")
+            for source_dir in (static_text_dir, text_output_dir):
+                source = os.path.join(source_dir, file_name)
+                if os.path.exists(source):
+                    shutil.copy2(source, os.path.join(output_dir, file_name))
+                    print(f"{file_name} copied to website.")
+                    break
 
         print(f"Website generated successfully in '{output_dir}'")
         print(f"Open '{os.path.join(output_dir, 'index.html')}' in a web browser to view it.")

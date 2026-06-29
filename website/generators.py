@@ -624,6 +624,16 @@ def generate_texts_index(output_dir, title):
                 <a href="../pausanias-greek.pdf">Open Greek Text PDF</a>
             </section>
             <section class="hub-card">
+                <h3>Greek Markup PDF</h3>
+                <p>Simple #book.chapter.section# Greek passage copy for print colour annotation.</p>
+                <a href="../pausanias-greek-markup.pdf">Open Markup PDF</a>
+            </section>
+            <section class="hub-card">
+                <h3>Greek Markup Word</h3>
+                <p>Editable Word version of the same #book.chapter.section# Greek passage copy.</p>
+                <a href="../pausanias-greek-markup.docx">Open Markup Word</a>
+            </section>
+            <section class="hub-card">
                 <h3>Greek Checklist PDF</h3>
                 <p>Greek sentence review sheet with passage IDs, annotation boxes, and April tags.</p>
                 <a href="../pausanias-greek-checklist.pdf">Open Greek Checklist PDF</a>
