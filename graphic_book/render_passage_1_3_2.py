@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import sqlite3
 import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -10,8 +11,6 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
-
-from pausanias_db import connect
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageOps
 
@@ -52,9 +51,12 @@ def root_dir() -> Path:
 
 
 def load_translation() -> str:
-    with connect() as conn:
+    db_path = root_dir() / "pausanias.sqlite"
+    if not db_path.exists():
+        raise RuntimeError(f"Missing local SQLite database: {db_path}")
+    with sqlite3.connect(db_path) as conn:
         row = conn.execute(
-            "SELECT english_translation FROM translations WHERE passage_id = %s",
+            "SELECT english_translation FROM translations WHERE passage_id = ?",
             (PASSAGE_ID,),
         ).fetchone()
     if not row or not row[0]:
@@ -335,7 +337,22 @@ def make_locator_map(records: list[FitRecord]) -> Image.Image:
     )
 
     map_rect = (22, 70, panel.width - 22, 240)
-    draw.rounded_rectangle(map_rect, radius=16, fill="#efe0ba", outline="#aa8651", width=2)
+    map_size = (map_rect[2] - map_rect[0], map_rect[3] - map_rect[1])
+    relief = Image.effect_noise(map_size, 24).convert("L")
+    relief = ImageOps.autocontrast(relief)
+    map_base = ImageOps.colorize(relief, black="#c4a26c", white="#f4e5bd").convert("RGBA")
+    paving = Image.new("RGBA", map_size, (0, 0, 0, 0))
+    pdraw = ImageDraw.Draw(paving)
+    for x in range(-map_size[1], map_size[0], 34):
+        pdraw.line((x, 0, x + map_size[1], map_size[1]), fill=(126, 94, 52, 32), width=1)
+    for y in range(12, map_size[1], 28):
+        pdraw.line((0, y, map_size[0], y - 18), fill=(255, 244, 213, 26), width=1)
+    map_base.alpha_composite(paving)
+    mask = Image.new("L", map_size, 0)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, map_size[0] - 1, map_size[1] - 1), radius=16, fill=255)
+    map_base.putalpha(mask)
+    panel.alpha_composite(map_base, map_rect[:2], source=(0, 0, map_size[0], map_size[1]))
+    draw.rounded_rectangle(map_rect, radius=16, outline="#aa8651", width=2)
 
     road_band = [
         (map_rect[0] + 22, map_rect[1] + 158),
@@ -352,8 +369,14 @@ def make_locator_map(records: list[FitRecord]) -> Image.Image:
     altar = (map_rect[0] + 214, map_rect[1] + 90, map_rect[0] + 252, map_rect[1] + 124)
     acropolis = [(map_rect[0] + 44, map_rect[1] + 36), (map_rect[0] + 86, map_rect[1] + 12), (map_rect[0] + 104, map_rect[1] + 42)]
 
+    for shape in [royal_stoa, stoa_zeus, statue_court, altar]:
+        shadow = (shape[0] + 3, shape[1] + 4, shape[2] + 3, shape[3] + 4)
+        draw.rounded_rectangle(shadow, radius=8, fill="#6f513044")
+    draw.polygon([(x + 3, y + 4) for x, y in acropolis], fill="#6f513044")
     draw.rounded_rectangle(royal_stoa, radius=8, fill=CITY, outline=RULE, width=2)
+    draw.rounded_rectangle((royal_stoa[0] + 5, royal_stoa[1] + 6, royal_stoa[2] - 5, royal_stoa[3] - 6), radius=5, outline=CITY_LIGHT, width=1)
     draw.rounded_rectangle(stoa_zeus, radius=8, fill=CITY, outline=RULE, width=2)
+    draw.rounded_rectangle((stoa_zeus[0] + 5, stoa_zeus[1] + 6, stoa_zeus[2] - 5, stoa_zeus[3] - 6), radius=5, outline=CITY_LIGHT, width=1)
     draw.rounded_rectangle(statue_court, radius=10, fill="#e3c891", outline=RULE, width=2)
     draw.rounded_rectangle(altar, radius=6, fill="#c29d67", outline=RULE, width=2)
     draw.polygon(acropolis, fill="#a77e49", outline=RULE)
