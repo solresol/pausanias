@@ -137,16 +137,16 @@ Source anchors are in the private ignored transcript notes, especially:
       Zenodo CSV/JSON release.
 - [x] Store strict pre-Pausanias filtering on MANTO edges so Pausanias-derived,
       later, and unknown-date source evidence cannot leak into the main model.
-- [x] Add the `place-state` LLM batch mode for Pausanias-present survival,
-      ruin, abandonment, destruction, renaming, and refoundation claims.
+- [x] Replace the `place-state` LLM sweep with MANTO-derived place-survival
+      labels from entity `Information` fields and Pausanias tie records.
 - [x] Add first-pass MANTO place linking, strict graph-feature extraction, and
       an explainable logistic-regression classifier scaffold.
 - [ ] Run the full MANTO import after downloading the current release into the
       ignored local cache.
 - [ ] Review MANTO source-date coverage and add manual source-date overrides for
       high-value ancient sources that the generic importer cannot date.
-- [ ] Manually audit a sample of place-state claims before treating LLM labels
-      as training ground truth.
+- [ ] Manually audit a sample of MANTO-derived place-survival labels before
+      treating absence of a negative status phrase as a stable positive label.
 - [ ] Manually review ambiguous Pausanias-to-MANTO place links, especially exact
       name matches without Pleiades IDs.
 - [ ] Compare the strict pre-Pausanias model against a Pausanias-included upper

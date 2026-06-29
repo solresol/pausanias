@@ -19,6 +19,8 @@ from sklearn.preprocessing import StandardScaler
 from pausanias_db import add_database_argument, connect, initialize_schema, read_sql_query
 
 
+FEATURE_SET_VERSION = "manto-pausanias-place-network-v2"
+LABEL_SOURCE_VERSION = "manto-entity-info-v1"
 FEATURE_COLUMNS = [
     "degree",
     "degree_centrality",
@@ -47,9 +49,9 @@ def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     add_database_argument(parser)
     parser.add_argument("--release-record-id", type=int, default=None)
-    parser.add_argument("--feature-set-version", default="manto-place-network-v1")
-    parser.add_argument("--label-prompt-version", default="place-state-v1")
-    parser.add_argument("--min-samples", type=int, default=20)
+    parser.add_argument("--feature-set-version", default=FEATURE_SET_VERSION)
+    parser.add_argument("--label-source-version", default=LABEL_SOURCE_VERSION)
+    parser.add_argument("--min-samples", type=int, default=10)
     parser.add_argument("--test-size", type=float, default=0.25)
     parser.add_argument("--include-non-pre-pausanias", action="store_true")
     return parser.parse_args()
@@ -74,7 +76,7 @@ def latest_release_id(conn) -> int:
 def load_feature_rows(conn, *, release_id: int, feature_set_version: str, pre_pausanias_only: bool):
     return read_sql_query(
         """
-        SELECT reference_form, english_transcription, manto_label,
+        SELECT reference_form, english_transcription, manto_id, manto_label,
                degree, degree_centrality, pagerank, betweenness_centrality,
                clustering_coefficient, component_size, community_size,
                high_centrality_neighbor_count, max_neighbor_pagerank,
@@ -89,46 +91,42 @@ def load_feature_rows(conn, *, release_id: int, feature_set_version: str, pre_pa
     )
 
 
-def load_labels(conn, *, prompt_version: str) -> dict[str, str]:
+def load_labels(conn, *, release_id: int, label_source_version: str) -> dict[str, str]:
     df = read_sql_query(
         """
-        SELECT canonical_place_name, target_label, COUNT(*) AS count
-        FROM place_state_mentions
-        WHERE prompt_version = %s
-          AND temporal_scope = 'pausanias_present'
+        SELECT object_id, place_name, target_label
+        FROM manto_place_status_labels
+        WHERE release_record_id = %s
+          AND label_source_version = %s
           AND target_label IN ('survives', 'does_not_survive')
-        GROUP BY canonical_place_name, target_label
         """,
         conn,
-        (prompt_version,),
+        (release_id, label_source_version),
     )
-    votes: dict[str, Counter] = {}
+    labels: dict[str, str] = {}
     for _, row in df.iterrows():
-        key = normalize_name(row["canonical_place_name"])
-        if not key:
-            continue
-        votes.setdefault(key, Counter())[row["target_label"]] += int(row["count"])
-    labels = {}
-    for key, counter in votes.items():
-        if not counter:
-            continue
-        labels[key] = counter.most_common(1)[0][0]
+        object_id = str(row["object_id"])
+        labels[object_id] = row["target_label"]
+        name_key = normalize_name(row["place_name"])
+        if name_key:
+            labels.setdefault(name_key, row["target_label"])
     return labels
 
 
 def attach_labels(features_df, labels: dict[str, str]):
     rows = []
     for _, row in features_df.iterrows():
+        label = labels.get(str(row.get("manto_id") or ""))
         candidate_names = [
             row.get("reference_form"),
             row.get("english_transcription"),
             row.get("manto_label"),
         ]
-        label = None
-        for name in candidate_names:
-            label = labels.get(normalize_name(name))
-            if label:
-                break
+        if not label:
+            for name in candidate_names:
+                label = labels.get(normalize_name(name))
+                if label:
+                    break
         if not label:
             continue
         rows.append({**row.to_dict(), "target_label": label})
@@ -145,7 +143,7 @@ def save_run(
     run_id: str,
     release_id: int,
     feature_set_version: str,
-    label_prompt_version: str,
+    label_source_version: str,
     pre_pausanias_only: bool,
     status: str,
     sample_count: int,
@@ -160,7 +158,7 @@ def save_run(
         cursor.execute(
             """
             INSERT INTO place_survival_model_runs (
-                run_id, release_record_id, feature_set_version, label_prompt_version,
+                run_id, release_record_id, feature_set_version, label_source_version,
                 model_type, pre_pausanias_only, started_at, completed_at, status,
                 sample_count, positive_count, negative_count, accuracy,
                 baseline_accuracy, precision_survives, recall_survives, f1_survives,
@@ -189,7 +187,7 @@ def save_run(
                 run_id,
                 release_id,
                 feature_set_version,
-                label_prompt_version,
+                label_source_version,
                 pre_pausanias_only,
                 timestamp,
                 timestamp,
@@ -256,25 +254,35 @@ def main() -> None:
             feature_set_version=args.feature_set_version,
             pre_pausanias_only=pre_pausanias_only,
         )
-        labels = load_labels(conn, prompt_version=args.label_prompt_version)
+        labels = load_labels(
+            conn,
+            release_id=release_id,
+            label_source_version=args.label_source_version,
+        )
         training = attach_labels(features, labels)
         y = np.array([1 if label == "survives" else 0 for label in training.get("target_label", [])])
         positive_count = int(np.sum(y)) if len(y) else 0
         negative_count = int(len(y) - positive_count)
-        if len(training) < args.min_samples or len(set(y)) < 2:
+        if (
+            len(training) < args.min_samples
+            or len(set(y)) < 2
+            or positive_count < 2
+            or negative_count < 2
+        ):
             save_run(
                 conn,
                 run_id=run_id,
                 release_id=release_id,
                 feature_set_version=args.feature_set_version,
-                label_prompt_version=args.label_prompt_version,
+                label_source_version=args.label_source_version,
                 pre_pausanias_only=pre_pausanias_only,
                 status="blocked_insufficient_training_data",
                 sample_count=len(training),
                 positive_count=positive_count,
                 negative_count=negative_count,
                 notes=(
-                    f"Need at least {args.min_samples} linked labeled places and both classes; "
+                    f"Need at least {args.min_samples} linked labeled places and at least "
+                    f"two examples from both classes; "
                     f"feature rows={len(features)}, label names={len(labels)}."
                 ),
             )
@@ -322,7 +330,7 @@ def main() -> None:
             run_id=run_id,
             release_id=release_id,
             feature_set_version=args.feature_set_version,
-            label_prompt_version=args.label_prompt_version,
+            label_source_version=args.label_source_version,
             pre_pausanias_only=pre_pausanias_only,
             status="completed",
             sample_count=len(training),

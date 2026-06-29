@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import argparse
-import json
+import re
 from datetime import datetime, timezone
 
 import networkx as nx
@@ -12,7 +12,8 @@ import networkx as nx
 from pausanias_db import add_database_argument, connect, initialize_schema
 
 
-FEATURE_SET_VERSION = "manto-place-network-v1"
+FEATURE_SET_VERSION = "manto-pausanias-place-network-v2"
+LABEL_SOURCE_VERSION = "manto-entity-info-v1"
 
 
 def now_iso() -> str:
@@ -24,6 +25,13 @@ def parse_arguments() -> argparse.Namespace:
     add_database_argument(parser)
     parser.add_argument("--release-record-id", type=int, default=None)
     parser.add_argument("--feature-set-version", default=FEATURE_SET_VERSION)
+    parser.add_argument(
+        "--target-source",
+        choices=("manto-status-labels", "linked-proper-nouns"),
+        default="manto-status-labels",
+        help="Build target nodes from MANTO Pausanias place labels or from local proper-noun links.",
+    )
+    parser.add_argument("--label-source-version", default=LABEL_SOURCE_VERSION)
     parser.add_argument(
         "--include-non-pre-pausanias",
         action="store_true",
@@ -105,6 +113,42 @@ def load_links(conn, release_id: int) -> list[dict]:
             "english_transcription": row[2],
             "manto_id": row[3],
             "manto_label": row[4],
+        }
+        for row in rows
+    ]
+
+
+def clean_place_name(value: str) -> str:
+    text = re.sub(r"^[^\w]+", "", value or "").strip()
+    return " ".join(text.split())
+
+
+def load_manto_status_targets(
+    conn,
+    release_id: int,
+    *,
+    label_source_version: str,
+) -> list[dict]:
+    with conn.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT place_name, object_id
+            FROM manto_place_status_labels
+            WHERE release_record_id = %s
+              AND label_source_version = %s
+              AND target_label IN ('survives', 'does_not_survive')
+            ORDER BY place_name, object_id
+            """,
+            (release_id, label_source_version),
+        )
+        rows = cursor.fetchall()
+    return [
+        {
+            "reference_form": clean_place_name(row[0]),
+            "entity_type": "place",
+            "english_transcription": clean_place_name(row[0]),
+            "manto_id": row[1],
+            "manto_label": row[0],
         }
         for row in rows
     ]
@@ -353,8 +397,16 @@ def main() -> None:
         release_id = args.release_record_id or latest_release_id(conn)
         print("Loading MANTO edges...", flush=True)
         edges = load_edges(conn, release_id, pre_pausanias_only=pre_pausanias_only)
-        print("Loading Pausanias-MANTO links...", flush=True)
-        links = load_links(conn, release_id)
+        if args.target_source == "linked-proper-nouns":
+            print("Loading Pausanias-MANTO links...", flush=True)
+            links = load_links(conn, release_id)
+        else:
+            print("Loading MANTO Pausanias place-status targets...", flush=True)
+            links = load_manto_status_targets(
+                conn,
+                release_id,
+                label_source_version=args.label_source_version,
+            )
         print("Building graph...", flush=True)
         graph = build_graph(edges, links)
         rows = build_feature_rows(

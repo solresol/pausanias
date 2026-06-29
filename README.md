@@ -118,26 +118,23 @@ Import the cached release into PostgreSQL:
 uv run manto_importer.py
 ```
 
-The importer stores raw CSV/JSON rows in `manto_raw_records`, then builds
-best-effort `manto_entities` and `manto_edges`. For prediction, use the strict
-pre-Pausanias graph only: `manto_edges.is_pre_pausanias = TRUE`. Edges from
-Pausanias, sources dated to Pausanias or later, and unknown-date sources are
-excluded from the default modelling graph to avoid leaking both Pausanias' own
-evidence and future evidence.
+The importer stores raw CSV/JSON row summaries in `manto_raw_records`, then
+builds best-effort `manto_entities`, typed `manto_entity_details`,
+`manto_tie_details`, and `manto_edges`. It derives Pausanias place-survival
+labels in `manto_place_status_labels` from MANTO's entity `Information` field
+for places linked to Pausanias tie records.
 
-After Wikidata/Pleiades linking has run, link Pausanias places to MANTO and
-build network features:
+For prediction, use the strict pre-Pausanias graph only:
+`manto_edges.is_pre_pausanias = TRUE`. Edges from Pausanias, sources dated to
+Pausanias or later, and unknown-date sources are excluded from the default
+modelling graph to avoid leaking both Pausanias' own evidence and future
+evidence.
+
+Build MANTO network features for the labelled Pausanias places and train the
+first explainable model:
 
 ```bash
-uv run link_manto_places.py
 uv run manto_place_network_features.py
-```
-
-The place-state LLM sweep is part of `sentence_tagging_daily.sh` as
-`--mode place-state`. Once enough `place_state_mentions` have Pausanias-present
-labels, train the first explainable model:
-
-```bash
 uv run predict_place_survival.py
 ```
 

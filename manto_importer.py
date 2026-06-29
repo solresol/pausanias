@@ -36,6 +36,9 @@ from pausanias_db import add_database_argument, connect, initialize_schema
 DEFAULT_PAUSANIAS_CUTOFF_YEAR = 180
 MAX_TEXT_ANALYSIS_CHARS = 50000
 MANTO_IMPORT_ADVISORY_LOCK_ID = 19446254
+MANTO_PLACE_STATUS_LABEL_SOURCE_VERSION = "manto-entity-info-v1"
+ENTITY_DETAILS_PATH = "data/entity_6580/entity_objects_6580.csv"
+TIE_DETAILS_PATH = "data/tie_6582/tie_objects_6582.csv"
 MANTO_ID_RE = re.compile(
     r"(?:object|objects|classification|classifications|source|sources)[/_:-]?(\d+)",
     re.IGNORECASE,
@@ -44,6 +47,15 @@ PLEIADES_RE = re.compile(r"(?:pleiades\.stoa\.org/places/|pleiades[:=\s]+)(\d+)"
 DATE_OR_SOURCE_RE = re.compile(
     r"\b(?:BCE|BC|CE|AD|Pausanias|Periegesis|start-attributes)\b",
     re.I,
+)
+DOES_NOT_SURVIVE_PATTERNS: tuple[tuple[str, str], ...] = (
+    (r"\bin ruins?\b", "ruins"),
+    (r"\bruined\b", "ruined"),
+    (r"\bdeserted\b", "deserted"),
+    (r"\buninhabited\b", "uninhabited"),
+    (r"\babandoned\b", "abandoned"),
+    (r"\bno longer\b", "no_longer"),
+    (r"\bdestroyed\b", "destroyed"),
 )
 
 
@@ -444,6 +456,69 @@ def extract_pleiades_id(data: dict[str, Any]) -> str:
     return match.group(1) if match else ""
 
 
+def object_id(record: dict[str, Any]) -> str:
+    return first_by_normalized_key(record, ["Object ID", "object_id", "Object Id"])
+
+
+def nodegoat_id(record: dict[str, Any]) -> str:
+    return first_by_normalized_key(record, ["nodegoat ID", "nodegoat_id", "Nodegoat Id"])
+
+
+def manto_entity_detail_tuple(
+    *, release_id: int, record: dict[str, Any], file_path: str, imported_at: str
+) -> tuple | None:
+    if file_path != ENTITY_DETAILS_PATH:
+        return None
+    row_object_id = object_id(record)
+    row_nodegoat_id = nodegoat_id(record)
+    name = record_label(record)
+    if not row_object_id or not row_nodegoat_id or not name:
+        return None
+    pleiades = first_by_normalized_key(record, ["Pleiades"]) or extract_pleiades_id(record)
+    return (
+        release_id,
+        row_object_id,
+        row_nodegoat_id,
+        name,
+        first_by_normalized_key(record, ["Information"]),
+        pleiades or None,
+        first_by_normalized_key(record, ["Somewhere in or near - Object ID"]),
+        first_by_normalized_key(record, ["Somewhere in or near"]),
+        first_by_normalized_key(record, ["ToposText"]),
+        first_by_normalized_key(record, ["Commentary"]),
+        imported_at,
+    )
+
+
+def manto_tie_detail_tuple(
+    *, release_id: int, record: dict[str, Any], file_path: str, imported_at: str
+) -> tuple | None:
+    if file_path != TIE_DETAILS_PATH:
+        return None
+    row_object_id = object_id(record)
+    row_nodegoat_id = nodegoat_id(record)
+    name = record_label(record)
+    if not row_object_id or not row_nodegoat_id or not name:
+        return None
+    return (
+        release_id,
+        row_object_id,
+        row_nodegoat_id,
+        name,
+        imported_at,
+    )
+
+
+def place_status_label(information: str) -> tuple[str, str, str]:
+    for pattern, reason in DOES_NOT_SURVIVE_PATTERNS:
+        match = re.search(pattern, information, re.I)
+        if match:
+            return "does_not_survive", reason, match.group(0)
+    if re.search(r"\bunlocat(?:able|ed)\b", information, re.I):
+        return "exclude", "unlocatable_without_survival_status", "unlocatable"
+    return "survives", "pausanias_mentioned_without_negative_status", ""
+
+
 def raw_record_tuple(
     *,
     release_id: int,
@@ -567,6 +642,36 @@ SET entity_kind = EXCLUDED.entity_kind,
     imported_at = EXCLUDED.imported_at
 """
 
+ENTITY_DETAIL_SQL = """
+INSERT INTO manto_entity_details (
+    release_record_id, object_id, nodegoat_id, name, information, pleiades_id,
+    somewhere_in_or_near_object_id, somewhere_in_or_near_label, topos_text,
+    commentary, imported_at
+)
+VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+ON CONFLICT (release_record_id, object_id) DO UPDATE
+SET nodegoat_id = EXCLUDED.nodegoat_id,
+    name = EXCLUDED.name,
+    information = EXCLUDED.information,
+    pleiades_id = EXCLUDED.pleiades_id,
+    somewhere_in_or_near_object_id = EXCLUDED.somewhere_in_or_near_object_id,
+    somewhere_in_or_near_label = EXCLUDED.somewhere_in_or_near_label,
+    topos_text = EXCLUDED.topos_text,
+    commentary = EXCLUDED.commentary,
+    imported_at = EXCLUDED.imported_at
+"""
+
+TIE_DETAIL_SQL = """
+INSERT INTO manto_tie_details (
+    release_record_id, object_id, nodegoat_id, name, imported_at
+)
+VALUES (%s, %s, %s, %s, %s)
+ON CONFLICT (release_record_id, object_id) DO UPDATE
+SET nodegoat_id = EXCLUDED.nodegoat_id,
+    name = EXCLUDED.name,
+    imported_at = EXCLUDED.imported_at
+"""
+
 EDGE_SQL = """
 INSERT INTO manto_edges (
     release_record_id, edge_id, source_manto_id, target_manto_id, relation_type,
@@ -586,19 +691,109 @@ SET source_manto_id = EXCLUDED.source_manto_id,
 """
 
 
+def pausanias_place_status_rows(conn, release_id: int, created_at: str) -> list[tuple]:
+    with conn.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT DISTINCT d.object_id, d.nodegoat_id, d.name, d.information
+            FROM manto_entity_details d
+            WHERE d.release_record_id = %s
+              AND d.name LIKE '🌍%%'
+              AND EXISTS (
+                  SELECT 1
+                  FROM manto_edges e
+                  JOIN manto_tie_details t
+                    ON t.release_record_id = e.release_record_id
+                   AND t.object_id = e.source_manto_id
+                  WHERE e.release_record_id = d.release_record_id
+                    AND e.target_manto_id = d.object_id
+                    AND t.name LIKE '📖 Pausanias%%'
+              )
+            ORDER BY d.name, d.object_id
+            """,
+            (release_id,),
+        )
+        rows = cursor.fetchall()
+    status_rows = []
+    for object_id_value, nodegoat_id_value, name, information in rows:
+        target_label, status_reason, matched_phrase = place_status_label(information or "")
+        status_rows.append(
+            (
+                release_id,
+                object_id_value,
+                nodegoat_id_value,
+                name,
+                information or "",
+                MANTO_PLACE_STATUS_LABEL_SOURCE_VERSION,
+                target_label,
+                status_reason,
+                matched_phrase,
+                True,
+                created_at,
+            )
+        )
+    return status_rows
+
+
+def rebuild_place_status_labels(conn, release_id: int, created_at: str) -> int:
+    rows = pausanias_place_status_rows(conn, release_id, created_at)
+    with conn.cursor() as cursor:
+        cursor.execute(
+            """
+            DELETE FROM manto_place_status_labels
+            WHERE release_record_id = %s
+              AND label_source_version = %s
+            """,
+            (release_id, MANTO_PLACE_STATUS_LABEL_SOURCE_VERSION),
+        )
+        cursor.executemany(
+            """
+            INSERT INTO manto_place_status_labels (
+                release_record_id, object_id, nodegoat_id, place_name, information,
+                label_source_version, target_label, status_reason, matched_phrase,
+                is_pausanias_mentioned, created_at
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ON CONFLICT (release_record_id, object_id, label_source_version) DO UPDATE
+            SET nodegoat_id = EXCLUDED.nodegoat_id,
+                place_name = EXCLUDED.place_name,
+                information = EXCLUDED.information,
+                target_label = EXCLUDED.target_label,
+                status_reason = EXCLUDED.status_reason,
+                matched_phrase = EXCLUDED.matched_phrase,
+                is_pausanias_mentioned = EXCLUDED.is_pausanias_mentioned,
+                created_at = EXCLUDED.created_at
+            """,
+            rows,
+        )
+    return len(rows)
+
+
 def import_release(conn, *, release, zip_path: Path, args: argparse.Namespace) -> dict[str, int]:
     imported_at = now_iso()
     if not args.append:
         with conn.cursor() as cursor:
             cursor.execute("DELETE FROM manto_raw_records WHERE release_record_id = %s", (release.record_id,))
             cursor.execute("DELETE FROM manto_entities WHERE release_record_id = %s", (release.record_id,))
+            cursor.execute("DELETE FROM manto_entity_details WHERE release_record_id = %s", (release.record_id,))
+            cursor.execute("DELETE FROM manto_tie_details WHERE release_record_id = %s", (release.record_id,))
+            cursor.execute("DELETE FROM manto_place_status_labels WHERE release_record_id = %s", (release.record_id,))
             cursor.execute("DELETE FROM manto_edges WHERE release_record_id = %s", (release.record_id,))
         conn.commit()
 
     raw_batch: list[tuple] = []
     entity_batch: list[tuple] = []
+    entity_detail_batch: list[tuple] = []
+    tie_detail_batch: list[tuple] = []
     edge_batch: list[tuple] = []
-    counts = {"raw_records": 0, "entities": 0, "edges": 0}
+    counts = {
+        "raw_records": 0,
+        "entities": 0,
+        "entity_details": 0,
+        "tie_details": 0,
+        "edges": 0,
+        "place_status_labels": 0,
+    }
 
     for file_path, file_format, record_number, record in iter_zip_records(zip_path):
         raw_batch.append(
@@ -619,6 +814,22 @@ def import_release(conn, *, release, zip_path: Path, args: argparse.Namespace) -
         )
         if entity:
             entity_batch.append(entity)
+        entity_detail = manto_entity_detail_tuple(
+            release_id=release.record_id,
+            record=record,
+            file_path=file_path,
+            imported_at=imported_at,
+        )
+        if entity_detail:
+            entity_detail_batch.append(entity_detail)
+        tie_detail = manto_tie_detail_tuple(
+            release_id=release.record_id,
+            record=record,
+            file_path=file_path,
+            imported_at=imported_at,
+        )
+        if tie_detail:
+            tie_detail_batch.append(tie_detail)
         edge_batch.extend(
             edge_tuples(
                 release_id=release.record_id,
@@ -635,19 +846,34 @@ def import_release(conn, *, release, zip_path: Path, args: argparse.Namespace) -
         if len(raw_batch) >= args.batch_size:
             execute_batch(conn, RAW_SQL, raw_batch)
             execute_batch(conn, ENTITY_SQL, entity_batch)
+            execute_batch(conn, ENTITY_DETAIL_SQL, entity_detail_batch)
+            execute_batch(conn, TIE_DETAIL_SQL, tie_detail_batch)
             execute_batch(conn, EDGE_SQL, edge_batch)
             counts["entities"] += len(entity_batch)
+            counts["entity_details"] += len(entity_detail_batch)
+            counts["tie_details"] += len(tie_detail_batch)
             counts["edges"] += len(edge_batch)
             raw_batch.clear()
             entity_batch.clear()
+            entity_detail_batch.clear()
+            tie_detail_batch.clear()
             edge_batch.clear()
             conn.commit()
 
     execute_batch(conn, RAW_SQL, raw_batch)
     execute_batch(conn, ENTITY_SQL, entity_batch)
+    execute_batch(conn, ENTITY_DETAIL_SQL, entity_detail_batch)
+    execute_batch(conn, TIE_DETAIL_SQL, tie_detail_batch)
     execute_batch(conn, EDGE_SQL, edge_batch)
     counts["entities"] += len(entity_batch)
+    counts["entity_details"] += len(entity_detail_batch)
+    counts["tie_details"] += len(tie_detail_batch)
     counts["edges"] += len(edge_batch)
+    counts["place_status_labels"] = rebuild_place_status_labels(
+        conn,
+        release.record_id,
+        imported_at,
+    )
     with conn.cursor() as cursor:
         cursor.execute(
             """
@@ -719,7 +945,10 @@ def main() -> None:
         f"Imported MANTO release {release.record_id}: "
         f"{counts['raw_records']:,} raw rows, "
         f"{counts['entities']:,} entity upserts, "
-        f"{counts['edges']:,} edge upserts."
+        f"{counts['entity_details']:,} entity-detail upserts, "
+        f"{counts['tie_details']:,} tie-detail upserts, "
+        f"{counts['edges']:,} edge upserts, "
+        f"{counts['place_status_labels']:,} place-status labels."
     )
 
 

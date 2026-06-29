@@ -5,11 +5,9 @@ from sentence_tag_batch import (
     DISCOURSE_MODE_PROMPT_VERSION,
     GRETA_BATCH_PROMPT_VERSION,
     GRETA_BOTH_BATCH_PROMPT_VERSION,
-    PLACE_STATE_PROMPT_VERSION,
     bucket_from_flags,
     completion_body,
     mode_prompt_version,
-    place_state_target_label,
     unprocessed_sql,
 )
 
@@ -101,9 +99,20 @@ class SentenceTagBatchTests(unittest.TestCase):
             parser = _ap.ArgumentParser()
             parser.add_argument(
                 "--mode",
-                choices=("greta", "greta-both", "legacy", "discourse", "place-state"),
+                choices=("greta", "greta-both", "legacy", "discourse"),
             )
             parser.parse_args(["--mode", "greta-both-context"])
+
+    def test_place_state_mode_is_removed(self):
+        import argparse as _ap
+
+        parser = _ap.ArgumentParser()
+        parser.add_argument(
+            "--mode",
+            choices=("greta", "greta-both", "legacy", "discourse"),
+        )
+        with self.assertRaises(SystemExit):
+            parser.parse_args(["--mode", "place-state"])
 
     def test_priority_books_first_order_is_before_natural_order(self):
         args = args_for_mode("greta-both")
@@ -137,42 +146,6 @@ class SentenceTagBatchTests(unittest.TestCase):
         self.assertIn("sentence_llm_grammar_analyses", sql)
         self.assertIn("sentence_discourse_mode_tags", sql)
         self.assertIn("greek-sentence-grammar-v1", sql)
-
-    def test_place_state_completion_and_unprocessed_sql_use_review_table(self):
-        args = args_for_mode("place-state")
-        body = completion_body(
-            args,
-            {
-                "passage_id": "8.1.1",
-                "sentence_number": 1,
-                "sentence": "Greek",
-                "english_sentence": "English",
-            },
-        )
-        tool = body["tools"][0]["function"]
-        self.assertEqual(mode_prompt_version(args), PLACE_STATE_PROMPT_VERSION)
-        self.assertEqual(tool["name"], "save_place_state_review")
-        self.assertIn("claims", tool["parameters"]["properties"])
-        self.assertIn("pausanias_present", str(tool["parameters"]))
-        self.assertEqual(body["temperature"], 0)
-
-        sql = unprocessed_sql(args)
-        self.assertIn("sentence_place_state_reviews", sql)
-        self.assertIn(PLACE_STATE_PROMPT_VERSION, sql)
-
-    def test_place_state_target_label_requires_pausanias_present(self):
-        self.assertEqual(
-            place_state_target_label("inhabited_still_exists", "pausanias_present"),
-            "survives",
-        )
-        self.assertEqual(
-            place_state_target_label("ruined_or_remains", "pausanias_present"),
-            "does_not_survive",
-        )
-        self.assertEqual(
-            place_state_target_label("inhabited_still_exists", "mythic_past"),
-            "exclude",
-        )
 
 
 if __name__ == "__main__":

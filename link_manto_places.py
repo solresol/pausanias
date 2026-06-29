@@ -4,14 +4,10 @@
 from __future__ import annotations
 
 import argparse
-import json
 import re
 from datetime import datetime, timezone
 
 from pausanias_db import add_database_argument, connect, initialize_schema
-
-
-PLEIADES_RE = re.compile(r"(?:pleiades\.stoa\.org/places/|pleiades[:=\s]+)(\d+)", re.I)
 
 
 def now_iso() -> str:
@@ -22,6 +18,16 @@ def normalize_name(value: str | None) -> str:
     if not value:
         return ""
     return re.sub(r"[^a-z0-9]+", "", value.lower())
+
+
+def name_variants(value: str | None) -> set[str]:
+    if not value:
+        return set()
+    text = re.sub(r"^[^\w]+", "", value).strip()
+    without_parenthetical = re.sub(r"\s*\([^)]*\)", "", text).strip()
+    variants = {normalize_name(text), normalize_name(without_parenthetical)}
+    variants.discard("")
+    return variants
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -48,22 +54,6 @@ def latest_release_id(conn) -> int:
     if not row:
         raise RuntimeError("No imported MANTO release found.")
     return int(row[0])
-
-
-def extract_pleiades_id(data) -> str:
-    text = json.dumps(data, ensure_ascii=False)
-    match = PLEIADES_RE.search(text)
-    return match.group(1) if match else ""
-
-
-def graph_manto_id(raw_manto_id: str, data: dict) -> str:
-    for key in ("Object ID", "object_id", "object id", "ID", "id"):
-        value = data.get(key) if isinstance(data, dict) else None
-        if value:
-            text = str(value).strip()
-            if text:
-                return text
-    return raw_manto_id
 
 
 def load_places(conn) -> list[dict]:
@@ -103,23 +93,24 @@ def load_manto_entities(conn, release_id: int) -> list[dict]:
     with conn.cursor() as cursor:
         cursor.execute(
             """
-            SELECT manto_id, label, entity_kind, data
-            FROM manto_entities
+            SELECT object_id, name, pleiades_id
+            FROM manto_entity_details
             WHERE release_record_id = %s
+              AND name LIKE '🌍%%'
             """,
             (release_id,),
         )
         rows = cursor.fetchall()
     entities = []
-    for manto_id, label, entity_kind, data in rows:
-        data = data or {}
+    for object_id, label, pleiades_id in rows:
         entities.append(
             {
-                "manto_id": graph_manto_id(manto_id, data),
+                "manto_id": object_id,
                 "label": label or "",
-                "entity_kind": entity_kind or "",
-                "pleiades_id": extract_pleiades_id(data),
+                "entity_kind": "place",
+                "pleiades_id": pleiades_id or "",
                 "norm_label": normalize_name(label),
+                "norm_variants": name_variants(label),
             }
         )
     return entities
@@ -144,10 +135,8 @@ def candidate_links(place: dict, entities: list[dict]) -> list[dict]:
                 }
             )
             continue
-        if entity["norm_label"] and entity["norm_label"] in place_names:
-            confidence = "medium"
-            if "place" in entity["entity_kind"].lower() or "object" in entity["entity_kind"].lower():
-                confidence = "high"
+        if place_names & entity["norm_variants"]:
+            confidence = "high" if entity["norm_label"] in place_names else "medium"
             candidates.append(
                 {
                     **entity,
