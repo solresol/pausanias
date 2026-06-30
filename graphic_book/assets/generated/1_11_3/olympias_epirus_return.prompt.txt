@@ -1,0 +1,7 @@
+Use case: historical-scene
+Asset type: scenic inset raster art for a Pausanias graphic-book page, no text or labels in image
+Primary request: Create a richly detailed historical illustration of Olympias returning into Epirus after Alexander son of Neoptolemus died among the Lucanians, fearing Antipater. Show a dignified Macedonian-Epirote royal woman traveling modestly with attendants through a rugged Epirote mountain pass, a covered litter or pack animals, small armed escort, stone way markers, and distant lake or valley. The scene should feel like a historically grounded journey and political exile, not a myth scene.
+Style and quality: sophisticated watercolor-and-gouache realism on warm parchment, high-end classical-history book art, rich terrain and atmospheric light, detailed ancient clothing and equipment, not flat vector, not diagrammatic, not cartoon-like.
+Composition: horizontal inset, travelers in lower third, mountain pass and valley opening behind them, space in sky and terrain for local label callouts.
+Historical constraints: modest clothing, no nudity, no gore, no fantasy elements, no anachronistic Roman imperial imagery.
+Text constraints: no written words, no labels, no inscriptions, no watermarks, no pseudo-text.

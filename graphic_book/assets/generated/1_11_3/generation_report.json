@@ -1,0 +1,27 @@
+{
+  "passage_id": "1.11.3",
+  "mode": "built-in image_gen",
+  "generated_image_directory": "/Users/gregb/.codex/generated_images/019f19b1-b610-7a82-a874-dff76f10253f",
+  "approved_reference_pages": [
+    "graphic_book/images/1/1/4.png",
+    "graphic_book/images/1/1/5.png"
+  ],
+  "continuity_reference_pages": [
+    "graphic_book/images/1/11/2.png"
+  ],
+  "assets": [
+    {
+      "output": "graphic_book/assets/generated/1_11_3/main_epirus_co_kings_aeacides.png",
+      "source_image": "/Users/gregb/.codex/generated_images/019f19b1-b610-7a82-a874-dff76f10253f/ig_0a92c16086125372016a4404d9e0248191b39f9c1c4671211a.png",
+      "prompt_file": "graphic_book/assets/generated/1_11_3/main_epirus_co_kings_aeacides.prompt.txt",
+      "description": "Generated raster main panel showing Epirote co-rulers, Aeacides' military support for Olympias, and the Macedonian pressure beyond the valley."
+    },
+    {
+      "output": "graphic_book/assets/generated/1_11_3/olympias_epirus_return.png",
+      "source_image": "/Users/gregb/.codex/generated_images/019f19b1-b610-7a82-a874-dff76f10253f/ig_0a92c16086125372016a44058e8c0881919f60076cf69d84da.png",
+      "prompt_file": "graphic_book/assets/generated/1_11_3/olympias_epirus_return.prompt.txt",
+      "description": "Generated raster scenic inset for Olympias returning through Epirus after the Lucanian death of Alexander son of Neoptolemus."
+    }
+  ],
+  "content_suitability": "Reviewed before rendering: modest clothing, no nudity, no gore, no fantasy elements."
+}
