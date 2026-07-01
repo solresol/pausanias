@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: main raster panel for a Pausanias graphic-book page, later overlaid with local labels and callouts
+Primary request: Create a richly painted historical scene of the battle near Oeniadae where Aeacides of Epirus is wounded while fighting Philip, Cassander's brother.
+Scene/backdrop: late fourth-century BCE western Greece, the marshy Achelous river delta near Oeniadae, low stone city walls and towers in the distance, river channels, reeds, boats pulled onto muddy banks, hills fading in warm haze.
+Subject: Epirote soldiers around a wounded royal commander in bronze cuirass and cloak in the middle foreground; Macedonian-style infantry and cavalry pressing from the opposite side; no gore, no exposed bodies.
+Style/medium: sophisticated coffee-table historical illustration, painterly watercolor and gouache over parchment texture, dense atmospheric detail, historically grounded Greek/Macedonian arms and clothing, suitable for a professional classics publication.
+Composition/framing: wide landscape panorama, strong spatial orientation, high viewpoint but human-scale action in foreground, open sky and terrain suitable for later callout labels; no text or symbols.
+Lighting/mood: late afternoon amber light after a hard battle, serious and elegiac, not fantasy.
+Color palette: parchment gold, olive hills, blue-green wetlands, bronze and muted red accents.
+Constraints: no text, no labels, no banners with writing, no maps, no modern objects, no nudity, no blood spray, no fantasy armor, no Roman imperial gear, no cartoon/vector/diagram look.
+Avoid: flat terrain, icon-like figures, crude schematic composition, classroom diagram, watermark.

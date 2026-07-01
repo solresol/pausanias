@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: scenic inset raster for a Pausanias graphic-book page, later overlaid with local caption
+Primary request: Create a richly painted Epirote council scene showing Aeacides facing rejection and eventual forgiveness by the Epirotes after Olympias' violent rule.
+Scene/backdrop: rugged Epirus highland assembly terrace, stone benches, oak trees, distant mountains and a fortified settlement, late fourth-century BCE.
+Subject: Aeacides in modest royal cloak standing before wary Epirote elders and soldiers; a few figures soften toward him, implying reconciliation; no single theatrical gesture, no violence.
+Style/medium: sophisticated historical illustration, painterly watercolor/gouache with parchment atlas warmth, detailed but readable at small inset size, historically grounded Greek/Epirote dress and equipment.
+Composition/framing: medium-wide horizontal scene, clear central figure, surrounding council, depth toward mountains; leave clean upper corners for later local label if needed.
+Lighting/mood: cool mountain morning with warm sunlight breaking through, tense but reconciliatory.
+Color palette: parchment ochre, mountain blue-gray, olive green, bronze, muted red and cream.
+Constraints: no text, no labels, no inscriptions, no modern objects, no nudity, no gore, no fantasy armor, no Roman imperial gear, no cartoon/vector/diagram look.
+Avoid: flat schematic figures, icon-like faces, classroom diagram, watermark.
