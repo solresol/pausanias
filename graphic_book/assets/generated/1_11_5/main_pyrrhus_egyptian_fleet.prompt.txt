@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: Pausanias graphic-book main raster panel, later overlaid locally with labels and callouts
+Primary request: Create a richly detailed historical illustration of young Pyrrhus being restored to Epirus with an Egyptian fleet sent by Ptolemy son of Lagus. The scene should read as a late 4th / early 3rd century BCE Mediterranean crossing: Ptolemaic warships and transport vessels under warm light, soldiers and attendants on deck, a young royal exile near the stern, rugged Epirote coast and mountains emerging ahead, Ionian sea below. No exact text, no labels, no map words.
+Scene/backdrop: Ionian Sea approaching the coast of Epirus, rugged mountains and harbors in the distance, a few small islands, atmospheric but clear geographic orientation.
+Subject: Ptolemaic fleet restoring Pyrrhus after his flight from Cassander; historically grounded Hellenistic ships, armor, robes, and standards.
+Style/medium: finished coffee-table book historical illustration, painterly realism with parchment-atlas warmth, sophisticated textured landscape, detailed ships and coast, comparable in ambition to a high-quality illustrated historical atlas spread.
+Composition/framing: wide panoramic view from slightly above sea level, fleet moving diagonally from lower left toward upper right coast, strong depth, clear areas for later callouts around the top and sides.
+Lighting/mood: golden late afternoon, dignified, dramatic but not violent.
+Color palette: warm ochres, sea blues, muted greens, bronze, linen, weathered wood; avoid flat vector colors.
+Materials/textures: painted water, oars, rigging, sails, bronze shields, rocky Epirote coast, parchment-compatible grain.
+Constraints: no text, no labels, no watermark, no visible nudity, no gore, no cartoon styling, no simple diagram or icon figures, no modern ships or buildings.

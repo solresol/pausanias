@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: Pausanias graphic-book scenic inset, later overlaid locally with exact caption
+Primary request: Create a rich historical illustration of an Epirote night uprising against King Alcetas, the uncontrollable older brother of Aeacides, without gore. The scene should show torchlit Epirote citizens and nobles in a mountain palace courtyard at night, tense confrontation, fallen royal banners, guards lowering spears, but no explicit killing, blood, or nudity. No exact text, no labels.
+Scene/backdrop: Epirus, rugged highland palace courtyard, stone walls, dark mountains beyond, torchlight and moonlight.
+Subject: Epeirotes rising against Alcetas after his violent rule; a tense political overthrow rather than a battlefield.
+Style/medium: finished historical atlas illustration, painterly realism, sophisticated rich raster art, warm torchlight, textured stone, historically grounded Hellenistic clothing and armor.
+Composition/framing: medium-wide inset composition, central palace steps and crowd with torches, readable at small size, avoid cramped faces at edges.
+Lighting/mood: dramatic night scene, amber torchlight, controlled tension, professional historical-book tone.
+Color palette: dark blue night, warm ochre torchlight, stone grey, bronze, linen, muted red banners.
+Constraints: no text, no labels, no watermark, no visible nudity, no gore, no cartoon style, no flat vector diagram, no modern objects.

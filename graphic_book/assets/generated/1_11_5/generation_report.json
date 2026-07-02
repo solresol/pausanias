@@ -1,0 +1,25 @@
+{
+  "passage_id": "1.11.5",
+  "approved_reference_pages": [
+    "graphic_book/images/1/1/4.png",
+    "graphic_book/images/1/1/5.png"
+  ],
+  "continuity_reference_pages": [
+    "graphic_book/images/1/11/4.png"
+  ],
+  "generated_assets": [
+    {
+      "output": "graphic_book/assets/generated/1_11_5/main_pyrrhus_egyptian_fleet.png",
+      "source_image": "/Users/gregb/.codex/generated_images/019f23fd-67b5-7bc1-b0aa-eba35c4c7c66/ig_0b5a4e97a34a14d8016a46a79f83b48191beeb5bf206a04739.png",
+      "prompt_file": "graphic_book/assets/generated/1_11_5/main_pyrrhus_egyptian_fleet.prompt.txt"
+    },
+    {
+      "output": "graphic_book/assets/generated/1_11_5/alcetas_night_uprising.png",
+      "source_image": "/Users/gregb/.codex/generated_images/019f23fd-67b5-7bc1-b0aa-eba35c4c7c66/ig_0b5a4e97a34a14d8016a46a83e819c81919b7aa9cc231a2811.png",
+      "prompt_file": "graphic_book/assets/generated/1_11_5/alcetas_night_uprising.prompt.txt"
+    }
+  ],
+  "final_image": "graphic_book/images/1/11/5.png",
+  "layout_report": "tmp/passage_1_11_5_layout_report.json",
+  "visual_quality_check": "Accepted after full-size inspection: rich historical main art, subordinate route locator, local labels and captions legible, no text crossing borders, no gore or nudity."
+}
