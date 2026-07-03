@@ -8,6 +8,7 @@ import re
 import uuid
 from collections import Counter
 from datetime import datetime, timezone
+from typing import Iterable
 
 import numpy as np
 from sklearn.linear_model import LogisticRegression
@@ -21,6 +22,8 @@ from pausanias_db import add_database_argument, connect, initialize_schema, read
 
 FEATURE_SET_VERSION = "manto-pausanias-place-network-v2"
 LABEL_SOURCE_VERSION = "manto-entity-info-v1"
+LLM_LABEL_SOURCE_VERSION = "llm-place-state-v1"
+TRAINING_LABEL_SETS = ("manto", "sentence-llm", "passage-llm", "llm", "combined")
 FEATURE_COLUMNS = [
     "degree",
     "degree_centrality",
@@ -51,6 +54,21 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument("--release-record-id", type=int, default=None)
     parser.add_argument("--feature-set-version", default=FEATURE_SET_VERSION)
     parser.add_argument("--label-source-version", default=LABEL_SOURCE_VERSION)
+    parser.add_argument(
+        "--training-label-set",
+        choices=TRAINING_LABEL_SETS,
+        default="manto",
+        help=(
+            "Which target labels to train from. 'manto' is the default; "
+            "'combined' adds sentence and passage LLM labels by normalized place name."
+        ),
+    )
+    parser.add_argument(
+        "--label-conflict-policy",
+        choices=("drop", "prefer-manto", "prefer-llm"),
+        default="drop",
+        help="How to handle contradictory labels for the same normalized key.",
+    )
     parser.add_argument("--min-samples", type=int, default=10)
     parser.add_argument("--test-size", type=float, default=0.25)
     parser.add_argument("--include-non-pre-pausanias", action="store_true")
@@ -91,7 +109,26 @@ def load_feature_rows(conn, *, release_id: int, feature_set_version: str, pre_pa
     )
 
 
-def load_labels(conn, *, release_id: int, label_source_version: str) -> dict[str, str]:
+def label_source_version_for_run(args: argparse.Namespace) -> str:
+    if args.training_label_set == "manto":
+        return args.label_source_version
+    if args.training_label_set == "combined":
+        return f"{args.label_source_version}+{LLM_LABEL_SOURCE_VERSION}"
+    return f"{LLM_LABEL_SOURCE_VERSION}:{args.training_label_set}"
+
+
+def label_key(kind: str, value: str | None) -> str:
+    if kind == "manto":
+        return f"manto:{value or ''}"
+    return f"name:{normalize_name(value)}"
+
+
+def load_manto_label_records(
+    conn,
+    *,
+    release_id: int,
+    label_source_version: str,
+) -> list[dict[str, str]]:
     df = read_sql_query(
         """
         SELECT object_id, place_name, target_label
@@ -103,20 +140,158 @@ def load_labels(conn, *, release_id: int, label_source_version: str) -> dict[str
         conn,
         (release_id, label_source_version),
     )
-    labels: dict[str, str] = {}
+    records: list[dict[str, str]] = []
     for _, row in df.iterrows():
         object_id = str(row["object_id"])
-        labels[object_id] = row["target_label"]
+        label = row["target_label"]
+        records.append(
+            {
+                "key": label_key("manto", object_id),
+                "label": label,
+                "source": "manto",
+            }
+        )
         name_key = normalize_name(row["place_name"])
         if name_key:
-            labels.setdefault(name_key, row["target_label"])
-    return labels
+            records.append(
+                {
+                    "key": label_key("name", row["place_name"]),
+                    "label": label,
+                    "source": "manto",
+                }
+            )
+    return records
+
+
+def load_sentence_llm_label_records(conn) -> list[dict[str, str]]:
+    df = read_sql_query(
+        """
+        SELECT canonical_place_name, target_label
+        FROM place_state_mentions
+        WHERE target_label IN ('survives', 'does_not_survive')
+        """,
+        conn,
+    )
+    return [
+        {
+            "key": label_key("name", row["canonical_place_name"]),
+            "label": row["target_label"],
+            "source": "sentence-llm",
+        }
+        for _, row in df.iterrows()
+        if normalize_name(row["canonical_place_name"])
+    ]
+
+
+def load_passage_llm_label_records(conn) -> list[dict[str, str]]:
+    df = read_sql_query(
+        """
+        SELECT canonical_place_name, target_label
+        FROM passage_place_state_mentions
+        WHERE target_label IN ('survives', 'does_not_survive')
+        """,
+        conn,
+    )
+    return [
+        {
+            "key": label_key("name", row["canonical_place_name"]),
+            "label": row["target_label"],
+            "source": "passage-llm",
+        }
+        for _, row in df.iterrows()
+        if normalize_name(row["canonical_place_name"])
+    ]
+
+
+def choose_conflicting_label(
+    existing: dict[str, str],
+    incoming: dict[str, str],
+    *,
+    conflict_policy: str,
+) -> dict[str, str] | None:
+    if existing["label"] == incoming["label"]:
+        return existing
+    if conflict_policy == "prefer-manto":
+        if existing["source"] == "manto":
+            return existing
+        if incoming["source"] == "manto":
+            return incoming
+    if conflict_policy == "prefer-llm":
+        if existing["source"] != "manto":
+            return existing
+        if incoming["source"] != "manto":
+            return incoming
+    return None
+
+
+def merge_label_records(
+    records: Iterable[dict[str, str]],
+    *,
+    conflict_policy: str,
+) -> tuple[dict[str, str], Counter]:
+    merged: dict[str, dict[str, str] | None] = {}
+    stats: Counter = Counter()
+    for record in records:
+        if not record["key"] or record["key"] in {"manto:", "name:"}:
+            continue
+        stats["records"] += 1
+        stats[f"records_{record['source']}"] += 1
+        existing = merged.get(record["key"])
+        if existing is None and record["key"] in merged:
+            stats["ignored_after_conflict"] += 1
+            continue
+        if existing is None:
+            merged[record["key"]] = record
+            continue
+        winner = choose_conflicting_label(
+            existing,
+            record,
+            conflict_policy=conflict_policy,
+        )
+        if winner is None:
+            merged[record["key"]] = None
+            stats["conflicts_dropped"] += 1
+        else:
+            merged[record["key"]] = winner
+            if winner is not existing:
+                stats["conflicts_resolved"] += 1
+    labels = {
+        key: record["label"]
+        for key, record in merged.items()
+        if record is not None
+    }
+    stats["label_keys"] = len(labels)
+    return labels, stats
+
+
+def load_labels(
+    conn,
+    *,
+    release_id: int,
+    label_source_version: str,
+    training_label_set: str,
+    conflict_policy: str,
+) -> tuple[dict[str, str], Counter]:
+    records: list[dict[str, str]] = []
+    if training_label_set in {"manto", "combined"}:
+        records.extend(
+            load_manto_label_records(
+                conn,
+                release_id=release_id,
+                label_source_version=label_source_version,
+            )
+        )
+    if training_label_set in {"sentence-llm", "llm", "combined"}:
+        records.extend(load_sentence_llm_label_records(conn))
+    if training_label_set in {"passage-llm", "llm", "combined"}:
+        records.extend(load_passage_llm_label_records(conn))
+    return merge_label_records(records, conflict_policy=conflict_policy)
 
 
 def attach_labels(features_df, labels: dict[str, str]):
     rows = []
     for _, row in features_df.iterrows():
-        label = labels.get(str(row.get("manto_id") or ""))
+        label = labels.get(label_key("manto", str(row.get("manto_id") or "")))
         candidate_names = [
             row.get("reference_form"),
             row.get("english_transcription"),
@@ -124,7 +299,7 @@ def attach_labels(features_df, labels: dict[str, str]):
         ]
         if not label:
             for name in candidate_names:
-                label = labels.get(normalize_name(name))
+                label = labels.get(label_key("name", name))
                 if label:
                     break
         if not label:
@@ -254,10 +429,12 @@ def main() -> None:
             feature_set_version=args.feature_set_version,
             pre_pausanias_only=pre_pausanias_only,
         )
-        labels = load_labels(
+        labels, label_stats = load_labels(
             conn,
             release_id=release_id,
             label_source_version=args.label_source_version,
+            training_label_set=args.training_label_set,
+            conflict_policy=args.label_conflict_policy,
         )
         training = attach_labels(features, labels)
         y = np.array([1 if label == "survives" else 0 for label in training.get("target_label", [])])
@@ -274,7 +451,7 @@ def main() -> None:
                 run_id=run_id,
                 release_id=release_id,
                 feature_set_version=args.feature_set_version,
-                label_source_version=args.label_source_version,
+                label_source_version=label_source_version_for_run(args),
                 pre_pausanias_only=pre_pausanias_only,
                 status="blocked_insufficient_training_data",
                 sample_count=len(training),
@@ -283,7 +460,9 @@ def main() -> None:
                 notes=(
                     f"Need at least {args.min_samples} linked labeled places and at least "
                     f"two examples from both classes; "
-                    f"feature rows={len(features)}, label names={len(labels)}."
+                    f"feature rows={len(features)}, label keys={len(labels)}, "
+                    f"label set={args.training_label_set}, "
+                    f"label stats={dict(label_stats)}."
                 ),
             )
             print(
@@ -330,19 +509,25 @@ def main() -> None:
             run_id=run_id,
             release_id=release_id,
             feature_set_version=args.feature_set_version,
-            label_source_version=args.label_source_version,
+            label_source_version=label_source_version_for_run(args),
             pre_pausanias_only=pre_pausanias_only,
             status="completed",
             sample_count=len(training),
             positive_count=positive_count,
             negative_count=negative_count,
             metrics=metrics,
+            notes=(
+                f"label set={args.training_label_set}; "
+                f"conflict policy={args.label_conflict_policy}; "
+                f"label stats={dict(label_stats)}"
+            ),
         )
         coefficients = pipeline.named_steps["logreg"].coef_[0]
         save_feature_scores(conn, run_id, FEATURE_COLUMNS, coefficients)
     print(
         f"Trained place-survival model {run_id}: accuracy={metrics['accuracy']:.3f}, "
-        f"baseline={metrics['baseline_accuracy']:.3f}, samples={len(training)}."
+        f"baseline={metrics['baseline_accuracy']:.3f}, samples={len(training)}, "
+        f"labels={args.training_label_set}."
     )
 
 

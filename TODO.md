@@ -143,6 +143,8 @@ Source anchors are in the private ignored transcript notes, especially:
       candidate generation.
 - [x] Re-enable active LLM place-state extraction as a passage-level Batch API
       sweep rather than a sentence-level sweep.
+- [x] Let the explainable place-survival classifier train from MANTO-only,
+      sentence-LLM-only, passage-LLM-only, all-LLM, or combined target labels.
 - [x] Add first-pass MANTO place linking, strict graph-feature extraction, and
       an explainable logistic-regression classifier scaffold.
 - [ ] Run the full MANTO import after downloading the current release into the
@@ -156,8 +158,8 @@ Source anchors are in the private ignored transcript notes, especially:
 - [ ] Compare the strict pre-Pausanias model against a Pausanias-included upper
       bound only as a leakage diagnostic, not as evidence.
 - [ ] Compare MANTO labels, archived sentence-level LLM claims, and new
-      passage-level LLM claims before treating the combined labels as model
-      targets.
+      passage-level LLM claims before treating the combined labels as paper
+      evidence.
 
 ## Translation-Length Residuals and Wordiness
 

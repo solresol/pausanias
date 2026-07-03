@@ -138,6 +138,20 @@ uv run manto_place_network_features.py
 uv run predict_place_survival.py
 ```
 
+To compare target sources, keep MANTO-only as the default and switch the
+training label set explicitly:
+
+```bash
+uv run predict_place_survival.py --training-label-set manto
+uv run predict_place_survival.py --training-label-set sentence-llm
+uv run predict_place_survival.py --training-label-set passage-llm
+uv run predict_place_survival.py --training-label-set combined
+```
+
+`combined` uses MANTO labels plus recovered/new LLM claims by normalized place
+name; contradictory normalized-name labels are dropped unless
+`--label-conflict-policy` is changed.
+
 The archived sentence-level LLM `place-state` sweep is historical evidence, not
 the active sweep. To recover archived Batch API outputs for review or candidate
 generation, use:
