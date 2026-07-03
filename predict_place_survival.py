@@ -124,10 +124,21 @@ def label_key(kind: str, value: str | None) -> str:
     return f"name:{normalize_name(value)}"
 
 
-def label_keys(kind: str, value: str | None) -> set[str]:
+def label_keys(
+    kind: str,
+    value: str | None,
+    *,
+    include_parenthetical_content: bool = False,
+) -> set[str]:
     if kind == "manto":
         return {label_key(kind, value)}
-    return {f"name:{variant}" for variant in name_variants(value)}
+    return {
+        f"name:{variant}"
+        for variant in name_variants(
+            value,
+            include_parenthetical_content=include_parenthetical_content,
+        )
+    }
 
 
 def load_manto_label_records(
@@ -172,10 +183,20 @@ def load_manto_label_records(
     return records
 
 
-def label_records_from_name_rows(df, *, name_column: str, source: str) -> list[dict[str, str]]:
+def label_records_from_name_rows(
+    df,
+    *,
+    name_column: str,
+    source: str,
+    include_parenthetical_content: bool = False,
+) -> list[dict[str, str]]:
     records: list[dict[str, str]] = []
     for _, row in df.iterrows():
-        for key in label_keys("name", row[name_column]):
+        for key in label_keys(
+            "name",
+            row[name_column],
+            include_parenthetical_content=include_parenthetical_content,
+        ):
             records.append(
                 {
                     "key": key,
@@ -199,6 +220,7 @@ def load_sentence_llm_label_records(conn) -> list[dict[str, str]]:
         df,
         name_column="canonical_place_name",
         source="sentence-llm",
+        include_parenthetical_content=True,
     )
 
 
@@ -215,6 +237,7 @@ def load_passage_llm_label_records(conn) -> list[dict[str, str]]:
         df,
         name_column="canonical_place_name",
         source="passage-llm",
+        include_parenthetical_content=True,
     )
 
 

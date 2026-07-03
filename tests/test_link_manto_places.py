@@ -10,6 +10,20 @@ class LinkMantoPlacesTests(unittest.TestCase):
         self.assertIn(normalize_name("Argion"), variants)
         self.assertIn(normalize_name("Mycenae"), variants)
 
+    def test_name_variants_do_not_treat_region_parentheticals_as_aliases(self):
+        variants = name_variants("🌍 Asea (Arcadia)")
+
+        self.assertIn(normalize_name("Asea"), variants)
+        self.assertNotIn(normalize_name("Arcadia"), variants)
+
+        variants = name_variants(
+            "the island (Rhodes)",
+            include_parenthetical_content=True,
+        )
+
+        self.assertIn(normalize_name("Rhodes"), variants)
+        self.assertNotIn(normalize_name("island"), variants)
+
     def test_name_variants_add_cautious_head_place_variants(self):
         variants = name_variants("ancient Mantinea")
 

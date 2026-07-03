@@ -36,6 +36,7 @@ GENERIC_TRAILING_WORDS = {
     "harbour",
     "hill",
     "house",
+    "island",
     "marketplace",
     "mount",
     "mountain",
@@ -49,6 +50,7 @@ GENERIC_TRAILING_WORDS = {
     "wall",
     "walls",
 }
+GENERIC_NORMALIZED_NAMES = {normalize_name(word) for word in GENERIC_TRAILING_WORDS}
 
 DESCRIPTIVE_PREFIXES = (
     "ancient ",
@@ -63,11 +65,15 @@ DESCRIPTIVE_PREFIXES = (
 
 def add_normalized_variant(variants: set[str], value: str | None) -> None:
     normalized = normalize_name(value)
-    if normalized:
+    if normalized and normalized not in GENERIC_NORMALIZED_NAMES:
         variants.add(normalized)
 
 
-def name_variants(value: str | None) -> set[str]:
+def name_variants(
+    value: str | None,
+    *,
+    include_parenthetical_content: bool = False,
+) -> set[str]:
     if not value:
         return set()
     text = re.sub(r"^[^\w]+", "", value).strip()
@@ -77,8 +83,11 @@ def name_variants(value: str | None) -> set[str]:
     add_normalized_variant(variants, without_parenthetical)
 
     for parenthetical in re.findall(r"\(([^)]*)\)", text):
-        cleaned = re.sub(r"^(?:alt\.?|aka|also called)\s+", "", parenthetical.strip(), flags=re.I)
-        add_normalized_variant(variants, cleaned)
+        raw_parenthetical = parenthetical.strip()
+        is_alias = re.match(r"^(?:alt\.?|aka|also called)\s+", raw_parenthetical, flags=re.I)
+        if include_parenthetical_content or is_alias:
+            cleaned = re.sub(r"^(?:alt\.?|aka|also called)\s+", "", raw_parenthetical, flags=re.I)
+            add_normalized_variant(variants, cleaned)
 
     for base in {text, without_parenthetical}:
         lowered = base.lower()
@@ -189,8 +198,8 @@ def load_manto_entities(conn, release_id: int) -> list[dict]:
 def candidate_links(place: dict, entities: list[dict]) -> list[dict]:
     candidates = []
     place_names = (
-        name_variants(place.get("reference_form"))
-        | name_variants(place.get("english_transcription"))
+        name_variants(place.get("reference_form"), include_parenthetical_content=True)
+        | name_variants(place.get("english_transcription"), include_parenthetical_content=True)
     )
     pleiades_id = place.get("pleiades_id") or ""
     for entity in entities:
