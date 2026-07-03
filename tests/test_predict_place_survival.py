@@ -1,8 +1,15 @@
 import unittest
 
+import numpy as np
 import pandas as pd
 
-from predict_place_survival import attach_labels, label_key, label_keys, merge_label_records
+from predict_place_survival import (
+    attach_labels,
+    label_key,
+    label_keys,
+    merge_label_records,
+    model_metrics,
+)
 
 
 class PredictPlaceSurvivalTests(unittest.TestCase):
@@ -58,6 +65,20 @@ class PredictPlaceSurvivalTests(unittest.TestCase):
         attached = attach_labels(features, labels)
 
         self.assertEqual(list(attached["target_label"]), ["survives", "does_not_survive"])
+
+    def test_model_metrics_store_confusion_matrix_when_accuracy_matches_baseline(self):
+        y_test = np.array([1] * 12 + [0] * 16)
+        y_pred = np.array([1] * 9 + [0] * 3 + [1] * 9 + [0] * 7)
+        baseline_pred = np.zeros(len(y_test), dtype=int)
+
+        metrics = model_metrics(y_test, y_pred, baseline_pred)
+
+        self.assertAlmostEqual(metrics["accuracy"], metrics["baseline_accuracy"])
+        self.assertAlmostEqual(metrics["balanced_accuracy"], 0.59375)
+        self.assertEqual(metrics["true_survives_pred_survives"], 9)
+        self.assertEqual(metrics["true_survives_pred_does_not_survive"], 3)
+        self.assertEqual(metrics["true_does_not_survive_pred_survives"], 9)
+        self.assertEqual(metrics["true_does_not_survive_pred_does_not_survive"], 7)
 
 
 if __name__ == "__main__":

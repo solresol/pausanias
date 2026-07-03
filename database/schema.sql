@@ -1163,12 +1163,17 @@ CREATE TABLE IF NOT EXISTS place_survival_model_runs (
     negative_count INTEGER NOT NULL DEFAULT 0,
     accuracy DOUBLE PRECISION,
     baseline_accuracy DOUBLE PRECISION,
+    balanced_accuracy DOUBLE PRECISION,
     precision_survives DOUBLE PRECISION,
     recall_survives DOUBLE PRECISION,
     f1_survives DOUBLE PRECISION,
     precision_does_not_survive DOUBLE PRECISION,
     recall_does_not_survive DOUBLE PRECISION,
     f1_does_not_survive DOUBLE PRECISION,
+    true_survives_pred_survives INTEGER,
+    true_survives_pred_does_not_survive INTEGER,
+    true_does_not_survive_pred_survives INTEGER,
+    true_does_not_survive_pred_does_not_survive INTEGER,
     notes TEXT NOT NULL DEFAULT ''
 );
 

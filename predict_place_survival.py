@@ -12,13 +12,24 @@ from typing import Iterable
 
 import numpy as np
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, precision_recall_fscore_support
+from sklearn.metrics import (
+    accuracy_score,
+    balanced_accuracy_score,
+    confusion_matrix,
+    precision_recall_fscore_support,
+)
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
 from link_manto_places import name_variants
-from pausanias_db import add_database_argument, connect, initialize_schema, read_sql_query
+from pausanias_db import (
+    add_database_argument,
+    column_exists,
+    connect,
+    initialize_schema,
+    read_sql_query,
+)
 
 
 FEATURE_SET_VERSION = "manto-pausanias-place-network-v2"
@@ -37,6 +48,13 @@ FEATURE_COLUMNS = [
     "max_neighbor_pagerank",
     "shared_neighbor_high_centrality_score",
 ]
+MODEL_RUN_METRIC_COLUMNS = {
+    "balanced_accuracy": "DOUBLE PRECISION",
+    "true_survives_pred_survives": "INTEGER",
+    "true_survives_pred_does_not_survive": "INTEGER",
+    "true_does_not_survive_pred_survives": "INTEGER",
+    "true_does_not_survive_pred_does_not_survive": "INTEGER",
+}
 
 
 def now_iso() -> str:
@@ -359,6 +377,41 @@ def attach_labels(features_df, labels: dict[str, str]):
     return pd.DataFrame(rows)
 
 
+def ensure_model_run_metric_columns(conn) -> None:
+    with conn.cursor() as cursor:
+        for column_name, column_type in MODEL_RUN_METRIC_COLUMNS.items():
+            if not column_exists(conn, "place_survival_model_runs", column_name):
+                cursor.execute(
+                    f"ALTER TABLE place_survival_model_runs ADD COLUMN {column_name} {column_type}"
+                )
+    conn.commit()
+
+
+def model_metrics(y_test: np.ndarray, y_pred: np.ndarray, baseline_pred: np.ndarray) -> dict:
+    precision, recall, f1, _ = precision_recall_fscore_support(
+        y_test,
+        y_pred,
+        labels=[1, 0],
+        zero_division=0,
+    )
+    confusion = confusion_matrix(y_test, y_pred, labels=[1, 0])
+    return {
+        "accuracy": float(accuracy_score(y_test, y_pred)),
+        "baseline_accuracy": float(accuracy_score(y_test, baseline_pred)),
+        "balanced_accuracy": float(balanced_accuracy_score(y_test, y_pred)),
+        "precision_survives": float(precision[0]),
+        "recall_survives": float(recall[0]),
+        "f1_survives": float(f1[0]),
+        "precision_does_not_survive": float(precision[1]),
+        "recall_does_not_survive": float(recall[1]),
+        "f1_does_not_survive": float(f1[1]),
+        "true_survives_pred_survives": int(confusion[0][0]),
+        "true_survives_pred_does_not_survive": int(confusion[0][1]),
+        "true_does_not_survive_pred_survives": int(confusion[1][0]),
+        "true_does_not_survive_pred_does_not_survive": int(confusion[1][1]),
+    }
+
+
 def save_run(
     conn,
     *,
@@ -383,12 +436,16 @@ def save_run(
                 run_id, release_record_id, feature_set_version, label_source_version,
                 model_type, pre_pausanias_only, started_at, completed_at, status,
                 sample_count, positive_count, negative_count, accuracy,
-                baseline_accuracy, precision_survives, recall_survives, f1_survives,
+                baseline_accuracy, balanced_accuracy,
+                precision_survives, recall_survives, f1_survives,
                 precision_does_not_survive, recall_does_not_survive,
-                f1_does_not_survive, notes
+                f1_does_not_survive, true_survives_pred_survives,
+                true_survives_pred_does_not_survive,
+                true_does_not_survive_pred_survives,
+                true_does_not_survive_pred_does_not_survive, notes
             )
             VALUES (%s, %s, %s, %s, 'logistic_regression', %s, %s, %s, %s, %s, %s, %s,
-                    %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ON CONFLICT (run_id) DO UPDATE
             SET completed_at = EXCLUDED.completed_at,
                 status = EXCLUDED.status,
@@ -397,12 +454,17 @@ def save_run(
                 negative_count = EXCLUDED.negative_count,
                 accuracy = EXCLUDED.accuracy,
                 baseline_accuracy = EXCLUDED.baseline_accuracy,
+                balanced_accuracy = EXCLUDED.balanced_accuracy,
                 precision_survives = EXCLUDED.precision_survives,
                 recall_survives = EXCLUDED.recall_survives,
                 f1_survives = EXCLUDED.f1_survives,
                 precision_does_not_survive = EXCLUDED.precision_does_not_survive,
                 recall_does_not_survive = EXCLUDED.recall_does_not_survive,
                 f1_does_not_survive = EXCLUDED.f1_does_not_survive,
+                true_survives_pred_survives = EXCLUDED.true_survives_pred_survives,
+                true_survives_pred_does_not_survive = EXCLUDED.true_survives_pred_does_not_survive,
+                true_does_not_survive_pred_survives = EXCLUDED.true_does_not_survive_pred_survives,
+                true_does_not_survive_pred_does_not_survive = EXCLUDED.true_does_not_survive_pred_does_not_survive,
                 notes = EXCLUDED.notes
             """,
             (
@@ -419,12 +481,17 @@ def save_run(
                 negative_count,
                 metrics.get("accuracy"),
                 metrics.get("baseline_accuracy"),
+                metrics.get("balanced_accuracy"),
                 metrics.get("precision_survives"),
                 metrics.get("recall_survives"),
                 metrics.get("f1_survives"),
                 metrics.get("precision_does_not_survive"),
                 metrics.get("recall_does_not_survive"),
                 metrics.get("f1_does_not_survive"),
+                metrics.get("true_survives_pred_survives"),
+                metrics.get("true_survives_pred_does_not_survive"),
+                metrics.get("true_does_not_survive_pred_survives"),
+                metrics.get("true_does_not_survive_pred_does_not_survive"),
                 notes,
             ),
         )
@@ -469,6 +536,7 @@ def main() -> None:
     run_id = str(uuid.uuid4())
     with connect(args.database_url) as conn:
         initialize_schema(conn)
+        ensure_model_run_metric_columns(conn)
         release_id = args.release_record_id or latest_release_id(conn)
         features = load_feature_rows(
             conn,
@@ -535,22 +603,7 @@ def main() -> None:
         y_pred = pipeline.predict(x_test)
         majority_label = Counter(y_train).most_common(1)[0][0]
         baseline_pred = np.full(len(y_test), majority_label)
-        precision, recall, f1, _ = precision_recall_fscore_support(
-            y_test,
-            y_pred,
-            labels=[1, 0],
-            zero_division=0,
-        )
-        metrics = {
-            "accuracy": float(accuracy_score(y_test, y_pred)),
-            "baseline_accuracy": float(accuracy_score(y_test, baseline_pred)),
-            "precision_survives": float(precision[0]),
-            "recall_survives": float(recall[0]),
-            "f1_survives": float(f1[0]),
-            "precision_does_not_survive": float(precision[1]),
-            "recall_does_not_survive": float(recall[1]),
-            "f1_does_not_survive": float(f1[1]),
-        }
+        metrics = model_metrics(y_test, y_pred, baseline_pred)
         save_run(
             conn,
             run_id=run_id,
@@ -573,7 +626,9 @@ def main() -> None:
         save_feature_scores(conn, run_id, FEATURE_COLUMNS, coefficients)
     print(
         f"Trained place-survival model {run_id}: accuracy={metrics['accuracy']:.3f}, "
-        f"baseline={metrics['baseline_accuracy']:.3f}, samples={len(training)}, "
+        f"baseline={metrics['baseline_accuracy']:.3f}, "
+        f"balanced_accuracy={metrics['balanced_accuracy']:.3f}, "
+        f"samples={len(training)}, "
         f"labels={args.training_label_set}."
     )
 
