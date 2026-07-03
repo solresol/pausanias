@@ -138,13 +138,27 @@ uv run manto_place_network_features.py
 uv run predict_place_survival.py
 ```
 
-The earlier sentence-level LLM `place-state` sweep is not part of the daily
-pipeline. To recover archived Batch API outputs for review or candidate
+The archived sentence-level LLM `place-state` sweep is historical evidence, not
+the active sweep. To recover archived Batch API outputs for review or candidate
 generation, use:
 
 ```bash
 uv run recover_place_state_outputs.py
 ```
+
+The active LLM sweep is passage-level, because a single sentence often lacks
+enough context and one passage may contain multiple place claims. Refresh
+deterministic candidate hints, submit passage-level batches, and fetch completed
+runs with:
+
+```bash
+uv run place_state_candidate_importer.py
+uv run passage_place_state_batch.py --use-batch-api --candidate-first --token-budget 1000000
+uv run passage_place_state_batch.py --fetch-batches
+```
+
+`passage_place_state_daily.sh` runs those steps with a one-million-token daily
+planning budget and is called by `cronscript.sh`.
 
 ## UDPipe grammar annotations
 

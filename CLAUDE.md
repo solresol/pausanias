@@ -72,7 +72,10 @@ the authoritative dependency graph:
 8. `analyse_noun_network.py` — proper-noun co-occurrence network + centrality.
 9. `sentence_tagging_daily.sh` → `sentence_tag_batch.py` — batch sentence tagging
    (Greta ontology modes: `greta`, `greta-both-context`, `legacy`).
-10. `create_website.py` + `build_graphic_book.py` — generate the static site into
+10. `passage_place_state_daily.sh` → `passage_place_state_batch.py` — passage-level
+    place-state extraction with deterministic candidate hints and Batch API
+    submission/fetch.
+11. `create_website.py` + `build_graphic_book.py` — generate the static site into
     `pausanias_site/`, then `rsync` to `merah` (the web host, behind Cloudflare).
 
 Supporting tools not in the daily run: `check_proper_noun_spellings.py` (spelling

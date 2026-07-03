@@ -137,8 +137,12 @@ Source anchors are in the private ignored transcript notes, especially:
       Zenodo CSV/JSON release.
 - [x] Store strict pre-Pausanias filtering on MANTO edges so Pausanias-derived,
       later, and unknown-date source evidence cannot leak into the main model.
-- [x] Replace the `place-state` LLM sweep with MANTO-derived place-survival
-      labels from entity `Information` fields and Pausanias tie records.
+- [x] Import MANTO-derived place-survival labels from entity `Information`
+      fields and Pausanias tie records.
+- [x] Restore archived sentence-level `place-state` outputs for evidence and
+      candidate generation.
+- [x] Re-enable active LLM place-state extraction as a passage-level Batch API
+      sweep rather than a sentence-level sweep.
 - [x] Add first-pass MANTO place linking, strict graph-feature extraction, and
       an explainable logistic-regression classifier scaffold.
 - [ ] Run the full MANTO import after downloading the current release into the
@@ -151,6 +155,9 @@ Source anchors are in the private ignored transcript notes, especially:
       name matches without Pleiades IDs.
 - [ ] Compare the strict pre-Pausanias model against a Pausanias-included upper
       bound only as a leakage diagnostic, not as evidence.
+- [ ] Compare MANTO labels, archived sentence-level LLM claims, and new
+      passage-level LLM claims before treating the combined labels as model
+      targets.
 
 ## Translation-Length Residuals and Wordiness
 
@@ -187,10 +194,12 @@ Source anchors are in the private ignored transcript notes, especially:
       timestamp, API mode, batch IDs, and failure status.
 - [x] Add token-budgeted daily batch submission rather than relying only on a
       tiny fixed row count.
+- [x] Add the passage-level place-state sweep to the daily cron pipeline with a
+      one-million-token planning budget.
 - [ ] Keep the slow legacy sentence-tagging lane running only as a background
       comparison path.
-- [ ] Monitor daily batch fetch/submission so submitted discourse and people
-      runs do not sit un-ingested.
+- [ ] Monitor daily batch fetch/submission so submitted discourse, people, and
+      passage place-state runs do not sit un-ingested.
 
 ## Optional Exploratory Threads
 
