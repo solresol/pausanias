@@ -1,0 +1,532 @@
+{
+  "passage_id": "1.11.6",
+  "output_path": "/Users/gregb/Documents/devel/pausanias/graphic_book/images/1/11/6.png",
+  "text_blocks_checked": 28,
+  "minimum_font_size_used": 8,
+  "fit_records": [
+    {
+      "name": "panel:title",
+      "rect": [
+        18,
+        14,
+        360,
+        72
+      ],
+      "font_path": "/System/Library/Fonts/Supplemental/Georgia Bold.ttf",
+      "font_size": 29,
+      "text_bbox": [
+        28,
+        24,
+        262,
+        45
+      ],
+      "text": "PASSAGE 1.11.6"
+    },
+    {
+      "name": "panel:translation",
+      "rect": [
+        24,
+        92,
+        354,
+        656
+      ],
+      "font_path": "/System/Library/Fonts/Supplemental/Georgia.ttf",
+      "font_size": 18,
+      "text_bbox": [
+        32,
+        100,
+        346,
+        380
+      ],
+      "text": "Pyrrhus, after he became king, first\nattacked the Corcyraeans among all\nGreeks, seeing their island situated in\nfront of his own country and unwilling\nthat it should serve as a base of\noperations against him for others. After\nCorcyra was captured, regarding what\nhe suffered in the war against\nLysimachus, and how he expelled\nDemetrius and ruled Macedonia until\nhe was again driven out by\nLysimachus\u2014these greatest events of\nPyrrhus in that period, so far as they\ninvolve Lysimachus, I have already\nmade clear."
+    },
+    {
+      "name": "label:CORCYRA BEFORE EPIRUS",
+      "rect": [
+        8,
+        5,
+        600,
+        57
+      ],
+      "font_path": "/System/Library/Fonts/Supplemental/Georgia Bold.ttf",
+      "font_size": 22,
+      "text_bbox": [
+        12,
+        9,
+        331,
+        25
+      ],
+      "text": "CORCYRA BEFORE EPIRUS"
+    },
+    {
+      "name": "label:PYRRHUS KING OF EPIRUS",
+      "rect": [
+        8,
+        5,
+        312,
+        43
+      ],
+      "font_path": "/Users/gregb/Library/Fonts/EBGaramond-VariableFont_wght.ttf",
+      "font_size": 15,
+      "text_bbox": [
+        12,
+        9,
+        197,
+        20
+      ],
+      "text": "PYRRHUS KING OF EPIRUS"
+    },
+    {
+      "name": "label:CORCYRA",
+      "rect": [
+        8,
+        5,
+        170,
+        43
+      ],
+      "font_path": "/Users/gregb/Library/Fonts/EBGaramond-VariableFont_wght.ttf",
+      "font_size": 17,
+      "text_bbox": [
+        12,
+        9,
+        96,
+        22
+      ],
+      "text": "CORCYRA"
+    },
+    {
+      "name": "label:EPIROTE COAST",
+      "rect": [
+        8,
+        5,
+        268,
+        43
+      ],
+      "font_path": "/Users/gregb/Library/Fonts/EBGaramond-VariableFont_wght.ttf",
+      "font_size": 17,
+      "text_bbox": [
+        12,
+        9,
+        142,
+        22
+      ],
+      "text": "EPIROTE COAST"
+    },
+    {
+      "name": "label:IONIAN CHANNEL",
+      "rect": [
+        8,
+        5,
+        268,
+        43
+      ],
+      "font_path": "/Users/gregb/Library/Fonts/EBGaramond-VariableFont_wght.ttf",
+      "font_size": 15,
+      "text_bbox": [
+        12,
+        9,
+        145,
+        21
+      ],
+      "text": "IONIAN CHANNEL"
+    },
+    {
+      "name": "label:EPIROTE FLEET",
+      "rect": [
+        8,
+        5,
+        222,
+        43
+      ],
+      "font_path": "/Users/gregb/Library/Fonts/EBGaramond-VariableFont_wght.ttf",
+      "font_size": 15,
+      "text_bbox": [
+        12,
+        9,
+        122,
+        21
+      ],
+      "text": "EPIROTE FLEET"
+    },
+    {
+      "name": "callout:corcyra",
+      "rect": [
+        14,
+        10,
+        394,
+        78
+      ],
+      "font_path": "/System/Library/Fonts/Supplemental/Georgia.ttf",
+      "font_size": 14,
+      "text_bbox": [
+        19,
+        15,
+        385,
+        44
+      ],
+      "text": "Pyrrhus attacks Corcyra first, before another power can use\nit as a base against Epirus."
+    },
+    {
+      "name": "callout:macedon",
+      "rect": [
+        14,
+        10,
+        452,
+        80
+      ],
+      "font_path": "/System/Library/Fonts/Supplemental/Georgia.ttf",
+      "font_size": 14,
+      "text_bbox": [
+        19,
+        15,
+        398,
+        44
+      ],
+      "text": "Pausanias points back to the larger Macedonian struggle with\nDemetrius and Lysimachus."
+    },
+    {
+      "name": "locator:title",
+      "rect": [
+        18,
+        14,
+        370,
+        58
+      ],
+      "font_path": "/System/Library/Fonts/Supplemental/Georgia Bold.ttf",
+      "font_size": 17,
+      "text_bbox": [
+        24,
+        20,
+        262,
+        32
+      ],
+      "text": "CORCYRA AND MACEDON"
+    },
+    {
+      "name": "locator:corcyra",
+      "rect": [
+        34,
+        136,
+        116,
+        160
+      ],
+      "font_path": "/Users/gregb/Library/Fonts/EBGaramond-VariableFont_wght.ttf",
+      "font_size": 8,
+      "text_bbox": [
+        36,
+        138,
+        76,
+        145
+      ],
+      "text": "CORCYRA"
+    },
+    {
+      "name": "locator:epirus",
+      "rect": [
+        100,
+        116,
+        172,
+        140
+      ],
+      "font_path": "/Users/gregb/Library/Fonts/EBGaramond-VariableFont_wght.ttf",
+      "font_size": 8,
+      "text_bbox": [
+        102,
+        118,
+        129,
+        125
+      ],
+      "text": "EPIRUS"
+    },
+    {
+      "name": "locator:macedon",
+      "rect": [
+        210,
+        100,
+        298,
+        124
+      ],
+      "font_path": "/Users/gregb/Library/Fonts/EBGaramond-VariableFont_wght.ttf",
+      "font_size": 8,
+      "text_bbox": [
+        212,
+        102,
+        254,
+        109
+      ],
+      "text": "MACEDON"
+    },
+    {
+      "name": "locator:ionian",
+      "rect": [
+        72,
+        184,
+        152,
+        208
+      ],
+      "font_path": "/Users/gregb/Library/Fonts/EBGaramond-VariableFont_wght.ttf",
+      "font_size": 8,
+      "text_bbox": [
+        74,
+        186,
+        104,
+        193
+      ],
+      "text": "IONIAN"
+    },
+    {
+      "name": "locator:contest",
+      "rect": [
+        156,
+        144,
+        290,
+        168
+      ],
+      "font_path": "/Users/gregb/Library/Fonts/EBGaramond-VariableFont_wght.ttf",
+      "font_size": 8,
+      "text_bbox": [
+        158,
+        146,
+        222,
+        153
+      ],
+      "text": "LATER CONTEST"
+    },
+    {
+      "name": "locator:caption",
+      "rect": [
+        22,
+        258,
+        366,
+        316
+      ],
+      "font_path": "/System/Library/Fonts/Supplemental/Georgia.ttf",
+      "font_size": 12,
+      "text_bbox": [
+        27,
+        263,
+        341,
+        289
+      ],
+      "text": "Corcyra faced Epirus across the Ionian channel; Macedonia\nframes the later struggle."
+    },
+    {
+      "name": "inset:macedon-caption",
+      "rect": [
+        28,
+        232,
+        428,
+        308
+      ],
+      "font_path": "/System/Library/Fonts/Supplemental/Georgia.ttf",
+      "font_size": 18,
+      "text_bbox": [
+        34,
+        238,
+        389,
+        276
+      ],
+      "text": "Pyrrhus' Corcyra campaign stands before his\nlarger contests for Macedonia."
+    },
+    {
+      "name": "label:MACEDONIAN STRUGGLE",
+      "rect": [
+        8,
+        5,
+        268,
+        31
+      ],
+      "font_path": "/Users/gregb/Library/Fonts/EBGaramond-VariableFont_wght.ttf",
+      "font_size": 13,
+      "text_bbox": [
+        12,
+        9,
+        173,
+        20
+      ],
+      "text": "MACEDONIAN STRUGGLE"
+    },
+    {
+      "name": "sequence:title",
+      "rect": [
+        24,
+        18,
+        428,
+        60
+      ],
+      "font_path": "/System/Library/Fonts/Supplemental/Georgia Bold.ttf",
+      "font_size": 17,
+      "text_bbox": [
+        30,
+        24,
+        255,
+        37
+      ],
+      "text": "PYRRHUS' NEXT MOVES"
+    },
+    {
+      "name": "sequence:name:0",
+      "rect": [
+        34,
+        85,
+        154,
+        123
+      ],
+      "font_path": "/Users/gregb/Library/Fonts/EBGaramond-VariableFont_wght.ttf",
+      "font_size": 12,
+      "text_bbox": [
+        36,
+        87,
+        96,
+        97
+      ],
+      "text": "CORCYRA"
+    },
+    {
+      "name": "sequence:note:0",
+      "rect": [
+        166,
+        84,
+        418,
+        124
+      ],
+      "font_path": "/System/Library/Fonts/Supplemental/Georgia.ttf",
+      "font_size": 12,
+      "text_bbox": [
+        168,
+        86,
+        404,
+        109
+      ],
+      "text": "First target after Pyrrhus secures the Epirote\nthrone."
+    },
+    {
+      "name": "sequence:name:1",
+      "rect": [
+        34,
+        143,
+        154,
+        181
+      ],
+      "font_path": "/Users/gregb/Library/Fonts/EBGaramond-VariableFont_wght.ttf",
+      "font_size": 12,
+      "text_bbox": [
+        36,
+        145,
+        97,
+        155
+      ],
+      "text": "STRATEGY"
+    },
+    {
+      "name": "sequence:note:1",
+      "rect": [
+        166,
+        142,
+        418,
+        182
+      ],
+      "font_path": "/System/Library/Fonts/Supplemental/Georgia.ttf",
+      "font_size": 12,
+      "text_bbox": [
+        168,
+        144,
+        391,
+        170
+      ],
+      "text": "The island must not become a hostile base\nagainst Epirus."
+    },
+    {
+      "name": "sequence:name:2",
+      "rect": [
+        34,
+        201,
+        154,
+        239
+      ],
+      "font_path": "/Users/gregb/Library/Fonts/EBGaramond-VariableFont_wght.ttf",
+      "font_size": 12,
+      "text_bbox": [
+        36,
+        203,
+        105,
+        213
+      ],
+      "text": "DEMETRIUS"
+    },
+    {
+      "name": "sequence:note:2",
+      "rect": [
+        166,
+        200,
+        418,
+        240
+      ],
+      "font_path": "/System/Library/Fonts/Supplemental/Georgia.ttf",
+      "font_size": 12,
+      "text_bbox": [
+        168,
+        202,
+        359,
+        225
+      ],
+      "text": "Pyrrhus expels him and briefly rules\nMacedonia."
+    },
+    {
+      "name": "sequence:name:3",
+      "rect": [
+        34,
+        259,
+        154,
+        297
+      ],
+      "font_path": "/Users/gregb/Library/Fonts/EBGaramond-VariableFont_wght.ttf",
+      "font_size": 12,
+      "text_bbox": [
+        36,
+        261,
+        111,
+        271
+      ],
+      "text": "LYSIMACHUS"
+    },
+    {
+      "name": "sequence:note:3",
+      "rect": [
+        166,
+        258,
+        418,
+        298
+      ],
+      "font_path": "/System/Library/Fonts/Supplemental/Georgia.ttf",
+      "font_size": 12,
+      "text_bbox": [
+        168,
+        260,
+        408,
+        273
+      ],
+      "text": "The same rival later drives Pyrrhus out again."
+    }
+  ],
+  "page_plan": "/Users/gregb/Documents/devel/pausanias/graphic_book/assets/generated/1_11_6/page_plan.md",
+  "approved_reference_pages": [
+    "graphic_book/images/1/1/4.png",
+    "graphic_book/images/1/1/5.png"
+  ],
+  "continuity_reference_pages": [
+    "graphic_book/images/1/11/5.png"
+  ],
+  "sources": [
+    {
+      "path": "/Users/gregb/Documents/devel/pausanias/graphic_book/assets/generated/1_11_6/main_corcyra_campaign.png",
+      "source_image": "/Users/gregb/.codex/generated_images/019f2924-4a1f-70f1-ae8e-03600d460183/ig_0c6e66d680487777016a47f92e36d481918b08418cfd6a505b.png",
+      "description": "Generated raster main panel showing Pyrrhus and an Epirote fleet facing Corcyra across the Ionian channel."
+    },
+    {
+      "path": "/Users/gregb/Documents/devel/pausanias/graphic_book/assets/generated/1_11_6/macedonian_power_shift.png",
+      "source_image": "/Users/gregb/.codex/generated_images/019f2924-4a1f-70f1-ae8e-03600d460183/ig_0c6e66d680487777016a47f9d5192c8191a55e050c5f3b2247.png",
+      "description": "Generated raster scenic inset showing Pyrrhus' later Macedonian power struggle without gore."
+    }
+  ]
+}
