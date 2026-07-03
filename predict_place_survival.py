@@ -33,10 +33,12 @@ from pausanias_db import (
 
 
 FEATURE_SET_VERSION = "manto-pausanias-place-network-v2"
+CONNECTEDNESS_FEATURE_SET_VERSION = "manto-place-connectedness-v1"
 LABEL_SOURCE_VERSION = "manto-entity-info-v1"
 LLM_LABEL_SOURCE_VERSION = "llm-place-state-v1"
 TRAINING_LABEL_SETS = ("manto", "sentence-llm", "passage-llm", "llm", "combined")
-FEATURE_COLUMNS = [
+FEATURE_FAMILIES = ("network", "connectedness", "combined")
+NETWORK_FEATURE_COLUMNS = [
     "degree",
     "degree_centrality",
     "pagerank",
@@ -48,6 +50,30 @@ FEATURE_COLUMNS = [
     "max_neighbor_pagerank",
     "shared_neighbor_high_centrality_score",
 ]
+CONNECTEDNESS_FEATURE_COLUMNS = [
+    "place_graph_degree",
+    "place_graph_pagerank",
+    "local_place_neighbor_count",
+    "direct_place_neighbor_count",
+    "same_parent_place_neighbor_count",
+    "large_place_neighbor_count",
+    "large_place_max_degree",
+    "large_place_max_pagerank",
+    "has_large_place_neighbor",
+    "strong_place_tie_count",
+    "mythic_figure_count",
+    "action_pattern_count",
+    "shared_mythic_figure_neighbor_count",
+    "shared_mythic_figure_count",
+    "max_shared_mythic_figures_with_neighbor",
+    "shared_mythic_figure_large_place_neighbor_count",
+    "shared_action_neighbor_count",
+    "shared_action_pattern_count",
+    "shared_action_neighbor_pattern_count",
+    "max_shared_action_patterns_with_neighbor",
+    "shared_action_large_place_neighbor_count",
+]
+FEATURE_COLUMNS = NETWORK_FEATURE_COLUMNS
 MODEL_RUN_METRIC_COLUMNS = {
     "balanced_accuracy": "DOUBLE PRECISION",
     "true_survives_pred_survives": "INTEGER",
@@ -72,6 +98,16 @@ def parse_arguments() -> argparse.Namespace:
     add_database_argument(parser)
     parser.add_argument("--release-record-id", type=int, default=None)
     parser.add_argument("--feature-set-version", default=FEATURE_SET_VERSION)
+    parser.add_argument(
+        "--connectedness-feature-set-version",
+        default=CONNECTEDNESS_FEATURE_SET_VERSION,
+    )
+    parser.add_argument(
+        "--feature-family",
+        choices=FEATURE_FAMILIES,
+        default="network",
+        help="Train on generic network features, Greta-style connectedness features, or both.",
+    )
     parser.add_argument("--label-source-version", default=LABEL_SOURCE_VERSION)
     parser.add_argument(
         "--training-label-set",
@@ -110,10 +146,10 @@ def latest_release_id(conn) -> int:
     return int(df.iloc[0]["record_id"])
 
 
-def load_feature_rows(conn, *, release_id: int, feature_set_version: str, pre_pausanias_only: bool):
+def load_network_feature_rows(conn, *, release_id: int, feature_set_version: str, pre_pausanias_only: bool):
     return read_sql_query(
         """
-        SELECT reference_form, english_transcription, manto_id, manto_label,
+        SELECT reference_form, entity_type, english_transcription, manto_id, manto_label,
                degree, degree_centrality, pagerank, betweenness_centrality,
                clustering_coefficient, component_size, community_size,
                high_centrality_neighbor_count, max_neighbor_pagerank,
@@ -125,6 +161,103 @@ def load_feature_rows(conn, *, release_id: int, feature_set_version: str, pre_pa
         """,
         conn,
         (release_id, feature_set_version, pre_pausanias_only),
+    )
+
+
+def load_connectedness_feature_rows(
+    conn,
+    *,
+    release_id: int,
+    feature_set_version: str,
+    pre_pausanias_only: bool,
+):
+    return read_sql_query(
+        """
+        SELECT reference_form, entity_type, english_transcription, manto_id, manto_label,
+               place_graph_degree, place_graph_pagerank,
+               local_place_neighbor_count, direct_place_neighbor_count,
+               same_parent_place_neighbor_count, large_place_neighbor_count,
+               large_place_max_degree, large_place_max_pagerank,
+               has_large_place_neighbor, strong_place_tie_count,
+               mythic_figure_count, action_pattern_count,
+               shared_mythic_figure_neighbor_count, shared_mythic_figure_count,
+               max_shared_mythic_figures_with_neighbor,
+               shared_mythic_figure_large_place_neighbor_count,
+               shared_action_neighbor_count, shared_action_pattern_count,
+               shared_action_neighbor_pattern_count,
+               max_shared_action_patterns_with_neighbor,
+               shared_action_large_place_neighbor_count
+        FROM manto_place_connectedness_features
+        WHERE release_record_id = %s
+          AND feature_set_version = %s
+          AND pre_pausanias_only = %s
+        """,
+        conn,
+        (release_id, feature_set_version, pre_pausanias_only),
+    )
+
+
+def load_feature_rows(
+    conn,
+    *,
+    release_id: int,
+    feature_set_version: str,
+    connectedness_feature_set_version: str,
+    pre_pausanias_only: bool,
+    feature_family: str,
+):
+    if feature_family == "network":
+        return (
+            load_network_feature_rows(
+                conn,
+                release_id=release_id,
+                feature_set_version=feature_set_version,
+                pre_pausanias_only=pre_pausanias_only,
+            ),
+            NETWORK_FEATURE_COLUMNS,
+            feature_set_version,
+        )
+    if feature_family == "connectedness":
+        return (
+            load_connectedness_feature_rows(
+                conn,
+                release_id=release_id,
+                feature_set_version=connectedness_feature_set_version,
+                pre_pausanias_only=pre_pausanias_only,
+            ),
+            CONNECTEDNESS_FEATURE_COLUMNS,
+            connectedness_feature_set_version,
+        )
+
+    network = load_network_feature_rows(
+        conn,
+        release_id=release_id,
+        feature_set_version=feature_set_version,
+        pre_pausanias_only=pre_pausanias_only,
+    )
+    connectedness = load_connectedness_feature_rows(
+        conn,
+        release_id=release_id,
+        feature_set_version=connectedness_feature_set_version,
+        pre_pausanias_only=pre_pausanias_only,
+    )
+    if network.empty or connectedness.empty:
+        return (
+            network.iloc[0:0].copy() if not network.empty else connectedness.iloc[0:0].copy(),
+            NETWORK_FEATURE_COLUMNS + CONNECTEDNESS_FEATURE_COLUMNS,
+            f"{feature_set_version}+{connectedness_feature_set_version}",
+        )
+    merged = network.merge(
+        connectedness[
+            ["reference_form", "entity_type", "manto_id"] + CONNECTEDNESS_FEATURE_COLUMNS
+        ],
+        on=["reference_form", "entity_type", "manto_id"],
+        how="inner",
+    )
+    return (
+        merged,
+        NETWORK_FEATURE_COLUMNS + CONNECTEDNESS_FEATURE_COLUMNS,
+        f"{feature_set_version}+{connectedness_feature_set_version}",
     )
 
 
@@ -538,11 +671,13 @@ def main() -> None:
         initialize_schema(conn)
         ensure_model_run_metric_columns(conn)
         release_id = args.release_record_id or latest_release_id(conn)
-        features = load_feature_rows(
+        features, feature_columns, run_feature_set_version = load_feature_rows(
             conn,
             release_id=release_id,
             feature_set_version=args.feature_set_version,
+            connectedness_feature_set_version=args.connectedness_feature_set_version,
             pre_pausanias_only=pre_pausanias_only,
+            feature_family=args.feature_family,
         )
         labels, label_stats = load_labels(
             conn,
@@ -565,7 +700,7 @@ def main() -> None:
                 conn,
                 run_id=run_id,
                 release_id=release_id,
-                feature_set_version=args.feature_set_version,
+                feature_set_version=run_feature_set_version,
                 label_source_version=label_source_version_for_run(args),
                 pre_pausanias_only=pre_pausanias_only,
                 status="blocked_insufficient_training_data",
@@ -576,6 +711,7 @@ def main() -> None:
                     f"Need at least {args.min_samples} linked labeled places and at least "
                     f"two examples from both classes; "
                     f"feature rows={len(features)}, label keys={len(labels)}, "
+                    f"feature family={args.feature_family}, "
                     f"label set={args.training_label_set}, "
                     f"label stats={dict(label_stats)}."
                 ),
@@ -585,7 +721,7 @@ def main() -> None:
                 f"({positive_count} survives, {negative_count} does_not_survive)."
             )
             return
-        x = training[FEATURE_COLUMNS].astype(float).to_numpy()
+        x = training[feature_columns].astype(float).to_numpy()
         x_train, x_test, y_train, y_test = train_test_split(
             x,
             y,
@@ -608,7 +744,7 @@ def main() -> None:
             conn,
             run_id=run_id,
             release_id=release_id,
-            feature_set_version=args.feature_set_version,
+            feature_set_version=run_feature_set_version,
             label_source_version=label_source_version_for_run(args),
             pre_pausanias_only=pre_pausanias_only,
             status="completed",
@@ -617,18 +753,20 @@ def main() -> None:
             negative_count=negative_count,
             metrics=metrics,
             notes=(
+                f"feature family={args.feature_family}; "
                 f"label set={args.training_label_set}; "
                 f"conflict policy={args.label_conflict_policy}; "
                 f"label stats={dict(label_stats)}"
             ),
         )
         coefficients = pipeline.named_steps["logreg"].coef_[0]
-        save_feature_scores(conn, run_id, FEATURE_COLUMNS, coefficients)
+        save_feature_scores(conn, run_id, feature_columns, coefficients)
     print(
         f"Trained place-survival model {run_id}: accuracy={metrics['accuracy']:.3f}, "
         f"baseline={metrics['baseline_accuracy']:.3f}, "
         f"balanced_accuracy={metrics['balanced_accuracy']:.3f}, "
         f"samples={len(training)}, "
+        f"features={args.feature_family}, "
         f"labels={args.training_label_set}."
     )
 

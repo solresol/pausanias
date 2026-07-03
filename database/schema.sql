@@ -1148,6 +1148,48 @@ CREATE INDEX IF NOT EXISTS idx_manto_place_network_features_reference
         entity_type
     );
 
+CREATE TABLE IF NOT EXISTS manto_place_connectedness_features (
+    release_record_id BIGINT NOT NULL REFERENCES manto_releases(record_id) ON DELETE CASCADE,
+    feature_set_version TEXT NOT NULL,
+    reference_form TEXT NOT NULL,
+    entity_type TEXT NOT NULL,
+    english_transcription TEXT NOT NULL,
+    manto_id TEXT NOT NULL,
+    manto_label TEXT,
+    pre_pausanias_only BOOLEAN NOT NULL,
+    place_graph_degree INTEGER NOT NULL,
+    place_graph_pagerank DOUBLE PRECISION NOT NULL,
+    local_place_neighbor_count INTEGER NOT NULL,
+    direct_place_neighbor_count INTEGER NOT NULL,
+    same_parent_place_neighbor_count INTEGER NOT NULL,
+    large_place_neighbor_count INTEGER NOT NULL,
+    large_place_max_degree INTEGER NOT NULL,
+    large_place_max_pagerank DOUBLE PRECISION NOT NULL,
+    has_large_place_neighbor BOOLEAN NOT NULL,
+    strong_place_tie_count INTEGER NOT NULL,
+    mythic_figure_count INTEGER NOT NULL,
+    action_pattern_count INTEGER NOT NULL,
+    shared_mythic_figure_neighbor_count INTEGER NOT NULL,
+    shared_mythic_figure_count INTEGER NOT NULL,
+    max_shared_mythic_figures_with_neighbor INTEGER NOT NULL,
+    shared_mythic_figure_large_place_neighbor_count INTEGER NOT NULL,
+    shared_action_neighbor_count INTEGER NOT NULL,
+    shared_action_pattern_count INTEGER NOT NULL,
+    shared_action_neighbor_pattern_count INTEGER NOT NULL,
+    max_shared_action_patterns_with_neighbor INTEGER NOT NULL,
+    shared_action_large_place_neighbor_count INTEGER NOT NULL,
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (release_record_id, feature_set_version, reference_form, entity_type, manto_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_manto_place_connectedness_features_reference
+    ON manto_place_connectedness_features (
+        release_record_id,
+        feature_set_version,
+        reference_form,
+        entity_type
+    );
+
 CREATE TABLE IF NOT EXISTS place_survival_model_runs (
     run_id TEXT PRIMARY KEY,
     release_record_id BIGINT NOT NULL REFERENCES manto_releases(record_id) ON DELETE CASCADE,

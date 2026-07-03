@@ -140,7 +140,23 @@ first explainable model:
 
 ```bash
 uv run manto_place_network_features.py
+uv run manto_place_connectedness_features.py
 uv run predict_place_survival.py
+```
+
+`manto_place_connectedness_features.py` prepares Greta's connectedness signals:
+local place-neighbor pools from direct place-place edges plus
+`somewhere_in_or_near` parent/sibling relationships, large-place neighbor
+proxies from the pre-Pausanias place graph, shared mythic/person figures with
+neighboring places, and shared action-pattern links where neighboring places
+have the same kind of story with distinct person figures.
+
+Train on those signals alone, or combine them with the older centrality
+features:
+
+```bash
+uv run predict_place_survival.py --feature-family connectedness
+uv run predict_place_survival.py --feature-family combined
 ```
 
 To compare target sources, keep MANTO-only as the default and switch the
