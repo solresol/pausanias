@@ -2,7 +2,7 @@ import unittest
 
 import pandas as pd
 
-from predict_place_survival import attach_labels, label_key, merge_label_records
+from predict_place_survival import attach_labels, label_key, label_keys, merge_label_records
 
 
 class PredictPlaceSurvivalTests(unittest.TestCase):
@@ -42,17 +42,18 @@ class PredictPlaceSurvivalTests(unittest.TestCase):
                     "manto_label": "Eleutherae",
                 },
                 {
-                    "reference_form": "Old walls",
-                    "english_transcription": "Old Walls",
+                    "reference_form": "Μαντίνεια",
+                    "english_transcription": "Mantinea",
                     "manto_id": "456",
-                    "manto_label": "Old Walls",
+                    "manto_label": "🌍 Mantinea (Arcadia)",
                 },
             ]
         )
         labels = {
             label_key("manto", "123"): "survives",
-            label_key("name", "Old Walls"): "does_not_survive",
         }
+        for key in label_keys("name", "ancient Mantinea"):
+            labels[key] = "does_not_survive"
 
         attached = attach_labels(features, labels)
 

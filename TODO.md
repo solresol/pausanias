@@ -145,6 +145,8 @@ Source anchors are in the private ignored transcript notes, especially:
       sweep rather than a sentence-level sweep.
 - [x] Let the explainable place-survival classifier train from MANTO-only,
       sentence-LLM-only, passage-LLM-only, all-LLM, or combined target labels.
+- [x] Add deterministic Pausanias-place-to-MANTO linking to the documented
+      MANTO import sequence.
 - [x] Add first-pass MANTO place linking, strict graph-feature extraction, and
       an explainable logistic-regression classifier scaffold.
 - [ ] Run the full MANTO import after downloading the current release into the
@@ -155,6 +157,9 @@ Source anchors are in the private ignored transcript notes, especially:
       treating absence of a negative status phrase as a stable positive label.
 - [ ] Manually review ambiguous Pausanias-to-MANTO place links, especially exact
       name matches without Pleiades IDs.
+- [ ] Expand Pausanias-to-MANTO place linking beyond exact names: MANTO
+      alternate labels, local epithets, monument/site names attached to a head
+      place, and Pleiades/Wikidata mismatches.
 - [ ] Compare the strict pre-Pausanias model against a Pausanias-included upper
       bound only as a leakage diagnostic, not as evidence.
 - [ ] Compare MANTO labels, archived sentence-level LLM claims, and new

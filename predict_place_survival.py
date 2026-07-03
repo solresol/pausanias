@@ -17,6 +17,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
+from link_manto_places import name_variants
 from pausanias_db import add_database_argument, connect, initialize_schema, read_sql_query
 
 
@@ -123,6 +124,12 @@ def label_key(kind: str, value: str | None) -> str:
     return f"name:{normalize_name(value)}"
 
 
+def label_keys(kind: str, value: str | None) -> set[str]:
+    if kind == "manto":
+        return {label_key(kind, value)}
+    return {f"name:{variant}" for variant in name_variants(value)}
+
+
 def load_manto_label_records(
     conn,
     *,
@@ -153,11 +160,27 @@ def load_manto_label_records(
         )
         name_key = normalize_name(row["place_name"])
         if name_key:
+            for key in label_keys("name", row["place_name"]):
+                records.append(
+                    {
+                        "key": key,
+                        "label": label,
+                        "source": "manto",
+                    }
+                )
+
+    return records
+
+
+def label_records_from_name_rows(df, *, name_column: str, source: str) -> list[dict[str, str]]:
+    records: list[dict[str, str]] = []
+    for _, row in df.iterrows():
+        for key in label_keys("name", row[name_column]):
             records.append(
                 {
-                    "key": label_key("name", row["place_name"]),
-                    "label": label,
-                    "source": "manto",
+                    "key": key,
+                    "label": row["target_label"],
+                    "source": source,
                 }
             )
     return records
@@ -172,15 +195,11 @@ def load_sentence_llm_label_records(conn) -> list[dict[str, str]]:
         """,
         conn,
     )
-    return [
-        {
-            "key": label_key("name", row["canonical_place_name"]),
-            "label": row["target_label"],
-            "source": "sentence-llm",
-        }
-        for _, row in df.iterrows()
-        if normalize_name(row["canonical_place_name"])
-    ]
+    return label_records_from_name_rows(
+        df,
+        name_column="canonical_place_name",
+        source="sentence-llm",
+    )
 
 
 def load_passage_llm_label_records(conn) -> list[dict[str, str]]:
@@ -192,15 +211,11 @@ def load_passage_llm_label_records(conn) -> list[dict[str, str]]:
         """,
         conn,
     )
-    return [
-        {
-            "key": label_key("name", row["canonical_place_name"]),
-            "label": row["target_label"],
-            "source": "passage-llm",
-        }
-        for _, row in df.iterrows()
-        if normalize_name(row["canonical_place_name"])
-    ]
+    return label_records_from_name_rows(
+        df,
+        name_column="canonical_place_name",
+        source="passage-llm",
+    )
 
 
 def choose_conflicting_label(
@@ -299,7 +314,10 @@ def attach_labels(features_df, labels: dict[str, str]):
         ]
         if not label:
             for name in candidate_names:
-                label = labels.get(label_key("name", name))
+                for key in label_keys("name", name):
+                    label = labels.get(key)
+                    if label:
+                        break
                 if label:
                     break
         if not label:

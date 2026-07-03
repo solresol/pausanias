@@ -116,6 +116,7 @@ Import the cached release into PostgreSQL:
 
 ```bash
 uv run manto_importer.py
+uv run link_manto_places.py
 ```
 
 The importer stores raw CSV/JSON row summaries in `manto_raw_records`, then
@@ -123,6 +124,10 @@ builds best-effort `manto_entities`, typed `manto_entity_details`,
 `manto_tie_details`, and `manto_edges`. It derives Pausanias place-survival
 labels in `manto_place_status_labels` from MANTO's entity `Information` field
 for places linked to Pausanias tie records.
+
+`link_manto_places.py` links local Pausanias place proper nouns to imported
+MANTO place entities. Run it after each MANTO import before rebuilding network
+features.
 
 For prediction, use the strict pre-Pausanias graph only:
 `manto_edges.is_pre_pausanias = TRUE`. Edges from Pausanias, sources dated to

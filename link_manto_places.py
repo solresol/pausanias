@@ -20,13 +20,83 @@ def normalize_name(value: str | None) -> str:
     return re.sub(r"[^a-z0-9]+", "", value.lower())
 
 
+GENERIC_TRAILING_WORDS = {
+    "acropolis",
+    "agora",
+    "altar",
+    "bedchamber",
+    "cave",
+    "citadel",
+    "city",
+    "desert",
+    "gate",
+    "gates",
+    "grove",
+    "harbor",
+    "harbour",
+    "hill",
+    "house",
+    "marketplace",
+    "mount",
+    "mountain",
+    "plain",
+    "river",
+    "sanctuary",
+    "spring",
+    "temple",
+    "town",
+    "village",
+    "wall",
+    "walls",
+}
+
+DESCRIPTIVE_PREFIXES = (
+    "ancient ",
+    "old ",
+    "former ",
+    "the ancient ",
+    "the old ",
+    "the former ",
+    "the ",
+)
+
+
+def add_normalized_variant(variants: set[str], value: str | None) -> None:
+    normalized = normalize_name(value)
+    if normalized:
+        variants.add(normalized)
+
+
 def name_variants(value: str | None) -> set[str]:
     if not value:
         return set()
     text = re.sub(r"^[^\w]+", "", value).strip()
+    variants: set[str] = set()
+    add_normalized_variant(variants, text)
     without_parenthetical = re.sub(r"\s*\([^)]*\)", "", text).strip()
-    variants = {normalize_name(text), normalize_name(without_parenthetical)}
-    variants.discard("")
+    add_normalized_variant(variants, without_parenthetical)
+
+    for parenthetical in re.findall(r"\(([^)]*)\)", text):
+        cleaned = re.sub(r"^(?:alt\.?|aka|also called)\s+", "", parenthetical.strip(), flags=re.I)
+        add_normalized_variant(variants, cleaned)
+
+    for base in {text, without_parenthetical}:
+        lowered = base.lower()
+        for prefix in DESCRIPTIVE_PREFIXES:
+            if lowered.startswith(prefix):
+                add_normalized_variant(variants, base[len(prefix):])
+        if " at " in lowered:
+            add_normalized_variant(variants, re.split(r"\s+at\s+", base, maxsplit=1, flags=re.I)[1])
+        if " near " in lowered:
+            add_normalized_variant(variants, re.split(r"\s+near\s+", base, maxsplit=1, flags=re.I)[1])
+        if " of " in lowered:
+            before, after = re.split(r"\s+of\s+", base, maxsplit=1, flags=re.I)
+            if before.split() and before.split()[-1].lower() in GENERIC_TRAILING_WORDS:
+                add_normalized_variant(variants, after)
+        words = base.split()
+        while len(words) > 1 and words[-1].lower() in GENERIC_TRAILING_WORDS:
+            words = words[:-1]
+            add_normalized_variant(variants, " ".join(words))
     return variants
 
 
@@ -118,11 +188,10 @@ def load_manto_entities(conn, release_id: int) -> list[dict]:
 
 def candidate_links(place: dict, entities: list[dict]) -> list[dict]:
     candidates = []
-    place_names = {
-        normalize_name(place.get("reference_form")),
-        normalize_name(place.get("english_transcription")),
-    }
-    place_names.discard("")
+    place_names = (
+        name_variants(place.get("reference_form"))
+        | name_variants(place.get("english_transcription"))
+    )
     pleiades_id = place.get("pleiades_id") or ""
     for entity in entities:
         if pleiades_id and entity["pleiades_id"] == pleiades_id:
