@@ -138,6 +138,14 @@ uv run manto_place_network_features.py
 uv run predict_place_survival.py
 ```
 
+The earlier sentence-level LLM `place-state` sweep is not part of the daily
+pipeline. To recover archived Batch API outputs for review or candidate
+generation, use:
+
+```bash
+uv run recover_place_state_outputs.py
+```
+
 ## UDPipe grammar annotations
 
 Sentence-level grammar annotations are stored separately from the LLM
