@@ -55,6 +55,53 @@ class LinkMantoPlacesTests(unittest.TestCase):
         self.assertEqual(len(candidates), 1)
         self.assertEqual(candidates[0]["match_method"], "exact_normalized_name")
 
+    def test_manto_entity_variants_do_not_offer_container_places(self):
+        variants = name_variants(
+            "🌍 the Sanctuary of Apollo at Athens",
+            include_location_container=False,
+            include_generic_head=False,
+        )
+
+        self.assertIn(normalize_name("the Sanctuary of Apollo at Athens"), variants)
+        self.assertNotIn(normalize_name("Athens"), variants)
+
+    def test_plain_place_does_not_match_manto_subplaces_at_that_place(self):
+        candidates = candidate_links(
+            {
+                "reference_form": "Ἀθῆναι",
+                "english_transcription": "Athens",
+                "pleiades_id": "",
+            },
+            [
+                {
+                    "manto_id": "8188815",
+                    "label": "🌍 Athens (Attica)",
+                    "entity_kind": "place",
+                    "pleiades_id": "579885",
+                    "norm_label": normalize_name("🌍 Athens (Attica)"),
+                    "norm_variants": name_variants(
+                        "🌍 Athens (Attica)",
+                        include_location_container=False,
+                        include_generic_head=False,
+                    ),
+                },
+                {
+                    "manto_id": "10157580",
+                    "label": "🌍 the Sanctuary of Apollo at Athens",
+                    "entity_kind": "place",
+                    "pleiades_id": "",
+                    "norm_label": normalize_name("🌍 the Sanctuary of Apollo at Athens"),
+                    "norm_variants": name_variants(
+                        "🌍 the Sanctuary of Apollo at Athens",
+                        include_location_container=False,
+                        include_generic_head=False,
+                    ),
+                },
+            ],
+        )
+
+        self.assertEqual([candidate["manto_id"] for candidate in candidates], ["8188815"])
+
 
 if __name__ == "__main__":
     unittest.main()

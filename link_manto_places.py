@@ -73,6 +73,8 @@ def name_variants(
     value: str | None,
     *,
     include_parenthetical_content: bool = False,
+    include_location_container: bool = True,
+    include_generic_head: bool = True,
 ) -> set[str]:
     if not value:
         return set()
@@ -94,16 +96,16 @@ def name_variants(
         for prefix in DESCRIPTIVE_PREFIXES:
             if lowered.startswith(prefix):
                 add_normalized_variant(variants, base[len(prefix):])
-        if " at " in lowered:
+        if include_location_container and " at " in lowered:
             add_normalized_variant(variants, re.split(r"\s+at\s+", base, maxsplit=1, flags=re.I)[1])
-        if " near " in lowered:
+        if include_location_container and " near " in lowered:
             add_normalized_variant(variants, re.split(r"\s+near\s+", base, maxsplit=1, flags=re.I)[1])
-        if " of " in lowered:
+        if include_location_container and " of " in lowered:
             before, after = re.split(r"\s+of\s+", base, maxsplit=1, flags=re.I)
             if before.split() and before.split()[-1].lower() in GENERIC_TRAILING_WORDS:
                 add_normalized_variant(variants, after)
         words = base.split()
-        while len(words) > 1 and words[-1].lower() in GENERIC_TRAILING_WORDS:
+        while include_generic_head and len(words) > 1 and words[-1].lower() in GENERIC_TRAILING_WORDS:
             words = words[:-1]
             add_normalized_variant(variants, " ".join(words))
     return variants
@@ -189,7 +191,11 @@ def load_manto_entities(conn, release_id: int) -> list[dict]:
                 "entity_kind": "place",
                 "pleiades_id": pleiades_id or "",
                 "norm_label": normalize_name(label),
-                "norm_variants": name_variants(label),
+                "norm_variants": name_variants(
+                    label,
+                    include_location_container=False,
+                    include_generic_head=False,
+                ),
             }
         )
     return entities

@@ -52,7 +52,7 @@ class PredictPlaceSurvivalTests(unittest.TestCase):
         labels = {
             label_key("manto", "123"): "survives",
         }
-        for key in label_keys("name", "ancient Mantinea"):
+        for key in label_keys("name", "ancient Mantinea", include_generic_head=True):
             labels[key] = "does_not_survive"
 
         attached = attach_labels(features, labels)

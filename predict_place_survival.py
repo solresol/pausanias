@@ -129,6 +129,8 @@ def label_keys(
     value: str | None,
     *,
     include_parenthetical_content: bool = False,
+    include_location_container: bool = False,
+    include_generic_head: bool = False,
 ) -> set[str]:
     if kind == "manto":
         return {label_key(kind, value)}
@@ -137,6 +139,8 @@ def label_keys(
         for variant in name_variants(
             value,
             include_parenthetical_content=include_parenthetical_content,
+            include_location_container=include_location_container,
+            include_generic_head=include_generic_head,
         )
     }
 
@@ -196,6 +200,8 @@ def label_records_from_name_rows(
             "name",
             row[name_column],
             include_parenthetical_content=include_parenthetical_content,
+            include_location_container=True,
+            include_generic_head=True,
         ):
             records.append(
                 {
