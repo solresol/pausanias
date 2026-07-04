@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: raster main panel for a Pausanias graphic-book page, no text baked in
+Primary request: Create a rich, sophisticated historical atlas-style illustration for Pausanias 1.11.7, showing the moment before Pyrrhus becomes the first Greek to wage war against Rome. The image should be a dramatic oblique view across the Ionian Sea from western Greece/Epirus toward southern Italy, with Pyrrhus and a few Epirote companions in Hellenistic armor in the foreground studying the route west. Across the water, show the coast of southern Italy with a fortified Greek city and the idea of Rome's inland power suggested by distant roads, standards, and hills. Include subtle visual echoes of earlier Greek non-encounters with Rome: a faint Trojan/heroic memory in the sky or surf, and a distant southern Italian/Lucanian landscape, but keep Pyrrhus and the Ionian-to-Italy geography as the clear focus.
+Style/medium: high-quality painterly historical illustration, coffee-table book spread quality, richly textured, parchment-atlas compatible, detailed terrain, sea, ships, architecture, and figures.
+Composition/framing: wide landscape composition, 16:10 feel, strong foreground figure group at lower left, open Ionian crossing through the center, southern Italy and inland roads at right/background. Leave room for local callout labels over the image.
+Lighting/mood: late afternoon Mediterranean light, warm parchment-compatible palette, dignified historical tone.
+Constraints: no readable text, no labels, no watermarks, no modern objects, no nudity, no gore, no cartoon style, no flat vector terrain, no classroom diagram, no simple icons. Render as finished art with depth, atmosphere, and historical plausibility.
+
+Built-in image generation output copied from:
+/Users/gregb/.codex/generated_images/019f2e49-ff31-7a31-9642-fb068ed08e63/ig_0e46a5338eecc911016a494a9a6430819186e3197554f05bec.png

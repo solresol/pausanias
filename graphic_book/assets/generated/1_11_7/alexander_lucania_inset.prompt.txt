@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: raster scenic inset for a Pausanias graphic-book page, no text baked in
+Primary request: Create a historically grounded painterly inset scene for Pausanias 1.11.7: Alexander of Epirus in the land of the Lucanians before he can meet the Romans in battle. Show a somber southern Italian Lucanian landscape with rugged hills, a river crossing or road, Greek/Epirote soldiers lowering standards near a simple field memorial or abandoned shield. The scene should imply a failed campaign and death in Lucania without gore or violence.
+Style/medium: high-quality painterly historical illustration, rich texture, parchment atlas compatible, refined coffee-table book quality.
+Composition/framing: horizontal inset composition, Lucanian hills and settlement traces in the background, soldiers and memorial in foreground, enough clear areas for local labels/caption added later.
+Lighting/mood: overcast golden dusk, restrained and elegiac.
+Constraints: no readable text, no labels, no watermarks, no modern objects, no nudity, no gore, no cartoon style, no flat vector terrain, no simple icons, no schematic map.
+
+Built-in image generation output copied from:
+/Users/gregb/.codex/generated_images/019f2e49-ff31-7a31-9642-fb068ed08e63/ig_0e46a5338eecc911016a494b5138b88191b145c103d82df3b8.png
