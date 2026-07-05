@@ -3200,6 +3200,417 @@ def get_extended_network_analysis(conn):
     }
 
 
+MANTO_PLACE_PREFIX = "🌍"
+MANTO_PLACE_EXCLUDED_RELATIONS = {
+    "",
+    "collection",
+    "period",
+    "source_attributes",
+    "unesco_status",
+}
+MANTO_ATHENS_ATTICA_ID = "8188815"
+
+
+def _manto_clean_label(value):
+    text = str(value or "").strip()
+    return re.sub(r"^[^\w]+", "", text).strip() or text or "Unknown"
+
+
+def _manto_latest_release_id(conn):
+    rows = read_sql_query(
+        """
+        SELECT record_id
+        FROM manto_releases
+        WHERE import_status IN ('imported', 'partial_imported')
+        ORDER BY COALESCE(imported_at, updated_at) DESC, record_id DESC
+        LIMIT 1
+        """,
+        conn,
+    )
+    if len(rows) == 0:
+        return None
+    return int(rows.iloc[0]["record_id"])
+
+
+def _manto_edge_key(source_id, target_id):
+    return tuple(sorted((str(source_id), str(target_id))))
+
+
+def _add_manto_place_edge(graph, edge_details, source_id, target_id, relation, source_label, year):
+    if not source_id or not target_id or source_id == target_id:
+        return
+    relation = str(relation or "").strip() or "related"
+    if relation in MANTO_PLACE_EXCLUDED_RELATIONS:
+        return
+    if graph.has_edge(source_id, target_id):
+        graph[source_id][target_id]["weight"] += 1
+    else:
+        graph.add_edge(source_id, target_id, weight=1)
+    key = _manto_edge_key(source_id, target_id)
+    detail = edge_details[key]
+    detail["relations"][relation] += 1
+    detail["sources"][(str(source_label or "MANTO edge row without source label"), year)] += 1
+
+
+def _manto_weighted_strengths(graph):
+    return {
+        node: sum(attrs.get("weight", 1) for _, _, attrs in graph.edges(node, data=True))
+        for node in graph.nodes()
+    }
+
+
+def _manto_community_payload(graph, communities, community_index, strengths, pagerank, places):
+    rows = []
+    for index, community in enumerate(communities, start=1):
+        subgraph = graph.subgraph(community)
+        parent_counts = Counter(
+            places[node].get("parent_label") or "No locality parent"
+            for node in community
+        )
+        top_nodes = sorted(
+            community,
+            key=lambda node: (
+                strengths.get(node, 0),
+                graph.degree(node),
+                pagerank.get(node, 0.0),
+                places[node]["label"],
+            ),
+            reverse=True,
+        )[:10]
+        rows.append(
+            {
+                "community": int(index),
+                "size": int(len(community)),
+                "edge_count": int(subgraph.number_of_edges()),
+                "weighted_edges": int(
+                    sum(attrs.get("weight", 1) for _, _, attrs in subgraph.edges(data=True))
+                ),
+                "top_localities": [
+                    {
+                        "label": _manto_clean_label(label),
+                        "count": int(count),
+                    }
+                    for label, count in parent_counts.most_common(5)
+                ],
+                "top_places": [
+                    {
+                        "id": str(node),
+                        "label": places[node]["label"],
+                        "degree": int(graph.degree(node)),
+                        "strength": int(strengths.get(node, 0)),
+                        "pagerank": float(pagerank.get(node, 0.0)),
+                    }
+                    for node in top_nodes
+                ],
+                "contains_athens_attica": MANTO_ATHENS_ATTICA_ID in community,
+            }
+        )
+    return rows
+
+
+def _manto_edge_payload(graph, edge_details, source_id, target_id):
+    attrs = graph.get_edge_data(source_id, target_id, default={})
+    detail = edge_details.get(_manto_edge_key(source_id, target_id), {})
+    relation_rows = detail.get("relations", Counter()).most_common(6)
+    source_rows = detail.get("sources", Counter()).most_common(6)
+    return {
+        "source": str(source_id),
+        "target": str(target_id),
+        "weight": int(attrs.get("weight", 1)),
+        "relations": [
+            {"relation": relation, "count": int(count)}
+            for relation, count in relation_rows
+        ],
+        "sources": [
+            {
+                "label": label,
+                "latest_year": int(year) if year is not None and not pd.isna(year) else None,
+                "count": int(count),
+            }
+            for (label, year), count in source_rows
+        ],
+    }
+
+
+def _manto_node_payload(node_id, graph, places, community_index, strengths, pagerank, focus=False):
+    return {
+        "id": str(node_id),
+        "label": places[node_id]["label"],
+        "parent_label": _manto_clean_label(places[node_id].get("parent_label")),
+        "community": int(community_index.get(node_id, 0)),
+        "degree": int(graph.degree(node_id)),
+        "strength": int(strengths.get(node_id, 0)),
+        "pagerank": float(pagerank.get(node_id, 0.0)),
+        "focus": bool(focus),
+    }
+
+
+def get_manto_place_network_analysis(conn, *, neighborhood_limit=75, community_limit=15):
+    """Build compact MANTO place-network data for static website visualisations."""
+    required_tables = {"manto_releases", "manto_entity_details", "manto_edges"}
+    if not all(table_exists(conn, table) for table in required_tables):
+        return {
+            "available": False,
+            "message": "MANTO tables are not available.",
+        }
+
+    release_id = _manto_latest_release_id(conn)
+    if release_id is None:
+        return {
+            "available": False,
+            "message": "No imported MANTO release is available.",
+        }
+
+    place_rows = read_sql_query(
+        """
+        SELECT object_id, name, somewhere_in_or_near_object_id,
+               somewhere_in_or_near_label
+        FROM manto_entity_details
+        WHERE release_record_id = %s
+          AND substring(name from 1 for 1) = %s
+        """,
+        conn,
+        (release_id, MANTO_PLACE_PREFIX),
+    )
+    if len(place_rows) == 0:
+        return {
+            "available": False,
+            "message": "No MANTO place details are available.",
+        }
+
+    places = {}
+    for _, row in place_rows.iterrows():
+        object_id = str(row["object_id"])
+        places[object_id] = {
+            "id": object_id,
+            "label": _manto_clean_label(row["name"]),
+            "raw_label": str(row["name"] or ""),
+            "parent_id": str(row["somewhere_in_or_near_object_id"] or ""),
+            "parent_label": str(row["somewhere_in_or_near_label"] or ""),
+        }
+
+    edge_rows = read_sql_query(
+        """
+        SELECT e.source_manto_id, e.target_manto_id, e.relation_type,
+               e.evidence_source_label, e.evidence_latest_year
+        FROM manto_edges e
+        JOIN manto_entity_details sd
+          ON sd.release_record_id = e.release_record_id
+         AND sd.object_id = e.source_manto_id
+         AND substring(sd.name from 1 for 1) = %s
+        JOIN manto_entity_details td
+          ON td.release_record_id = e.release_record_id
+         AND td.object_id = e.target_manto_id
+         AND substring(td.name from 1 for 1) = %s
+        WHERE e.release_record_id = %s
+          AND e.is_pre_pausanias
+        """,
+        conn,
+        (MANTO_PLACE_PREFIX, MANTO_PLACE_PREFIX, release_id),
+    )
+
+    graph = nx.Graph()
+    graph.add_nodes_from(places)
+    edge_details = defaultdict(lambda: {"relations": Counter(), "sources": Counter()})
+
+    for _, row in edge_rows.iterrows():
+        source_id = str(row["source_manto_id"])
+        target_id = str(row["target_manto_id"])
+        if source_id not in places or target_id not in places:
+            continue
+        _add_manto_place_edge(
+            graph,
+            edge_details,
+            source_id,
+            target_id,
+            str(row["relation_type"] or "").lower(),
+            row["evidence_source_label"],
+            row["evidence_latest_year"],
+        )
+
+    parent_edge_count = 0
+    for place_id, place in places.items():
+        parent_id = place.get("parent_id")
+        if parent_id and parent_id in places and parent_id != place_id:
+            _add_manto_place_edge(
+                graph,
+                edge_details,
+                place_id,
+                parent_id,
+                "somewhere_in_or_near",
+                "MANTO place-detail locality field",
+                None,
+            )
+            parent_edge_count += 1
+
+    connected_graph = graph.copy()
+    connected_graph.remove_nodes_from(list(nx.isolates(connected_graph)))
+    if connected_graph.number_of_edges() == 0:
+        return {
+            "available": False,
+            "message": "The MANTO place graph has no place-place links.",
+        }
+
+    strengths = _manto_weighted_strengths(graph)
+    pagerank = nx.pagerank(graph, weight="weight") if graph.number_of_edges() else {
+        node: 0.0 for node in graph.nodes()
+    }
+    component_sizes = sorted((len(component) for component in nx.connected_components(graph)), reverse=True)
+    try:
+        communities = nx.community.louvain_communities(
+            connected_graph,
+            weight="weight",
+            seed=42,
+            resolution=1.0,
+        )
+    except (AttributeError, nx.NetworkXException, ZeroDivisionError):
+        communities = list(nx.community.greedy_modularity_communities(connected_graph, weight="weight"))
+    communities = sorted(
+        communities,
+        key=lambda community: (
+            -len(community),
+            sorted(places[node]["label"] for node in community)[0],
+        ),
+    )
+    community_index = {}
+    for index, community in enumerate(communities, start=1):
+        for node in community:
+            community_index[node] = index
+    modularity = (
+        nx.community.modularity(connected_graph, communities, weight="weight")
+        if communities and connected_graph.number_of_edges()
+        else 0.0
+    )
+
+    athens_id = MANTO_ATHENS_ATTICA_ID if MANTO_ATHENS_ATTICA_ID in graph else None
+    if athens_id is None:
+        for node_id, attrs in places.items():
+            if attrs["raw_label"] == "🌍 Athens (Attica)" or attrs["label"] == "Athens (Attica)":
+                athens_id = node_id
+                break
+
+    athens = {}
+    athens_network = {"nodes": [], "links": []}
+    if athens_id and athens_id in graph:
+        athens_neighbors = set(graph.neighbors(athens_id))
+        neighbor_subgraph = graph.subgraph(athens_neighbors)
+        possible_neighbor_edges = len(athens_neighbors) * (len(athens_neighbors) - 1) / 2
+        core_numbers = nx.core_number(connected_graph) if connected_graph.number_of_edges() else {}
+        athens_community = community_index.get(athens_id, 0)
+        athens_community_nodes = {
+            node for node, index in community_index.items() if index == athens_community
+        }
+        athens = {
+            "id": athens_id,
+            "label": places[athens_id]["label"],
+            "degree": int(graph.degree(athens_id)),
+            "strength": int(strengths.get(athens_id, 0)),
+            "pagerank": float(pagerank.get(athens_id, 0.0)),
+            "community": int(athens_community),
+            "community_size": int(len(athens_community_nodes)),
+            "clustering": float(nx.clustering(graph, athens_id)) if graph.degree(athens_id) > 1 else 0.0,
+            "triangles": int(nx.triangles(graph, athens_id)),
+            "neighbor_edge_count": int(neighbor_subgraph.number_of_edges()),
+            "neighbor_density": float(
+                neighbor_subgraph.number_of_edges() / possible_neighbor_edges
+            ) if possible_neighbor_edges else 0.0,
+            "core_number": int(core_numbers.get(athens_id, 0)),
+        }
+        selected_neighbors = sorted(
+            athens_neighbors,
+            key=lambda node: (
+                graph[athens_id][node].get("weight", 1),
+                strengths.get(node, 0),
+                graph.degree(node),
+                pagerank.get(node, 0.0),
+            ),
+            reverse=True,
+        )[:neighborhood_limit]
+        selected_nodes = {athens_id, *selected_neighbors}
+        athens_network = {
+            "nodes": [
+                _manto_node_payload(
+                    node,
+                    graph,
+                    places,
+                    community_index,
+                    strengths,
+                    pagerank,
+                    focus=(node == athens_id),
+                )
+                for node in sorted(
+                    selected_nodes,
+                    key=lambda node: (node != athens_id, -strengths.get(node, 0), places[node]["label"]),
+                )
+            ],
+            "links": [
+                _manto_edge_payload(graph, edge_details, source, target)
+                for source, target in graph.subgraph(selected_nodes).edges()
+            ],
+        }
+
+    community_rows = _manto_community_payload(
+        graph,
+        communities[:community_limit],
+        community_index,
+        strengths,
+        pagerank,
+        places,
+    )
+    top_community_ids = {row["community"] for row in community_rows}
+    community_edges = Counter()
+    for source, target, attrs in graph.edges(data=True):
+        source_community = community_index.get(source)
+        target_community = community_index.get(target)
+        if not source_community or not target_community or source_community == target_community:
+            continue
+        if source_community not in top_community_ids or target_community not in top_community_ids:
+            continue
+        community_edges[tuple(sorted((source_community, target_community)))] += attrs.get("weight", 1)
+
+    community_network = {
+        "nodes": [
+            {
+                "id": f"community-{row['community']}",
+                "community": int(row["community"]),
+                "label": f"Community {row['community']}",
+                "size": int(row["size"]),
+                "top_places": row["top_places"][:5],
+                "top_localities": row["top_localities"][:3],
+                "contains_athens_attica": bool(row["contains_athens_attica"]),
+            }
+            for row in community_rows
+        ],
+        "links": [
+            {
+                "source": f"community-{source}",
+                "target": f"community-{target}",
+                "weight": int(weight),
+            }
+            for (source, target), weight in community_edges.most_common(80)
+        ],
+    }
+
+    return {
+        "available": True,
+        "message": "",
+        "release_record_id": int(release_id),
+        "pre_pausanias_only": True,
+        "node_count": int(graph.number_of_nodes()),
+        "edge_count": int(graph.number_of_edges()),
+        "manto_place_edge_rows": int(len(edge_rows)),
+        "somewhere_in_or_near_edges": int(parent_edge_count),
+        "component_count": int(len(component_sizes)),
+        "largest_component_size": int(component_sizes[0]) if component_sizes else 0,
+        "community_count": int(len(communities)),
+        "modularity": float(modularity),
+        "athens": athens,
+        "athens_network": athens_network,
+        "communities": community_rows,
+        "community_network": community_network,
+    }
+
+
 def get_translation_page_data(conn):
     """Get all data needed for translation pages: passages, translations, proper nouns with Wikidata info."""
     cursor = conn.cursor()

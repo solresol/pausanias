@@ -514,6 +514,88 @@ def create_website_structure(output_dir):
         font-size: 0.9em;
     }
 
+    .manto-network-layout {
+        align-items: start;
+        display: grid;
+        gap: 18px;
+        grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+        margin: 20px 0 28px;
+    }
+
+    .manto-network-panel {
+        background-color: #fffaf4;
+        border: 1px solid #d9cec0;
+        border-radius: 6px;
+        min-height: 520px;
+        overflow: hidden;
+        position: relative;
+        width: 100%;
+    }
+
+    .manto-community-panel {
+        min-height: 440px;
+    }
+
+    .manto-network-panel svg {
+        display: block;
+        height: 100%;
+        min-height: inherit;
+        width: 100%;
+    }
+
+    .manto-links line {
+        cursor: pointer;
+        stroke: #9c8d7f;
+        stroke-opacity: 0.58;
+    }
+
+    .manto-links line:hover {
+        stroke: #7f2d1f;
+        stroke-opacity: 0.95;
+    }
+
+    .manto-nodes circle {
+        cursor: pointer;
+    }
+
+    .manto-labels text {
+        fill: #463d33;
+        paint-order: stroke;
+        pointer-events: none;
+        stroke: #fffaf4;
+        stroke-width: 3px;
+    }
+
+    .manto-network-detail {
+        background-color: #f6f1ea;
+        border-left: 5px solid #9d8771;
+        border-radius: 6px;
+        box-sizing: border-box;
+        min-height: 180px;
+        overflow-wrap: anywhere;
+        padding: 14px;
+    }
+
+    .manto-network-tooltip {
+        background-color: rgba(47, 36, 28, 0.94);
+        border-radius: 5px;
+        color: white;
+        display: none;
+        font-size: 0.9em;
+        line-height: 1.35;
+        max-width: min(420px, calc(100vw - 32px));
+        padding: 10px 12px;
+        pointer-events: none;
+        position: absolute;
+        z-index: 30;
+    }
+
+    @media (max-width: 960px) {
+        .manto-network-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+
     .people-table {
         font-size: 0.92em;
         margin-bottom: 24px;

@@ -586,6 +586,10 @@ def _generated_footer():
     return f"Generated on {datetime.now().strftime('%Y-%m-%d at %H:%M:%S')} from the PostgreSQL database"
 
 
+def _manto_network_json_payload(network_data):
+    return json.dumps(network_data or {}, ensure_ascii=False).replace("</", "<\\/")
+
+
 def generate_texts_index(output_dir, title):
     """Generate a hub page for text and graphic-book formats."""
     texts_dir = os.path.join(output_dir, "texts")
@@ -4224,6 +4228,364 @@ def generate_analysis_pages(greta_analysis, section_people_analysis, discourse_a
         f.write(index_page)
 
 
+def _render_manto_community_rows(communities):
+    rows = []
+    for community in communities:
+        localities = ", ".join(
+            f"{item.get('label')} ({int(item.get('count') or 0)})"
+            for item in community.get("top_localities", [])
+        )
+        places = ", ".join(
+            item.get("label", "")
+            for item in community.get("top_places", [])[:8]
+        )
+        marker = "Yes" if community.get("contains_athens_attica") else ""
+        rows.append(f"""
+            <tr>
+                <td class="num">{int(community.get("community") or 0)}</td>
+                <td>{marker}</td>
+                <td class="num">{int(community.get("size") or 0):,}</td>
+                <td class="num">{int(community.get("edge_count") or 0):,}</td>
+                <td>{html.escape(localities)}</td>
+                <td>{html.escape(places)}</td>
+            </tr>
+        """)
+    if not rows:
+        return '<tr><td colspan="6">No MANTO communities are available.</td></tr>'
+    return "".join(rows)
+
+
+def _manto_network_script(network_data):
+    data_json = _manto_network_json_payload(network_data)
+    return """
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+    const mantoData = __MANTO_DATA__;
+
+    function formatNumber(value, digits) {
+        if (value === null || value === undefined || Number.isNaN(Number(value))) {
+            return "n/a";
+        }
+        return Number(value).toFixed(digits);
+    }
+
+    function relationSummary(link) {
+        const relations = link.relations || [];
+        if (!relations.length) {
+            return "No relation label recorded";
+        }
+        return relations.map(function (row) {
+            return row.relation + " (" + row.count + ")";
+        }).join(", ");
+    }
+
+    function sourceSummary(link) {
+        const sources = link.sources || [];
+        if (!sources.length) {
+            return "No source label recorded";
+        }
+        return sources.map(function (row) {
+            const year = row.latest_year === null || row.latest_year === undefined ? "" : ", latest year " + row.latest_year;
+            return row.label + year + " (" + row.count + ")";
+        }).join("<br>");
+    }
+
+    function nodeHtml(node) {
+        const topPlaces = node.top_places || [];
+        const places = topPlaces.map(function (row) { return row.label; }).join(", ");
+        const localityRows = node.top_localities || [];
+        const localities = localityRows.map(function (row) {
+            return row.label + " (" + row.count + ")";
+        }).join(", ");
+        return "<strong>" + node.label + "</strong>"
+            + "<br>Community: " + (node.community || "n/a")
+            + "<br>Degree: " + (node.degree || 0)
+            + "<br>Weighted links: " + (node.strength || 0)
+            + "<br>PageRank: " + formatNumber(node.pagerank, 4)
+            + (node.parent_label ? "<br>Locality: " + node.parent_label : "")
+            + (places ? "<br>Leading places: " + places : "")
+            + (localities ? "<br>Leading localities: " + localities : "");
+    }
+
+    function linkHtml(link) {
+        const source = typeof link.source === "object" ? link.source.label : link.source;
+        const target = typeof link.target === "object" ? link.target.label : link.target;
+        return "<strong>" + source + " ↔ " + target + "</strong>"
+            + "<br>Weight: " + (link.weight || 1)
+            + "<br>Relations: " + relationSummary(link)
+            + "<br>Sources:<br>" + sourceSummary(link);
+    }
+
+    function setDetails(html) {
+        const detail = document.getElementById("manto-network-detail");
+        if (detail) {
+            detail.innerHTML = html;
+        }
+    }
+
+    function renderNetwork(containerId, graph, options) {
+        const container = document.getElementById(containerId);
+        if (!container || !graph || !graph.nodes || !graph.nodes.length) {
+            return;
+        }
+        const width = container.clientWidth || 900;
+        const height = options.height || 620;
+        const color = d3.scaleOrdinal()
+            .domain(d3.range(1, 30))
+            .range([
+                "#4c78a8", "#f58518", "#54a24b", "#e45756", "#72b7b2",
+                "#b279a2", "#ff9da6", "#9d755d", "#bab0ab", "#8cd17d",
+                "#b6992d", "#499894", "#86bcb6", "#d37295", "#a0cbe8"
+            ]);
+        const tooltip = d3.select("#manto-network-tooltip");
+        const svg = d3.select(container).append("svg")
+            .attr("viewBox", [0, 0, width, height])
+            .attr("role", "img")
+            .attr("aria-label", options.label || "MANTO network visualization");
+        const g = svg.append("g");
+        svg.call(d3.zoom().scaleExtent([0.35, 4]).on("zoom", function (event) {
+            g.attr("transform", event.transform);
+        }));
+        const links = (graph.links || []).map(function (link) { return Object.assign({}, link); });
+        const nodes = (graph.nodes || []).map(function (node) { return Object.assign({}, node); });
+        const linkForceDistance = options.linkDistance || 95;
+        const simulation = d3.forceSimulation(nodes)
+            .force("link", d3.forceLink(links).id(function (d) { return d.id; }).distance(linkForceDistance).strength(0.55))
+            .force("charge", d3.forceManyBody().strength(options.charge || -260))
+            .force("center", d3.forceCenter(width / 2, height / 2))
+            .force("collision", d3.forceCollide().radius(function (d) {
+                return (d.focus ? 28 : 13) + Math.sqrt(d.size || d.strength || d.degree || 1);
+            }));
+
+        const link = g.append("g")
+            .attr("class", "manto-links")
+            .selectAll("line")
+            .data(links)
+            .join("line")
+            .attr("stroke-width", function (d) { return Math.max(1, Math.sqrt(d.weight || 1)); })
+            .on("mousemove", function (event, d) {
+                tooltip.style("display", "block")
+                    .style("left", (event.pageX + 12) + "px")
+                    .style("top", (event.pageY + 12) + "px")
+                    .html(linkHtml(d));
+            })
+            .on("mouseout", function () {
+                tooltip.style("display", "none");
+            })
+            .on("click", function (event, d) {
+                setDetails(linkHtml(d));
+            });
+        link.append("title").text(function (d) { return relationSummary(d); });
+
+        const node = g.append("g")
+            .attr("class", "manto-nodes")
+            .selectAll("circle")
+            .data(nodes)
+            .join("circle")
+            .attr("r", function (d) {
+                if (d.focus || d.contains_athens_attica) {
+                    return 14;
+                }
+                return Math.max(5, Math.min(18, 4 + Math.sqrt(d.size || d.strength || d.degree || 1)));
+            })
+            .attr("fill", function (d) { return d.focus ? "#7f2d1f" : color(d.community || 0); })
+            .attr("stroke", function (d) { return d.focus || d.contains_athens_attica ? "#2f241c" : "#fff"; })
+            .attr("stroke-width", function (d) { return d.focus || d.contains_athens_attica ? 2.5 : 1.2; })
+            .on("mousemove", function (event, d) {
+                tooltip.style("display", "block")
+                    .style("left", (event.pageX + 12) + "px")
+                    .style("top", (event.pageY + 12) + "px")
+                    .html(nodeHtml(d));
+            })
+            .on("mouseout", function () {
+                tooltip.style("display", "none");
+            })
+            .on("click", function (event, d) {
+                setDetails(nodeHtml(d));
+            })
+            .call(d3.drag()
+                .on("start", function (event, d) {
+                    if (!event.active) simulation.alphaTarget(0.3).restart();
+                    d.fx = d.x;
+                    d.fy = d.y;
+                })
+                .on("drag", function (event, d) {
+                    d.fx = event.x;
+                    d.fy = event.y;
+                })
+                .on("end", function (event, d) {
+                    if (!event.active) simulation.alphaTarget(0);
+                    d.fx = null;
+                    d.fy = null;
+                }));
+        node.append("title").text(function (d) { return d.label; });
+
+        const labels = g.append("g")
+            .attr("class", "manto-labels")
+            .selectAll("text")
+            .data(nodes.filter(function (d) {
+                return d.focus || d.contains_athens_attica || (d.size && d.size >= 25) || (d.strength && d.strength >= 15);
+            }))
+            .join("text")
+            .text(function (d) { return d.label; })
+            .attr("font-size", "11px")
+            .attr("dx", 10)
+            .attr("dy", 4);
+
+        simulation.on("tick", function () {
+            link
+                .attr("x1", function (d) { return d.source.x; })
+                .attr("y1", function (d) { return d.source.y; })
+                .attr("x2", function (d) { return d.target.x; })
+                .attr("y2", function (d) { return d.target.y; });
+            node
+                .attr("cx", function (d) { return d.x; })
+                .attr("cy", function (d) { return d.y; });
+            labels
+                .attr("x", function (d) { return d.x; })
+                .attr("y", function (d) { return d.y; });
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        if (!mantoData.available) {
+            return;
+        }
+        renderNetwork("manto-athens-network", mantoData.athens_network, {
+            label: "Athens MANTO neighborhood",
+            height: 660,
+            charge: -320,
+            linkDistance: 105
+        });
+        renderNetwork("manto-community-network", mantoData.community_network, {
+            label: "MANTO place-community graph",
+            height: 520,
+            charge: -420,
+            linkDistance: 150
+        });
+    });
+    </script>
+    """.replace("__MANTO_DATA__", data_json)
+
+
+def generate_manto_network_pages(network_data, output_dir, title):
+    """Generate MANTO place-network visualisation pages."""
+    places_dir = os.path.join(output_dir, "places")
+    os.makedirs(places_dir, exist_ok=True)
+
+    if not network_data or not network_data.get("available"):
+        message = html.escape(
+            network_data.get("message", "No MANTO network data is available.")
+            if network_data
+            else "No MANTO network data is available."
+        )
+        page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - MANTO Place Network</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{title}</h1>
+        <p>MANTO place network</p>
+    </header>
+    {_site_nav("../", "places")}
+    <div class="container">
+        <div class="breadcrumb"><a href="index.html">Places</a> &rsaquo; MANTO Place Network</div>
+        <h2>MANTO Place Network</h2>
+        <p>{message}</p>
+        <footer>{_generated_footer()}</footer>
+    </div>
+</body>
+</html>
+"""
+        with open(os.path.join(places_dir, "manto-network.html"), "w", encoding="utf-8") as f:
+            f.write(page)
+        return
+
+    athens = network_data.get("athens", {})
+    communities = network_data.get("communities", [])
+    script = _manto_network_script(network_data)
+    athens_summary = f"""
+        <div class="metric-strip">
+            <div><strong>{int(network_data.get("node_count", 0)):,}</strong><span>MANTO places</span></div>
+            <div><strong>{int(network_data.get("edge_count", 0)):,}</strong><span>place links</span></div>
+            <div><strong>{int(network_data.get("community_count", 0)):,}</strong><span>detected communities</span></div>
+            <div><strong>{_format_network_float(network_data.get("modularity", 0), 3)}</strong><span>modularity</span></div>
+        </div>
+        <div class="metric-strip">
+            <div><strong>{int(athens.get("degree", 0)):,}</strong><span>Athens neighbors</span></div>
+            <div><strong>{int(athens.get("community_size", 0)):,}</strong><span>Athens community size</span></div>
+            <div><strong>{_format_network_float(athens.get("clustering", 0), 3)}</strong><span>Athens clustering</span></div>
+            <div><strong>{_format_network_float(athens.get("neighbor_density", 0), 3)}</strong><span>neighbor density</span></div>
+        </div>
+    """
+    structure_note = (
+        "Athens is not treated as a complete clique here. The local-clustering "
+        f"coefficient is {_format_network_float(athens.get('clustering', 0), 3)} "
+        f"with {int(athens.get('triangles', 0)):,} closed neighbor triangles; "
+        f"its neighbors have density {_format_network_float(athens.get('neighbor_density', 0), 3)}. "
+        "That is a hub embedded in a dense community, not an all-to-all clique."
+    )
+
+    page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - MANTO Place Network</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{title}</h1>
+        <p>MANTO place-place structure and source-backed links</p>
+    </header>
+    {_site_nav("../", "places")}
+    <div class="container wide-container">
+        <div class="breadcrumb"><a href="index.html">Places</a> &rsaquo; MANTO Place Network</div>
+        <h2>MANTO Place Network</h2>
+        <p class="note">This page uses the latest imported MANTO release ({int(network_data.get("release_record_id", 0))}) and strict pre-Pausanias place-place edges, plus MANTO <code>somewhere_in_or_near</code> locality edges from place details. Hover or click a link to see relation labels and source labels recorded for that edge.</p>
+        {athens_summary}
+
+        <section class="manto-network-layout">
+            <div>
+                <h2>Athens Neighborhood</h2>
+                <p class="note">{html.escape(structure_note)}</p>
+                <div id="manto-athens-network" class="manto-network-panel"></div>
+            </div>
+            <aside id="manto-network-detail" class="manto-network-detail">
+                <strong>Network details</strong><br>
+                Hover or click a node or link to see MANTO relation/source evidence.
+            </aside>
+        </section>
+
+        <h2>Community Graph</h2>
+        <p class="note">Nodes are detected MANTO place communities; links are aggregated cross-community place links among the displayed communities.</p>
+        <div id="manto-community-network" class="manto-network-panel manto-community-panel"></div>
+
+        <h2>Detected Place Communities</h2>
+        <table class="predictor-table">
+            <thead>
+                <tr><th>#</th><th>Athens?</th><th>Places</th><th>Internal Edges</th><th>Leading Localities</th><th>Leading Places</th></tr>
+            </thead>
+            <tbody>{_render_manto_community_rows(communities)}</tbody>
+        </table>
+
+        <footer>{_generated_footer()}</footer>
+    </div>
+    <div id="manto-network-tooltip" class="manto-network-tooltip"></div>
+    {script}
+</body>
+</html>
+"""
+    with open(os.path.join(places_dir, "manto-network.html"), "w", encoding="utf-8") as f:
+        f.write(page)
+
+
 def generate_places_index(output_dir, title):
     """Generate a hub page for geographic and noun-network views."""
     places_dir = os.path.join(output_dir, "places")
@@ -4284,6 +4646,11 @@ def generate_places_index(output_dir, title):
 
         <h2>Network Analysis</h2>
         <div class="hub-grid">
+            <section class="hub-card">
+                <h3>MANTO Place Network</h3>
+                <p>Strict pre-Pausanias MANTO place-place links, locality edges, Athens neighborhood structure, and detected place communities.</p>
+                <a href="manto-network.html">Open MANTO Network</a>
+            </section>
             <section class="hub-card">
                 <h3>Interactive Network</h3>
                 <p>Full proper-noun co-occurrence network with component, centrality, link, and node filters.</p>
