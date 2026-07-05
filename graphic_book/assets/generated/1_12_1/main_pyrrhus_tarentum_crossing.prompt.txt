@@ -1,0 +1,13 @@
+Use case: historical-scene
+Asset type: main panel for a Pausanias illustrated graphic-book page, to be cropped into a parchment atlas spread
+Primary request: A rich, historically grounded Hellenistic coastal expedition scene for Pausanias 1.12.1: Pyrrhus of Epirus preparing to cross from Greece over the Ionian Sea toward Tarentum in southern Italy after Tarentine envoys ask for help against Rome. No text or labels.
+Scene/backdrop: broad elevated view over an Epirote or Greek harbor facing west across the Ionian Sea at dawn; triremes and transport ships are being fitted out, cavalry horses and infantry equipment wait near the quay, Tarentine envoys in Greek dress confer with Pyrrhus and his officers, and distant Italian headlands glow across the sea.
+Subject: Pyrrhus as a dignified Hellenistic king-general, Tarentine ambassadors, ship crews preparing warships and merchant transports, cavalry tack and shields, broad sea crossing toward Italy.
+Style/medium: sophisticated painterly historical illustration, watercolor and gouache over fine ink, antiquarian atlas plate quality, richly textured terrain and sea, credible Hellenistic clothing and ships, museum-book finish.
+Composition/framing: wide panoramic oblique view, strong spatial depth from foreground council and harbor to ships and westward sea; leave open sky/sea areas that can accept local leader lines and labels after generation.
+Lighting/mood: warm early morning light, strategic expectancy, polished coffee-table book quality.
+Color palette: warm parchment-compatible ochres, sea blue-greens, muted reds, bronze, olive slopes; nuanced not flat.
+Materials/textures: stone quay, linen sails, painted hulls, bronze armor, horse tack, rugged coast, atmospheric sea.
+Text (verbatim): none.
+Constraints: no readable writing, no labels, no modern objects, no nudity, no gore, no cartoon/vector style, no simple diagram, no placeholder map, no fantasy armor.
+Avoid: flat vector terrain, classroom diagram, schematic icons, crude figures, exaggerated cinematic fantasy, visible text, watermark.

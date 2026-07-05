@@ -1,0 +1,13 @@
+Use case: historical-scene
+Asset type: scenic inset for a Pausanias illustrated graphic-book page, to be placed inside a parchment frame with local captioning
+Primary request: A rich Hellenistic scene showing Tarentine ambassadors persuading Pyrrhus by describing prosperous Italy and invoking friendship and suppliants. No text or labels.
+Scene/backdrop: interior-open loggia or shaded council terrace in Tarentum or an Epirote palace, with a small painted-map tablet and offerings on a table, glimpses of southern Italian harbor wealth outside: grain sacks, amphorae, ships, sunlit water.
+Subject: Tarentine envoys in Greek robes pleading and gesturing; Pyrrhus and Epirote advisors listening; visible symbols of alliance, ships, and prosperity.
+Style/medium: sophisticated painterly historical illustration, watercolor/gouache with fine ink detail, antiquarian plate finish, suitable for a coffee-table historical atlas.
+Composition/framing: medium-wide horizontal scene, clear figures and table, enough empty upper or side areas for later crop and caption frame; no built-in text.
+Lighting/mood: warm southern light, diplomatic urgency, polished historical book art.
+Color palette: parchment-compatible golds, muted blues, terracotta, olive, bronze, cream linen.
+Materials/textures: marble/stone, woven robes, bronze helmets, amphorae, rolled sailcloth, wooden table, harbor haze.
+Text (verbatim): none.
+Constraints: no readable writing, no labels, no modern objects, no nudity, no gore, no cartoon/vector style, no simple diagram, no fantasy armor.
+Avoid: crude figures, flat vector look, classroom scene, text, watermark, anachronistic Roman imperial details.
