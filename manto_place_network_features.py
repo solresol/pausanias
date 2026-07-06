@@ -4,16 +4,47 @@
 from __future__ import annotations
 
 import argparse
+import math
 import re
 from datetime import datetime, timezone
 
 import networkx as nx
+from networkx.algorithms import approximation as nx_approx
 
-from pausanias_db import add_database_argument, connect, initialize_schema
+from pausanias_db import add_database_argument, column_exists, connect, initialize_schema
 
 
-FEATURE_SET_VERSION = "manto-pausanias-place-network-v2"
+FEATURE_SET_VERSION = "manto-pausanias-place-network-v3"
 LABEL_SOURCE_VERSION = "manto-entity-info-v1"
+
+# MANTO bookkeeping relations describe the database and its bibliography, not
+# the mythic network itself; keeping them would let citation volume masquerade
+# as narrative connectivity.
+BOOKKEEPING_RELATIONS = {
+    "",
+    "collection",
+    "period",
+    "source_attributes",
+    "unesco_status",
+    "mentioned_in_text",
+    "depictions",
+    "identified_in",
+}
+
+UNREACHABLE_HOP_DISTANCE = 99
+DISJOINT_PATH_CUTOFF = 5
+LOCAL_REACH_CUTOFF = 3
+
+NEW_FEATURE_COLUMNS = {
+    "k_core": "INTEGER",
+    "hop_distance_to_large_place": "INTEGER",
+    "nodes_within_two_hops": "INTEGER",
+    "nodes_within_three_hops": "INTEGER",
+    "disjoint_paths_to_large_place": "INTEGER",
+    "bridge_edge_fraction": "DOUBLE PRECISION",
+    "within_module_degree_zscore": "DOUBLE PRECISION",
+    "participation_coefficient": "DOUBLE PRECISION",
+}
 
 
 def now_iso() -> str:
@@ -41,9 +72,9 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--community-node-limit",
         type=int,
-        default=50000,
+        default=500000,
         help=(
-            "Use connected-component size instead of greedy modularity when "
+            "Use connected-component size instead of Louvain communities when "
             "the graph has more nodes than this limit."
         ),
     )
@@ -56,6 +87,16 @@ def parse_arguments() -> argparse.Namespace:
         "--skip-components",
         action="store_true",
         help="Set component/community sizes to 1 instead of walking connected components.",
+    )
+    parser.add_argument(
+        "--include-bookkeeping-edges",
+        action="store_true",
+        help=(
+            "Keep MANTO bookkeeping relations (source_attributes, collection, "
+            "period, unesco_status, mentioned_in_text, depictions, identified_in) "
+            "in the graph. Default excludes them so centralities measure the "
+            "myth network rather than the bibliography."
+        ),
     )
     return parser.parse_args()
 
@@ -154,10 +195,17 @@ def load_manto_status_targets(
     ]
 
 
-def build_graph(edges: list[tuple], links: list[dict]) -> nx.Graph:
+def build_graph(
+    edges: list[tuple],
+    links: list[dict],
+    *,
+    include_bookkeeping: bool = False,
+) -> nx.Graph:
     graph = nx.Graph()
     for source_id, target_id, relation_type in edges:
         if not source_id or not target_id or source_id == target_id:
+            continue
+        if not include_bookkeeping and (relation_type or "") in BOOKKEEPING_RELATIONS:
             continue
         if graph.has_edge(source_id, target_id):
             graph[source_id][target_id]["weight"] += 1
@@ -189,29 +237,148 @@ def component_sizes_for_targets(graph: nx.Graph, target_nodes: set[str]) -> dict
     return sizes
 
 
-def community_sizes(
+def detect_communities(
     graph: nx.Graph,
     *,
     node_limit: int,
+) -> dict[str, int]:
+    """Map each node to a Louvain community index, or {} when skipped."""
+    if graph.number_of_edges() == 0 or graph.number_of_nodes() > node_limit:
+        return {}
+    communities = nx.algorithms.community.louvain_communities(
+        graph,
+        weight="weight",
+        seed=42,
+    )
+    membership: dict[str, int] = {}
+    for index, community in enumerate(communities):
+        for node in community:
+            membership[node] = index
+    return membership
+
+
+def community_sizes(
+    membership: dict[str, int],
+    *,
     target_nodes: set[str],
     component_fallback: dict[str, int],
 ) -> dict[str, int]:
-    if graph.number_of_edges() == 0:
-        return {node: 1 for node in target_nodes}
-    if graph.number_of_nodes() > node_limit:
+    if not membership:
         return dict(component_fallback)
-    communities = nx.algorithms.community.greedy_modularity_communities(
-        graph,
-        weight="weight",
-    )
-    sizes = {}
-    for community in communities:
-        size = len(community)
-        for node in target_nodes & set(community):
-            sizes[node] = size
+    counts: dict[int, int] = {}
+    for community in membership.values():
+        counts[community] = counts.get(community, 0) + 1
+    sizes = {
+        node: counts[membership[node]]
+        for node in target_nodes
+        if node in membership
+    }
     for node in target_nodes:
         sizes.setdefault(node, component_fallback.get(node, 1))
     return sizes
+
+
+def cartographic_roles(
+    graph: nx.Graph,
+    membership: dict[str, int],
+    target_nodes: set[str],
+) -> tuple[dict[str, float], dict[str, float]]:
+    """Guimerà-Amaral within-module degree z-score and participation coefficient."""
+    if not membership:
+        return {}, {}
+    module_degrees: dict[str, dict[int, int]] = {}
+    for node in graph.nodes:
+        per_module: dict[int, int] = {}
+        for neighbor in graph.neighbors(node):
+            community = membership.get(neighbor)
+            if community is None:
+                continue
+            per_module[community] = per_module.get(community, 0) + 1
+        module_degrees[node] = per_module
+
+    within: dict[int, list[float]] = {}
+    for node, per_module in module_degrees.items():
+        community = membership.get(node)
+        if community is None:
+            continue
+        within.setdefault(community, []).append(float(per_module.get(community, 0)))
+    module_stats = {}
+    for community, values in within.items():
+        mean = sum(values) / len(values)
+        variance = sum((value - mean) ** 2 for value in values) / len(values)
+        module_stats[community] = (mean, math.sqrt(variance))
+
+    zscores: dict[str, float] = {}
+    participation: dict[str, float] = {}
+    for node in target_nodes:
+        per_module = module_degrees.get(node, {})
+        degree = sum(per_module.values())
+        community = membership.get(node)
+        if community is not None and community in module_stats:
+            mean, std = module_stats[community]
+            own = float(per_module.get(community, 0))
+            zscores[node] = (own - mean) / std if std > 0 else 0.0
+        if degree > 0:
+            participation[node] = 1.0 - sum(
+                (count / degree) ** 2 for count in per_module.values()
+            )
+    return zscores, participation
+
+
+def hop_distances_to_large_places(graph: nx.Graph, large_nodes: set[str]) -> dict[str, int]:
+    sources = {node for node in large_nodes if node in graph}
+    if not sources:
+        return {}
+    return nx.multi_source_dijkstra_path_length(graph, sources, weight=None)
+
+
+def local_reach(graph: nx.Graph, node: str, cutoff: int) -> dict[int, int]:
+    """Count nodes at each hop distance up to cutoff (excluding the node itself)."""
+    counts = {distance: 0 for distance in range(1, cutoff + 1)}
+    if node not in graph:
+        return counts
+    for _, distance in nx.single_source_shortest_path_length(graph, node, cutoff=cutoff).items():
+        if distance >= 1:
+            counts[distance] += 1
+    return counts
+
+
+def nearest_large_place(
+    graph: nx.Graph,
+    node: str,
+    large_nodes: set[str],
+    cutoff: int,
+) -> str | None:
+    if node not in graph:
+        return None
+    lengths = nx.single_source_shortest_path_length(graph, node, cutoff=cutoff)
+    best_node = None
+    best_distance = cutoff + 1
+    for candidate, distance in lengths.items():
+        if candidate == node or candidate not in large_nodes:
+            continue
+        if distance < best_distance:
+            best_node = candidate
+            best_distance = distance
+    return best_node
+
+
+def bridge_fractions(graph: nx.Graph, target_nodes: set[str]) -> dict[str, float]:
+    bridges = set()
+    for source, target in nx.bridges(graph):
+        bridges.add(frozenset((source, target)))
+    fractions = {}
+    for node in target_nodes:
+        if node not in graph:
+            continue
+        incident = list(graph.edges(node))
+        if not incident:
+            continue
+        bridge_count = sum(
+            1 for source, target in incident if frozenset((source, target)) in bridges
+        )
+        fractions[node] = bridge_count / len(incident)
+    return fractions
 
 
 def safe_betweenness(graph: nx.Graph, sample_size: int) -> dict[str, float]:
@@ -266,16 +433,23 @@ def build_feature_rows(
     if skip_components:
         components = {node: 1 for node in target_nodes}
         communities = {node: 1 for node in target_nodes}
+        membership: dict[str, int] = {}
         component_mode = "skipped"
     else:
         components = component_sizes_for_targets(graph, target_nodes)
+        membership = detect_communities(graph, node_limit=community_node_limit)
         communities = community_sizes(
-            graph,
-            node_limit=community_node_limit,
+            membership,
             target_nodes=target_nodes,
             component_fallback=components,
         )
         component_mode = "target_nodes"
+    print("Computing cartographic roles...", flush=True)
+    module_zscores, participation = cartographic_roles(graph, membership, target_nodes)
+    print("Computing k-cores...", flush=True)
+    core_numbers = nx.core_number(graph) if graph.number_of_nodes() else {}
+    print("Computing bridge fractions...", flush=True)
+    bridge_fraction = bridge_fractions(graph, target_nodes)
     sorted_pagerank = sorted(pagerank.values(), reverse=True)
     top_count = max(1, min(50, int(len(sorted_pagerank) * 0.05) or 1))
     top_nodes = {
@@ -283,6 +457,8 @@ def build_feature_rows(
         if value >= (sorted_pagerank[top_count - 1] if sorted_pagerank else 0.0)
     }
     top_neighbor_sets = {node: set(graph.neighbors(node)) for node in top_nodes}
+    print("Computing hop distances to large places...", flush=True)
+    hop_distances = hop_distances_to_large_places(graph, top_nodes)
 
     rows = []
     for link in links:
@@ -294,6 +470,16 @@ def build_feature_rows(
             (jaccard(neighbors, top_neighbors) for top_neighbors in top_neighbor_sets.values()),
             default=0.0,
         )
+        reach = local_reach(graph, node, LOCAL_REACH_CUTOFF)
+        hop_distance = int(hop_distances.get(node, UNREACHABLE_HOP_DISTANCE))
+        disjoint_paths = 0
+        nearest_large = nearest_large_place(graph, node, top_nodes - {node}, LOCAL_REACH_CUTOFF)
+        if nearest_large is not None:
+            disjoint_paths = int(
+                nx_approx.local_node_connectivity(
+                    graph, node, nearest_large, cutoff=DISJOINT_PATH_CUTOFF
+                )
+            )
         features = {
             "degree": int(graph.degree(node)) if node in graph else 0,
             "degree_centrality": float(degree_centrality.get(node, 0.0)),
@@ -305,6 +491,18 @@ def build_feature_rows(
             "high_centrality_neighbor_count": int(len(high_neighbors)),
             "max_neighbor_pagerank": float(max_neighbor_pagerank),
             "shared_neighbor_high_centrality_score": float(shared_score),
+            "k_core": int(core_numbers.get(node, 0)),
+            "hop_distance_to_large_place": (
+                0 if node in top_nodes else hop_distance
+            ),
+            "nodes_within_two_hops": int(reach.get(1, 0) + reach.get(2, 0)),
+            "nodes_within_three_hops": int(
+                reach.get(1, 0) + reach.get(2, 0) + reach.get(3, 0)
+            ),
+            "disjoint_paths_to_large_place": disjoint_paths,
+            "bridge_edge_fraction": float(bridge_fraction.get(node, 0.0)),
+            "within_module_degree_zscore": float(module_zscores.get(node, 0.0)),
+            "participation_coefficient": float(participation.get(node, 0.0)),
             "graph_node_count": int(graph.number_of_nodes()),
             "graph_edge_count": int(graph.number_of_edges()),
             "component_mode": component_mode,
@@ -331,10 +529,28 @@ def build_feature_rows(
                 features["high_centrality_neighbor_count"],
                 features["max_neighbor_pagerank"],
                 features["shared_neighbor_high_centrality_score"],
+                features["k_core"],
+                features["hop_distance_to_large_place"],
+                features["nodes_within_two_hops"],
+                features["nodes_within_three_hops"],
+                features["disjoint_paths_to_large_place"],
+                features["bridge_edge_fraction"],
+                features["within_module_degree_zscore"],
+                features["participation_coefficient"],
                 timestamp,
             )
         )
     return rows
+
+
+def ensure_feature_columns(conn) -> None:
+    with conn.cursor() as cursor:
+        for column_name, column_type in NEW_FEATURE_COLUMNS.items():
+            if not column_exists(conn, "manto_place_network_features", column_name):
+                cursor.execute(
+                    f"ALTER TABLE manto_place_network_features ADD COLUMN {column_name} {column_type}"
+                )
+    conn.commit()
 
 
 def save_rows(
@@ -363,9 +579,14 @@ def save_rows(
                 degree, degree_centrality, pagerank, betweenness_centrality,
                 clustering_coefficient, component_size, community_size,
                 high_centrality_neighbor_count, max_neighbor_pagerank,
-                shared_neighbor_high_centrality_score, created_at
+                shared_neighbor_high_centrality_score, k_core,
+                hop_distance_to_large_place, nodes_within_two_hops,
+                nodes_within_three_hops, disjoint_paths_to_large_place,
+                bridge_edge_fraction, within_module_degree_zscore,
+                participation_coefficient, created_at
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ON CONFLICT (
                 release_record_id, feature_set_version, reference_form, entity_type, manto_id
             ) DO UPDATE
@@ -382,6 +603,14 @@ def save_rows(
                 high_centrality_neighbor_count = EXCLUDED.high_centrality_neighbor_count,
                 max_neighbor_pagerank = EXCLUDED.max_neighbor_pagerank,
                 shared_neighbor_high_centrality_score = EXCLUDED.shared_neighbor_high_centrality_score,
+                k_core = EXCLUDED.k_core,
+                hop_distance_to_large_place = EXCLUDED.hop_distance_to_large_place,
+                nodes_within_two_hops = EXCLUDED.nodes_within_two_hops,
+                nodes_within_three_hops = EXCLUDED.nodes_within_three_hops,
+                disjoint_paths_to_large_place = EXCLUDED.disjoint_paths_to_large_place,
+                bridge_edge_fraction = EXCLUDED.bridge_edge_fraction,
+                within_module_degree_zscore = EXCLUDED.within_module_degree_zscore,
+                participation_coefficient = EXCLUDED.participation_coefficient,
                 created_at = EXCLUDED.created_at
             """,
             rows,
@@ -394,6 +623,7 @@ def main() -> None:
     pre_pausanias_only = not args.include_non_pre_pausanias
     with connect(args.database_url) as conn:
         initialize_schema(conn)
+        ensure_feature_columns(conn)
         release_id = args.release_record_id or latest_release_id(conn)
         print("Loading MANTO edges...", flush=True)
         edges = load_edges(conn, release_id, pre_pausanias_only=pre_pausanias_only)
@@ -408,7 +638,11 @@ def main() -> None:
                 label_source_version=args.label_source_version,
             )
         print("Building graph...", flush=True)
-        graph = build_graph(edges, links)
+        graph = build_graph(
+            edges,
+            links,
+            include_bookkeeping=args.include_bookkeeping_edges,
+        )
         rows = build_feature_rows(
             release_id=release_id,
             feature_set_version=args.feature_set_version,

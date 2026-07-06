@@ -1136,6 +1136,14 @@ CREATE TABLE IF NOT EXISTS manto_place_network_features (
     high_centrality_neighbor_count INTEGER NOT NULL,
     max_neighbor_pagerank DOUBLE PRECISION NOT NULL,
     shared_neighbor_high_centrality_score DOUBLE PRECISION NOT NULL,
+    k_core INTEGER,
+    hop_distance_to_large_place INTEGER,
+    nodes_within_two_hops INTEGER,
+    nodes_within_three_hops INTEGER,
+    disjoint_paths_to_large_place INTEGER,
+    bridge_edge_fraction DOUBLE PRECISION,
+    within_module_degree_zscore DOUBLE PRECISION,
+    participation_coefficient DOUBLE PRECISION,
     created_at TEXT NOT NULL,
     PRIMARY KEY (release_record_id, feature_set_version, reference_form, entity_type, manto_id)
 );
@@ -1178,12 +1186,75 @@ CREATE TABLE IF NOT EXISTS manto_place_connectedness_features (
     shared_action_neighbor_pattern_count INTEGER NOT NULL,
     max_shared_action_patterns_with_neighbor INTEGER NOT NULL,
     shared_action_large_place_neighbor_count INTEGER NOT NULL,
+    exclusive_figure_count INTEGER,
+    panhellenic_figure_count INTEGER,
+    figure_mean_ubiquity DOUBLE PRECISION,
+    figure_max_ubiquity INTEGER,
+    kin_linked_place_count INTEGER,
+    kin_linked_neighbor_count INTEGER,
+    kin_linked_large_place_count INTEGER,
+    action_profile_entropy DOUBLE PRECISION,
+    max_action_cosine_with_neighbor DOUBLE PRECISION,
+    mean_action_cosine_with_neighbors DOUBLE PRECISION,
+    max_action_cosine_with_large_place DOUBLE PRECISION,
+    archaic_story_count INTEGER,
+    classical_story_count INTEGER,
+    hellenistic_story_count INTEGER,
+    early_imperial_story_count INTEGER,
+    earliest_attestation_year INTEGER,
+    latest_attestation_year INTEGER,
+    attestation_span_years INTEGER,
+    shared_figure_count_zscore DOUBLE PRECISION,
+    shared_figure_neighbor_zscore DOUBLE PRECISION,
     created_at TEXT NOT NULL,
     PRIMARY KEY (release_record_id, feature_set_version, reference_form, entity_type, manto_id)
 );
 
 CREATE INDEX IF NOT EXISTS idx_manto_place_connectedness_features_reference
     ON manto_place_connectedness_features (
+        release_record_id,
+        feature_set_version,
+        reference_form,
+        entity_type
+    );
+
+CREATE TABLE IF NOT EXISTS pleiades_places (
+    pleiades_id TEXT PRIMARY KEY,
+    title TEXT,
+    representative_latitude DOUBLE PRECISION,
+    representative_longitude DOUBLE PRECISION,
+    location_precision TEXT,
+    time_periods TEXT,
+    imported_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS manto_place_geography_features (
+    release_record_id BIGINT NOT NULL REFERENCES manto_releases(record_id) ON DELETE CASCADE,
+    feature_set_version TEXT NOT NULL,
+    reference_form TEXT NOT NULL,
+    entity_type TEXT NOT NULL,
+    english_transcription TEXT NOT NULL,
+    manto_id TEXT NOT NULL,
+    manto_label TEXT,
+    pre_pausanias_only BOOLEAN NOT NULL,
+    has_coordinates BOOLEAN NOT NULL,
+    geo_distance_to_nearest_large_place_km DOUBLE PRECISION NOT NULL,
+    geo_distance_to_nearest_place_km DOUBLE PRECISION NOT NULL,
+    places_within_50km_count INTEGER NOT NULL,
+    narrative_neighbor_count_with_coords INTEGER NOT NULL,
+    mean_narrative_neighbor_distance_km DOUBLE PRECISION NOT NULL,
+    min_narrative_neighbor_distance_km DOUBLE PRECISION NOT NULL,
+    max_narrative_neighbor_distance_km DOUBLE PRECISION NOT NULL,
+    neighbors_within_25km_count INTEGER NOT NULL,
+    neighbors_within_50km_count INTEGER NOT NULL,
+    neighbors_within_100km_count INTEGER NOT NULL,
+    local_tie_fraction_50km DOUBLE PRECISION NOT NULL,
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (release_record_id, feature_set_version, reference_form, entity_type, manto_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_manto_place_geography_features_reference
+    ON manto_place_geography_features (
         release_record_id,
         feature_set_version,
         reference_form,
