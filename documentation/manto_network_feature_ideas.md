@@ -210,6 +210,32 @@ of correlated pairs can counter-rotate; the LLM labels themselves are
 unaudited (see the manual-audit item in `TODO.md`); leave-one-region-out
 validation has not been run yet.
 
+## Label supply audit (2026-07-06)
+
+Where the n=152 training set comes from and where it leaks:
+
+- **Passage sweep is 18% done.** 569 of 3,170 passages processed by the
+  passage-level place-state sweep (gpt-5.4-mini, Batch API, 1M-token daily
+  budget in cron). Actual cost is ~1,500 tokens/passage against the 3,500
+  planning estimate, so the remaining ~2,600 passages cost roughly 4M tokens
+  total. The sweep has already produced 371 distinct labelled places.
+- **Linking is the biggest leak.** Of 371 labelled places, only 152 reach
+  training. The drops are (a) Latin-vs-Greek transliteration mismatches that
+  deterministic linking misses (Amyclae/Amyklai, Bassai/Bassae, Aegae/Aigai),
+  (b) sub-place names that should map to a head place ("acropolis of
+  Gythium", "Aegina city", "ancient Mantinea"), and (c) monuments that are
+  unlinkable in principle (altars, statues, "Alcmena's bedchamber").
+- **Pleiades time periods give high-precision negatives.** 1,483 MANTO places
+  have Pleiades attestation periods; 227 have nothing after the Hellenistic
+  period. On the overlap with unambiguous LLM labels (n=52), Pleiades
+  "no post-Hellenistic attestation" agrees with the LLM's does_not_survive
+  10/11 times, but Roman-era attestation does NOT imply survival (22 of 32
+  LLM non-survivors are still Roman-attested — a ruin Pausanias describes is
+  itself an attestation). Use asymmetrically: absence after Hellenistic as a
+  does_not_survive label source; presence proves nothing.
+- **MANTO Information labels stay diagnostic-only** (872:9; absence of a
+  negative phrase defaults to survives).
+
 ## Relation hygiene
 
 MANTO bookkeeping relations (`source_attributes`, `collection`, `period`,

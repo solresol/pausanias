@@ -218,7 +218,25 @@ Full write-up with paper-facing methodology notes:
       presenting either to Greta as a finding.
 - [ ] Grow the balanced labelled sample: the passage-level place-state sweep
       currently yields 152 linked, labelled places; more passage batches and
-      better Pausanias-to-MANTO linking both raise n.
+      better Pausanias-to-MANTO linking both raise n. Label supply audit is in
+      `documentation/manto_network_feature_ideas.md`.
+- [ ] Fix the labelled-place linking leak first (free, biggest lever): 371
+      LLM-labelled places but only 152 link. Add Latin/Greek transliteration
+      variants (Amyclae/Amyklai, -ae/-ai, c/k) and head-place mapping
+      ("acropolis of Gythium" -> Gythium, "ancient Mantinea" -> Mantinea) to
+      the linking/attach name variants.
+- [ ] Finish the passage place-state sweep: 569/3,170 passages done; remaining
+      ~2,600 passages cost roughly 4M batch tokens (~1,500 actual
+      tokens/passage vs the 3,500 planning estimate). Either raise the one-off
+      token budget or let the daily cron run ~9 more days.
+- [ ] Add Pleiades time-period labels as a third, asymmetric label source:
+      "no attestation after Hellenistic" (227 MANTO places) is a
+      high-precision does_not_survive signal (10/11 agreement with LLM labels
+      on the overlap); Roman-era attestation must NOT be used as a survives
+      signal, since Pausanias-described ruins are themselves Roman-attested.
+- [ ] Build a small manual gold set (~50 stratified place-state labels) with
+      Greg/Greta and use the disagreement rate as the error bar on LLM labels,
+      mirroring the Book 3 manual-tag sensitivity approach.
 - [ ] Later: figure quality via global centrality propagation, genealogical
       depth of founding heroes, role-archetype clustering of action profiles,
       regular-equivalence blockmodelling, Burt's constraint, gravity-model
