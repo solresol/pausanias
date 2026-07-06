@@ -9,6 +9,7 @@ from predict_place_survival import (
     label_keys,
     merge_label_records,
     model_metrics,
+    resolve_feature_families,
 )
 
 
@@ -79,6 +80,24 @@ class PredictPlaceSurvivalTests(unittest.TestCase):
         self.assertEqual(metrics["true_survives_pred_does_not_survive"], 3)
         self.assertEqual(metrics["true_does_not_survive_pred_survives"], 9)
         self.assertEqual(metrics["true_does_not_survive_pred_does_not_survive"], 7)
+
+    def test_resolve_feature_families_handles_aliases_combinations_and_errors(self):
+        self.assertEqual(
+            resolve_feature_families("combined"), ["network", "connectedness"]
+        )
+        self.assertEqual(
+            resolve_feature_families("all"),
+            ["network", "connectedness", "geography", "fame"],
+        )
+        self.assertEqual(
+            resolve_feature_families("connectedness, fame"),
+            ["connectedness", "fame"],
+        )
+        self.assertEqual(resolve_feature_families("fame,fame"), ["fame"])
+        with self.assertRaises(SystemExit):
+            resolve_feature_families("mystery")
+        with self.assertRaises(SystemExit):
+            resolve_feature_families("")
 
 
 if __name__ == "__main__":

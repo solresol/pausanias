@@ -18,7 +18,7 @@ from sklearn.metrics import (
     confusion_matrix,
     precision_recall_fscore_support,
 )
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import StratifiedKFold, train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
@@ -32,12 +32,25 @@ from pausanias_db import (
 )
 
 
-FEATURE_SET_VERSION = "manto-pausanias-place-network-v2"
-CONNECTEDNESS_FEATURE_SET_VERSION = "manto-place-connectedness-v1"
+FEATURE_SET_VERSION = "manto-pausanias-place-network-v3"
+CONNECTEDNESS_FEATURE_SET_VERSION = "manto-place-connectedness-v2"
+GEOGRAPHY_FEATURE_SET_VERSION = "manto-place-geography-v1"
+FAME_FEATURE_SET_VERSION = "manto-pausanias-fame-v1"
 LABEL_SOURCE_VERSION = "manto-entity-info-v1"
 LLM_LABEL_SOURCE_VERSION = "llm-place-state-v1"
 TRAINING_LABEL_SETS = ("manto", "sentence-llm", "passage-llm", "llm", "combined")
-FEATURE_FAMILIES = ("network", "connectedness", "combined")
+BASE_FEATURE_FAMILIES = ("network", "connectedness", "geography", "fame")
+FEATURE_FAMILY_ALIASES = {
+    "combined": ["network", "connectedness"],
+    "all": ["network", "connectedness", "geography", "fame"],
+}
+IDENTITY_COLUMNS = [
+    "reference_form",
+    "entity_type",
+    "english_transcription",
+    "manto_id",
+    "manto_label",
+]
 NETWORK_FEATURE_COLUMNS = [
     "degree",
     "degree_centrality",
@@ -49,6 +62,14 @@ NETWORK_FEATURE_COLUMNS = [
     "high_centrality_neighbor_count",
     "max_neighbor_pagerank",
     "shared_neighbor_high_centrality_score",
+    "k_core",
+    "hop_distance_to_large_place",
+    "nodes_within_two_hops",
+    "nodes_within_three_hops",
+    "disjoint_paths_to_large_place",
+    "bridge_edge_fraction",
+    "within_module_degree_zscore",
+    "participation_coefficient",
 ]
 CONNECTEDNESS_FEATURE_COLUMNS = [
     "place_graph_degree",
@@ -72,6 +93,45 @@ CONNECTEDNESS_FEATURE_COLUMNS = [
     "shared_action_neighbor_pattern_count",
     "max_shared_action_patterns_with_neighbor",
     "shared_action_large_place_neighbor_count",
+    "exclusive_figure_count",
+    "panhellenic_figure_count",
+    "figure_mean_ubiquity",
+    "figure_max_ubiquity",
+    "kin_linked_place_count",
+    "kin_linked_neighbor_count",
+    "kin_linked_large_place_count",
+    "action_profile_entropy",
+    "max_action_cosine_with_neighbor",
+    "mean_action_cosine_with_neighbors",
+    "max_action_cosine_with_large_place",
+    "archaic_story_count",
+    "classical_story_count",
+    "hellenistic_story_count",
+    "early_imperial_story_count",
+    "earliest_attestation_year",
+    "latest_attestation_year",
+    "attestation_span_years",
+    "shared_figure_count_zscore",
+    "shared_figure_neighbor_zscore",
+]
+GEOGRAPHY_FEATURE_COLUMNS = [
+    "has_coordinates",
+    "geo_distance_to_nearest_large_place_km",
+    "geo_distance_to_nearest_place_km",
+    "places_within_50km_count",
+    "narrative_neighbor_count_with_coords",
+    "mean_narrative_neighbor_distance_km",
+    "min_narrative_neighbor_distance_km",
+    "max_narrative_neighbor_distance_km",
+    "neighbors_within_25km_count",
+    "neighbors_within_50km_count",
+    "neighbors_within_100km_count",
+    "local_tie_fraction_50km",
+]
+FAME_FEATURE_COLUMNS = [
+    "pausanias_mention_count",
+    "pausanias_passage_count",
+    "manto_pre_pausanias_edge_count",
 ]
 FEATURE_COLUMNS = NETWORK_FEATURE_COLUMNS
 MODEL_RUN_METRIC_COLUMNS = {
@@ -103,10 +163,27 @@ def parse_arguments() -> argparse.Namespace:
         default=CONNECTEDNESS_FEATURE_SET_VERSION,
     )
     parser.add_argument(
+        "--geography-feature-set-version",
+        default=GEOGRAPHY_FEATURE_SET_VERSION,
+    )
+    parser.add_argument(
         "--feature-family",
-        choices=FEATURE_FAMILIES,
         default="network",
-        help="Train on generic network features, Greta-style connectedness features, or both.",
+        help=(
+            "Comma-separated combination of network, connectedness, geography, "
+            "and fame (e.g. 'connectedness,fame'). 'combined' means "
+            "network+connectedness; 'all' means every family. 'fame' alone is "
+            "the no-structure attention baseline the structural families must beat."
+        ),
+    )
+    parser.add_argument(
+        "--cv-folds",
+        type=int,
+        default=0,
+        help=(
+            "When >= 2, report pooled out-of-fold metrics from stratified "
+            "k-fold cross-validation instead of a single train/test split."
+        ),
     )
     parser.add_argument("--label-source-version", default=LABEL_SOURCE_VERSION)
     parser.add_argument(
@@ -146,48 +223,38 @@ def latest_release_id(conn) -> int:
     return int(df.iloc[0]["record_id"])
 
 
-def load_network_feature_rows(conn, *, release_id: int, feature_set_version: str, pre_pausanias_only: bool):
-    return read_sql_query(
-        """
-        SELECT reference_form, entity_type, english_transcription, manto_id, manto_label,
-               degree, degree_centrality, pagerank, betweenness_centrality,
-               clustering_coefficient, component_size, community_size,
-               high_centrality_neighbor_count, max_neighbor_pagerank,
-               shared_neighbor_high_centrality_score
-        FROM manto_place_network_features
-        WHERE release_record_id = %s
-          AND feature_set_version = %s
-          AND pre_pausanias_only = %s
-        """,
-        conn,
-        (release_id, feature_set_version, pre_pausanias_only),
-    )
+def resolve_feature_families(feature_family: str) -> list[str]:
+    if feature_family in FEATURE_FAMILY_ALIASES:
+        return list(FEATURE_FAMILY_ALIASES[feature_family])
+    families = [part.strip() for part in feature_family.split(",") if part.strip()]
+    unknown = sorted(set(families) - set(BASE_FEATURE_FAMILIES))
+    if unknown or not families:
+        raise SystemExit(
+            f"Unknown feature families {unknown}; choose from "
+            f"{BASE_FEATURE_FAMILIES} (comma-separated) or aliases "
+            f"{sorted(FEATURE_FAMILY_ALIASES)}."
+        )
+    seen: list[str] = []
+    for family in families:
+        if family not in seen:
+            seen.append(family)
+    return seen
 
 
-def load_connectedness_feature_rows(
+def load_family_table(
     conn,
     *,
+    table: str,
+    columns: list[str],
     release_id: int,
     feature_set_version: str,
     pre_pausanias_only: bool,
 ):
+    column_sql = ", ".join(IDENTITY_COLUMNS + columns)
     return read_sql_query(
-        """
-        SELECT reference_form, entity_type, english_transcription, manto_id, manto_label,
-               place_graph_degree, place_graph_pagerank,
-               local_place_neighbor_count, direct_place_neighbor_count,
-               same_parent_place_neighbor_count, large_place_neighbor_count,
-               large_place_max_degree, large_place_max_pagerank,
-               has_large_place_neighbor, strong_place_tie_count,
-               mythic_figure_count, action_pattern_count,
-               shared_mythic_figure_neighbor_count, shared_mythic_figure_count,
-               max_shared_mythic_figures_with_neighbor,
-               shared_mythic_figure_large_place_neighbor_count,
-               shared_action_neighbor_count, shared_action_pattern_count,
-               shared_action_neighbor_pattern_count,
-               max_shared_action_patterns_with_neighbor,
-               shared_action_large_place_neighbor_count
-        FROM manto_place_connectedness_features
+        f"""
+        SELECT {column_sql}
+        FROM {table}
         WHERE release_record_id = %s
           AND feature_set_version = %s
           AND pre_pausanias_only = %s
@@ -195,6 +262,65 @@ def load_connectedness_feature_rows(
         conn,
         (release_id, feature_set_version, pre_pausanias_only),
     )
+
+
+def load_fame_counts(conn, *, release_id: int):
+    """Attention-only baseline: Pausanias mention volume and raw MANTO degree.
+
+    Mention counts arrive via manto_place_links, so unlinked places count 0;
+    the MANTO edge count deliberately includes bookkeeping relations because it
+    measures attestation volume, not narrative structure.
+    """
+    mentions = read_sql_query(
+        """
+        SELECT l.manto_id,
+               count(*) AS pausanias_mention_count,
+               count(DISTINCT pn.passage_id) AS pausanias_passage_count
+        FROM manto_place_links l
+        JOIN proper_nouns pn
+          ON pn.reference_form = l.reference_form
+         AND pn.entity_type = l.entity_type
+        WHERE l.release_record_id = %s
+          AND l.confidence <> 'rejected'
+        GROUP BY l.manto_id
+        """,
+        conn,
+        (release_id,),
+    )
+    edge_counts = read_sql_query(
+        """
+        SELECT manto_id, count(*) AS manto_pre_pausanias_edge_count
+        FROM (
+            SELECT source_manto_id AS manto_id
+            FROM manto_edges
+            WHERE release_record_id = %s AND is_pre_pausanias
+            UNION ALL
+            SELECT target_manto_id
+            FROM manto_edges
+            WHERE release_record_id = %s AND is_pre_pausanias
+        ) endpoints
+        GROUP BY manto_id
+        """,
+        conn,
+        (release_id, release_id),
+    )
+    if mentions.empty:
+        merged = edge_counts.copy()
+        merged["pausanias_mention_count"] = 0
+        merged["pausanias_passage_count"] = 0
+    else:
+        merged = mentions.merge(edge_counts, on="manto_id", how="outer")
+    for column in FAME_FEATURE_COLUMNS:
+        if column not in merged.columns:
+            merged[column] = 0
+    return merged[["manto_id"] + FAME_FEATURE_COLUMNS].fillna(0)
+
+
+FAMILY_TABLES = {
+    "network": ("manto_place_network_features", NETWORK_FEATURE_COLUMNS),
+    "connectedness": ("manto_place_connectedness_features", CONNECTEDNESS_FEATURE_COLUMNS),
+    "geography": ("manto_place_geography_features", GEOGRAPHY_FEATURE_COLUMNS),
+}
 
 
 def load_feature_rows(
@@ -203,62 +329,61 @@ def load_feature_rows(
     release_id: int,
     feature_set_version: str,
     connectedness_feature_set_version: str,
+    geography_feature_set_version: str,
     pre_pausanias_only: bool,
     feature_family: str,
 ):
-    if feature_family == "network":
-        return (
-            load_network_feature_rows(
-                conn,
-                release_id=release_id,
-                feature_set_version=feature_set_version,
-                pre_pausanias_only=pre_pausanias_only,
-            ),
-            NETWORK_FEATURE_COLUMNS,
-            feature_set_version,
+    families = resolve_feature_families(feature_family)
+    versions = {
+        "network": feature_set_version,
+        "connectedness": connectedness_feature_set_version,
+        "geography": geography_feature_set_version,
+        "fame": FAME_FEATURE_SET_VERSION,
+    }
+    feature_columns: list[str] = []
+    merged = None
+    # Fame has no feature table of its own; it joins onto another family's rows,
+    # so a fame-only run borrows the network rows as its identity spine.
+    table_families = [family for family in families if family != "fame"]
+    spine_families = table_families or ["network"]
+    for family in spine_families:
+        table, columns = FAMILY_TABLES[family]
+        frame = load_family_table(
+            conn,
+            table=table,
+            columns=columns,
+            release_id=release_id,
+            feature_set_version=versions[family],
+            pre_pausanias_only=pre_pausanias_only,
         )
-    if feature_family == "connectedness":
-        return (
-            load_connectedness_feature_rows(
-                conn,
-                release_id=release_id,
-                feature_set_version=connectedness_feature_set_version,
-                pre_pausanias_only=pre_pausanias_only,
-            ),
-            CONNECTEDNESS_FEATURE_COLUMNS,
-            connectedness_feature_set_version,
-        )
-
-    network = load_network_feature_rows(
-        conn,
-        release_id=release_id,
-        feature_set_version=feature_set_version,
-        pre_pausanias_only=pre_pausanias_only,
-    )
-    connectedness = load_connectedness_feature_rows(
-        conn,
-        release_id=release_id,
-        feature_set_version=connectedness_feature_set_version,
-        pre_pausanias_only=pre_pausanias_only,
-    )
-    if network.empty or connectedness.empty:
-        return (
-            network.iloc[0:0].copy() if not network.empty else connectedness.iloc[0:0].copy(),
-            NETWORK_FEATURE_COLUMNS + CONNECTEDNESS_FEATURE_COLUMNS,
-            f"{feature_set_version}+{connectedness_feature_set_version}",
-        )
-    merged = network.merge(
-        connectedness[
-            ["reference_form", "entity_type", "manto_id"] + CONNECTEDNESS_FEATURE_COLUMNS
-        ],
-        on=["reference_form", "entity_type", "manto_id"],
-        how="inner",
-    )
-    return (
-        merged,
-        NETWORK_FEATURE_COLUMNS + CONNECTEDNESS_FEATURE_COLUMNS,
-        f"{feature_set_version}+{connectedness_feature_set_version}",
-    )
+        if family in families:
+            feature_columns.extend(columns)
+        else:
+            frame = frame[IDENTITY_COLUMNS]
+        if merged is None:
+            merged = frame
+        elif frame.empty or merged.empty:
+            merged = merged.iloc[0:0].copy()
+        else:
+            merge_columns = [
+                column for column in frame.columns
+                if column in ("reference_form", "entity_type", "manto_id")
+                or column not in merged.columns
+            ]
+            merged = merged.merge(
+                frame[merge_columns],
+                on=["reference_form", "entity_type", "manto_id"],
+                how="inner",
+            )
+    if "fame" in families and merged is not None and not merged.empty:
+        fame = load_fame_counts(conn, release_id=release_id)
+        merged = merged.merge(fame, on="manto_id", how="left")
+        merged[FAME_FEATURE_COLUMNS] = merged[FAME_FEATURE_COLUMNS].fillna(0)
+        feature_columns.extend(FAME_FEATURE_COLUMNS)
+    elif "fame" in families:
+        feature_columns.extend(FAME_FEATURE_COLUMNS)
+    run_version = "+".join(versions[family] for family in families)
+    return merged, feature_columns, run_version
 
 
 def label_source_version_for_run(args: argparse.Namespace) -> str:
@@ -676,6 +801,7 @@ def main() -> None:
             release_id=release_id,
             feature_set_version=args.feature_set_version,
             connectedness_feature_set_version=args.connectedness_feature_set_version,
+            geography_feature_set_version=args.geography_feature_set_version,
             pre_pausanias_only=pre_pausanias_only,
             feature_family=args.feature_family,
         )
@@ -722,24 +848,44 @@ def main() -> None:
             )
             return
         x = training[feature_columns].astype(float).to_numpy()
-        x_train, x_test, y_train, y_test = train_test_split(
-            x,
-            y,
-            test_size=args.test_size,
-            random_state=42,
-            stratify=y,
-        )
-        pipeline = Pipeline(
-            [
-                ("scale", StandardScaler()),
-                ("logreg", LogisticRegression(max_iter=2000, class_weight="balanced")),
-            ]
-        )
-        pipeline.fit(x_train, y_train)
-        y_pred = pipeline.predict(x_test)
-        majority_label = Counter(y_train).most_common(1)[0][0]
-        baseline_pred = np.full(len(y_test), majority_label)
-        metrics = model_metrics(y_test, y_pred, baseline_pred)
+
+        def make_pipeline() -> Pipeline:
+            return Pipeline(
+                [
+                    ("scale", StandardScaler()),
+                    ("logreg", LogisticRegression(max_iter=2000, class_weight="balanced")),
+                ]
+            )
+
+        cv_folds = min(args.cv_folds, positive_count, negative_count) if args.cv_folds >= 2 else 0
+        if cv_folds >= 2:
+            splitter = StratifiedKFold(n_splits=cv_folds, shuffle=True, random_state=42)
+            oof_pred = np.zeros(len(y), dtype=int)
+            for train_index, test_index in splitter.split(x, y):
+                fold_pipeline = make_pipeline()
+                fold_pipeline.fit(x[train_index], y[train_index])
+                oof_pred[test_index] = fold_pipeline.predict(x[test_index])
+            majority_label = Counter(y).most_common(1)[0][0]
+            baseline_pred = np.full(len(y), majority_label)
+            metrics = model_metrics(y, oof_pred, baseline_pred)
+            evaluation_mode = f"{cv_folds}-fold-cv"
+            pipeline = make_pipeline()
+            pipeline.fit(x, y)
+        else:
+            x_train, x_test, y_train, y_test = train_test_split(
+                x,
+                y,
+                test_size=args.test_size,
+                random_state=42,
+                stratify=y,
+            )
+            pipeline = make_pipeline()
+            pipeline.fit(x_train, y_train)
+            y_pred = pipeline.predict(x_test)
+            majority_label = Counter(y_train).most_common(1)[0][0]
+            baseline_pred = np.full(len(y_test), majority_label)
+            metrics = model_metrics(y_test, y_pred, baseline_pred)
+            evaluation_mode = "single-split"
         save_run(
             conn,
             run_id=run_id,
@@ -756,6 +902,7 @@ def main() -> None:
                 f"feature family={args.feature_family}; "
                 f"label set={args.training_label_set}; "
                 f"conflict policy={args.label_conflict_policy}; "
+                f"evaluation={evaluation_mode}; "
                 f"label stats={dict(label_stats)}"
             ),
         )
@@ -767,7 +914,8 @@ def main() -> None:
         f"balanced_accuracy={metrics['balanced_accuracy']:.3f}, "
         f"samples={len(training)}, "
         f"features={args.feature_family}, "
-        f"labels={args.training_label_set}."
+        f"labels={args.training_label_set}, "
+        f"evaluation={evaluation_mode}."
     )
 
 
