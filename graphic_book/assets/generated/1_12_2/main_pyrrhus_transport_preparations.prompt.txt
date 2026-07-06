@@ -1,0 +1,14 @@
+Use case: historical-scene
+Asset type: raster main panel for a Pausanias graphic-book page, no text baked into the image
+Primary request: Create a rich, historically grounded Hellenistic coastal logistics scene for Pyrrhus preparing the crossing to Italy after deciding on his campaign.
+Scene/backdrop: a fortified Greek harbor at dawn on the Ionian Sea, ships moored at stone quays, mountainous Epirus/Tarentum visual language, distant sea horizon.
+Subject: Pyrrhus in Hellenistic armor directing urgent preparations; warships being readied; merchant vessels taking on cavalry horses, infantry, shields, amphorae, ropes, gangplanks, sailors, and soldiers. The scene should imply speed, military foresight, and a secret crossing.
+Style/medium: sophisticated coffee-table historical illustration, warm parchment-compatible palette, painterly realism with fine ink-and-wash texture, richly detailed architecture, ships, rigging, figures, and water. Comparable visual ambition to an illustrated historical atlas spread.
+Composition/framing: wide landscape panel, slightly elevated three-quarter view; Pyrrhus and cavalry loading in the left or center foreground, ships and merchant transports extending across the midground, open sea and hazy Italian direction in the distance. Leave open areas around edges for local labels and callouts.
+Lighting/mood: dawn gold and blue sea light, purposeful urgency, not chaotic.
+Color palette: weathered stone, bronze, muted red cloaks, ochre sails, deep blue-green sea, parchment-friendly highlights.
+Materials/textures: wood hulls, linen sails, bronze armor, horse tack, stone quay, ropes, wave texture.
+Text (verbatim): no text, no inscriptions, no letters, no watermark.
+Constraints: historically plausible Hellenistic Greek ships and soldiers; professional, dense, finished art; suitable for a general audience; no nudity; no modern objects; no cartoon/vector/flat diagram style.
+Avoid: simple icons, schematic map, empty terrain, stock fantasy armor, Roman triumph scene, readable text, labels, banners with letters, watermark.
+

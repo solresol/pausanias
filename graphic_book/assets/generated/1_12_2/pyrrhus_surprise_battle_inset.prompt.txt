@@ -1,0 +1,14 @@
+Use case: historical-scene
+Asset type: raster scenic inset for a Pausanias graphic-book page, no text baked into the image
+Primary request: Create a compact but richly finished Hellenistic battlefield scene showing Pyrrhus' sudden first appearance with his army causing confusion among Romans fighting Tarentines.
+Scene/backdrop: southern Italian plain near a Greek city, dusty battlefield with low hills and city walls far behind, late afternoon light.
+Subject: Pyrrhus arriving with Greek infantry and cavalry from the flank; Roman troops in early Republican equipment startled and turning in confusion; Tarentine allies rallying. The key idea is surprise and sudden visibility after an unseen crossing.
+Style/medium: sophisticated historical illustration, painterly realism with atlas-book texture, detailed but readable at inset size, parchment-compatible tones.
+Composition/framing: wide horizontal inset; Pyrrhus' force entering from one side, Roman line disrupted in the center, Tarentine troops on the opposite side; dust, shields, spears, horses, banners without letters. Leave a little uncluttered sky/ground near edges for local labels.
+Lighting/mood: tense, dynamic, historically serious, not gore-focused.
+Color palette: ochre dust, bronze, muted red, dark blue-green shadows, warm stone.
+Materials/textures: shields, helmets, linen cuirasses, horse tack, dust, dry grass, city wall stone.
+Text (verbatim): no text, no inscriptions, no readable marks, no watermark.
+Constraints: no graphic gore, no nudity, no modern objects; high-quality finished art, not a diagram; accurate enough distinction between Greek/Tarentine and early Roman forces.
+Avoid: fantasy monsters, elephants (they are for the next passage, not this one), readable labels, cartoony figures, flat vector terrain, sparse symbolic silhouettes.
+
