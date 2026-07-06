@@ -161,9 +161,11 @@ Source anchors are in the private ignored transcript notes, especially:
       treating absence of a negative status phrase as a stable positive label.
 - [ ] Manually review ambiguous Pausanias-to-MANTO place links, especially exact
       name matches without Pleiades IDs.
-- [ ] Expand Pausanias-to-MANTO place linking beyond exact names: MANTO
-      alternate labels, local epithets, monument/site names attached to a head
-      place, and Pleiades/Wikidata mismatches.
+- [x] Expand Pausanias-to-MANTO place linking beyond exact names:
+      transliteration variants and LLM-curated links are in
+      (link_manto_places.py, llm_link_manto_places.py, curated_place_links).
+- [ ] Remaining linking gaps: MANTO alternate labels as a deterministic lane,
+      local epithets, and Pleiades/Wikidata mismatch reconciliation.
 - [ ] Compare the strict pre-Pausanias model against a Pausanias-included upper
       bound only as a leakage diagnostic, not as evidence.
 - [ ] Compare MANTO labels, archived sentence-level LLM claims, and new
@@ -220,11 +222,22 @@ Full write-up with paper-facing methodology notes:
       currently yields 152 linked, labelled places; more passage batches and
       better Pausanias-to-MANTO linking both raise n. Label supply audit is in
       `documentation/manto_network_feature_ideas.md`.
-- [ ] Fix the labelled-place linking leak first (free, biggest lever): 371
+- [x] Fix the labelled-place linking leak first (free, biggest lever): 371
       LLM-labelled places but only 152 link. Add Latin/Greek transliteration
       variants (Amyclae/Amyklai, -ae/-ai, c/k) and head-place mapping
       ("acropolis of Gythium" -> Gythium, "ancient Mantinea" -> Mantinea) to
-      the linking/attach name variants.
+      the linking/attach name variants. Done via transliteration keys (+305
+      links), curated_place_links, and llm_link_manto_places.py (+110 links,
+      142 no-matches); training n rose 152 -> 356.
+- [ ] Review the 110 LLM-suggested links in curated_place_links, starting with
+      the "(low confidence)" generic-sanctuary ones; set reviewed=TRUE or
+      rejected=TRUE, then re-run link_manto_places.py. The website curation
+      page is places/manto-links.html.
+- [ ] Explain the accuracy drop at n=356 (all families fell; connectedness+fame
+      best at 0.628 vs fame 0.568): stratify evaluation by link confidence
+      (high / medium / curated-llm) to separate link noise from the
+      easy-subset effect, e.g. a --min-link-confidence option through the
+      feature builders and classifier.
 - [ ] Finish the passage place-state sweep: 569/3,170 passages done; remaining
       ~2,600 passages cost roughly 4M batch tokens (~1,500 actual
       tokens/passage vs the 3,500 planning estimate). Either raise the one-off

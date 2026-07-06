@@ -127,7 +127,24 @@ for places linked to Pausanias tie records.
 
 `link_manto_places.py` links local Pausanias place proper nouns to imported
 MANTO place entities. Run it after each MANTO import before rebuilding network
-features.
+features. Besides Pleiades-ID and exact normalized-name matches it bridges
+Latin/Greek transliteration variants (Amyclae/Amyklai, Rhium/Rion) at medium
+confidence, and it injects rows from `curated_place_links` — the persistent
+curation table for manually asserted links (source='manual') and LLM
+suggestions (source='llm'). To have an LLM propose links for place names that
+carry survival labels but match nothing:
+
+```bash
+uv run llm_link_manto_places.py --dry-run   # list unlinked names and shortlists
+uv run llm_link_manto_places.py             # record decisions in curated_place_links
+uv run link_manto_places.py                 # inject them into manto_place_links
+```
+
+No-match decisions are stored too (rejected=TRUE) so names are not re-queried.
+The website page `places/manto-links.html` lists every link with method,
+confidence, and survival label, plus the labelled-but-unlinked curation queue.
+To assert a link manually, insert into `curated_place_links` with
+source='manual' and re-run `link_manto_places.py`.
 
 For prediction, use the strict pre-Pausanias graph only:
 `manto_edges.is_pre_pausanias = TRUE`. Edges from Pausanias, sources dated to

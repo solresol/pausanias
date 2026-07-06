@@ -236,6 +236,37 @@ Where the n=152 training set comes from and where it leaks:
 - **MANTO Information labels stay diagnostic-only** (872:9; absence of a
   negative phrase defaults to survives).
 
+## Linking expansion results (2026-07-06, same day, second pass)
+
+Fixing the linking leak worked mechanically: transliteration bridging added
+305 deterministic links and the LLM curation pass (gpt-5.4-mini, ~150k tokens)
+added 110 more with 142 recorded no-matches, taking `manto_place_links` from
+811 to 1,226 rows and the labelled training sample from n=152 to **n=356**
+(the labelled-but-unlinked queue is down to 134 names, mostly monuments).
+
+The scientific result is sobering and useful: on the bigger, harder sample
+every model got *worse*, not better (5-fold CV, LLM labels, majority class
+58%):
+
+| feature family | n=152 | n=356 |
+| --- | --- | --- |
+| fame baseline | 0.610 | 0.568 |
+| network v3 | 0.668 | 0.529 |
+| connectedness v2 | 0.702 | 0.612 |
+| geography | 0.583 | 0.553 |
+| network + connectedness | 0.733 | 0.580 |
+| connectedness + fame | 0.715 | **0.628** |
+| all | 0.728 | 0.617 |
+
+Reading: the exact-name-linkable places were the famous, well-attested ones —
+exactly where network features are informative — so the n=152 numbers were an
+easy-subset artifact. On the fuller sample, Greta-style connectedness still
+beats fame (+0.04..0.06) but generic centrality collapses to chance. Two
+follow-ups before drawing conclusions: (a) re-run stratified by link
+confidence (high vs medium vs curated-llm) to separate link-noise from
+easy-subset effects; (b) review the low-confidence LLM links (generic
+"sanctuary of X" names) which plausibly attach wrong labels.
+
 ## Relation hygiene
 
 MANTO bookkeeping relations (`source_attributes`, `collection`, `period`,
