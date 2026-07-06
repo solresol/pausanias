@@ -37,6 +37,10 @@ Source anchors are in the private ignored transcript notes, especially:
       before choosing the next analysis.
 - [ ] Decide which additional Pausanias analysis, if any, belongs in the July
       paper rather than a later paper.
+- [ ] Decide whether the MANTO place-survival network features belong in the
+      July paper or a separate follow-on paper; see
+      `documentation/manto_network_feature_ideas.md` for the feature inventory
+      and the fame-baseline/leakage guardrails any claim must pass.
 - [ ] Use the manual Book 3 disagreement rate as uncertainty/error bars for
       claims such as "daughter is strongly mythic" rather than treating AI labels
       as ground truth.
@@ -165,6 +169,46 @@ Source anchors are in the private ignored transcript notes, especially:
 - [ ] Compare MANTO labels, archived sentence-level LLM claims, and new
       passage-level LLM claims before treating the combined labels as paper
       evidence.
+
+### Network-feature brainstorm (2026-07-06)
+
+Full write-up with paper-facing methodology notes:
+`documentation/manto_network_feature_ideas.md`.
+
+- [ ] Add deeper position features to the place graph: k-core number, hop
+      distance to the nearest large place, 2/3-hop local reach, approximate
+      node-disjoint paths to the nearest large place (narrative redundancy),
+      and bridge-edge fraction.
+- [ ] Exclude MANTO bookkeeping relations (source_attributes, collection,
+      period, unesco_status, mentioned_in_text, depictions, identified_in)
+      from the generic network-feature graph.
+- [ ] Add figure-ubiquity features: exclusive-figure count, panhellenic-figure
+      count, mean/max figure ubiquity per place.
+- [ ] Add kin-mediated place ties: places linked via figure-kinship-figure
+      chains (founders who are siblings, parent/child, spouses).
+- [ ] Add action-profile features: per-place action vectors, profile entropy,
+      cosine similarity with neighbours and with large places.
+- [ ] Add Guimerà-Amaral cartographic roles: within-community degree z-score
+      and participation coefficient over Louvain communities.
+- [ ] Add temporal-layering features from evidence_latest_year: per-stratum
+      story counts (archaic/classical/Hellenistic/early imperial), attestation
+      span, and myth-accretion signals.
+- [ ] Import Pleiades coordinates for MANTO places and add geography-network
+      hybrid features: geographic distance to the nearest large place,
+      neighbour-distance statistics, and localism of mythology (fraction of
+      narrative ties within 25/50/100 km).
+- [ ] Add a fame-baseline feature family (Pausanias mention counts plus raw
+      pre-Pausanias attestation volume) that structural features must beat.
+- [ ] Add stratified cross-validation to the place-survival classifier instead
+      of relying on a single train/test split.
+- [ ] Add null-model z-scores for shared-figure features via degree-preserving
+      rewiring of the place-figure structure.
+- [ ] Later: figure quality via global centrality propagation, genealogical
+      depth of founding heroes, role-archetype clustering of action profiles,
+      regular-equivalence blockmodelling, Burt's constraint, gravity-model
+      residuals, and leave-one-region-out validation.
+- [ ] Keep negative-valence motifs (destruction/conquest edges) out of the
+      fair model; report them separately as a leakage-adjacent diagnostic.
 
 ## Translation-Length Residuals and Wordiness
 
