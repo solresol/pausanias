@@ -4586,6 +4586,123 @@ def generate_manto_network_pages(network_data, output_dir, title):
         f.write(page)
 
 
+def _render_manto_link_rows(links):
+    if not links:
+        return '<tr><td colspan="7">No MANTO place links are available.</td></tr>'
+    rows = []
+    for link in links:
+        survival = link.get("survival_label") or ""
+        survival_cell = {
+            "survives": '<span class="badge badge-good">survives</span>',
+            "does_not_survive": '<span class="badge badge-bad">does not survive</span>',
+            "conflicting": '<span class="badge">conflicting</span>',
+        }.get(survival, "")
+        rows.append(
+            "<tr>"
+            f"<td>{html.escape(link['reference_form'])}</td>"
+            f"<td>{html.escape(link['english_transcription'])}</td>"
+            f"<td>{html.escape(link['manto_label'])}</td>"
+            f"<td><code>{html.escape(link['manto_id'])}</code></td>"
+            f"<td>{html.escape(link['match_method'])}</td>"
+            f"<td>{html.escape(link['confidence'])}{' ✓' if link.get('reviewed') else ''}</td>"
+            f"<td>{survival_cell}</td>"
+            "</tr>"
+        )
+    return "".join(rows)
+
+
+def _render_manto_unlinked_rows(unlinked):
+    if not unlinked:
+        return '<tr><td colspan="4">Every labelled place currently links to MANTO.</td></tr>'
+    rows = []
+    for item in unlinked:
+        rows.append(
+            "<tr>"
+            f"<td>{html.escape(item['place_name'])}</td>"
+            f"<td>{html.escape(item['survival_label'])}</td>"
+            f"<td>{int(item['mention_count'])}</td>"
+            f"<td>{html.escape(item.get('llm_decision') or '')}</td>"
+            "</tr>"
+        )
+    return "".join(rows)
+
+
+def generate_manto_links_page(links_data, output_dir, title):
+    """Generate the MANTO-Pausanias place-link listing and curation queue."""
+    places_dir = os.path.join(output_dir, "places")
+    os.makedirs(places_dir, exist_ok=True)
+
+    if not links_data or not links_data.get("available"):
+        message = html.escape(
+            links_data.get("message", "No MANTO link data is available.")
+            if links_data
+            else "No MANTO link data is available."
+        )
+        body = f"<p>{message}</p>"
+        summary = ""
+        method_note = ""
+    else:
+        method_counts = links_data.get("method_counts", {})
+        method_note = ", ".join(
+            f"{html.escape(method)}: {count:,}"
+            for method, count in sorted(method_counts.items(), key=lambda item: -item[1])
+        )
+        summary = f"""
+        <div class="metric-strip">
+            <div><strong>{int(links_data.get("linked_count", 0)):,}</strong><span>Pausanias&ndash;MANTO links</span></div>
+            <div><strong>{int(links_data.get("labelled_place_count", 0)):,}</strong><span>places with survival labels</span></div>
+            <div><strong>{int(links_data.get("unlinked_count", 0)):,}</strong><span>labelled but unlinked</span></div>
+        </div>
+        """
+        body = f"""
+        <h2>Linked Places</h2>
+        <p class="note">Match methods: {method_note}. Links marked ✓ have been manually reviewed. Curated rows come from <code>curated_place_links</code> (manual entries or LLM suggestions via <code>llm_link_manto_places.py</code>).</p>
+        <table class="predictor-table">
+            <thead>
+                <tr><th>Pausanias Form</th><th>Transcription</th><th>MANTO Label</th><th>MANTO ID</th><th>Method</th><th>Confidence</th><th>Survival Label</th></tr>
+            </thead>
+            <tbody>{_render_manto_link_rows(links_data.get("links", []))}</tbody>
+        </table>
+
+        <h2>Curation Queue: Labelled but Unlinked</h2>
+        <p class="note">These places carry survival labels from the place-state sweeps but match no MANTO entity yet. Add rows to <code>curated_place_links</code> (source='manual') or run <code>llm_link_manto_places.py</code>, then re-run <code>link_manto_places.py</code>.</p>
+        <table class="predictor-table">
+            <thead>
+                <tr><th>Labelled Place Name</th><th>Survival Label</th><th>Mentions</th><th>LLM Decision</th></tr>
+            </thead>
+            <tbody>{_render_manto_unlinked_rows(links_data.get("unlinked", []))}</tbody>
+        </table>
+        """
+
+    page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - MANTO Place Links</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{title}</h1>
+        <p>Pausanias&ndash;MANTO place identifications</p>
+    </header>
+    {_site_nav("../", "places")}
+    <div class="container wide-container">
+        <div class="breadcrumb"><a href="index.html">Places</a> &rsaquo; MANTO Place Links</div>
+        <h2>MANTO &harr; Pausanias Connections</h2>
+        <p class="note">How places named by Pausanias map onto MANTO mythology entities. These links join the survival labels to the MANTO network features in the place-survival model.</p>
+        {summary}
+        {body}
+        <footer>{_generated_footer()}</footer>
+    </div>
+</body>
+</html>
+"""
+    with open(os.path.join(places_dir, "manto-links.html"), "w", encoding="utf-8") as f:
+        f.write(page)
+
+
 def generate_places_index(output_dir, title):
     """Generate a hub page for geographic and noun-network views."""
     places_dir = os.path.join(output_dir, "places")
@@ -4650,6 +4767,11 @@ def generate_places_index(output_dir, title):
                 <h3>MANTO Place Network</h3>
                 <p>Strict pre-Pausanias MANTO place-place links, locality edges, Athens neighborhood structure, and detected place communities.</p>
                 <a href="manto-network.html">Open MANTO Network</a>
+            </section>
+            <section class="hub-card">
+                <h3>MANTO Place Links</h3>
+                <p>How Pausanias' place names map onto MANTO entities: link methods, confidence, survival labels, and the labelled-but-unlinked curation queue.</p>
+                <a href="manto-links.html">Open MANTO Links</a>
             </section>
             <section class="hub-card">
                 <h3>Interactive Network</h3>

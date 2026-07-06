@@ -3611,6 +3611,152 @@ def get_manto_place_network_analysis(conn, *, neighborhood_limit=75, community_l
     }
 
 
+def _place_matching_keys(value):
+    from link_manto_places import name_variants, transliteration_keys
+
+    variants = name_variants(
+        value,
+        include_parenthetical_content=True,
+        include_location_container=True,
+        include_generic_head=True,
+    )
+    return variants | transliteration_keys(variants)
+
+
+def get_manto_pausanias_links(conn):
+    """Pausanias-MANTO place links plus the labelled-but-unlinked curation queue."""
+    required_tables = {"manto_releases", "manto_place_links"}
+    if not all(pg_table_exists(conn, table) for table in required_tables):
+        return {
+            "available": False,
+            "message": "MANTO place-link tables are not available.",
+        }
+    release_id = _manto_latest_release_id(conn)
+    if release_id is None:
+        return {
+            "available": False,
+            "message": "No imported MANTO release is available.",
+        }
+
+    link_rows = read_sql_query(
+        """
+        SELECT reference_form, english_transcription, manto_id, manto_label,
+               match_method, confidence, reviewed
+        FROM manto_place_links
+        WHERE release_record_id = %s
+          AND confidence <> 'rejected'
+        ORDER BY english_transcription, reference_form, manto_id
+        """,
+        conn,
+        (release_id,),
+    )
+
+    labels = {}
+    label_counts = Counter()
+    if pg_table_exists(conn, "passage_place_state_mentions"):
+        label_rows = read_sql_query(
+            """
+            SELECT canonical_place_name, target_label, count(*) AS mention_count
+            FROM (
+                SELECT canonical_place_name, target_label
+                FROM passage_place_state_mentions
+                WHERE target_label IN ('survives', 'does_not_survive')
+                UNION ALL
+                SELECT canonical_place_name, target_label
+                FROM place_state_mentions
+                WHERE target_label IN ('survives', 'does_not_survive')
+            ) mentions
+            GROUP BY canonical_place_name, target_label
+            """,
+            conn,
+        )
+        per_name = defaultdict(Counter)
+        for _, row in label_rows.iterrows():
+            per_name[str(row["canonical_place_name"])][str(row["target_label"])] += int(
+                row["mention_count"]
+            )
+        for name, counts in per_name.items():
+            label = "conflicting" if len(counts) > 1 else next(iter(counts))
+            label_counts[label] += 1
+            total = int(sum(counts.values()))
+            for key in _place_matching_keys(name):
+                labels[key] = (label, name, total)
+
+    curated_decisions = {}
+    if pg_table_exists(conn, "curated_place_links"):
+        curated_rows = read_sql_query(
+            "SELECT place_name, manto_id, source, rationale, rejected FROM curated_place_links",
+            conn,
+        )
+        for _, row in curated_rows.iterrows():
+            curated_decisions[str(row["place_name"])] = {
+                "manto_id": str(row["manto_id"] or ""),
+                "source": str(row["source"]),
+                "rationale": str(row["rationale"] or ""),
+                "rejected": bool(row["rejected"]),
+            }
+
+    linked_keys = set()
+    links = []
+    for _, row in link_rows.iterrows():
+        row_keys = set()
+        for value in (row["reference_form"], row["english_transcription"], row["manto_label"]):
+            row_keys.update(_place_matching_keys(value))
+        linked_keys.update(row_keys)
+        survival = ""
+        for key in row_keys:
+            if key in labels:
+                survival = labels[key][0]
+                break
+        links.append(
+            {
+                "reference_form": str(row["reference_form"] or ""),
+                "english_transcription": str(row["english_transcription"] or ""),
+                "manto_id": str(row["manto_id"] or ""),
+                "manto_label": _manto_clean_label(row["manto_label"]),
+                "match_method": str(row["match_method"] or ""),
+                "confidence": str(row["confidence"] or ""),
+                "reviewed": bool(row["reviewed"]),
+                "survival_label": survival,
+            }
+        )
+
+    seen_names = set()
+    unlinked = []
+    for label, name, mention_count in labels.values():
+        if name in seen_names:
+            continue
+        seen_names.add(name)
+        if _place_matching_keys(name) & linked_keys:
+            continue
+        decision = curated_decisions.get(name)
+        unlinked.append(
+            {
+                "place_name": name,
+                "survival_label": label,
+                "mention_count": mention_count,
+                "llm_decision": (
+                    f"no match ({decision['rationale']})"
+                    if decision and decision["rejected"]
+                    else ""
+                ),
+            }
+        )
+    unlinked.sort(key=lambda item: (-item["mention_count"], item["place_name"]))
+
+    method_counts = Counter(link["match_method"] for link in links)
+    return {
+        "available": True,
+        "release_record_id": int(release_id),
+        "links": links,
+        "unlinked": unlinked,
+        "method_counts": dict(method_counts),
+        "labelled_place_count": int(sum(label_counts.values())),
+        "linked_count": len(links),
+        "unlinked_count": len(unlinked),
+    }
+
+
 def get_translation_page_data(conn):
     """Get all data needed for translation pages: passages, translations, proper nouns with Wikidata info."""
     cursor = conn.cursor()

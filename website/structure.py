@@ -514,6 +514,24 @@ def create_website_structure(output_dir):
         font-size: 0.9em;
     }
 
+    .badge {
+        background-color: #eee9e3;
+        border-radius: 10px;
+        font-size: 0.85em;
+        padding: 2px 8px;
+        white-space: nowrap;
+    }
+
+    .badge-good {
+        background-color: #dcebd5;
+        color: #2f5d2a;
+    }
+
+    .badge-bad {
+        background-color: #f0dcd7;
+        color: #7a3527;
+    }
+
     .manto-network-layout {
         align-items: start;
         display: grid;

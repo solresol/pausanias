@@ -22,7 +22,7 @@ from sklearn.model_selection import StratifiedKFold, train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
-from link_manto_places import name_variants
+from link_manto_places import name_variants, transliteration_keys
 from pausanias_db import (
     add_database_argument,
     column_exists,
@@ -410,14 +410,14 @@ def label_keys(
 ) -> set[str]:
     if kind == "manto":
         return {label_key(kind, value)}
-    return {
-        f"name:{variant}"
-        for variant in name_variants(
-            value,
-            include_parenthetical_content=include_parenthetical_content,
-            include_location_container=include_location_container,
-            include_generic_head=include_generic_head,
-        )
+    variants = name_variants(
+        value,
+        include_parenthetical_content=include_parenthetical_content,
+        include_location_container=include_location_container,
+        include_generic_head=include_generic_head,
+    )
+    return {f"name:{variant}" for variant in variants} | {
+        f"translit:{key}" for key in transliteration_keys(variants)
     }
 
 

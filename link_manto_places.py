@@ -20,6 +20,50 @@ def normalize_name(value: str | None) -> str:
     return re.sub(r"[^a-z0-9]+", "", value.lower())
 
 
+# Ordered substitutions mapping Latin-style romanizations onto a canonical
+# Greek-style key: Amyclae/Amyklai, Aegae/Aigai, Rhium/Rion all collide.
+TRANSLITERATION_SUBSTITUTIONS = (
+    ("ae", "ai"),
+    ("oe", "oi"),
+    ("rh", "r"),
+    ("c", "k"),
+)
+TRANSLITERATION_ENDINGS = (
+    ("um", "on"),
+    ("us", "os"),
+)
+
+
+def transliteration_key(value: str | None) -> str:
+    key = normalize_name(value)
+    if not key:
+        return ""
+    for source, target in TRANSLITERATION_SUBSTITUTIONS:
+        key = key.replace(source, target)
+    for source, target in TRANSLITERATION_ENDINGS:
+        if key.endswith(source):
+            key = key[: -len(source)] + target
+            break
+    return key
+
+
+def transliteration_keys(variants: set[str]) -> set[str]:
+    """Canonical transliteration keys for normalized name variants.
+
+    Includes a looser final -ai/-a merge so Latin plurals like Alipherae meet
+    Greek singulars like Aliphera.
+    """
+    keys: set[str] = set()
+    for variant in variants:
+        key = transliteration_key(variant)
+        if not key:
+            continue
+        keys.add(key)
+        if key.endswith("ai"):
+            keys.add(key[:-1])
+    return keys
+
+
 GENERIC_TRAILING_WORDS = {
     "acropolis",
     "agora",
@@ -184,6 +228,11 @@ def load_manto_entities(conn, release_id: int) -> list[dict]:
         rows = cursor.fetchall()
     entities = []
     for object_id, label, pleiades_id in rows:
+        norm_variants = name_variants(
+            label,
+            include_location_container=False,
+            include_generic_head=False,
+        )
         entities.append(
             {
                 "manto_id": object_id,
@@ -191,11 +240,8 @@ def load_manto_entities(conn, release_id: int) -> list[dict]:
                 "entity_kind": "place",
                 "pleiades_id": pleiades_id or "",
                 "norm_label": normalize_name(label),
-                "norm_variants": name_variants(
-                    label,
-                    include_location_container=False,
-                    include_generic_head=False,
-                ),
+                "norm_variants": norm_variants,
+                "translit_variants": transliteration_keys(norm_variants),
             }
         )
     return entities
@@ -207,6 +253,7 @@ def candidate_links(place: dict, entities: list[dict]) -> list[dict]:
         name_variants(place.get("reference_form"), include_parenthetical_content=True)
         | name_variants(place.get("english_transcription"), include_parenthetical_content=True)
     )
+    place_translit = transliteration_keys(place_names)
     pleiades_id = place.get("pleiades_id") or ""
     for entity in entities:
         if pleiades_id and entity["pleiades_id"] == pleiades_id:
@@ -229,9 +276,95 @@ def candidate_links(place: dict, entities: list[dict]) -> list[dict]:
                     "rationale": "Normalized Pausanias place name matches MANTO label.",
                 }
             )
+            continue
+        if place_translit & entity.get("translit_variants", set()):
+            candidates.append(
+                {
+                    **entity,
+                    "match_method": "transliteration",
+                    "confidence": "medium",
+                    "rationale": (
+                        "Latin/Greek transliteration key matches MANTO label "
+                        "(e.g. -ae/-ai, c/k)."
+                    ),
+                }
+            )
     # Prefer high-confidence matches but keep multiple rows if names are ambiguous.
     candidates.sort(key=lambda item: (item["confidence"] != "high", item["match_method"], item["manto_id"]))
     return candidates
+
+
+def load_curated_links(conn) -> list[dict]:
+    with conn.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT place_name, manto_id, manto_label, source, rationale,
+                   reviewed, rejected
+            FROM curated_place_links
+            """
+        )
+        rows = cursor.fetchall()
+    return [
+        {
+            "place_name": row[0],
+            "manto_id": row[1],
+            "manto_label": row[2] or "",
+            "source": row[3],
+            "rationale": row[4] or "",
+            "reviewed": bool(row[5]),
+            "rejected": bool(row[6]),
+        }
+        for row in rows
+    ]
+
+
+def curated_link_rows(
+    curated: list[dict],
+    entities: list[dict],
+    *,
+    release_id: int,
+    existing_keys: set[tuple[str, str]],
+    timestamp: str,
+) -> list[tuple]:
+    """Rows for curated links the deterministic pass did not already produce.
+
+    Rejected curated rows are skipped (an empty manto_id records an LLM
+    no-match decision so the name is not re-queried).
+    """
+    entity_labels = {entity["manto_id"]: entity["label"] for entity in entities}
+    rows: list[tuple] = []
+    for link in curated:
+        if link["rejected"] or not link["manto_id"]:
+            continue
+        key = (link["place_name"], link["manto_id"])
+        if key in existing_keys:
+            continue
+        if link["manto_id"] not in entity_labels:
+            print(
+                f"Curated link {link['place_name']!r} -> {link['manto_id']} "
+                "has no MANTO entity in this release; skipping.",
+                flush=True,
+            )
+            continue
+        confidence = "high" if link["source"] == "manual" or link["reviewed"] else "medium"
+        rows.append(
+            (
+                release_id,
+                link["place_name"],
+                "place",
+                link["place_name"],
+                None,
+                None,
+                link["manto_id"],
+                entity_labels[link["manto_id"]] or link["manto_label"],
+                f"curated-{link['source']}",
+                confidence,
+                link["rationale"] or "Curated link.",
+                timestamp,
+                timestamp,
+            )
+        )
+    return rows
 
 
 def save_links(conn, release_id: int, links: list[tuple]) -> None:
@@ -280,8 +413,10 @@ def main() -> None:
             places = places[: args.limit]
         entities = load_manto_entities(conn, release_id)
         rows = []
+        existing_keys: set[tuple[str, str]] = set()
         for place in places:
             for candidate in candidate_links(place, entities):
+                existing_keys.add((place["reference_form"], candidate["manto_id"]))
                 rows.append(
                     (
                         release_id,
@@ -299,11 +434,26 @@ def main() -> None:
                         timestamp,
                     )
                 )
+        curated = load_curated_links(conn)
+        curated_rows = curated_link_rows(
+            curated,
+            entities,
+            release_id=release_id,
+            existing_keys=existing_keys,
+            timestamp=timestamp,
+        )
+        rows.extend(curated_rows)
         if args.dry_run:
-            print(f"Would upsert {len(rows):,} MANTO place links for release {release_id}.")
+            print(
+                f"Would upsert {len(rows):,} MANTO place links for release {release_id} "
+                f"({len(curated_rows):,} from curated links)."
+            )
             return
         save_links(conn, release_id, rows)
-    print(f"Upserted {len(rows):,} MANTO place links for release {release_id}.")
+    print(
+        f"Upserted {len(rows):,} MANTO place links for release {release_id} "
+        f"({len(curated_rows):,} from curated links)."
+    )
 
 
 if __name__ == "__main__":

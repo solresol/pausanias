@@ -1,6 +1,30 @@
 import unittest
 
-from link_manto_places import candidate_links, name_variants, normalize_name
+from link_manto_places import (
+    candidate_links,
+    curated_link_rows,
+    name_variants,
+    normalize_name,
+    transliteration_key,
+    transliteration_keys,
+)
+
+
+def manto_entity(manto_id: str, label: str, pleiades_id: str = "") -> dict:
+    norm_variants = name_variants(
+        label,
+        include_location_container=False,
+        include_generic_head=False,
+    )
+    return {
+        "manto_id": manto_id,
+        "label": label,
+        "entity_kind": "place",
+        "pleiades_id": pleiades_id,
+        "norm_label": normalize_name(label),
+        "norm_variants": norm_variants,
+        "translit_variants": transliteration_keys(norm_variants),
+    }
 
 
 class LinkMantoPlacesTests(unittest.TestCase):
@@ -101,6 +125,92 @@ class LinkMantoPlacesTests(unittest.TestCase):
         )
 
         self.assertEqual([candidate["manto_id"] for candidate in candidates], ["8188815"])
+
+    def test_transliteration_keys_bridge_latin_and_greek_romanizations(self):
+        pairs = [
+            ("Amyclae", "Amyklai"),
+            ("Aegae", "Aigai"),
+            ("Bassai", "Bassae"),
+            ("Rhium", "Rion"),
+            ("Asopus", "Asopos"),
+            ("Alipherae", "Aliphera"),
+        ]
+        for latin, greek in pairs:
+            latin_keys = transliteration_keys(name_variants(latin))
+            greek_keys = transliteration_keys(name_variants(greek))
+            self.assertTrue(
+                latin_keys & greek_keys,
+                f"{latin} and {greek} should share a transliteration key",
+            )
+        self.assertEqual(transliteration_key("Rhium"), "rion")
+        self.assertEqual(transliteration_key(""), "")
+
+    def test_candidate_links_fall_back_to_transliteration_matches(self):
+        candidates = candidate_links(
+            {
+                "reference_form": "Ἀμύκλαι",
+                "english_transcription": "Amyclae",
+                "pleiades_id": "",
+            },
+            [manto_entity("9001", "🌍 Amyklai (Lakonia)")],
+        )
+        self.assertEqual(len(candidates), 1)
+        self.assertEqual(candidates[0]["match_method"], "transliteration")
+        self.assertEqual(candidates[0]["confidence"], "medium")
+
+    def test_curated_link_rows_skip_rejected_covered_and_stale_links(self):
+        entities = [manto_entity("9001", "🌍 Amyklai (Lakonia)")]
+        curated = [
+            {
+                "place_name": "ancient Amyclae",
+                "manto_id": "9001",
+                "manto_label": "",
+                "source": "llm",
+                "rationale": "LLM matched the Laconian town.",
+                "reviewed": False,
+                "rejected": False,
+            },
+            {
+                "place_name": "Arabian desert",
+                "manto_id": "",
+                "manto_label": "",
+                "source": "llm",
+                "rationale": "No MANTO place candidate.",
+                "reviewed": False,
+                "rejected": True,
+            },
+            {
+                "place_name": "Lost Town",
+                "manto_id": "gone-in-this-release",
+                "manto_label": "🌍 Lost Town",
+                "source": "manual",
+                "rationale": "",
+                "reviewed": True,
+                "rejected": False,
+            },
+            {
+                "place_name": "Amyklai",
+                "manto_id": "9001",
+                "manto_label": "",
+                "source": "manual",
+                "rationale": "",
+                "reviewed": True,
+                "rejected": False,
+            },
+        ]
+        rows = curated_link_rows(
+            curated,
+            entities,
+            release_id=1,
+            existing_keys={("Amyklai", "9001")},
+            timestamp="now",
+        )
+        self.assertEqual(len(rows), 1)
+        row = rows[0]
+        self.assertEqual(row[1], "ancient Amyclae")
+        self.assertEqual(row[6], "9001")
+        self.assertEqual(row[8], "curated-llm")
+        self.assertEqual(row[9], "medium")
 
 
 if __name__ == "__main__":
