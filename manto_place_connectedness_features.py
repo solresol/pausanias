@@ -16,6 +16,7 @@ from manto_place_network_features import (
     latest_release_id,
     load_links,
     load_manto_status_targets,
+    parse_match_methods,
 )
 from pausanias_db import add_database_argument, column_exists, connect, initialize_schema
 
@@ -244,6 +245,14 @@ def parse_arguments() -> argparse.Namespace:
         type=float,
         default=0.95,
         help="Places at or above this PageRank/degree quantile count as large-place neighbors.",
+    )
+    parser.add_argument(
+        "--link-match-methods",
+        default="",
+        help=(
+            "Comma-separated manto_place_links.match_method filter for "
+            "linked-proper-nouns targets. Default: all methods."
+        ),
     )
     parser.add_argument(
         "--panhellenic-min-places",
@@ -962,7 +971,11 @@ def main() -> None:
         edges = load_typed_edges(conn, release_id, pre_pausanias_only=pre_pausanias_only)
         if args.target_source == "linked-proper-nouns":
             print("Loading Pausanias-MANTO links...", flush=True)
-            links = load_links(conn, release_id)
+            links = load_links(
+                conn,
+                release_id,
+                match_methods=parse_match_methods(args.link_match_methods),
+            )
         else:
             print("Loading MANTO Pausanias place-status targets...", flush=True)
             links = load_manto_status_targets(

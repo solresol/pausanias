@@ -1646,3 +1646,42 @@ CREATE TABLE IF NOT EXISTS sentence_simplified_skepticism_metrics (
     baseline_actual_1_pred_1 INTEGER NOT NULL,
     timestamp TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS stylometry_chunks (
+    chunk_set TEXT NOT NULL,
+    chunk_id TEXT NOT NULL,
+    chunk_index INTEGER NOT NULL,
+    tokenizer_version TEXT NOT NULL,
+    passage_start TEXT NOT NULL,
+    passage_end TEXT NOT NULL,
+    book_start INTEGER NOT NULL,
+    book_end INTEGER NOT NULL,
+    token_count INTEGER NOT NULL,
+    sentence_count INTEGER NOT NULL,
+    is_messenian_wars BOOLEAN NOT NULL,
+    overlap_fraction_messenian_wars DOUBLE PRECISION NOT NULL,
+    is_book4 BOOLEAN NOT NULL,
+    is_book8 BOOLEAN NOT NULL,
+    is_control BOOLEAN NOT NULL,
+    is_boundary_chunk BOOLEAN NOT NULL,
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (chunk_set, chunk_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_stylometry_chunks_flags
+    ON stylometry_chunks (chunk_set, is_messenian_wars, is_book4, is_book8);
+
+CREATE TABLE IF NOT EXISTS stylometry_chunk_sentences (
+    chunk_set TEXT NOT NULL,
+    chunk_id TEXT NOT NULL,
+    passage_id TEXT NOT NULL,
+    sentence_number INTEGER NOT NULL,
+    token_count INTEGER NOT NULL,
+    PRIMARY KEY (chunk_set, chunk_id, passage_id, sentence_number),
+    FOREIGN KEY (chunk_set, chunk_id)
+        REFERENCES stylometry_chunks(chunk_set, chunk_id)
+        ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_stylometry_chunk_sentences_passage
+    ON stylometry_chunk_sentences (passage_id, sentence_number);

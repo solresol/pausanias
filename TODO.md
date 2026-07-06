@@ -44,8 +44,9 @@ Source anchors are in the private ignored transcript notes, especially:
 - [ ] Use the manual Book 3 disagreement rate as uncertainty/error bars for
       claims such as "daughter is strongly mythic" rather than treating AI labels
       as ground truth.
-- [ ] Reconcile the production checkout on `raksasa` with GitHub/local `main`
-      before relying on the newest non-analysis commits.
+- [x] Reconcile the production checkout on `raksasa` with GitHub/local `main`:
+      verified clean at /home/pausanias/pausanias; cronscript.sh git-pulls main
+      at the start of each nightly run, so it self-reconciles.
 
 ## Classifier Ontology and Validation
 

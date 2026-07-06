@@ -25,6 +25,7 @@ from manto_place_network_features import (
     latest_release_id,
     load_links,
     load_manto_status_targets,
+    parse_match_methods,
 )
 from pausanias_db import add_database_argument, connect, initialize_schema
 
@@ -57,6 +58,14 @@ def parse_arguments() -> argparse.Namespace:
         help="Use all MANTO edges. Default is strict pre-Pausanias-only edges.",
     )
     parser.add_argument("--large-place-quantile", type=float, default=0.95)
+    parser.add_argument(
+        "--link-match-methods",
+        default="",
+        help=(
+            "Comma-separated manto_place_links.match_method filter for "
+            "linked-proper-nouns targets. Default: all methods."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -261,7 +270,11 @@ def main() -> None:
         print("Loading typed MANTO edges...", flush=True)
         edges = load_typed_edges(conn, release_id, pre_pausanias_only=pre_pausanias_only)
         if args.target_source == "linked-proper-nouns":
-            links = load_links(conn, release_id)
+            links = load_links(
+                conn,
+                release_id,
+                match_methods=parse_match_methods(args.link_match_methods),
+            )
         else:
             links = load_manto_status_targets(
                 conn,

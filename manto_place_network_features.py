@@ -89,6 +89,15 @@ def parse_arguments() -> argparse.Namespace:
         help="Set component/community sizes to 1 instead of walking connected components.",
     )
     parser.add_argument(
+        "--link-match-methods",
+        default="",
+        help=(
+            "Comma-separated manto_place_links.match_method filter for "
+            "linked-proper-nouns targets, e.g. 'exact_normalized_name' or "
+            "'exact_normalized_name,transliteration'. Default: all methods."
+        ),
+    )
+    parser.add_argument(
         "--include-bookkeeping-edges",
         action="store_true",
         help=(
@@ -99,6 +108,11 @@ def parse_arguments() -> argparse.Namespace:
         ),
     )
     return parser.parse_args()
+
+
+def parse_match_methods(value: str | None) -> tuple[str, ...] | None:
+    methods = tuple(part.strip() for part in (value or "").split(",") if part.strip())
+    return methods or None
 
 
 def latest_release_id(conn) -> int:
@@ -133,18 +147,26 @@ def load_edges(conn, release_id: int, *, pre_pausanias_only: bool) -> list[tuple
         return cursor.fetchall()
 
 
-def load_links(conn, release_id: int) -> list[dict]:
+def load_links(
+    conn,
+    release_id: int,
+    *,
+    match_methods: tuple[str, ...] | None = None,
+) -> list[dict]:
+    method_filter = "AND match_method = ANY(%s)" if match_methods else ""
+    parameters: tuple = (release_id, list(match_methods)) if match_methods else (release_id,)
     with conn.cursor() as cursor:
         cursor.execute(
-            """
+            f"""
             SELECT reference_form, entity_type, english_transcription,
                    manto_id, manto_label
             FROM manto_place_links
             WHERE release_record_id = %s
               AND confidence <> 'rejected'
+              {method_filter}
             ORDER BY reference_form, confidence
             """,
-            (release_id,),
+            parameters,
         )
         rows = cursor.fetchall()
     return [
@@ -629,7 +651,11 @@ def main() -> None:
         edges = load_edges(conn, release_id, pre_pausanias_only=pre_pausanias_only)
         if args.target_source == "linked-proper-nouns":
             print("Loading Pausanias-MANTO links...", flush=True)
-            links = load_links(conn, release_id)
+            links = load_links(
+                conn,
+                release_id,
+                match_methods=parse_match_methods(args.link_match_methods),
+            )
         else:
             print("Loading MANTO Pausanias place-status targets...", flush=True)
             links = load_manto_status_targets(
