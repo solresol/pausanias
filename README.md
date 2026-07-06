@@ -135,13 +135,40 @@ Pausanias or later, and unknown-date sources are excluded from the default
 modelling graph to avoid leaking both Pausanias' own evidence and future
 evidence.
 
-Build MANTO network features for the labelled Pausanias places and train the
-first explainable model:
+Import Pleiades representative coordinates (cached CSV dump under
+`tmp/pleiades/`) so geography-network hybrid features can be built:
+
+```bash
+uv run import_pleiades_coordinates.py
+```
+
+Build MANTO network, connectedness, and geography features for the labelled
+Pausanias places and train the explainable model:
 
 ```bash
 uv run manto_place_network_features.py
 uv run manto_place_connectedness_features.py
+uv run manto_place_geography_features.py
 uv run predict_place_survival.py
+```
+
+The MANTO-derived status labels are almost all `survives` (roughly 872:9), so
+models on the default `manto-status-labels` target set are nearly degenerate.
+For informative runs, build the feature sets for the Pausanias-linked places
+and train against the LLM place-state labels:
+
+```bash
+uv run manto_place_network_features.py --target-source linked-proper-nouns \
+    --feature-set-version manto-pausanias-place-network-v3-linked
+uv run manto_place_connectedness_features.py --target-source linked-proper-nouns \
+    --feature-set-version manto-place-connectedness-v2-linked
+uv run manto_place_geography_features.py --target-source linked-proper-nouns \
+    --feature-set-version manto-place-geography-v1-linked
+uv run predict_place_survival.py --training-label-set combined --cv-folds 5 \
+    --feature-set-version manto-pausanias-place-network-v3-linked \
+    --connectedness-feature-set-version manto-place-connectedness-v2-linked \
+    --geography-feature-set-version manto-place-geography-v1-linked \
+    --feature-family all
 ```
 
 `manto_place_connectedness_features.py` prepares Greta's connectedness signals:
@@ -151,12 +178,19 @@ proxies from the pre-Pausanias place graph, shared mythic/person figures with
 neighboring places, and shared action-pattern links where neighboring places
 have the same kind of story with distinct person figures.
 
-Train on those signals alone, or combine them with the older centrality
-features:
+`--feature-family` accepts any comma-separated combination of `network`,
+`connectedness`, `geography`, and `fame`, plus the aliases `combined`
+(network+connectedness) and `all`. `fame` is the no-structure attention
+baseline — Pausanias mention counts plus raw pre-Pausanias MANTO edge volume —
+that structural families must beat before any network claim means anything.
+`--cv-folds 5` reports pooled out-of-fold metrics from stratified k-fold
+cross-validation instead of a single train/test split:
 
 ```bash
 uv run predict_place_survival.py --feature-family connectedness
 uv run predict_place_survival.py --feature-family combined
+uv run predict_place_survival.py --feature-family fame --cv-folds 5
+uv run predict_place_survival.py --feature-family connectedness,fame --cv-folds 5
 ```
 
 To compare target sources, keep MANTO-only as the default and switch the

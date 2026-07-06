@@ -148,6 +148,68 @@ than any static centrality.
    regression with standardized features and cross-validated estimates;
    prefer coefficient signs and stability over point accuracy.
 
+## First results (2026-07-06 implementation pass)
+
+Everything above except the items marked "proposed" was implemented and run
+against MANTO release 19446255 (myth graph after bookkeeping exclusion: 7,275
+nodes / 63,701 pre-Pausanias edges; place graph 2,370 nodes / 5,433 edges;
+1,464 MANTO places carry Pleiades coordinates).
+
+**Evaluation regimes.** The MANTO-derived label set is 872:9 in favour of
+`survives` — effectively degenerate — and the MANTO+LLM "combined" set is
+639:11. The passage/sentence LLM label set is balanced (84 survives : 68
+does_not_survive, n=152 linked places) and is the evaluation that means
+anything. All numbers below are pooled out-of-fold balanced accuracy from
+stratified 5-fold CV on that set.
+
+| feature family | balanced accuracy |
+| --- | --- |
+| geography only | 0.583 |
+| **fame baseline** (mentions + attestation volume) | **0.610** |
+| network v3 (position) | 0.668 |
+| connectedness v2 (Greta signals) | 0.702 |
+| connectedness + fame | 0.715 |
+| all four families | 0.728 |
+| network + connectedness | **0.733** |
+
+Headline readings:
+
+1. **Structure beats fame.** The best structural model clears the
+   attention-only baseline by ~12 points of balanced accuracy, so network
+   position is not merely a proxy for how much a place gets talked about.
+2. **Narrative beats geography.** Geography alone is *below* the fame
+   baseline, and adding it to the structural families does not help (0.728 vs
+   0.733). On current features, being narratively connected matters; being
+   physically near things does not measurably add.
+3. **The single-split scores were flattering.** The same
+   connectedness/combined-labels configuration scores 0.975 balanced accuracy
+   on a single train/test split and 0.761 under 5-fold CV — with 11 negatives
+   a lucky split is easy. Prior 0.9+ results in `place_survival_model_runs`
+   should be read as split luck, not model quality.
+4. **Figure-ubiquity signature.** In the best model the strongest coefficient
+   pair is `figure_mean_ubiquity` negative (−1.39) with `figure_max_ubiquity`
+   (+1.11) and `panhellenic_figure_count` (+0.67) positive: places built
+   entirely from widely-shared panhellenic figures fare badly, while places
+   with one famous anchor plus otherwise local, exclusive figures fare well —
+   "a big patron and your own identity".
+5. **Greta's shared-figure hypothesis survives the null-model control.**
+   `shared_figure_neighbor_zscore` — sharing figures with neighbours *more
+   than degree-preserving chance predicts* — is positive (+0.83) in the best
+   model, i.e. genuine story-sharing, not just attestation volume, associates
+   with survival.
+6. On the (degenerate) combined-label run, `has_large_place_neighbor` (+2.28)
+   and the kin-mediated tie counts (`kin_linked_large_place_count` +1.86,
+   `kin_linked_place_count` +1.35) dominate positively, and
+   `early_imperial_story_count` is strongly negative (−2.14) — places known
+   mainly through late mythography rather than the archaic/classical core
+   look fragile. Treat these as hypotheses to re-test on better labels, not
+   findings.
+
+Caveats: n=152; coefficients on standardized but collinear features, so signs
+of correlated pairs can counter-rotate; the LLM labels themselves are
+unaudited (see the manual-audit item in `TODO.md`); leave-one-region-out
+validation has not been run yet.
+
 ## Relation hygiene
 
 MANTO bookkeeping relations (`source_attributes`, `collection`, `period`,

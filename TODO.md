@@ -175,34 +175,50 @@ Source anchors are in the private ignored transcript notes, especially:
 Full write-up with paper-facing methodology notes:
 `documentation/manto_network_feature_ideas.md`.
 
-- [ ] Add deeper position features to the place graph: k-core number, hop
+- [x] Add deeper position features to the place graph: k-core number, hop
       distance to the nearest large place, 2/3-hop local reach, approximate
       node-disjoint paths to the nearest large place (narrative redundancy),
       and bridge-edge fraction.
-- [ ] Exclude MANTO bookkeeping relations (source_attributes, collection,
+- [x] Exclude MANTO bookkeeping relations (source_attributes, collection,
       period, unesco_status, mentioned_in_text, depictions, identified_in)
       from the generic network-feature graph.
-- [ ] Add figure-ubiquity features: exclusive-figure count, panhellenic-figure
+- [x] Add figure-ubiquity features: exclusive-figure count, panhellenic-figure
       count, mean/max figure ubiquity per place.
-- [ ] Add kin-mediated place ties: places linked via figure-kinship-figure
+- [x] Add kin-mediated place ties: places linked via figure-kinship-figure
       chains (founders who are siblings, parent/child, spouses).
-- [ ] Add action-profile features: per-place action vectors, profile entropy,
+- [x] Add action-profile features: per-place action vectors, profile entropy,
       cosine similarity with neighbours and with large places.
-- [ ] Add Guimerà-Amaral cartographic roles: within-community degree z-score
+- [x] Add Guimerà-Amaral cartographic roles: within-community degree z-score
       and participation coefficient over Louvain communities.
-- [ ] Add temporal-layering features from evidence_latest_year: per-stratum
+- [x] Add temporal-layering features from evidence_latest_year: per-stratum
       story counts (archaic/classical/Hellenistic/early imperial), attestation
       span, and myth-accretion signals.
-- [ ] Import Pleiades coordinates for MANTO places and add geography-network
+- [x] Import Pleiades coordinates for MANTO places and add geography-network
       hybrid features: geographic distance to the nearest large place,
       neighbour-distance statistics, and localism of mythology (fraction of
       narrative ties within 25/50/100 km).
-- [ ] Add a fame-baseline feature family (Pausanias mention counts plus raw
+- [x] Add a fame-baseline feature family (Pausanias mention counts plus raw
       pre-Pausanias attestation volume) that structural features must beat.
-- [ ] Add stratified cross-validation to the place-survival classifier instead
+- [x] Add stratified cross-validation to the place-survival classifier instead
       of relying on a single train/test split.
-- [ ] Add null-model z-scores for shared-figure features via degree-preserving
+- [x] Add null-model z-scores for shared-figure features via degree-preserving
       rewiring of the place-figure structure.
+- [ ] Treat the passage/sentence LLM label set (84:68, n=152) as the primary
+      evaluation; the MANTO label set is 872:9 and the MANTO+LLM combined set
+      639:11, both nearly degenerate. First-pass CV results are in
+      `documentation/manto_network_feature_ideas.md`: structure 0.733 vs fame
+      baseline 0.610 vs geography 0.583 balanced accuracy.
+- [ ] Stop citing the earlier 0.9+ balanced accuracies: the same
+      connectedness/combined-labels configuration scores 0.975 on a single
+      split but 0.761 under 5-fold CV, so those were split luck on 11
+      negatives.
+- [ ] Follow up the figure-ubiquity signature (mean ubiquity negative, max
+      ubiquity/panhellenic count positive: "a big patron plus your own local
+      identity") and the positive shared-figure null-model z-score before
+      presenting either to Greta as a finding.
+- [ ] Grow the balanced labelled sample: the passage-level place-state sweep
+      currently yields 152 linked, labelled places; more passage batches and
+      better Pausanias-to-MANTO linking both raise n.
 - [ ] Later: figure quality via global centrality propagation, genealogical
       depth of founding heroes, role-archetype clustering of action profiles,
       regular-equivalence blockmodelling, Burt's constraint, gravity-model
