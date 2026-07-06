@@ -234,11 +234,18 @@ Full write-up with paper-facing methodology notes:
       the "(low confidence)" generic-sanctuary ones; set reviewed=TRUE or
       rejected=TRUE, then re-run link_manto_places.py. The website curation
       page is places/manto-links.html.
-- [ ] Explain the accuracy drop at n=356 (all families fell; connectedness+fame
-      best at 0.628 vs fame 0.568): stratify evaluation by link confidence
-      (high / medium / curated-llm) to separate link noise from the
-      easy-subset effect, e.g. a --min-link-confidence option through the
-      feature builders and classifier.
+- [x] Explain the accuracy drop at n=356: link-tier stratification
+      (--link-match-methods through the feature builders) shows the
+      transliteration tier is clean (all-families 0.719 at n=292 vs 0.735 at
+      n=186) while the 110 LLM links cost ~10 points on everything including
+      the fame baseline — i.e. link noise, not sample difficulty. Details in
+      documentation/manto_network_feature_ideas.md.
+- [ ] Use the exact+transliteration link tier (n=292) as the default
+      modelling set until the LLM links are reviewed; after review, rebuild
+      the full tier and re-test.
+- [ ] Current defensible headline: structure adds ~5 points of balanced
+      accuracy on top of the fame baseline (0.719 vs 0.672), stable across
+      deterministic link tiers; structure alone does not beat fame.
 - [ ] Finish the passage place-state sweep: 569/3,170 passages done; remaining
       ~2,600 passages cost roughly 4M batch tokens (~1,500 actual
       tokens/passage vs the 3,500 planning estimate). Either raise the one-off

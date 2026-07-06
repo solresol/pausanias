@@ -267,6 +267,40 @@ confidence (high vs medium vs curated-llm) to separate link-noise from
 easy-subset effects; (b) review the low-confidence LLM links (generic
 "sanctuary of X" names) which plausibly attach wrong labels.
 
+### Link-tier stratification (2026-07-06, third pass)
+
+The feature builders now accept `--link-match-methods`; feature sets were
+rebuilt on three link tiers and retrained (5-fold CV, LLM labels, balanced
+accuracy):
+
+| family | exact only (n=186) | +transliteration (n=292) | +LLM links (n=356) |
+| --- | --- | --- | --- |
+| fame baseline | 0.682 | 0.672 | 0.568 |
+| connectedness | 0.623 | 0.625 | 0.612 |
+| connectedness + fame | 0.689 | 0.729 | 0.628 |
+| network + connectedness | 0.691 | 0.668 | 0.580 |
+| all | **0.735** | **0.719** | 0.617 |
+
+Verdict: **the degradation comes from the LLM-curated links, not from the
+sample getting harder.** Adding 106 transliteration-linked places costs
+almost nothing (0.735 -> 0.719; connectedness+fame improves), but adding the
+110 LLM links knocks ~10 points off everything — including the fame baseline,
+which should be robust to merely-obscure places. That signature points at
+mislinked rows (generic "sanctuary of X" guesses, sub-places mapped to head
+towns) injecting label noise, not at honest difficulty. Revised position
+while the LLM links await review:
+
+- Use the **exact+transliteration tier (n=292)** as the default modelling set
+  (`--link-match-methods exact_normalized_name,transliteration`).
+- Fame alone is a strong baseline (~0.67); structure alone is weaker than
+  fame; but the full structural stack **adds ~5 points on top of fame**
+  (0.719 vs 0.672), stable across both deterministic tiers. The defensible
+  claim is incremental, not standalone: mythic-network structure carries
+  survival signal beyond attention volume.
+- After the 110 curated LLM links are reviewed (reviewed=TRUE / rejected),
+  rebuild the full tier and re-test whether clean LLM links behave like
+  transliteration links.
+
 ## Relation hygiene
 
 MANTO bookkeeping relations (`source_attributes`, `collection`, `period`,
