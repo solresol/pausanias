@@ -1,0 +1,12 @@
+Use case: historical-scene
+Asset type: scenic inset art for a Pausanias graphic-book page, later caption will be added locally
+Primary request: Alexander the Great's army encounters King Porus' Indian war elephants at the Hydaspes, shown as the historical precedent for European rulers acquiring elephants.
+Scene/backdrop: Punjab river plain after a hard-fought Hellenistic battle, early morning haze, river and trees in the distance.
+Subject: Alexander's Macedonian cavalry and phalanx observing captured or subdued Indian elephants and handlers; Porus' force suggested respectfully in the background, no humiliation tableau.
+Style/medium: sophisticated painterly historical reconstruction matching an antique atlas coffee-table page, realistic fabric, bronze, horse tack, elephant skin, atmospheric depth.
+Composition/framing: wide inset composition, clear elephants at center, Macedonian figures at left, Indian army context at right/background, leave clean areas for later crop but no text.
+Lighting/mood: muted dawn light, solemn, documentary, rich detail.
+Color palette: dusty golds, muted greens, bronze, indigo shadows, parchment-compatible.
+Text: no text, no letters, no labels, no watermark.
+Content constraints: professional audience; no nudity, no gore, no severed limbs. Fully clothed or armored figures only.
+Avoid: cartoon, flat vector, fantasy monsters, modern gear, crude diagram, low detail, inaccurate elephant anatomy, textual artifacts.

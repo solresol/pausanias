@@ -1,0 +1,12 @@
+Use case: historical-scene
+Asset type: main panel art for a Pausanias graphic-book page, later labels will be added locally
+Primary request: Pyrrhus of Epirus unleashes war elephants against Roman soldiers for the first time, a sophisticated coffee-table historical illustration.
+Scene/backdrop: southern Italian battlefield in the early 3rd century BCE, dusty plain with low hills, distant Greek-style camp standards, warm late-afternoon light.
+Subject: several large Indian war elephants in bronze and leather harness advancing with Epirote handlers and Hellenistic infantry; Roman manipular infantry in helmets and shields recoiling in disciplined terror, imagining the elephants as strange creatures.
+Style/medium: richly textured painterly historical reconstruction, parchment-atlas compatible, realistic materials, detailed armor, fabric, elephant skin, dust, smoke, and landscape depth; mature museum-book illustration, not cartoon, not vector.
+Composition/framing: wide cinematic landscape, strong diagonal from elephants at left/center toward Roman line at right, enough clear visual regions for later callout labels, no empty symbolic map look.
+Lighting/mood: golden low sun, dramatic but readable, high craftsmanship, sober historical atmosphere.
+Color palette: warm ochre dust, bronze, muted reds, off-white linen, deep blue-gray shadows; compatible with antique parchment borders.
+Text: no text, no letters, no inscriptions, no labels, no watermark.
+Content constraints: professional audience; no nudity, no gore, no severed limbs, no erotic poses. Keep all bodies clothed or armored. Elephants must look plausible and powerful, not fantasy monsters.
+Avoid: flat vector terrain, simple icons, classroom diagram, low-detail sketch, modern objects, fantasy armor, excessive violence, misshapen elephant anatomy, text in the image.
