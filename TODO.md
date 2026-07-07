@@ -246,10 +246,22 @@ Full write-up with paper-facing methodology notes:
 - [ ] Current defensible headline: structure adds ~5 points of balanced
       accuracy on top of the fame baseline (0.719 vs 0.672), stable across
       deterministic link tiers; structure alone does not beat fame.
-- [ ] Finish the passage place-state sweep: 569/3,170 passages done; remaining
-      ~2,600 passages cost roughly 4M batch tokens (~1,500 actual
-      tokens/passage vs the 3,500 planning estimate). Either raise the one-off
-      token budget or let the daily cron run ~9 more days.
+- [x] Finish the passage place-state sweep: full corpus now covered
+      (3,162/3,170 passages; final 2,309-passage batch, 3.27M tokens,
+      1,205 mentions). New passages are survives-heavy (810:21), so the
+      LLM label set is now 82:18 at n=444 linked places.
+- [ ] The local-plus-imported-heroes finding replicates on the full-corpus
+      labels (exclusive_figure_count +1.23, figure_mean_ubiquity -0.65,
+      figure_max_ubiquity +0.64; connectedness+fame 0.724 vs fame 0.684):
+      write it up for Greta with the collinearity caveats.
+- [ ] Verify the first gpt-5.5 legacy tagging batch executes (submitted
+      2026-07-07 manually; if the model id is wrong the batch will fail at
+      execution, visible in ~/cronlogs/cronscript.log on raksasa).
+- [ ] The 2026-07-07 cron died silently between the tagging fetch and the
+      grammar lane (all steps pass when re-run manually; suspected transient
+      OpenAI error at the batch-deadline boundary). Cron output now logs to
+      /home/pausanias/cronlogs/cronscript.log; consider making cronscript.sh
+      tolerate single-step failures for the batch-fetch lanes.
 - [ ] Add Pleiades time-period labels as a third, asymmetric label source:
       "no attestation after Hellenistic" (227 MANTO places) is a
       high-precision does_not_survive signal (10/11 agreement with LLM labels

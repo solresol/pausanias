@@ -301,6 +301,31 @@ while the LLM links await review:
   rebuild the full tier and re-test whether clean LLM links behave like
   transliteration links.
 
+## Full-corpus labels (2026-07-07)
+
+The passage place-state sweep now covers the whole corpus (3,162/3,170
+passages; the final 2,309-passage batch added 1,205 mentions for 3.27M
+tokens). The new passages are survives-heavy (810:21) because the
+ruin-hinted candidate passages were swept first, so the class balance on the
+translit tier moved to 82:18 at n=444. Retrained numbers (5-fold CV, LLM
+labels, balanced accuracy): fame 0.684, connectedness 0.620,
+**connectedness+fame 0.724**, all 0.706 — the ~4-point increment of
+structure over fame replicates on the tripled sample.
+
+**The local-plus-imported-heroes signature is stable.** In the best model,
+`exclusive_figure_count` is the strongest structural coefficient (+1.23,
+fifth overall behind only the fame features and two shared-figure/kin
+features), with `figure_mean_ubiquity` negative (−0.65) and
+`figure_max_ubiquity` positive (+0.64), while `panhellenic_figure_count` and
+raw `mythic_figure_count` are ~0. Same signature as the first pass on
+different labels and features: places whose mythology includes figures
+attested nowhere else — plus at least one panhellenic anchor — survive;
+places whose mythology is on average borrowed do not. Treat mean/max as
+directional (they are mechanically correlated); the exclusive-figure count
+is the robust, interpretable core of the finding. Kin and shared-action
+coefficient signs counter-rotate between runs and should not be read
+individually.
+
 ## Relation hygiene
 
 MANTO bookkeeping relations (`source_attributes`, `collection`, `period`,
