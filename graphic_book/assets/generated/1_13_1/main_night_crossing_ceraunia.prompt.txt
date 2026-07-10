@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: main illustrated panel for a parchment-atlas graphic book page
+Primary request: Paint a sophisticated, historically grounded panoramic scene of Pyrrhus secretly withdrawing by night from Tarentum across the Adriatic toward the Ceraunian Mountains after defeat in Italy.
+Scene/backdrop: moonlit ancient Adriatic; a Tarentine harbor receding in the far left distance; several battered Hellenistic transports crossing dark water; the steep, unmistakable Ceraunian mountain coast rising on the right, with troops beginning a torchlit landing and climbing route.
+Subject: Pyrrhus, fully clothed in plausible Hellenistic armor and dark red cloak, standing aboard the foremost ship and looking toward the mountain shore; weary Epirote troops, horses, oarsmen, worn sails, and surviving vessels.
+Style/medium: richly detailed painterly historical illustration, naturalistic figures, atmospheric depth, parchment-compatible ochres, slate blues, muted reds, fine engraved texture, coffee-table art-book quality.
+Composition/framing: wide landscape, Pyrrhus left of center, ships create a diagonal route toward the illuminated mountain landing on the right; generous clear areas for later local labels; no decorative border.
+Lighting/mood: moonlight, lanterns, torchlight, restrained tension and secrecy, luminous water, readable silhouettes without becoming black or muddy.
+Constraints: visually communicate a secret night retreat and a destination in high coastal mountains; historically plausible ships and clothing; all figures fully clothed; no modern objects.
+Avoid: any text, letters, labels, cartography, watermark, flat vector shapes, diagrammatic terrain, fantasy armor, nudity, gore, cartoon style, empty generic seascape.

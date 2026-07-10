@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: scenic inset for a parchment-atlas graphic book page
+Primary request: Paint Pyrrhus misleading assembled Epirote and Tarentine leaders by proclaiming that reinforcements will soon arrive while the actual sealed replies lie unread on a table.
+Scene/backdrop: lamplit command chamber at Tarentum at night, maps and sealed scrolls on a wooden table, an open doorway or colonnade hinting at the harbor beyond.
+Subject: Pyrrhus, fully clothed in plausible Hellenistic military dress and dark red cloak, addressing a compact group of skeptical but attentive leaders; his gesture projects confidence while his other hand deliberately leaves the returned letters unopened.
+Style/medium: richly detailed naturalistic historical illustration, warm lamplight, painterly realism, engraved texture, parchment-compatible palette, finished museum-publication quality.
+Composition/framing: horizontal inset, Pyrrhus slightly left of center, faces and sealed documents clearly visible, room at edges for local framing; no decorative border.
+Lighting/mood: warm lamplight against blue night, calculated confidence and political tension.
+Constraints: the deception must be visually legible without caption text; historically plausible setting and clothing; all figures fully clothed.
+Avoid: any readable text, labels, watermark, modern paper, fantasy throne room, melodramatic villain pose, nudity, gore, flat illustration, cartoon style.

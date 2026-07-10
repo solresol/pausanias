@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: subordinate unlabeled geographic inset base for a parchment-atlas page
+Primary request: Create a richly textured oblique relief-map painting of the ancient Adriatic crossing from the heel of southern Italy to the steep Ceraunian coast, viewed from above and slightly south.
+Scene/backdrop: southern Italian peninsula on the left, narrow Adriatic and Ionian waters in the center, rugged Ceraunian Mountains and Epirote coast on the right; small ancient harbor forms at Tarentum and a mountainous landing opposite.
+Style/medium: antique painted relief map, natural coastlines, parchment-compatible ochres, olive greens, teal-slate water, subtle engraved texture, sophisticated historical-atlas finish.
+Composition/framing: horizontal; leave the central sea readable for a locally drawn crossing route and leave clear land areas for later local labels; no border, compass, legend, route, or text.
+Lighting/mood: warm raking light across relief, calm clarity, high geographic legibility.
+Constraints: plausible geography and pronounced Ceraunian mountain relief; subordinate map-art identity, not a classroom diagram.
+Avoid: any words, labels, symbols, pins, arrows, route lines, watermark, flat vector polygons, rectangular water, fantasy geography, modern infrastructure.
