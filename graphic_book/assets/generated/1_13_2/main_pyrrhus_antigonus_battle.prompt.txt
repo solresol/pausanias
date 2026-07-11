@@ -1,0 +1,13 @@
+Use case: historical-scene
+Asset type: main panel for a sophisticated illustrated classical-history coffee-table book
+Primary request: Paint a sweeping, historically grounded Hellenistic battlefield panorama showing Pyrrhus of Epirus decisively overcoming Antigonus Gonatas and his Gallic mercenaries in 274 BCE.
+Scene/backdrop: broad Thessalian or Upper Macedonian valley, rugged uplands behind, distant route opening toward a hazy coast; broken Macedonian and Celtic formation withdrawing in depth.
+Subject: Pyrrhus in plausible early-third-century BCE bronze armour and red Molossian cloak commands from the near middle ground; disciplined Epirote phalangites press forward; distinctive but historically plausible Celtic mercenaries with oval shields yield and retreat; captured shields visible without becoming an icon display.
+Style/medium: richly detailed painterly historical illustration, naturalistic figures, cinematic but credible, textured oils and gouache, sophisticated museum-book art rather than fantasy art.
+Composition/framing: wide landscape, strong depth, Pyrrhus readable at left-center, battle flows diagonally toward the distant right coast; leave quiet sky and terrain pockets suitable for later local callout labels.
+Lighting/mood: late-afternoon bronze light through battle dust, decisive and grave, no celebratory spectacle.
+Color palette: weathered bronze, iron, oxblood, dusty olive, stone, muted blue distance.
+Materials/textures: convincing linen cuirasses, bronze helmets, wood and painted hide shields, churned earth, scrub and mountain rock.
+Constraints: no text, no letters, no captions, no labels, no map symbols; period-credible equipment; fully clothed and armoured figures; image must directly communicate a Hellenistic battle and decisive retreat.
+Avoid: flat vector art, diagrammatic ranks, cartoon fantasy warriors, Roman imperial armour, medieval armour, horned helmets, gore, corpses in close-up, nudity, modern objects, watermark.
+

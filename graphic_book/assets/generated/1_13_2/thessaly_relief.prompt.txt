@@ -1,0 +1,8 @@
+Use case: historical-scene
+Asset type: subordinate orientation inset base for a parchment-atlas graphic-book page
+Primary request: Create a richly textured oblique aerial relief painting of Thessaly and southern Macedonia, with the broad Thessalian basin, mountain chains, river valleys, Pherai-Larissa corridor, northern uplands, and a glimpse of the Aegean coast.
+Style/medium: painterly raised-relief atlas art, hand-coloured engraved-map atmosphere blended with realistic terrain, sophisticated and tactile.
+Composition/framing: landscape orientation, north toward upper left, Thessalian basin central, coast at right; reserve clear terrain pockets for local labels and a route overlay.
+Lighting/mood: warm raking light emphasizes relief; parchment-compatible earth palette with restrained blue water.
+Constraints: no text, no letters, no captions, no labels, no pins, no routes, no borders; geographic orientation rather than exact modern cartography.
+Avoid: flat vector polygons, classroom diagram, satellite-photo look, rectangular sea, oversized mountains, modern roads or cities, watermark.
