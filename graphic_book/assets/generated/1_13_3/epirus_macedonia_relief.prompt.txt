@@ -1,0 +1,8 @@
+Use case: historical-scene
+Asset type: subordinate orientation inset base for a parchment-atlas graphic-book page
+Primary request: Create a richly textured oblique aerial relief painting from mountainous Epirus and Dodona eastward across the Pindus into Macedonia, with Thessaly visible toward the lower right and a restrained glimpse of the Ionian and Aegean waters.
+Style/medium: painterly raised-relief atlas art, hand-coloured engraved-map atmosphere blended with credible terrain, sophisticated and tactile.
+Composition/framing: landscape orientation, west at left and north toward the upper edge; Dodona basin left of centre, high Pindus spine central, Macedonian plains upper right, Thessaly lower right; reserve clear terrain pockets for local labels and route overlays.
+Lighting/mood: warm raking light emphasizes mountain relief and long-distance orientation; parchment-compatible earth palette with restrained blue water.
+Constraints: no text, no letters, no captions, no labels, no pins, no routes, no borders; geography should be plausible but need not match modern cartography exactly.
+Avoid: flat vector polygons, classroom diagram, satellite-photo look, rectangular seas, oversized symbolic mountains, modern roads or cities, watermark.

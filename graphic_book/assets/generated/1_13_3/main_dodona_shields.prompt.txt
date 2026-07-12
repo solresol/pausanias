@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: main panel for a sophisticated illustrated classical-history coffee-table book
+Primary request: Paint a monumental archaeological reconstruction of Macedonian shields consecrated by Pyrrhus beside the columns of Zeus's sanctuary at Dodona in the early third century BCE.
+Scene/backdrop: the open sacred precinct at Dodona in Epirus, weathered honey-coloured colonnade, the ancient sacred oak prominent nearby, rugged green-grey Epirote mountains opening behind the sanctuary.
+Subject: captured round Macedonian shields and bronze armour displayed solemnly along the temple colonnade as ownerless war trophies; two fully clothed sanctuary attendants arrange the dedication while a few modestly dressed visitors contemplate it.
+Style/medium: richly detailed painterly archaeological reconstruction, textured oils and gouache, naturalistic museum-quality historical illustration, tactile stone, bronze, timber, leaves and distant atmosphere.
+Composition/framing: wide landscape with strong architectural depth; columns and shields dominate the near and middle ground; sacred oak and mountains establish Dodona unmistakably; leave quiet stone and sky pockets for later local callout labels.
+Lighting/mood: clear late-afternoon mountain light, solemn reversal of fortune, reflective rather than triumphalist.
+Color palette: honey limestone, weathered bronze, deep oak green, muted crimson shield paint, blue-grey mountain distance.
+Constraints: no text, no letters, no inscriptions, no captions, no labels, no map symbols; historically plausible Hellenistic sanctuary and Macedonian equipment; all figures fully clothed.
+Avoid: flat vector art, icon display, modern museum cases, Roman imperial temple grandeur, fantasy shields, readable pseudo-writing, nudity, gore, watermark.
