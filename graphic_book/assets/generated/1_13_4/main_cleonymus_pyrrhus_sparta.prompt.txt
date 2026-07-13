@@ -1,0 +1,8 @@
+Use case: historical-scene
+Asset type: main panel art for Pausanias 1.13.4, with labels and passage text added locally
+Primary request: a wide, richly painted approach to ancient Sparta through the Eurotas valley, where the Spartan exile Cleonymus directs Pyrrhus of Epirus and an invading army toward the city.
+Scene: Taygetus rises above the valley; the Eurotas leads toward modest, unwalled Sparta; Pyrrhus and Cleonymus stand in the foreground; cavalry, infantry, pack animals, and distant war elephants descend behind them.
+Style: sophisticated coffee-table historical illustration, warm watercolor and gouache over fine ink, painterly realism, deep atmospheric perspective, credible Hellenistic clothing and materials.
+Text: no text, no readable letters, no labels.
+Constraints: no modern objects, no fantasy armor, no watermark, no border, no nudity.
+Avoid: flat vector art, classroom diagrams, icon figures, cartoon style, photorealistic CGI, schematic terrain.

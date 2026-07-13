@@ -1,0 +1,7 @@
+Use case: geographic-orientation
+Asset type: secondary locator base for Pausanias 1.13.4, with route and labels added locally
+Primary request: a richly textured oblique relief-map illustration of southern Greece and the western Balkans, showing Epirus, Macedonia, mainland Greece, the Corinthian Gulf and Isthmus, and the Peloponnese with Taygetus and the Eurotas valley.
+Style: warm hand-painted watercolor and gouache over fine engraved ink, credible coastlines and mountain relief, muted blue-green sea, ochre and olive land, aged paper texture.
+Text: no text, no labels, no symbols, no routes.
+Constraints: no modern boundaries, people, ships, watermark, or border.
+Avoid: flat vector terrain, classroom maps, blunt polygons, rectangular water, sticker shapes, satellite imagery, modern GIS styling.
