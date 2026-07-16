@@ -1,0 +1,13 @@
+Use case: historical-scene
+Asset type: main panel art for a Pausanias graphic-book page, later overlaid with local labels and callouts
+Primary request: create a rich, historically grounded illustration for Pausanias 1.12.4: Greek artisans and readers know ivory in crafted objects, but living elephants are unknown before the Macedonian invasion of Asia.
+Scene/backdrop: an elegant Hellenistic Greek artisan workshop or learned storeroom opening onto a sunlit portico; in the foreground are carved ivory couch inlays, small ivory plaques, tools, wax tablets, and a Homeric scroll; in the far background, through the portico or as a painted wall-map relief, a distant Macedonian route leads east toward Asia and India, with a faint, awe-inspiring silhouette or mural-like vision of an elephant beyond mountains, clearly remote and not physically present in Greece.
+Subject: ivory craft objects and scholarly evidence in the foreground; distant historical/geographic orientation to Asia and India; no nudity.
+Style/medium: sophisticated coffee-table historical illustration, warm watercolor and gouache over fine ink, rich texture, credible ancient materials, painterly depth, consistent with parchment atlas pages.
+Composition/framing: wide horizontal composition, strong foreground craft still life on the left and center, architectural depth and distant eastern route on the right; leave uncluttered regions near the top and edges for later labels.
+Lighting/mood: warm Mediterranean daylight, scholarly and archaeological, polished but not theatrical.
+Color palette: aged parchment, ivory, terracotta, bronze, muted blue shadows, olive and ochre landscape tones.
+Materials/textures: polished ivory, papyrus, wood, stone, bronze tools, linen, dusty hills, hand-painted map surface.
+Text (verbatim): no text, no readable letters, no labels.
+Constraints: high-detail raster art; historically plausible Greek clothing and architecture; no modern objects; no exact text; no watermark; no border; no diagrammatic flat vector map; no cartoon style; no nudity, exposed breasts, genitals, or eroticized figures.
+Avoid: classroom diagram, icon sheet, simple map symbols, flat vector terrain, modern museum display, photorealistic CGI, fantasy armor, readable text.
