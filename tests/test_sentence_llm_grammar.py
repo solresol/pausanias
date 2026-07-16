@@ -75,6 +75,66 @@ def test_validate_and_normalize_tokens_rejects_form_mismatch():
         validate_and_normalize_tokens(raw_tokens, ["ἐπίγραμμα"])
 
 
+@pytest.mark.parametrize(
+    ("returned_form", "expected_form"),
+    [
+        ("καί", "καὶ"),
+        ("Ἥρᾳ", "Ἥρᾷ"),
+    ],
+)
+def test_validate_and_normalize_tokens_corrects_accent_only_form_mismatch(
+    returned_form, expected_form
+):
+    raw_tokens = [
+        {
+            "token_index": 1,
+            "form": returned_form,
+            "lemma": "καί",
+            "upos": "CCONJ",
+            "xpos": "c--------",
+            "feats": {},
+            "head": 0,
+            "deprel": "root",
+            "confidence": "high",
+            "note": "",
+        }
+    ]
+
+    tokens = validate_and_normalize_tokens(raw_tokens, [expected_form])
+
+    assert tokens[0]["form"] == expected_form
+
+
+@pytest.mark.parametrize(
+    ("returned_form", "expected_form"),
+    [
+        ("ἀ", "ἁ"),
+        ("γῇ", "γῆ"),
+        ("τροφoῦ", "τροφοῦ"),
+    ],
+)
+def test_validate_and_normalize_tokens_preserves_non_accent_form_checks(
+    returned_form, expected_form
+):
+    raw_tokens = [
+        {
+            "token_index": 1,
+            "form": returned_form,
+            "lemma": returned_form,
+            "upos": "X",
+            "xpos": None,
+            "feats": {},
+            "head": 0,
+            "deprel": "root",
+            "confidence": "medium",
+            "note": "",
+        }
+    ]
+
+    with pytest.raises(ValueError, match="Expected form"):
+        validate_and_normalize_tokens(raw_tokens, [expected_form])
+
+
 def test_validate_and_normalize_tokens_rejects_self_head():
     raw_tokens = [
         {

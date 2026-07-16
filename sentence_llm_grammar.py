@@ -11,6 +11,7 @@ import re
 import shlex
 import subprocess
 import sys
+import unicodedata
 import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
@@ -49,6 +50,7 @@ GREEK_WORD_RE = (
     r"[\u0370-\u03ff\u1f00-\u1fff]+|[ʼ'’\u02bc])?"
 )
 LLM_TOKEN_RE = re.compile(rf"{GREEK_WORD_RE}|\d+(?:[.,]\d+)?|[^\s]")
+GREEK_ACCENT_MARKS = frozenset({"\u0300", "\u0301", "\u0342"})
 
 
 def now_iso() -> str:
@@ -97,6 +99,16 @@ def effective_token_budget(
 
 def total_api_tokens(run: dict) -> int:
     return int(run["input_tokens"]) + int(run["output_tokens"])
+
+
+def forms_match_except_accents(returned_form: str, expected_form: str) -> bool:
+    """Return whether forms differ only by acute, grave, or circumflex accents."""
+
+    def without_accents(value: str) -> str:
+        decomposed = unicodedata.normalize("NFD", value)
+        return "".join(character for character in decomposed if character not in GREEK_ACCENT_MARKS)
+
+    return without_accents(returned_form) == without_accents(expected_form)
 
 
 def load_openai_api_key(key_file: str) -> str:
@@ -429,8 +441,9 @@ def validate_and_normalize_tokens(raw_tokens: list[dict], expected_tokens: list[
         form = str(raw.get("form", ""))
         if token_index != index:
             raise ValueError(f"Expected token_index {index}, got {token_index}")
-        if form != expected_form:
+        if form != expected_form and not forms_match_except_accents(form, expected_form):
             raise ValueError(f"Expected form {expected_form!r} at {index}, got {form!r}")
+        form = expected_form
 
         upos = str(raw.get("upos", "")).upper()
         if upos not in UPOS_TAGS:
