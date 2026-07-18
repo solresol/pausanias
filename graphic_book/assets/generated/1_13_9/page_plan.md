@@ -1,0 +1,10 @@
+# Page plan: Pausanias 1.13.9
+
+- Passage: 1.13.9.
+- Key places, events, and objects: Pyrrhus of Epirus buried at Argos; three Aeacids whose deaths were attributed to divine intervention; Achilles killed at Troy through Paris and Apollo; Neoptolemus (Pyrrhus, son of Achilles) killed at Delphi after the Pythian oracle; Pyrrhus of Epirus killed at Argos in the Argive account; Pausanias's distrust of Hieronymus of Cardia as a historian close to Antigonus; the comparison with Philistus and Dionysius at Syracuse.
+- Main visual: a museum-quality, richly painted historical triptych. The left field shows fully armoured Achilles falling outside Troy as Paris looses an arrow and Apollo appears as a restrained divine presence; the centre shows fully clothed Neoptolemus at the sanctuary of Apollo at Delphi, with the temple terrace and Phaedriades unmistakable; the right shows Pyrrhus of Epirus in the compressed Argive street established in 1.13.8, with a roof tile descending and a modest funerary marker/sanctuary in the foreground. The three scenes share a sophisticated warm antiquarian palette but remain spatially distinct for local labels.
+- Inset: a richly rendered Hellenistic court historian at a writing table, observed by the royal court of Antigonus, with wax tablet, papyrus rolls, and an idealized royal portrait nearby. The image makes patronage pressure visible without relying on caption alone.
+- Orientation strategy: locally rendered headers identify TROY, DELPHI, and ARGOS above the three main fields; leaders identify Achilles, Paris and Apollo, the Temple of Apollo and Neoptolemus, Pyrrhus of Epirus, roof tile, tomb/sanctuary, and the court historian. A concise relational panel distinguishes the two men called Pyrrhus and connects all three Aeacids.
+- Approved style references: `graphic_book/images/1/1/4.png` and `graphic_book/images/1/1/5.png`.
+- Continuity reference only: `graphic_book/images/1/13/8.png`.
+- Content suitability: all figures are fully clothed or fully armoured; deaths are non-graphic; there is no visible nudity, gore, or eroticized pose.
