@@ -129,6 +129,12 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument("--psql-bin", default="psql")
     parser.add_argument("--openai-api-key-file", default="~/.openai.key")
     parser.add_argument("--model", default=DEFAULT_MODEL)
+    parser.add_argument(
+        "--reasoning-effort",
+        choices=("none", "minimal", "low", "medium", "high", "xhigh", "max"),
+        default=None,
+        help="Optional API reasoning effort; use none for gpt-5.6-sol function calls.",
+    )
     parser.add_argument("--prompt-version", default=DEFAULT_PROMPT_VERSION)
     parser.add_argument("--stop-after", type=int, default=None)
     parser.add_argument("--sample-size", type=int, default=None)
@@ -503,6 +509,7 @@ def analyse_sentence(
     client: OpenAI,
     *,
     model: str,
+    reasoning_effort: str | None = None,
     passage_id: str,
     sentence_number: int,
     sentence: str,
@@ -519,17 +526,20 @@ def analyse_sentence(
             "error": None,
         }
 
-    response = client.chat.completions.create(
-        model=model,
-        messages=completion_messages(
+    request = {
+        "model": model,
+        "messages": completion_messages(
             passage_id=passage_id,
             sentence_number=sentence_number,
             sentence=sentence,
             tokens=expected_tokens,
         ),
-        tools=grammar_tool(),
-        tool_choice={"type": "function", "function": {"name": "save_sentence_grammar"}},
-    )
+        "tools": grammar_tool(),
+        "tool_choice": {"type": "function", "function": {"name": "save_sentence_grammar"}},
+    }
+    if reasoning_effort is not None:
+        request["reasoning_effort"] = reasoning_effort
+    response = client.chat.completions.create(**request)
     input_tokens, output_tokens = safe_usage(response)
     tool_calls = response.choices[0].message.tool_calls
     if not tool_calls:
@@ -767,11 +777,14 @@ def output_payload(path: str | None, payload: dict) -> None:
     print(f"Saved JSON payload to {output_path}.")
 
 
-def analyse_row(client: OpenAI, model: str, row: dict) -> dict:
+def analyse_row(
+    client: OpenAI, model: str, row: dict, *, reasoning_effort: str | None = None
+) -> dict:
     try:
         result = analyse_sentence(
             client,
             model=model,
+            reasoning_effort=reasoning_effort,
             passage_id=row["passage_id"],
             sentence_number=row["sentence_number"],
             sentence=row["greek_sentence"],
@@ -874,6 +887,7 @@ def main() -> None:
             f"token_budget={args.token_budget}; daily_token_budget={args.daily_token_budget}; "
             f"daily_tokens_used={daily_tokens_used}; effective_token_budget={run_token_budget}; "
             f"budget_timezone={args.budget_timezone}; max_failures={args.max_failures}"
+            f"; reasoning_effort={args.reasoning_effort}"
         ),
     }
     payload = {"run": run, "results": [], "failures": []}
@@ -894,12 +908,26 @@ def main() -> None:
 
     for batch in batched(rows, write_batch_size):
         if concurrency == 1:
-            analysed = [analyse_row(client, args.model, row) for row in batch]
+            analysed = [
+                analyse_row(
+                    client,
+                    args.model,
+                    row,
+                    reasoning_effort=args.reasoning_effort,
+                )
+                for row in batch
+            ]
         else:
             analysed = []
             with ThreadPoolExecutor(max_workers=concurrency) as executor:
                 futures = {
-                    executor.submit(analyse_row, client, args.model, row): row
+                    executor.submit(
+                        analyse_row,
+                        client,
+                        args.model,
+                        row,
+                        reasoning_effort=args.reasoning_effort,
+                    ): row
                     for row in batch
                 }
                 for future in as_completed(futures):

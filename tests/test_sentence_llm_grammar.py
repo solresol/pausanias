@@ -1,6 +1,7 @@
 import pytest
 
 from sentence_llm_grammar import (
+    analyse_sentence,
     effective_token_budget,
     get_daily_token_usage,
     get_sentences,
@@ -9,6 +10,36 @@ from sentence_llm_grammar import (
     validate_and_normalize_tokens,
     write_payload,
 )
+
+
+class FakeCompletions:
+    def __init__(self):
+        self.request = None
+
+    def create(self, **kwargs):
+        self.request = kwargs
+        raise RuntimeError("stop after request capture")
+
+
+class FakeClient:
+    def __init__(self):
+        self.chat = type("Chat", (), {"completions": FakeCompletions()})()
+
+
+def test_analyse_sentence_passes_explicit_reasoning_effort():
+    client = FakeClient()
+
+    with pytest.raises(RuntimeError, match="request capture"):
+        analyse_sentence(
+            client,
+            model="gpt-5.6-sol",
+            reasoning_effort="none",
+            passage_id="8.10.7",
+            sentence_number=1,
+            sentence="Ἄρατος δὲ ἀπὸ συγκειμένου·",
+        )
+
+    assert client.chat.completions.request["reasoning_effort"] == "none"
 
 
 def test_tokenize_for_llm_splits_greek_words_and_punctuation():
