@@ -1,0 +1,7 @@
+Focused correction applied to the generated main art:
+
+Make one localized edit to this exact image. On the long foreground fountain facade there are ten bronze face waterspouts. Remove only the single far-left water outlet: remove its bronze face, water stream, and the basin directly beneath it. Replace that far-left outlet position with continuous plain dressed stone wall and paving that match the adjacent architecture. Do not move, add, duplicate, or alter the other nine bronze face waterspouts; they must remain exactly where they are and continue pouring into their existing nine basins.
+
+Preserve every other feature as closely as possible: composition, people, jars, columns, two upper sanctuaries, Odeion, statues, Acropolis, landscape, colors, texture, and lighting. Add no text, labels, signs, arrows, borders, or symbols. All figures and statues remain fully clothed.
+
+The accepted third raster has exactly nine visible bronze outlets and water streams.
