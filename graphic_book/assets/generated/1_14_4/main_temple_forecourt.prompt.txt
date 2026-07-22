@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: dominant raster art panel for a premium illustrated classical-history coffee-table book
+Primary request: Reconstruct the sacred forecourt of an Athenian temple in the second century CE, centered on two objects recorded by Pausanias: a life-size bronze ox posed as though being led to sacrifice and a dignified seated bronze portrait statue of the Cretan poet and purifier Epimenides.
+Scene/backdrop: Elevated Athenian sanctuary precinct at warm late-afternoon light; the Acropolis and Attic hills are visible beyond the colonnade for unmistakable geographic orientation; worn limestone paving, votive bases, restrained ritual objects, cypress and olive trees.
+Subject: The bronze ox occupies the left foreground in convincing three-quarter view, with a subtle bronze tether leading toward a fully clothed attendant; the seated bronze Epimenides occupies the right foreground, contemplative and elderly, draped in an archaic mantle. Both are unmistakably bronze monuments, not living protagonists.
+Style/medium: Sophisticated painterly archaeological reconstruction, richly textured naturalistic gouache and oil illustration, museum-publication accuracy, the visual ambition and density of the supplied approved Pausanias pages, restrained parchment-compatible palette.
+Composition/framing: Wide 3:2 landscape. Strong depth from foreground monuments through temple columns to the distant Acropolis. Leave limited calm areas at the upper corners and lower edge for locally applied callout labels, but keep the scene visually rich.
+Lighting/mood: Golden Mediterranean side light, luminous bronze patina, quiet sacred gravity, plausible atmospheric depth.
+Constraints: Historically grounded Greek dress and architecture; all people fully clothed; exact subjects clearly readable; no embedded labels, letters, inscription, decorative pseudo-writing, border, watermark, collage, split screen, modern objects, nudity, or fantasy spectacle.
+Avoid: flat vector art, classroom diagram, icon figures, sparse layout, cartoon styling, glossy 3D render, generic Roman palace, anatomically distorted ox, living ox mistaken for the bronze monument.
+

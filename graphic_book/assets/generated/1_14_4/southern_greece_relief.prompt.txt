@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: unlabeled geographic relief base for a subordinate orientation inset
+Primary request: Create a painterly oblique-relief atlas view of southern Greece and Crete, with Attica and Athens's region near the upper-right, the Peloponnese and Sparta's region near the center-left, and the island of Crete spanning the lower part of the frame. The Aegean separates them clearly.
+Scene/backdrop: Accurate-feeling Mediterranean topography: ochre mountain ranges, olive-green valleys, pale rocky coasts, and deep blue water with restrained hand-painted bathymetric texture.
+Style/medium: Sophisticated antique atlas relief painted in gouache and watercolor on subtly aged parchment, richly textured and geographically credible, matching a premium classical-history coffee-table book.
+Composition/framing: Wide landscape; all three regions remain visible with clear coastlines and sufficient space for exact local labels and thin route overlays added later.
+Lighting/mood: Warm raking relief light, scholarly and elegant.
+Constraints: Unlabeled base only; no text, letters, symbols, pins, route lines, borders, compass, ships, people, buildings, pseudo-writing, watermark, or decorative monsters.
+Avoid: flat vector polygons, rectangular sea, blunt block mountains, classroom map, cartoon islands, satellite-photo realism, sparse schematic composition.

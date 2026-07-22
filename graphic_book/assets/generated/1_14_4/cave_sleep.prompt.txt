@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: scenic raster inset for a premium illustrated classical-history coffee-table book
+Primary request: Illustrate Epimenides of Knossos asleep in a deep Cretan cave during the legendary forty-year slumber, as a historically grounded poetic scene rather than fantasy.
+Scene/backdrop: Rugged limestone cave in Crete with a distant mouth opening toward sunlit scrub and mountains; mineral textures, ancient offerings, an extinguished oil lamp, and layers of settled dust suggest extraordinary elapsed time.
+Subject: One fully clothed Cretan poet-seer sleeps peacefully on a natural stone shelf, wrapped in a dark wool mantle; an aged staff and simple satchel lie nearby. His pose is dignified and plausible, his face visible enough to read as sleep rather than death.
+Style/medium: Rich naturalistic gouache and oil illustration, archaeological reconstruction, sophisticated painterly detail, parchment-compatible earth colors, matching the visual ambition and finish of the supplied approved Pausanias pages.
+Composition/framing: Wide landscape inset with the sleeper in the lower-right third and the luminous cave mouth in the upper-left, creating a clear visual path through time and place. No text space is required inside the art.
+Lighting/mood: Cool cave shadows contrasted with warm Cretan daylight, mysterious but serene, no supernatural apparition.
+Constraints: Fully clothed figure; no embedded text, letters, inscription, border, watermark, nudity, bones, horror, modern equipment, or overt magic effects.
+Avoid: flat vector art, classroom diagram, iconography, cartoon styling, generic sleeping-bag scene, deathbed imagery, fantasy wizard tropes, sparse placeholder composition.
