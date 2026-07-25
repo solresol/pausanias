@@ -1,0 +1,13 @@
+# Page plan — passage 1.14.7
+
+- **Passage ID:** 1.14.7
+- **Key places, events, people, and objects:** the Athenian sanctuary of Aphrodite Urania; the cult's east-to-west transmission through Assyria, Paphos in Cyprus, Phoenician Ascalon, Cythera, and Athens; Aegeus founding the Athenian cult because he feared Urania's anger over his childlessness and his sisters' misfortune; the Parian-marble cult statue by Pheidias; and Athmonia's rival claim that Porphyrion founded its sanctuary before Actaeus.
+- **Main visual:** a richly finished historical reconstruction of the Athenian sanctuary in golden late-afternoon light. A monumental, fully clothed Parian-marble Aphrodite Urania by Pheidias dominates the sacred court; Aegeus approaches with an offering, while Attic worshippers and distant Athens establish the living cult setting.
+- **Scenic inset:** a fully clothed Aegeus before a small household altar, with an empty cradle and dynastic tokens handled symbolically rather than melodramatically. A distant sanctuary evokes his decision to establish Urania's cult.
+- **Orientation strategy:** a subordinate painterly relief atlas of the eastern Mediterranean traces the cult's movement from Assyria to Paphos, Ascalon, Cythera, and Athens. Exact place names and route lines are added locally; the atlas remains secondary to the sanctuary reconstruction.
+- **Tradition panel:** a compact locally typeset comparison distinguishes the city's Aegeus foundation story from Athmonia's older Porphyrion claim, making Pausanias's final observation about conflicting deme traditions explicit.
+- **Callout strategy:** measured labels and leaders point to the visible statue, its Parian marble, Aegeus, the sanctuary court, and Athens. The route inset uses locally rendered labels and a directional route whose stops sit on credible coastlines.
+- **Approved style anchors:** `graphic_book/images/1/1/4.png` and `graphic_book/images/1/1/5.png` for parchment-atlas grammar, rich raster illustration, visual density, and coffee-table-book finish.
+- **Continuity reference:** `graphic_book/images/1/14/6.png` for the immediate passage sequence, panel hierarchy, and typography only; it does not replace the approved quality anchors.
+- **Content suitability:** Aphrodite is represented as a dignified, fully clothed cult statue; all human figures are fully clothed and no eroticized or exposed bodies appear.
+- **Typography policy:** all passage text, headings, labels, captions, comparison text, and route names are rendered locally in measured rectangles with hard minimum sizes. Generated art contains no lettering.
