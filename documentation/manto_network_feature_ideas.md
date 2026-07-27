@@ -9,6 +9,52 @@ stories shared with neighbours through common mythic figures, or the same
 pattern of action performed by distinct city-related figures — may be
 predictive of abandonment.
 
+> **Correction, 2026-07-27:** the original `fame` family included Pausanias
+> mention and passage counts. Because Pausanias also supplies the target
+> place-state labels, those are target-proximate leakage and are inadmissible
+> as predictors. All historical results below involving `fame`,
+> `connectedness+fame`, or `all` are retired. The implementation now uses a
+> strictly pre-Pausanias MANTO-attestation baseline and retains `fame` only as
+> a compatibility alias for that corrected feature family.
+
+## Corrected leakage-controlled rerun (2026-07-27)
+
+The full-corpus, exact-plus-transliteration cohort was retrained after two
+corrections:
+
+1. remove `pausanias_mention_count` and `pausanias_passage_count` from every
+   model; and
+2. collapse spelling/link aliases to one row per MANTO entity before assigning
+   cross-validation folds.
+
+The second correction removed 189 duplicate alias rows, leaving n=255 unique
+MANTO places (204 survive, 51 do not survive; stratified five-fold
+cross-validation):
+
+| feature family | balanced accuracy |
+| --- | --- |
+| pre-Pausanias attestation volume | 0.480 |
+| **connectedness** | **0.564** |
+| connectedness + attestation | 0.561 |
+| network position | 0.473 |
+| network + connectedness | 0.529 |
+| geography | 0.485 |
+| all admissible features | 0.522 |
+
+This retracts both earlier positive framings. Raw pre-Pausanias attestation
+volume is not useful on its own, and the apparent 0.688 performance after only
+removing Pausanias attention was still inflated by duplicate MANTO identities
+crossing folds. After both corrections, connectedness is the best family at
+0.564 balanced accuracy: a weak signal, not a practically reliable classifier.
+Its pooled confusion matrix is 154/50 for actual survivors and 32/19 for actual
+non-survivors (columns: predicted survives / predicted does not survive).
+
+The local-plus-imported-figures coefficient pattern remains visible but smaller
+in the corrected connectedness model: `exclusive_figure_count` +0.695,
+`figure_max_ubiquity` +0.493, and `figure_mean_ubiquity` -0.532. Given the weak
+out-of-fold performance and correlated predictors, treat this only as a
+follow-up hypothesis.
+
 ## Status of Greta's core hypotheses
 
 Already implemented in `manto_place_connectedness_features.py` (v1):
@@ -125,17 +171,19 @@ than any static centrality.
 1. **The fame confound.** MANTO edge counts partly measure how much ancient
    literature discusses a place, and famous places survive. Every
    degree-flavoured feature is a fame proxy. Defenses:
-   - A **fame baseline model** — Pausanias mention counts plus raw
-     pre-Pausanias attestation volume, no structure — that the network
-     features must beat before any structural claim is made.
+   - A **pre-Pausanias attestation baseline** — raw MANTO edge volume from
+     strictly earlier sources, with no Pausanias-derived counts and no graph
+     structure — that the network features must beat before any structural
+     claim is made.
    - **Null-model z-scores** — degree-preserving rewiring of the
      place–figure structure, so shared-figure counts become "more sharing
      than expected given how well-attested the place and its figures are".
 2. **Leakage rules.** Keep the strict `is_pre_pausanias` edge filter for all
-   model-facing features. Pausanias-included runs are leakage diagnostics
-   only. Destruction-type edges and anything derived from survival labels
-   (community survival rates, similarity-to-survivor-centroid) are reported
-   separately or computed out-of-fold.
+   model-facing features. Do not use Pausanias mention or passage counts:
+   Pausanias supplies the target labels. Pausanias-included runs are leakage
+   diagnostics only. Destruction-type edges and anything derived from survival
+   labels (community survival rates, similarity-to-survivor-centroid) are
+   reported separately or computed out-of-fold.
 3. **Spatial autocorrelation.** Survival is regionally clustered. Use
    cross-validation rather than a single split, and check leave-one-region-out
    behaviour before claiming generalization; otherwise the model learns
@@ -148,7 +196,7 @@ than any static centrality.
    regression with standardized features and cross-validated estimates;
    prefer coefficient signs and stability over point accuracy.
 
-## First results (2026-07-06 implementation pass)
+## Retired first results (2026-07-06 implementation pass)
 
 Everything above except the items marked "proposed" was implemented and run
 against MANTO release 19446255 (myth graph after bookkeeping exclusion: 7,275
@@ -236,7 +284,7 @@ Where the n=152 training set comes from and where it leaks:
 - **MANTO Information labels stay diagnostic-only** (872:9; absence of a
   negative phrase defaults to survives).
 
-## Linking expansion results (2026-07-06, same day, second pass)
+## Retired linking expansion results (2026-07-06, same day, second pass)
 
 Fixing the linking leak worked mechanically: transliteration bridging added
 305 deterministic links and the LLM curation pass (gpt-5.4-mini, ~150k tokens)
@@ -267,7 +315,7 @@ confidence (high vs medium vs curated-llm) to separate link-noise from
 easy-subset effects; (b) review the low-confidence LLM links (generic
 "sanctuary of X" names) which plausibly attach wrong labels.
 
-### Link-tier stratification (2026-07-06, third pass)
+### Retired link-tier stratification (2026-07-06, third pass)
 
 The feature builders now accept `--link-match-methods`; feature sets were
 rebuilt on three link tiers and retrained (5-fold CV, LLM labels, balanced
@@ -301,7 +349,7 @@ while the LLM links await review:
   rebuild the full tier and re-test whether clean LLM links behave like
   transliteration links.
 
-## Full-corpus labels (2026-07-07)
+## Retired full-corpus results (2026-07-07)
 
 The passage place-state sweep now covers the whole corpus (3,162/3,170
 passages; the final 2,309-passage batch added 1,205 mentions for 3.27M

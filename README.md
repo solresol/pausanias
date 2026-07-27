@@ -196,19 +196,23 @@ neighboring places, and shared action-pattern links where neighboring places
 have the same kind of story with distinct person figures.
 
 `--feature-family` accepts any comma-separated combination of `network`,
-`connectedness`, `geography`, and `fame`, plus the aliases `combined`
-(network+connectedness) and `all`. `fame` is the no-structure attention
-baseline — Pausanias mention counts plus raw pre-Pausanias MANTO edge volume —
-that structural families must beat before any network claim means anything.
+`connectedness`, `geography`, and `attestation`, plus the aliases `combined`
+(network+connectedness) and `all`. `attestation` is the no-structure attention
+baseline: raw MANTO edge volume from sources strictly earlier than Pausanias.
+It deliberately excludes Pausanias mention and passage counts, because the
+same text supplies the target place-state labels.
 `--cv-folds 5` reports pooled out-of-fold metrics from stratified k-fold
 cross-validation instead of a single train/test split:
 
 ```bash
 uv run predict_place_survival.py --feature-family connectedness
 uv run predict_place_survival.py --feature-family combined
-uv run predict_place_survival.py --feature-family fame --cv-folds 5
-uv run predict_place_survival.py --feature-family connectedness,fame --cv-folds 5
+uv run predict_place_survival.py --feature-family attestation --cv-folds 5
+uv run predict_place_survival.py --feature-family connectedness,attestation --cv-folds 5
 ```
+
+`fame` remains a compatibility alias for `attestation`; it no longer loads
+Pausanias-derived predictors.
 
 To compare target sources, keep MANTO-only as the default and switch the
 training label set explicitly:

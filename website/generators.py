@@ -4703,6 +4703,287 @@ def generate_manto_links_page(links_data, output_dir, title):
         f.write(page)
 
 
+def _render_place_survival_comparison_rows(comparison, best_run_id):
+    rows = []
+    for model in comparison:
+        best_badge = (
+            ' <span class="badge badge-good">best balanced accuracy</span>'
+            if model["run_id"] == best_run_id
+            else ""
+        )
+        rows.append(
+            "<tr>"
+            f"<td><strong>{html.escape(model['label'])}</strong>{best_badge}</td>"
+            f"<td class=\"num\">{model['balanced_accuracy']:.3f}</td>"
+            f"<td class=\"num\">{model['accuracy']:.3f}</td>"
+            f"<td class=\"num\">{model['recall_survives']:.3f}</td>"
+            f"<td class=\"num\">{model['recall_does_not_survive']:.3f}</td>"
+            "</tr>"
+        )
+    return "".join(rows)
+
+
+def _render_place_survival_feature_rows(feature_scores, limit=16):
+    rows = []
+    for score in feature_scores[:limit]:
+        direction = score["direction"]
+        badge = (
+            '<span class="badge badge-good">survives</span>'
+            if direction == "survives"
+            else '<span class="badge badge-bad">does not survive</span>'
+        )
+        rows.append(
+            "<tr>"
+            f"<td>{html.escape(score['label'])}</td>"
+            f"<td>{html.escape(score['family'])}</td>"
+            f"<td class=\"num\">{score['coefficient']:+.3f}</td>"
+            f"<td>{badge}</td>"
+            "</tr>"
+        )
+    return "".join(rows)
+
+
+def generate_manto_place_survival_model_page(model_data, output_dir, title):
+    """Generate the leakage-controlled MANTO place-survival model page."""
+    places_dir = os.path.join(output_dir, "places")
+    os.makedirs(places_dir, exist_ok=True)
+
+    if not model_data or not model_data.get("available"):
+        message = html.escape(
+            model_data.get(
+                "message",
+                "No leakage-controlled place-survival model is available.",
+            )
+            if model_data
+            else "No leakage-controlled place-survival model is available."
+        )
+        body = f"<p>{message}</p>"
+    else:
+        best = model_data["best_model"]
+        comparison = model_data.get("comparison", [])
+        attestation = next(
+            (
+                model
+                for model in comparison
+                if model["feature_family"] == "attestation"
+            ),
+            None,
+        )
+        gain_note = ""
+        if attestation:
+            gain = best["balanced_accuracy"] - attestation["balanced_accuracy"]
+            gain_note = (
+                f"The best current model improves balanced accuracy by "
+                f"<strong>{gain:+.3f}</strong> over the strictly pre-Pausanias "
+                "attestation-volume baseline."
+            )
+        result_strength_note = ""
+        if best["balanced_accuracy"] < 0.600:
+            result_strength_note = (
+                "This is a weak predictive result, not a practically reliable "
+                "classifier. It is published here to make the present evidential "
+                "limit visible."
+            )
+
+        confusion_metrics = {
+            "actual_0_pred_0": best["true_survives_pred_survives"],
+            "actual_0_pred_1": best["true_survives_pred_does_not_survive"],
+            "actual_1_pred_0": best["true_does_not_survive_pred_survives"],
+            "actual_1_pred_1": best[
+                "true_does_not_survive_pred_does_not_survive"
+            ],
+        }
+        confusion = render_confusion_matrix_card(
+            "Best Model: Pooled Out-of-Fold Predictions",
+            confusion_metrics,
+            "Survives",
+            "Does not survive",
+        )
+        coverage = model_data.get("coverage", {})
+        evaluation_display = {
+            "5-fold-cv": "stratified five-fold cross-validation",
+        }.get(
+            str(model_data.get("evaluation", "")),
+            str(model_data.get("evaluation", "cross-validation")),
+        )
+        coverage_note = ""
+        if coverage:
+            coverage_note = (
+                f"The place-state sweep reviewed "
+                f"<strong>{coverage.get('reviewed_passage_count', 0):,}</strong> "
+                f"of <strong>{coverage.get('passage_count', 0):,}</strong> passages; "
+                f"<strong>{coverage.get('passages_with_claims', 0):,}</strong> "
+                "passages contain at least one explicit place-state claim."
+            )
+
+        release = model_data.get("release", {})
+        release_note = ""
+        if release:
+            doi = release.get("doi", "")
+            doi_html = (
+                f'<a href="https://doi.org/{html.escape(doi)}">'
+                f"{html.escape(doi)}</a>"
+                if doi
+                else ""
+            )
+            release_note = (
+                f"MANTO release {int(release.get('record_id', 0))}"
+                f"{f' ({doi_html})' if doi_html else ''}; "
+                "model-facing MANTO edges are restricted to evidence dated "
+                "strictly before Pausanias."
+            )
+        training_stats = model_data.get("training_stats", {})
+        identity_note = ""
+        if training_stats:
+            before = int(
+                training_stats.get("training_rows_before_place_collapse", 0)
+            )
+            after = int(
+                training_stats.get("training_rows_after_place_collapse", 0)
+            )
+            duplicates = int(
+                training_stats.get("duplicate_training_rows_collapsed", 0)
+            )
+            identity_note = (
+                f"The label-link join initially produced <strong>{before:,}</strong> "
+                f"alias rows. These were collapsed to <strong>{after:,}</strong> "
+                f"unique MANTO places, removing <strong>{duplicates:,}</strong> "
+                "duplicate spelling/link rows before cross-validation."
+            )
+
+        body = f"""
+        <p class="lead">Can the mythological position of a place, using evidence
+        available before Pausanias, predict whether Pausanias later describes it
+        as surviving or as ruined, abandoned, deserted, or destroyed?</p>
+
+        <div class="note">
+            <strong>Leakage correction.</strong> Earlier experimental runs used
+            Pausanias mention and passage counts as a “fame” baseline. Those
+            measurements come from the same text that supplies the outcome label,
+            so they have been removed. Earlier runs also allowed spelling aliases
+            for the same MANTO entity to enter different folds; the corrected
+            model uses exactly one row per MANTO place. This page excludes both
+            sets of retired runs.
+        </div>
+
+        <div class="metric-strip">
+            <div><strong>{int(model_data.get("sample_count", 0)):,}</strong><span>linked labelled places</span></div>
+            <div><strong>{int(model_data.get("survives_count", 0)):,}</strong><span>survives</span></div>
+            <div><strong>{int(model_data.get("does_not_survive_count", 0)):,}</strong><span>does not survive</span></div>
+            <div><strong>{best["balanced_accuracy"]:.3f}</strong><span>best balanced accuracy</span></div>
+        </div>
+
+        <h2>Model Comparison</h2>
+        <p>{gain_note} {result_strength_note}</p>
+        <p class="note">{identity_note}</p>
+        <p class="note">Results are pooled out-of-fold predictions from
+        {html.escape(evaluation_display)}.
+        Balanced accuracy averages recall for the two classes and is the primary
+        measure because the majority-class ordinary accuracy is
+        {best["majority_accuracy"]:.3f}. An always-survives classifier has
+        balanced accuracy 0.500.</p>
+        <div class="place-survival-table-wrap">
+            <table class="predictor-table">
+                <thead>
+                    <tr>
+                        <th>Feature family</th>
+                        <th class="num">Balanced accuracy</th>
+                        <th class="num">Ordinary accuracy</th>
+                        <th class="num">Survivor recall</th>
+                        <th class="num">Non-survivor recall</th>
+                    </tr>
+                </thead>
+                <tbody>{_render_place_survival_comparison_rows(comparison, best["run_id"])}</tbody>
+            </table>
+        </div>
+
+        <div class="confusion-section">
+            <div class="confusion-grid">{confusion}</div>
+        </div>
+
+        <h2>What the Model Is Allowed to See</h2>
+        <div class="hub-grid">
+            <section class="hub-card">
+                <h3>Pre-Pausanias Attestation</h3>
+                <p>Raw MANTO edge volume from evidence strictly earlier than
+                Pausanias. It contains no counts derived from Pausanias.</p>
+            </section>
+            <section class="hub-card">
+                <h3>Network Position</h3>
+                <p>Degree, PageRank, k-core, community role, reach, redundancy,
+                bridges, and paths to major places in the earlier myth network.</p>
+            </section>
+            <section class="hub-card">
+                <h3>Connectedness</h3>
+                <p>Shared figures and action patterns, distinctive local figures,
+                kin-mediated ties, large-place connections, and temporal layering.</p>
+            </section>
+            <section class="hub-card">
+                <h3>Geography</h3>
+                <p>Distances, nearby-place counts, and whether narrative
+                neighbours are geographically local.</p>
+            </section>
+        </div>
+
+        <h2>Strongest Standardized Coefficients</h2>
+        <p class="note">The final logistic regression is fitted on standardized
+        features. Coefficients show conditional associations within a correlated
+        feature set; they are not causal effects and should be interpreted as
+        patterns rather than isolated rankings.</p>
+        <div class="place-survival-table-wrap">
+            <table class="predictor-table">
+                <thead>
+                    <tr><th>Feature</th><th>Family</th><th class="num">Coefficient</th><th>Direction</th></tr>
+                </thead>
+                <tbody>{_render_place_survival_feature_rows(model_data.get("feature_scores", []))}</tbody>
+            </table>
+        </div>
+
+        <h2>Scope and Remaining Checks</h2>
+        <ul>
+            <li>The target is what Pausanias reports in the second century, not modern archaeological survival.</li>
+            <li>The active labels are LLM-extracted and still require a stratified human gold-set audit.</li>
+            <li>The model uses exact-name and deterministic transliteration links; unreviewed LLM-curated links are excluded.</li>
+            <li>All spelling aliases are collapsed to one MANTO entity before folds are assigned.</li>
+            <li>Cross-validation is stratified by label, but leave-one-region-out validation has not yet been run.</li>
+            <li>Performance supports association and prediction within this dataset, not a causal claim about why settlements survived.</li>
+        </ul>
+        <p class="note">{coverage_note} {release_note}</p>
+        <p><a href="manto-network.html">Inspect the MANTO place network</a> ·
+        <a href="manto-links.html">Inspect Pausanias–MANTO place links</a></p>
+        """
+
+    page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - MANTO Place Survival Model</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{title}</h1>
+        <p>Predicting Pausanias' reported place survival from earlier evidence</p>
+    </header>
+    {_site_nav("../", "places")}
+    <div class="container wide-container">
+        <div class="breadcrumb"><a href="index.html">Places</a> &rsaquo; Place Survival Model</div>
+        <h2>MANTO Place Survival Model</h2>
+        {body}
+        <footer>{_generated_footer()}</footer>
+    </div>
+</body>
+</html>
+"""
+    with open(
+        os.path.join(places_dir, "manto-survival-model.html"),
+        "w",
+        encoding="utf-8",
+    ) as f:
+        f.write(page)
+
+
 def generate_places_index(output_dir, title):
     """Generate a hub page for geographic and noun-network views."""
     places_dir = os.path.join(output_dir, "places")
@@ -4763,6 +5044,11 @@ def generate_places_index(output_dir, title):
 
         <h2>Network Analysis</h2>
         <div class="hub-grid">
+            <section class="hub-card">
+                <h3>MANTO Place Survival Model</h3>
+                <p>Leakage-controlled prediction of whether Pausanias reports a place as surviving, ruined, abandoned, or destroyed.</p>
+                <a href="manto-survival-model.html">Open Survival Model</a>
+            </section>
             <section class="hub-card">
                 <h3>MANTO Place Network</h3>
                 <p>Strict pre-Pausanias MANTO place-place links, locality edges, Athens neighborhood structure, and detected place communities.</p>

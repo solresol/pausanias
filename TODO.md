@@ -40,7 +40,7 @@ Source anchors are in the private ignored transcript notes, especially:
 - [ ] Decide whether the MANTO place-survival network features belong in the
       July paper or a separate follow-on paper; see
       `documentation/manto_network_feature_ideas.md` for the feature inventory
-      and the fame-baseline/leakage guardrails any claim must pass.
+      and the pre-Pausanias-attestation/leakage guardrails any claim must pass.
 - [ ] Use the manual Book 3 disagreement rate as uncertainty/error bars for
       claims such as "daughter is strongly mythic" rather than treating AI labels
       as ground truth.
@@ -200,17 +200,18 @@ Full write-up with paper-facing methodology notes:
       hybrid features: geographic distance to the nearest large place,
       neighbour-distance statistics, and localism of mythology (fraction of
       narrative ties within 25/50/100 km).
-- [x] Add a fame-baseline feature family (Pausanias mention counts plus raw
-      pre-Pausanias attestation volume) that structural features must beat.
+- [x] Remove Pausanias mention and passage counts from the predictor: they are
+      measured in the same text that supplies the target label. Replace the
+      old `fame` family with a strictly pre-Pausanias MANTO-attestation baseline;
+      keep `fame` only as a compatibility alias for the corrected family.
 - [x] Add stratified cross-validation to the place-survival classifier instead
       of relying on a single train/test split.
 - [x] Add null-model z-scores for shared-figure features via degree-preserving
       rewiring of the place-figure structure.
-- [ ] Treat the passage/sentence LLM label set (84:68, n=152) as the primary
-      evaluation; the MANTO label set is 872:9 and the MANTO+LLM combined set
-      639:11, both nearly degenerate. First-pass CV results are in
-      `documentation/manto_network_feature_ideas.md`: structure 0.733 vs fame
-      baseline 0.610 vs geography 0.583 balanced accuracy.
+- [ ] Treat the passage/sentence LLM label set as the primary evaluation; the
+      MANTO label set is nearly degenerate. Do not reuse comparisons against
+      the retired fame baseline: it contained Pausanias-derived attention
+      features. Publish only corrected attestation-baseline comparisons.
 - [ ] Stop citing the earlier 0.9+ balanced accuracies: the same
       connectedness/combined-labels configuration scores 0.975 on a single
       split but 0.761 under 5-fold CV, so those were split luck on 11
@@ -234,26 +235,27 @@ Full write-up with paper-facing methodology notes:
       the "(low confidence)" generic-sanctuary ones; set reviewed=TRUE or
       rejected=TRUE, then re-run link_manto_places.py. The website curation
       page is places/manto-links.html.
-- [x] Explain the accuracy drop at n=356: link-tier stratification
-      (--link-match-methods through the feature builders) shows the
-      transliteration tier is clean (all-families 0.719 at n=292 vs 0.735 at
-      n=186) while the 110 LLM links cost ~10 points on everything including
-      the fame baseline — i.e. link noise, not sample difficulty. Details in
-      documentation/manto_network_feature_ideas.md.
+- [ ] Re-run link-tier stratification with the corrected attestation baseline.
+      The prior comparison included Pausanias-derived attention features and
+      cannot support a predictive claim.
 - [ ] Use the exact+transliteration link tier (n=292) as the default
       modelling set until the LLM links are reviewed; after review, rebuild
       the full tier and re-test.
-- [ ] Current defensible headline: structure adds ~5 points of balanced
-      accuracy on top of the fame baseline (0.719 vs 0.672), stable across
-      deterministic link tiers; structure alone does not beat fame.
+- [x] Establish the corrected headline at one row per MANTO place: the
+      deterministic-link cohort is n=255 after collapsing 189 alias rows.
+      Connectedness is best but weak at 0.564 balanced accuracy; attestation is
+      0.480, network+connectedness 0.529, and all admissible features 0.522
+      under stratified five-fold cross-validation.
 - [x] Finish the passage place-state sweep: full corpus now covered
-      (3,162/3,170 passages; final 2,309-passage batch, 3.27M tokens,
+      (3,170/3,170 passages; final large batch used 3.27M tokens,
       1,205 mentions). New passages are survives-heavy (810:21), so the
-      LLM label set is now 82:18 at n=444 linked places.
-- [ ] The local-plus-imported-heroes finding replicates on the full-corpus
-      labels (exclusive_figure_count +1.23, figure_mean_ubiquity -0.65,
-      figure_max_ubiquity +0.64; connectedness+fame 0.724 vs fame 0.684):
-      write it up for Greta with the collinearity caveats.
+      label-link join yields 444 alias rows; the corrected model collapses
+      these to 255 unique MANTO places before cross-validation.
+- [x] Re-test the local-plus-imported-heroes coefficient pattern without
+      Pausanias-derived attention features and duplicate place identities:
+      exclusive-figure count remains positive (+0.695), max figure ubiquity
+      positive (+0.493), and mean figure ubiquity negative (-0.532). Weak model
+      performance and the human label/link audit gate any claim.
 - [ ] Verify the first gpt-5.5 legacy tagging batch executes (submitted
       2026-07-07 manually; if the model id is wrong the batch will fail at
       execution, visible in ~/cronlogs/cronscript.log on raksasa).

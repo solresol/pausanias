@@ -44,6 +44,7 @@ from .data import (
     get_extended_network_analysis,
     get_manto_place_network_analysis,
     get_manto_pausanias_links,
+    get_manto_place_survival_model,
     get_llm_grammar_page_data,
     get_stylometry_page_data,
     get_stylometric_sentence_model_data,
@@ -85,6 +86,7 @@ from .generators import (
     generate_network_analysis_pages,
     generate_manto_network_pages,
     generate_manto_links_page,
+    generate_manto_place_survival_model_page,
 )
 
 
@@ -184,6 +186,7 @@ def main():
         extended_network_analysis = get_extended_network_analysis(conn)
         manto_place_network_analysis = get_manto_place_network_analysis(conn)
         manto_pausanias_links = get_manto_pausanias_links(conn)
+        manto_place_survival_model = get_manto_place_survival_model(conn)
         sentence_mythic_predictors = get_sentence_mythicness_predictors(conn)
         sentence_skeptic_predictors = get_sentence_skepticism_predictors(conn)
         simplified_mythic_predictors = get_simplified_mythicness_predictors(conn)
@@ -312,6 +315,11 @@ def main():
         generate_network_analysis_pages(extended_network_analysis, output_dir, args.title)
         generate_manto_network_pages(manto_place_network_analysis, output_dir, args.title)
         generate_manto_links_page(manto_pausanias_links, output_dir, args.title)
+        generate_manto_place_survival_model_page(
+            manto_place_survival_model,
+            output_dir,
+            args.title,
+        )
         generate_mythic_page(passages_df, mythic_color_map, mythic_class_map, proper_nouns_dict, output_dir, args.title)
         generate_skepticism_page(passages_df, skeptic_color_map, skeptic_class_map, proper_nouns_dict, output_dir, args.title)
         generate_mythic_words_page(

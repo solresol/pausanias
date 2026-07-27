@@ -1,5 +1,6 @@
 """Database operations and data retrieval functions."""
 
+import ast
 import math
 import re
 import unicodedata
@@ -3754,6 +3755,300 @@ def get_manto_pausanias_links(conn):
         "labelled_place_count": int(sum(label_counts.values())),
         "linked_count": len(links),
         "unlinked_count": len(unlinked),
+    }
+
+
+PLACE_SURVIVAL_FAMILY_LABELS = {
+    "attestation": "Pre-Pausanias attestation",
+    "connectedness": "Connectedness",
+    "connectedness,attestation": "Connectedness + attestation",
+    "network": "Network position",
+    "network,connectedness": "Network + connectedness",
+    "geography": "Geography",
+    "network,connectedness,geography,attestation": "All admissible features",
+}
+PLACE_SURVIVAL_FAMILY_ORDER = {
+    family: index
+    for index, family in enumerate(
+        [
+            "attestation",
+            "connectedness",
+            "connectedness,attestation",
+            "network",
+            "network,connectedness",
+            "geography",
+            "network,connectedness,geography,attestation",
+        ]
+    )
+}
+
+
+def _place_survival_note_value(notes, key):
+    match = re.search(
+        rf"(?:^|;\s*){re.escape(key)}=([^;]+)",
+        str(notes or ""),
+    )
+    return match.group(1).strip() if match else ""
+
+
+def _place_survival_label_stats(notes):
+    match = re.search(r"(?:^|;\s*)label stats=(\{.*\})\s*$", str(notes or ""))
+    if not match:
+        return {}
+    try:
+        values = ast.literal_eval(match.group(1))
+    except (SyntaxError, ValueError):
+        return {}
+    return values if isinstance(values, dict) else {}
+
+
+def get_manto_place_survival_model(conn):
+    """Return the latest leakage-controlled place-survival model cohort."""
+    from predict_place_survival import (
+        ATTESTATION_FEATURE_COLUMNS,
+        CONNECTEDNESS_FEATURE_COLUMNS,
+        GEOGRAPHY_FEATURE_COLUMNS,
+        MODEL_TYPE,
+        NETWORK_FEATURE_COLUMNS,
+    )
+
+    required_tables = {
+        "manto_releases",
+        "place_survival_model_runs",
+        "place_survival_feature_scores",
+    }
+    if not all(pg_table_exists(conn, table) for table in required_tables):
+        return {
+            "available": False,
+            "message": "Place-survival model tables are not available.",
+        }
+
+    release_id = _manto_latest_release_id(conn)
+    if release_id is None:
+        return {
+            "available": False,
+            "message": "No imported MANTO release is available.",
+        }
+
+    run_rows = read_sql_query(
+        """
+        SELECT run_id, completed_at, sample_count, positive_count, negative_count,
+               accuracy, baseline_accuracy, balanced_accuracy,
+               precision_survives, recall_survives, f1_survives,
+               precision_does_not_survive, recall_does_not_survive,
+               f1_does_not_survive,
+               true_survives_pred_survives,
+               true_survives_pred_does_not_survive,
+               true_does_not_survive_pred_survives,
+               true_does_not_survive_pred_does_not_survive,
+               feature_set_version, label_source_version, notes
+        FROM place_survival_model_runs
+        WHERE release_record_id = %s
+          AND model_type = %s
+          AND status = 'completed'
+          AND pre_pausanias_only
+          AND balanced_accuracy IS NOT NULL
+        ORDER BY completed_at DESC, run_id DESC
+        """,
+        conn,
+        (release_id, MODEL_TYPE),
+    )
+    if run_rows.empty:
+        return {
+            "available": False,
+            "message": (
+                "No leakage-controlled, cross-validated place-survival model "
+                "runs are available."
+            ),
+        }
+
+    parsed_rows = []
+    for _, row in run_rows.iterrows():
+        record = row.to_dict()
+        record["feature_family"] = _place_survival_note_value(
+            record.get("notes"),
+            "feature family",
+        )
+        record["evaluation"] = _place_survival_note_value(
+            record.get("notes"),
+            "evaluation",
+        )
+        record["label_set"] = _place_survival_note_value(
+            record.get("notes"),
+            "label set",
+        )
+        parsed_rows.append(record)
+
+    full_family = "network,connectedness,geography,attestation"
+    anchor = next(
+        (
+            row
+            for row in parsed_rows
+            if row["feature_family"] == full_family
+        ),
+        parsed_rows[0],
+    )
+    cohort_rows = [
+        row
+        for row in parsed_rows
+        if int(row["sample_count"]) == int(anchor["sample_count"])
+        and int(row["positive_count"]) == int(anchor["positive_count"])
+        and int(row["negative_count"]) == int(anchor["negative_count"])
+        and str(row["label_source_version"]) == str(anchor["label_source_version"])
+        and row["evaluation"] == anchor["evaluation"]
+        and row["label_set"] == anchor["label_set"]
+    ]
+    training_stats = _place_survival_label_stats(anchor.get("notes"))
+
+    comparison = []
+    seen_families = set()
+    for row in cohort_rows:
+        family = row["feature_family"]
+        if not family or family in seen_families:
+            continue
+        seen_families.add(family)
+        comparison.append(
+            {
+                "run_id": str(row["run_id"]),
+                "completed_at": str(row["completed_at"]),
+                "feature_family": family,
+                "label": PLACE_SURVIVAL_FAMILY_LABELS.get(
+                    family,
+                    family.replace(",", " + ").replace("_", " ").title(),
+                ),
+                "feature_set_version": str(row["feature_set_version"]),
+                "accuracy": float(row["accuracy"]),
+                "majority_accuracy": float(row["baseline_accuracy"]),
+                "balanced_accuracy": float(row["balanced_accuracy"]),
+                "precision_survives": float(row["precision_survives"]),
+                "recall_survives": float(row["recall_survives"]),
+                "f1_survives": float(row["f1_survives"]),
+                "precision_does_not_survive": float(
+                    row["precision_does_not_survive"]
+                ),
+                "recall_does_not_survive": float(
+                    row["recall_does_not_survive"]
+                ),
+                "f1_does_not_survive": float(row["f1_does_not_survive"]),
+                "true_survives_pred_survives": int(
+                    row["true_survives_pred_survives"]
+                ),
+                "true_survives_pred_does_not_survive": int(
+                    row["true_survives_pred_does_not_survive"]
+                ),
+                "true_does_not_survive_pred_survives": int(
+                    row["true_does_not_survive_pred_survives"]
+                ),
+                "true_does_not_survive_pred_does_not_survive": int(
+                    row["true_does_not_survive_pred_does_not_survive"]
+                ),
+            }
+        )
+    comparison.sort(
+        key=lambda row: PLACE_SURVIVAL_FAMILY_ORDER.get(
+            row["feature_family"],
+            len(PLACE_SURVIVAL_FAMILY_ORDER),
+        )
+    )
+    best_model = max(
+        comparison,
+        key=lambda row: row["balanced_accuracy"],
+    )
+
+    score_rows = read_sql_query(
+        """
+        SELECT feature_name, coefficient, abs_coefficient, direction
+        FROM place_survival_feature_scores
+        WHERE run_id = %s
+        ORDER BY abs_coefficient DESC, feature_name
+        """,
+        conn,
+        (best_model["run_id"],),
+    )
+    feature_family_by_name = {}
+    for family, columns in (
+        ("Network position", NETWORK_FEATURE_COLUMNS),
+        ("Connectedness", CONNECTEDNESS_FEATURE_COLUMNS),
+        ("Geography", GEOGRAPHY_FEATURE_COLUMNS),
+        ("Pre-Pausanias attestation", ATTESTATION_FEATURE_COLUMNS),
+    ):
+        for column in columns:
+            feature_family_by_name[column] = family
+    feature_scores = [
+        {
+            "feature_name": str(row["feature_name"]),
+            "label": str(row["feature_name"]).replace("_", " "),
+            "family": feature_family_by_name.get(
+                str(row["feature_name"]),
+                "Other",
+            ),
+            "coefficient": float(row["coefficient"]),
+            "abs_coefficient": float(row["abs_coefficient"]),
+            "direction": str(row["direction"]),
+        }
+        for _, row in score_rows.iterrows()
+    ]
+
+    release_rows = read_sql_query(
+        """
+        SELECT record_id, doi, version, title
+        FROM manto_releases
+        WHERE record_id = %s
+        """,
+        conn,
+        (release_id,),
+    )
+    release = {}
+    if not release_rows.empty:
+        release = {
+            key: (
+                int(release_rows.iloc[0][key])
+                if key == "record_id"
+                else str(release_rows.iloc[0][key] or "")
+            )
+            for key in ("record_id", "doi", "version", "title")
+        }
+
+    coverage = {}
+    if (
+        pg_table_exists(conn, "passages")
+        and pg_table_exists(conn, "passage_place_state_reviews")
+    ):
+        coverage_rows = read_sql_query(
+            """
+            SELECT
+                (SELECT count(*) FROM passages) AS passage_count,
+                count(DISTINCT passage_id) AS reviewed_passage_count,
+                count(*) FILTER (WHERE has_place_state_claim) AS passages_with_claims
+            FROM passage_place_state_reviews
+            """,
+            conn,
+        )
+        if not coverage_rows.empty:
+            coverage = {
+                "passage_count": int(coverage_rows.iloc[0]["passage_count"]),
+                "reviewed_passage_count": int(
+                    coverage_rows.iloc[0]["reviewed_passage_count"]
+                ),
+                "passages_with_claims": int(
+                    coverage_rows.iloc[0]["passages_with_claims"]
+                ),
+            }
+
+    return {
+        "available": True,
+        "release": release,
+        "model_type": MODEL_TYPE,
+        "evaluation": anchor["evaluation"],
+        "label_set": anchor["label_set"],
+        "sample_count": int(anchor["sample_count"]),
+        "survives_count": int(anchor["positive_count"]),
+        "does_not_survive_count": int(anchor["negative_count"]),
+        "comparison": comparison,
+        "best_model": best_model,
+        "feature_scores": feature_scores,
+        "coverage": coverage,
+        "training_stats": training_stats,
     }
 
 

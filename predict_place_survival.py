@@ -35,14 +35,19 @@ from pausanias_db import (
 FEATURE_SET_VERSION = "manto-pausanias-place-network-v3"
 CONNECTEDNESS_FEATURE_SET_VERSION = "manto-place-connectedness-v2"
 GEOGRAPHY_FEATURE_SET_VERSION = "manto-place-geography-v1"
-FAME_FEATURE_SET_VERSION = "manto-pausanias-fame-v1"
+ATTESTATION_FEATURE_SET_VERSION = "manto-pre-pausanias-attestation-v1"
+MODEL_TYPE = "logistic_regression_strict_pre_pausanias_v2"
 LABEL_SOURCE_VERSION = "manto-entity-info-v1"
 LLM_LABEL_SOURCE_VERSION = "llm-place-state-v1"
 TRAINING_LABEL_SETS = ("manto", "sentence-llm", "passage-llm", "llm", "combined")
-BASE_FEATURE_FAMILIES = ("network", "connectedness", "geography", "fame")
+BASE_FEATURE_FAMILIES = ("network", "connectedness", "geography", "attestation")
 FEATURE_FAMILY_ALIASES = {
     "combined": ["network", "connectedness"],
-    "all": ["network", "connectedness", "geography", "fame"],
+    "all": ["network", "connectedness", "geography", "attestation"],
+    # Backward-compatible CLI spelling. Historical runs that used the old
+    # "fame" family are not comparable: they included Pausanias-derived
+    # mention counts and must not be used as predictive evidence.
+    "fame": ["attestation"],
 }
 IDENTITY_COLUMNS = [
     "reference_form",
@@ -128,9 +133,7 @@ GEOGRAPHY_FEATURE_COLUMNS = [
     "neighbors_within_100km_count",
     "local_tie_fraction_50km",
 ]
-FAME_FEATURE_COLUMNS = [
-    "pausanias_mention_count",
-    "pausanias_passage_count",
+ATTESTATION_FEATURE_COLUMNS = [
     "manto_pre_pausanias_edge_count",
 ]
 FEATURE_COLUMNS = NETWORK_FEATURE_COLUMNS
@@ -171,9 +174,10 @@ def parse_arguments() -> argparse.Namespace:
         default="network",
         help=(
             "Comma-separated combination of network, connectedness, geography, "
-            "and fame (e.g. 'connectedness,fame'). 'combined' means "
-            "network+connectedness; 'all' means every family. 'fame' alone is "
-            "the no-structure attention baseline the structural families must beat."
+            "and attestation (e.g. 'connectedness,attestation'). 'combined' means "
+            "network+connectedness; 'all' means every family. 'attestation' is "
+            "the strictly pre-Pausanias, no-structure attention baseline the "
+            "structural families must beat."
         ),
     )
     parser.add_argument(
@@ -226,7 +230,11 @@ def latest_release_id(conn) -> int:
 def resolve_feature_families(feature_family: str) -> list[str]:
     if feature_family in FEATURE_FAMILY_ALIASES:
         return list(FEATURE_FAMILY_ALIASES[feature_family])
-    families = [part.strip() for part in feature_family.split(",") if part.strip()]
+    families = [
+        "attestation" if part.strip() == "fame" else part.strip()
+        for part in feature_family.split(",")
+        if part.strip()
+    ]
     unknown = sorted(set(families) - set(BASE_FEATURE_FAMILIES))
     if unknown or not families:
         raise SystemExit(
@@ -264,29 +272,14 @@ def load_family_table(
     )
 
 
-def load_fame_counts(conn, *, release_id: int):
-    """Attention-only baseline: Pausanias mention volume and raw MANTO degree.
+def load_pre_pausanias_attestation_counts(conn, *, release_id: int):
+    """Strictly pre-Pausanias attestation-volume baseline.
 
-    Mention counts arrive via manto_place_links, so unlinked places count 0;
-    the MANTO edge count deliberately includes bookkeeping relations because it
-    measures attestation volume, not narrative structure.
+    The former ``fame`` baseline also used Pausanias mention and passage counts.
+    Those are measured in the same text that supplies the target label, so they
+    are inadmissible predictors. This replacement uses only endpoint counts from
+    MANTO edges explicitly dated before Pausanias.
     """
-    mentions = read_sql_query(
-        """
-        SELECT l.manto_id,
-               count(*) AS pausanias_mention_count,
-               count(DISTINCT pn.passage_id) AS pausanias_passage_count
-        FROM manto_place_links l
-        JOIN proper_nouns pn
-          ON pn.reference_form = l.reference_form
-         AND pn.entity_type = l.entity_type
-        WHERE l.release_record_id = %s
-          AND l.confidence <> 'rejected'
-        GROUP BY l.manto_id
-        """,
-        conn,
-        (release_id,),
-    )
     edge_counts = read_sql_query(
         """
         SELECT manto_id, count(*) AS manto_pre_pausanias_edge_count
@@ -304,16 +297,10 @@ def load_fame_counts(conn, *, release_id: int):
         conn,
         (release_id, release_id),
     )
-    if mentions.empty:
-        merged = edge_counts.copy()
-        merged["pausanias_mention_count"] = 0
-        merged["pausanias_passage_count"] = 0
-    else:
-        merged = mentions.merge(edge_counts, on="manto_id", how="outer")
-    for column in FAME_FEATURE_COLUMNS:
-        if column not in merged.columns:
-            merged[column] = 0
-    return merged[["manto_id"] + FAME_FEATURE_COLUMNS].fillna(0)
+    for column in ["manto_id"] + ATTESTATION_FEATURE_COLUMNS:
+        if column not in edge_counts.columns:
+            edge_counts[column] = 0
+    return edge_counts[["manto_id"] + ATTESTATION_FEATURE_COLUMNS].fillna(0)
 
 
 FAMILY_TABLES = {
@@ -338,13 +325,14 @@ def load_feature_rows(
         "network": feature_set_version,
         "connectedness": connectedness_feature_set_version,
         "geography": geography_feature_set_version,
-        "fame": FAME_FEATURE_SET_VERSION,
+        "attestation": ATTESTATION_FEATURE_SET_VERSION,
     }
     feature_columns: list[str] = []
     merged = None
-    # Fame has no feature table of its own; it joins onto another family's rows,
-    # so a fame-only run borrows the network rows as its identity spine.
-    table_families = [family for family in families if family != "fame"]
+    # Attestation has no feature table of its own; it joins onto another
+    # family's rows, so an attestation-only run borrows the network rows as its
+    # identity spine.
+    table_families = [family for family in families if family != "attestation"]
     spine_families = table_families or ["network"]
     for family in spine_families:
         table, columns = FAMILY_TABLES[family]
@@ -375,13 +363,18 @@ def load_feature_rows(
                 on=["reference_form", "entity_type", "manto_id"],
                 how="inner",
             )
-    if "fame" in families and merged is not None and not merged.empty:
-        fame = load_fame_counts(conn, release_id=release_id)
-        merged = merged.merge(fame, on="manto_id", how="left")
-        merged[FAME_FEATURE_COLUMNS] = merged[FAME_FEATURE_COLUMNS].fillna(0)
-        feature_columns.extend(FAME_FEATURE_COLUMNS)
-    elif "fame" in families:
-        feature_columns.extend(FAME_FEATURE_COLUMNS)
+    if "attestation" in families and merged is not None and not merged.empty:
+        attestation = load_pre_pausanias_attestation_counts(
+            conn,
+            release_id=release_id,
+        )
+        merged = merged.merge(attestation, on="manto_id", how="left")
+        merged[ATTESTATION_FEATURE_COLUMNS] = merged[
+            ATTESTATION_FEATURE_COLUMNS
+        ].fillna(0)
+        feature_columns.extend(ATTESTATION_FEATURE_COLUMNS)
+    elif "attestation" in families:
+        feature_columns.extend(ATTESTATION_FEATURE_COLUMNS)
     run_version = "+".join(versions[family] for family in families)
     return merged, feature_columns, run_version
 
@@ -635,6 +628,64 @@ def attach_labels(features_df, labels: dict[str, str]):
     return pd.DataFrame(rows)
 
 
+def collapse_training_places(training_df, feature_columns):
+    """Return one internally consistent training row per MANTO place.
+
+    Pausanias spelling variants can link to the same MANTO entity. Keeping those
+    aliases as separate rows lets the same place enter both training and test
+    folds. Collapse equal-feature aliases and drop a MANTO place entirely when
+    its attached aliases carry conflicting target labels.
+    """
+    from pandas import DataFrame
+
+    stats = Counter(
+        {
+            "training_rows_before_place_collapse": int(len(training_df)),
+            "manto_places_before_conflict_drop": 0,
+            "duplicate_training_rows_collapsed": 0,
+            "conflicting_manto_places_dropped": 0,
+            "training_rows_after_place_collapse": 0,
+        }
+    )
+    if training_df.empty:
+        return training_df.copy(), stats
+    if "manto_id" not in training_df.columns:
+        raise RuntimeError("Place-survival training rows have no manto_id column.")
+
+    rows = []
+    grouped = training_df.groupby("manto_id", sort=False, dropna=False)
+    stats["manto_places_before_conflict_drop"] = int(grouped.ngroups)
+    for manto_id, group in grouped:
+        stats["duplicate_training_rows_collapsed"] += int(len(group) - 1)
+        labels = {
+            str(label)
+            for label in group["target_label"]
+            if str(label)
+        }
+        if len(labels) != 1:
+            stats["conflicting_manto_places_dropped"] += 1
+            continue
+        inconsistent = [
+            column
+            for column in feature_columns
+            if column in group.columns
+            and int(group[column].nunique(dropna=False)) > 1
+        ]
+        if inconsistent:
+            raise RuntimeError(
+                f"MANTO place {manto_id} has inconsistent duplicate feature rows: "
+                f"{', '.join(inconsistent)}"
+            )
+        rows.append(group.iloc[0].to_dict())
+
+    if rows:
+        collapsed = DataFrame(rows, columns=training_df.columns)
+    else:
+        collapsed = training_df.iloc[0:0].copy()
+    stats["training_rows_after_place_collapse"] = int(len(collapsed))
+    return collapsed, stats
+
+
 def ensure_model_run_metric_columns(conn) -> None:
     with conn.cursor() as cursor:
         for column_name, column_type in MODEL_RUN_METRIC_COLUMNS.items():
@@ -702,7 +753,7 @@ def save_run(
                 true_does_not_survive_pred_survives,
                 true_does_not_survive_pred_does_not_survive, notes
             )
-            VALUES (%s, %s, %s, %s, 'logistic_regression', %s, %s, %s, %s, %s, %s, %s,
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                     %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ON CONFLICT (run_id) DO UPDATE
             SET completed_at = EXCLUDED.completed_at,
@@ -730,6 +781,7 @@ def save_run(
                 release_id,
                 feature_set_version,
                 label_source_version,
+                MODEL_TYPE,
                 pre_pausanias_only,
                 timestamp,
                 timestamp,
@@ -796,6 +848,9 @@ def main() -> None:
         initialize_schema(conn)
         ensure_model_run_metric_columns(conn)
         release_id = args.release_record_id or latest_release_id(conn)
+        resolved_feature_family = ",".join(
+            resolve_feature_families(args.feature_family)
+        )
         features, feature_columns, run_feature_set_version = load_feature_rows(
             conn,
             release_id=release_id,
@@ -813,6 +868,12 @@ def main() -> None:
             conflict_policy=args.label_conflict_policy,
         )
         training = attach_labels(features, labels)
+        training, place_collapse_stats = collapse_training_places(
+            training,
+            feature_columns,
+        )
+        run_stats = Counter(label_stats)
+        run_stats.update(place_collapse_stats)
         y = np.array([1 if label == "survives" else 0 for label in training.get("target_label", [])])
         positive_count = int(np.sum(y)) if len(y) else 0
         negative_count = int(len(y) - positive_count)
@@ -837,9 +898,9 @@ def main() -> None:
                     f"Need at least {args.min_samples} linked labeled places and at least "
                     f"two examples from both classes; "
                     f"feature rows={len(features)}, label keys={len(labels)}, "
-                    f"feature family={args.feature_family}, "
+                    f"feature family={resolved_feature_family}, "
                     f"label set={args.training_label_set}, "
-                    f"label stats={dict(label_stats)}."
+                    f"label stats={dict(run_stats)}."
                 ),
             )
             print(
@@ -899,11 +960,11 @@ def main() -> None:
             negative_count=negative_count,
             metrics=metrics,
             notes=(
-                f"feature family={args.feature_family}; "
+                f"feature family={resolved_feature_family}; "
                 f"label set={args.training_label_set}; "
                 f"conflict policy={args.label_conflict_policy}; "
                 f"evaluation={evaluation_mode}; "
-                f"label stats={dict(label_stats)}"
+                f"label stats={dict(run_stats)}"
             ),
         )
         coefficients = pipeline.named_steps["logreg"].coef_[0]
@@ -913,7 +974,7 @@ def main() -> None:
         f"baseline={metrics['baseline_accuracy']:.3f}, "
         f"balanced_accuracy={metrics['balanced_accuracy']:.3f}, "
         f"samples={len(training)}, "
-        f"features={args.feature_family}, "
+        f"features={resolved_feature_family}, "
         f"labels={args.training_label_set}, "
         f"evaluation={evaluation_mode}."
     )

@@ -217,6 +217,16 @@ def create_website_structure(output_dir):
         margin: 20px 0;
     }
 
+    .place-survival-table-wrap {
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .place-survival-table-wrap .predictor-table {
+        min-width: 720px;
+    }
+
     .predictor-sort-controls {
         display: flex;
         align-items: center;

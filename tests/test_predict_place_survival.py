@@ -1,12 +1,16 @@
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 import pandas as pd
 
 from predict_place_survival import (
+    ATTESTATION_FEATURE_COLUMNS,
     attach_labels,
+    collapse_training_places,
     label_key,
     label_keys,
+    load_pre_pausanias_attestation_counts,
     merge_label_records,
     model_metrics,
     resolve_feature_families,
@@ -87,17 +91,90 @@ class PredictPlaceSurvivalTests(unittest.TestCase):
         )
         self.assertEqual(
             resolve_feature_families("all"),
-            ["network", "connectedness", "geography", "fame"],
+            ["network", "connectedness", "geography", "attestation"],
         )
         self.assertEqual(
             resolve_feature_families("connectedness, fame"),
-            ["connectedness", "fame"],
+            ["connectedness", "attestation"],
         )
-        self.assertEqual(resolve_feature_families("fame,fame"), ["fame"])
+        self.assertEqual(
+            resolve_feature_families("fame,fame"),
+            ["attestation"],
+        )
         with self.assertRaises(SystemExit):
             resolve_feature_families("mystery")
         with self.assertRaises(SystemExit):
             resolve_feature_families("")
+
+    def test_attestation_baseline_excludes_pausanias_mention_features(self):
+        edge_counts = pd.DataFrame(
+            [
+                {
+                    "manto_id": "123",
+                    "manto_pre_pausanias_edge_count": 17,
+                }
+            ]
+        )
+        with patch(
+            "predict_place_survival.read_sql_query",
+            return_value=edge_counts,
+        ) as query:
+            counts = load_pre_pausanias_attestation_counts(
+                object(),
+                release_id=19446255,
+            )
+
+        self.assertEqual(
+            list(counts.columns),
+            ["manto_id", "manto_pre_pausanias_edge_count"],
+        )
+        self.assertEqual(
+            ATTESTATION_FEATURE_COLUMNS,
+            ["manto_pre_pausanias_edge_count"],
+        )
+        self.assertNotIn("pausanias_mention_count", counts.columns)
+        self.assertNotIn("pausanias_passage_count", counts.columns)
+        sql = query.call_args.args[0]
+        self.assertIn("is_pre_pausanias", sql)
+        self.assertNotIn("proper_nouns", sql)
+
+    def test_training_rows_collapse_to_one_row_per_manto_place(self):
+        training = pd.DataFrame(
+            [
+                {
+                    "manto_id": "123",
+                    "reference_form": "Amyklai",
+                    "degree": 4,
+                    "target_label": "survives",
+                },
+                {
+                    "manto_id": "123",
+                    "reference_form": "Amyclae",
+                    "degree": 4,
+                    "target_label": "survives",
+                },
+                {
+                    "manto_id": "456",
+                    "reference_form": "Aigai",
+                    "degree": 2,
+                    "target_label": "survives",
+                },
+                {
+                    "manto_id": "456",
+                    "reference_form": "Aegae",
+                    "degree": 2,
+                    "target_label": "does_not_survive",
+                },
+            ]
+        )
+
+        collapsed, stats = collapse_training_places(training, ["degree"])
+
+        self.assertEqual(list(collapsed["manto_id"]), ["123"])
+        self.assertEqual(stats["manto_places_before_conflict_drop"], 2)
+        self.assertEqual(stats["duplicate_training_rows_collapsed"], 2)
+        self.assertEqual(stats["conflicting_manto_places_dropped"], 1)
+        self.assertEqual(stats["training_rows_after_place_collapse"], 1)
 
 
 if __name__ == "__main__":
