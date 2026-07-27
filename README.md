@@ -214,6 +214,13 @@ uv run predict_place_survival.py --feature-family connectedness,attestation --cv
 `fame` remains a compatibility alias for `attestation`; it no longer loads
 Pausanias-derived predictors.
 
+The generated website publishes the corrected model at
+`places/manto-survival-model.html`. Its coefficient table links to
+`places/model-features/index.html`, which indexes 41 generated feature pages.
+Each page uses the shared definitions in `manto_place_feature_catalog.py` and
+adds current-cohort distributions, high and low place examples, the stored
+standardized coefficient, related features, and the strict pre-Pausanias scope.
+
 To compare target sources, keep MANTO-only as the default and switch the
 training label set explicitly:
 

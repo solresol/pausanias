@@ -36,6 +36,7 @@ from lemma_text import (
     surface_lookup_key,
     tokenize_greek,
 )
+from manto_place_feature_catalog import FEATURE_CATALOG
 from pausanias_db import read_sql_query, table_exists as pg_table_exists
 from stats_utils import compute_p_q_values
 
@@ -3802,14 +3803,143 @@ def _place_survival_label_stats(notes):
     return values if isinstance(values, dict) else {}
 
 
+def _place_survival_distribution(values):
+    """Return compact descriptive statistics for one feature series."""
+    numeric = pd.to_numeric(values, errors="coerce").dropna().astype(float)
+    if numeric.empty:
+        return {
+            "count": 0,
+            "minimum": None,
+            "q1": None,
+            "median": None,
+            "mean": None,
+            "q3": None,
+            "maximum": None,
+        }
+    return {
+        "count": int(len(numeric)),
+        "minimum": float(numeric.min()),
+        "q1": float(numeric.quantile(0.25)),
+        "median": float(numeric.median()),
+        "mean": float(numeric.mean()),
+        "q3": float(numeric.quantile(0.75)),
+        "maximum": float(numeric.max()),
+    }
+
+
+def _place_survival_example_rows(frame, feature_name, *, ascending, limit=6):
+    """Return deterministic high or low examples for a feature."""
+    if frame.empty or feature_name not in frame.columns:
+        return []
+    ordered = frame.dropna(subset=[feature_name]).sort_values(
+        [feature_name, "place_label", "manto_id"],
+        ascending=[ascending, True, True],
+        kind="stable",
+    )
+    return [
+        {
+            "manto_id": str(row["manto_id"]),
+            "place_label": str(row["place_label"]),
+            "target_label": str(row["target_label"]),
+            "value": float(row[feature_name]),
+        }
+        for _, row in ordered.head(limit).iterrows()
+    ]
+
+
+def build_place_survival_feature_details(feature_scores, cohort):
+    """Combine definitions, coefficients, distributions, and place examples."""
+    score_by_name = {
+        str(score["feature_name"]): score
+        for score in feature_scores
+    }
+    details = []
+    for feature in FEATURE_CATALOG:
+        frame = cohort.copy()
+        missing_examples = []
+        missing_count = 0
+        if feature.missing_sentinel is not None and feature.name in frame.columns:
+            sentinel_mask = pd.to_numeric(
+                frame[feature.name],
+                errors="coerce",
+            ).eq(feature.missing_sentinel)
+            missing_count = int(sentinel_mask.sum())
+            missing_examples = _place_survival_example_rows(
+                frame[sentinel_mask],
+                feature.name,
+                ascending=True,
+            )
+            frame = frame[~sentinel_mask].copy()
+
+        distributions = {
+            "overall": _place_survival_distribution(
+                frame.get(feature.name, pd.Series(dtype=float))
+            ),
+            "survives": _place_survival_distribution(
+                frame.loc[
+                    frame.get("target_label", pd.Series(index=frame.index, dtype=str))
+                    == "survives",
+                    feature.name,
+                ]
+                if feature.name in frame.columns
+                else pd.Series(dtype=float)
+            ),
+            "does_not_survive": _place_survival_distribution(
+                frame.loc[
+                    frame.get("target_label", pd.Series(index=frame.index, dtype=str))
+                    == "does_not_survive",
+                    feature.name,
+                ]
+                if feature.name in frame.columns
+                else pd.Series(dtype=float)
+            ),
+        }
+        details.append(
+            {
+                "name": feature.name,
+                "slug": feature.slug,
+                "title": feature.title,
+                "category": feature.category,
+                "definition": feature.definition,
+                "calculation": feature.calculation,
+                "higher_value": feature.higher_value,
+                "caution": feature.caution,
+                "value_kind": feature.value_kind,
+                "related_features": list(feature.related_features),
+                "missing_label": feature.missing_label,
+                "missing_count": missing_count,
+                "missing_examples": missing_examples,
+                "coefficient": score_by_name.get(feature.name),
+                "distributions": distributions,
+                "high_examples": _place_survival_example_rows(
+                    frame,
+                    feature.name,
+                    ascending=False,
+                ),
+                "low_examples": _place_survival_example_rows(
+                    frame,
+                    feature.name,
+                    ascending=True,
+                ),
+            }
+        )
+    return details
+
+
 def get_manto_place_survival_model(conn):
     """Return the latest leakage-controlled place-survival model cohort."""
     from predict_place_survival import (
         ATTESTATION_FEATURE_COLUMNS,
         CONNECTEDNESS_FEATURE_COLUMNS,
+        CONNECTEDNESS_FEATURE_SET_VERSION,
         GEOGRAPHY_FEATURE_COLUMNS,
+        LABEL_SOURCE_VERSION as MANTO_LABEL_SOURCE_VERSION,
         MODEL_TYPE,
         NETWORK_FEATURE_COLUMNS,
+        attach_labels,
+        collapse_training_places,
+        load_feature_rows,
+        load_labels,
     )
 
     required_tables = {
@@ -3989,6 +4119,51 @@ def get_manto_place_survival_model(conn):
         for _, row in score_rows.iterrows()
     ]
 
+    connectedness_run = next(
+        (
+            row
+            for row in comparison
+            if row["feature_family"] == "connectedness"
+        ),
+        None,
+    )
+    connectedness_feature_set_version = (
+        connectedness_run["feature_set_version"]
+        if connectedness_run
+        else CONNECTEDNESS_FEATURE_SET_VERSION
+    )
+    cohort_features, cohort_columns, _ = load_feature_rows(
+        conn,
+        release_id=release_id,
+        feature_set_version="",
+        connectedness_feature_set_version=connectedness_feature_set_version,
+        geography_feature_set_version="",
+        pre_pausanias_only=True,
+        feature_family="connectedness",
+    )
+    cohort_labels, _ = load_labels(
+        conn,
+        release_id=release_id,
+        label_source_version=MANTO_LABEL_SOURCE_VERSION,
+        training_label_set=anchor["label_set"],
+        conflict_policy=(
+            _place_survival_note_value(anchor.get("notes"), "conflict policy")
+            or "drop"
+        ),
+    )
+    cohort = attach_labels(cohort_features, cohort_labels)
+    cohort, _ = collapse_training_places(cohort, cohort_columns)
+    if not cohort.empty:
+        cohort["place_label"] = (
+            cohort["manto_label"]
+            .fillna(cohort["english_transcription"])
+            .fillna(cohort["reference_form"])
+        )
+    feature_details = build_place_survival_feature_details(
+        feature_scores,
+        cohort,
+    )
+
     release_rows = read_sql_query(
         """
         SELECT record_id, doi, version, title
@@ -4047,6 +4222,8 @@ def get_manto_place_survival_model(conn):
         "comparison": comparison,
         "best_model": best_model,
         "feature_scores": feature_scores,
+        "feature_details": feature_details,
+        "feature_count": len(feature_details),
         "coverage": coverage,
         "training_stats": training_stats,
     }

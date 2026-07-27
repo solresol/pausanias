@@ -154,6 +154,9 @@ Source anchors are in the private ignored transcript notes, especially:
       MANTO import sequence.
 - [x] Add first-pass MANTO place linking, strict graph-feature extraction, and
       an explainable logistic-regression classifier scaffold.
+- [x] Publish an indexed reference for all 41 connectedness features, with one
+      generated detail page per feature, current-cohort distributions, and
+      concrete place examples.
 - [ ] Run the full MANTO import after downloading the current release into the
       ignored local cache.
 - [ ] Review MANTO source-date coverage and add manual source-date overrides for

@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 from datetime import datetime
 from pathlib import Path
+from manto_place_feature_catalog import FEATURE_BY_NAME, FEATURE_CATALOG
 from .highlighting import highlight_passage
 
 GRAPHIC_PASSAGE_IMAGE_RE = re.compile(
@@ -4723,7 +4724,15 @@ def _render_place_survival_comparison_rows(comparison, best_run_id):
     return "".join(rows)
 
 
-def _render_place_survival_feature_rows(feature_scores, limit=16):
+def _render_place_survival_feature_rows(
+    feature_scores,
+    feature_details=None,
+    limit=16,
+):
+    detail_by_name = {
+        detail["name"]: detail
+        for detail in (feature_details or [])
+    }
     rows = []
     for score in feature_scores[:limit]:
         direction = score["direction"]
@@ -4732,9 +4741,16 @@ def _render_place_survival_feature_rows(feature_scores, limit=16):
             if direction == "survives"
             else '<span class="badge badge-bad">does not survive</span>'
         )
+        detail = detail_by_name.get(score["feature_name"])
+        feature_label = html.escape(score["label"])
+        if detail:
+            feature_label = (
+                f'<a href="model-features/{html.escape(detail["slug"])}.html">'
+                f"{html.escape(detail['title'])}</a>"
+            )
         rows.append(
             "<tr>"
-            f"<td>{html.escape(score['label'])}</td>"
+            f"<td>{feature_label}</td>"
             f"<td>{html.escape(score['family'])}</td>"
             f"<td class=\"num\">{score['coefficient']:+.3f}</td>"
             f"<td>{badge}</td>"
@@ -4935,9 +4951,15 @@ def generate_manto_place_survival_model_page(model_data, output_dir, title):
                 <thead>
                     <tr><th>Feature</th><th>Family</th><th class="num">Coefficient</th><th>Direction</th></tr>
                 </thead>
-                <tbody>{_render_place_survival_feature_rows(model_data.get("feature_scores", []))}</tbody>
+                <tbody>{_render_place_survival_feature_rows(
+                    model_data.get("feature_scores", []),
+                    model_data.get("feature_details", []),
+                )}</tbody>
             </table>
         </div>
+        <p><a href="model-features/index.html">Browse definitions and examples
+        for all {int(model_data.get("feature_count", 41))} connectedness
+        features</a>.</p>
 
         <h2>Scope and Remaining Checks</h2>
         <ul>
@@ -4982,6 +5004,428 @@ def generate_manto_place_survival_model_page(model_data, output_dir, title):
         encoding="utf-8",
     ) as f:
         f.write(page)
+
+
+def _place_survival_feature_details(model_data):
+    """Return all catalog features, enriched with current model data when present."""
+    supplied = {
+        detail["name"]: detail
+        for detail in (model_data or {}).get("feature_details", [])
+    }
+    details = []
+    for feature in FEATURE_CATALOG:
+        detail = {
+            "name": feature.name,
+            "slug": feature.slug,
+            "title": feature.title,
+            "category": feature.category,
+            "definition": feature.definition,
+            "calculation": feature.calculation,
+            "higher_value": feature.higher_value,
+            "caution": feature.caution,
+            "value_kind": feature.value_kind,
+            "related_features": list(feature.related_features),
+            "missing_label": feature.missing_label,
+            "missing_count": 0,
+            "missing_examples": [],
+            "coefficient": None,
+            "distributions": {},
+            "high_examples": [],
+            "low_examples": [],
+        }
+        detail.update(supplied.get(feature.name, {}))
+        details.append(detail)
+    return details
+
+
+def _format_place_survival_feature_value(value, value_kind):
+    if value is None:
+        return "—"
+    numeric = float(value)
+    if value_kind == "boolean":
+        return "Yes" if numeric >= 0.5 else "No"
+    if value_kind == "year":
+        rounded = int(round(numeric))
+        if rounded < 0:
+            return f"{abs(rounded):,} BCE"
+        if rounded > 0:
+            return f"{rounded:,} CE"
+        return "0"
+    if value_kind in {"years", "count"}:
+        return f"{int(round(numeric)):,}"
+    if value_kind == "zscore":
+        return f"{numeric:+.3f}"
+    if abs(numeric) < 0.001 and numeric != 0:
+        return f"{numeric:.6f}"
+    return f"{numeric:.3f}"
+
+
+def _render_place_survival_distribution(detail):
+    distributions = detail.get("distributions") or {}
+    if not distributions:
+        return "<p>Current cohort distributions are not available.</p>"
+    labels = (
+        ("overall", "All labelled places"),
+        ("survives", "Survives"),
+        ("does_not_survive", "Does not survive"),
+    )
+    value_kind = detail["value_kind"]
+    if value_kind == "boolean":
+        rows = []
+        for key, label in labels:
+            values = distributions.get(key) or {}
+            count = int(values.get("count") or 0)
+            share = float(values.get("mean") or 0.0)
+            yes_count = int(round(count * share))
+            rows.append(
+                "<tr>"
+                f"<th>{html.escape(label)}</th>"
+                f'<td class="num">{count:,}</td>'
+                f'<td class="num">{count - yes_count:,}</td>'
+                f'<td class="num">{yes_count:,}</td>'
+                f'<td class="num">{share:.1%}</td>'
+                "</tr>"
+            )
+        return f"""
+        <div class="place-survival-table-wrap">
+            <table class="predictor-table feature-distribution-table">
+                <thead><tr><th>Group</th><th class="num">N</th>
+                <th class="num">No</th><th class="num">Yes</th>
+                <th class="num">Share yes</th></tr></thead>
+                <tbody>{''.join(rows)}</tbody>
+            </table>
+        </div>
+        """
+
+    rows = []
+    for key, label in labels:
+        values = distributions.get(key) or {}
+        rows.append(
+            "<tr>"
+            f"<th>{html.escape(label)}</th>"
+            f'<td class="num">{int(values.get("count") or 0):,}</td>'
+            f'<td class="num">{_format_place_survival_feature_value(values.get("minimum"), value_kind)}</td>'
+            f'<td class="num">{_format_place_survival_feature_value(values.get("q1"), value_kind)}</td>'
+            f'<td class="num">{_format_place_survival_feature_value(values.get("median"), value_kind)}</td>'
+            f'<td class="num">{_format_place_survival_feature_value(values.get("mean"), value_kind)}</td>'
+            f'<td class="num">{_format_place_survival_feature_value(values.get("q3"), value_kind)}</td>'
+            f'<td class="num">{_format_place_survival_feature_value(values.get("maximum"), value_kind)}</td>'
+            "</tr>"
+        )
+    return f"""
+    <div class="place-survival-table-wrap">
+        <table class="predictor-table feature-distribution-table">
+            <thead><tr><th>Group</th><th class="num">N</th>
+            <th class="num">Minimum</th><th class="num">Q1</th>
+            <th class="num">Median</th><th class="num">Mean</th>
+            <th class="num">Q3</th><th class="num">Maximum</th></tr></thead>
+            <tbody>{''.join(rows)}</tbody>
+        </table>
+    </div>
+    """
+
+
+def _render_place_survival_example_table(examples, detail):
+    if not examples:
+        return "<p>No current cohort examples are available.</p>"
+    rows = []
+    for example in examples:
+        target = str(example.get("target_label") or "")
+        target_label = (
+            "Survives"
+            if target == "survives"
+            else "Does not survive"
+            if target == "does_not_survive"
+            else target.replace("_", " ").title()
+        )
+        rows.append(
+            "<tr>"
+            f"<td>{html.escape(str(example.get('place_label') or ''))}</td>"
+            f"<td><code>{html.escape(str(example.get('manto_id') or ''))}</code></td>"
+            f'<td class="num">{_format_place_survival_feature_value(example.get("value"), detail["value_kind"])}</td>'
+            f"<td>{html.escape(target_label)}</td>"
+            "</tr>"
+        )
+    return f"""
+    <div class="place-survival-table-wrap">
+        <table class="predictor-table feature-example-table">
+            <thead><tr><th>Place</th><th>MANTO ID</th>
+            <th class="num">Value</th><th>Pausanias reports</th></tr></thead>
+            <tbody>{''.join(rows)}</tbody>
+        </table>
+    </div>
+    """
+
+
+def _render_place_survival_feature_coefficient(detail):
+    score = detail.get("coefficient")
+    if not score:
+        return (
+            "<p>This feature does not have a stored coefficient in the current "
+            "published connectedness fit.</p>"
+        )
+    coefficient = float(score["coefficient"])
+    direction = (
+        "survives"
+        if score.get("direction") == "survives"
+        else "does not survive"
+    )
+    return (
+        f"<p>Its current standardized coefficient is "
+        f"<strong>{coefficient:+.3f}</strong>, pointing toward "
+        f"<strong>{html.escape(direction)}</strong>. This means that a "
+        "one-standard-deviation increase changes the fitted log odds in that "
+        "direction while the other included features are held fixed.</p>"
+        "<p>Because the connectedness features are correlated and the model's "
+        "out-of-fold performance is weak, this is a conditional association—not "
+        "a standalone ranking, causal effect, or historical explanation.</p>"
+    )
+
+
+def _render_place_survival_related_features(detail):
+    links = []
+    for feature_name in detail.get("related_features") or []:
+        related = FEATURE_BY_NAME.get(feature_name)
+        if not related:
+            continue
+        links.append(
+            f'<li><a href="{html.escape(related.slug)}.html">'
+            f"{html.escape(related.title)}</a></li>"
+        )
+    return (
+        f"<ul>{''.join(links)}</ul>"
+        if links
+        else "<p>No related features are listed.</p>"
+    )
+
+
+def _render_place_survival_feature_index_cards(details):
+    categories = []
+    seen = set()
+    for detail in details:
+        category = detail["category"]
+        if category not in seen:
+            seen.add(category)
+            categories.append(category)
+
+    sections = []
+    for category in categories:
+        cards = []
+        for detail in details:
+            if detail["category"] != category:
+                continue
+            score = detail.get("coefficient")
+            coefficient_note = ""
+            if score:
+                direction = (
+                    "survives"
+                    if score.get("direction") == "survives"
+                    else "does not survive"
+                )
+                coefficient_note = (
+                    f'<p class="feature-card-meta">Current coefficient: '
+                    f'<strong>{float(score["coefficient"]):+.3f}</strong> '
+                    f"toward {html.escape(direction)}</p>"
+                )
+            cards.append(
+                f"""
+                <article class="hub-card feature-index-card">
+                    <h3><a href="{html.escape(detail['slug'])}.html">{html.escape(detail['title'])}</a></h3>
+                    <p><code>{html.escape(detail['name'])}</code></p>
+                    <p>{html.escape(detail['definition'])}</p>
+                    {coefficient_note}
+                </article>
+                """
+            )
+        sections.append(
+            f"""
+            <section class="feature-index-section">
+                <h2>{html.escape(category)}</h2>
+                <div class="hub-grid feature-index-grid">{''.join(cards)}</div>
+            </section>
+            """
+        )
+    return "".join(sections)
+
+
+def generate_manto_place_survival_feature_pages(model_data, output_dir, title):
+    """Generate one index and one detail page for every connectedness feature."""
+    feature_dir = Path(output_dir) / "places" / "model-features"
+    feature_dir.mkdir(parents=True, exist_ok=True)
+    details = _place_survival_feature_details(model_data)
+    release = (model_data or {}).get("release") or {}
+    release_id = int(release.get("record_id") or 0)
+    sample_count = int((model_data or {}).get("sample_count") or 0)
+
+    index_body = f"""
+    <p class="lead">Definitions, calculations, current coefficients, outcome-group
+    distributions, and place examples for every input in the connectedness
+    feature family.</p>
+    <div class="note">
+        <strong>{len(details)} features, documented separately.</strong>
+        All examples come from the current one-row-per-MANTO-place model cohort.
+        “Neighbour” means the operational MANTO graph/locality neighbourhood, not
+        a fixed geographic radius.
+    </div>
+    {_render_place_survival_feature_index_cards(details)}
+    """
+    index_page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{html.escape(title)} - Place Survival Feature Guide</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{html.escape(title)}</h1>
+        <p>Reference guide for the MANTO place-survival model</p>
+    </header>
+    {_site_nav("../../", "places")}
+    <div class="container wide-container">
+        <div class="breadcrumb"><a href="../index.html">Places</a> &rsaquo;
+        <a href="../manto-survival-model.html">Place Survival Model</a> &rsaquo;
+        Feature Guide</div>
+        <h2>Connectedness Feature Guide</h2>
+        {index_body}
+        <footer>{_generated_footer()}</footer>
+    </div>
+</body>
+</html>
+"""
+    (feature_dir / "index.html").write_text(index_page, encoding="utf-8")
+
+    for detail in details:
+        score = detail.get("coefficient")
+        coefficient_value = (
+            f"{float(score['coefficient']):+.3f}"
+            if score
+            else "—"
+        )
+        direction = (
+            "Survives"
+            if score and score.get("direction") == "survives"
+            else "Does not survive"
+            if score
+            else "Not available"
+        )
+        overall_count = int(
+            ((detail.get("distributions") or {}).get("overall") or {}).get("count")
+            or 0
+        )
+        missing_note = ""
+        if detail.get("missing_label"):
+            missing_note = (
+                f'<p class="note"><strong>{int(detail.get("missing_count") or 0):,}</strong> '
+                f"{html.escape(detail['missing_label'].lower())} observations are "
+                "reported separately and excluded from the descriptive year "
+                "statistics below.</p>"
+            )
+
+        if detail["value_kind"] == "boolean":
+            high_heading = "Examples where the feature is present"
+            low_heading = "Examples where the feature is absent"
+        else:
+            high_heading = "Examples with high recorded values"
+            low_heading = "Examples with low recorded values"
+
+        missing_examples = ""
+        if detail.get("missing_examples"):
+            missing_examples = f"""
+            <h3>{html.escape(detail.get("missing_label") or "Missing-value examples")}</h3>
+            {_render_place_survival_example_table(detail["missing_examples"], detail)}
+            """
+
+        page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{html.escape(title)} - {html.escape(detail['title'])}</title>
+    <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>{html.escape(title)}</h1>
+        <p>Connectedness feature reference</p>
+    </header>
+    {_site_nav("../../", "places")}
+    <div class="container wide-container">
+        <div class="breadcrumb"><a href="../index.html">Places</a> &rsaquo;
+        <a href="../manto-survival-model.html">Place Survival Model</a> &rsaquo;
+        <a href="index.html">Feature Guide</a> &rsaquo;
+        {html.escape(detail['title'])}</div>
+        <h2>{html.escape(detail['title'])}</h2>
+        <p class="lead">{html.escape(detail['definition'])}</p>
+        <p class="note">Stored model field:
+        <code>{html.escape(detail['name'])}</code></p>
+
+        <div class="metric-strip">
+            <div><strong>{coefficient_value}</strong><span>standardized coefficient</span></div>
+            <div><strong>{html.escape(direction)}</strong><span>current direction</span></div>
+            <div><strong>{overall_count:,}</strong><span>observations summarized</span></div>
+            <div><strong>{html.escape(detail['category'])}</strong><span>feature group</span></div>
+        </div>
+
+        <h2>How It Is Calculated</h2>
+        <p>{html.escape(detail['calculation'])}</p>
+        <h3>What a higher value means</h3>
+        <p>{html.escape(detail['higher_value'])}</p>
+        <div class="note"><strong>Important qualification.</strong>
+        {html.escape(detail['caution'])}</div>
+
+        <h2>Current Model Cohort</h2>
+        <p>These descriptive statistics use the current labelled cohort after
+        aliases have been collapsed to one row per MANTO place.</p>
+        {missing_note}
+        {_render_place_survival_distribution(detail)}
+
+        <h2>Examples from the Current Data</h2>
+        <p>Examples are descriptive checks on the calculated feature. Their
+        outcome labels report what Pausanias says; they do not establish that the
+        feature caused survival or abandonment.</p>
+        <div class="feature-example-grid">
+            <section>
+                <h3>{html.escape(high_heading)}</h3>
+                {_render_place_survival_example_table(detail.get("high_examples"), detail)}
+            </section>
+            <section>
+                <h3>{html.escape(low_heading)}</h3>
+                {_render_place_survival_example_table(detail.get("low_examples"), detail)}
+            </section>
+        </div>
+        {missing_examples}
+
+        <h2>Interpretation in the Predictive Model</h2>
+        {_render_place_survival_feature_coefficient(detail)}
+
+        <h2>Related Features</h2>
+        {_render_place_survival_related_features(detail)}
+
+        <h2>Data Scope</h2>
+        <ul>
+            <li>The feature is calculated from MANTO release {release_id or "not available"} using evidence dated strictly before Pausanias.</li>
+            <li>The current labelled cohort contains {sample_count:,} distinct MANTO places.</li>
+            <li>The prediction target is whether Pausanias reports a place as surviving or not surviving, not its modern archaeological condition.</li>
+            <li>Feature values and examples may change when MANTO releases, links, labels, or feature definitions are revised.</li>
+        </ul>
+        <p><a href="index.html">Return to all 41 features</a> ·
+        <a href="../manto-survival-model.html">Return to the predictive model</a></p>
+        <footer>{_generated_footer()}</footer>
+    </div>
+</body>
+</html>
+"""
+        (feature_dir / f"{detail['slug']}.html").write_text(
+            page,
+            encoding="utf-8",
+        )
+
+    print(
+        "Generated MANTO place survival feature guide: "
+        f"{feature_dir / 'index.html'} ({len(details)} feature pages)"
+    )
 
 
 def generate_places_index(output_dir, title):

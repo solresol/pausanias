@@ -87,6 +87,7 @@ from .generators import (
     generate_manto_network_pages,
     generate_manto_links_page,
     generate_manto_place_survival_model_page,
+    generate_manto_place_survival_feature_pages,
 )
 
 
@@ -316,6 +317,11 @@ def main():
         generate_manto_network_pages(manto_place_network_analysis, output_dir, args.title)
         generate_manto_links_page(manto_pausanias_links, output_dir, args.title)
         generate_manto_place_survival_model_page(
+            manto_place_survival_model,
+            output_dir,
+            args.title,
+        )
+        generate_manto_place_survival_feature_pages(
             manto_place_survival_model,
             output_dir,
             args.title,

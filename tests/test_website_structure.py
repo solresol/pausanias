@@ -3,6 +3,7 @@ from pathlib import Path
 
 from website.generators import (
     generate_manto_network_pages,
+    generate_manto_place_survival_feature_pages,
     generate_manto_place_survival_model_page,
     generate_places_index,
     generate_texts_index,
@@ -108,6 +109,14 @@ def test_place_survival_page_publishes_only_corrected_model_story():
                 "direction": "survives",
             }
         ],
+        "feature_details": [
+            {
+                "name": "exclusive_figure_count",
+                "slug": "exclusive-figure-count",
+                "title": "Exclusive Figure Count",
+            }
+        ],
+        "feature_count": 41,
         "coverage": {
             "passage_count": 3170,
             "reviewed_passage_count": 3170,
@@ -136,12 +145,113 @@ def test_place_survival_page_publishes_only_corrected_model_story():
     assert "0.564" in html
     assert "weak predictive result" in html
     assert "189" in html
-    assert "exclusive figure count" in html
+    assert "Exclusive Figure Count" in html
+    assert 'href="model-features/exclusive-figure-count.html"' in html
+    assert 'href="model-features/index.html"' in html
     assert "Pausanias mention and passage counts" in html
     assert "stratified five-fold cross-validation" in html
     assert 'class="place-survival-table-wrap"' in html
     assert "pausanias_mention_count" not in html
     assert "manto-network.html" in html
+
+
+def test_place_survival_feature_guide_generates_index_and_41_detail_pages():
+    kin_detail = {
+        "name": "kin_linked_neighbor_count",
+        "slug": "kin-linked-neighbor-count",
+        "title": "Kin-Linked Neighbor Count",
+        "category": "Kinship connections",
+        "definition": "Number of operational neighbours linked through kin.",
+        "calculation": "Intersect kin-linked places with operational neighbours.",
+        "higher_value": "More neighbours host kin of focal-place figures.",
+        "caution": "Neighbour is a graph/locality relation, not a distance band.",
+        "value_kind": "count",
+        "related_features": [
+            "kin_linked_place_count",
+            "local_place_neighbor_count",
+        ],
+        "missing_label": "",
+        "missing_count": 0,
+        "missing_examples": [],
+        "coefficient": {
+            "feature_name": "kin_linked_neighbor_count",
+            "coefficient": -1.275,
+            "direction": "does_not_survive",
+        },
+        "distributions": {
+            "overall": {
+                "count": 2,
+                "minimum": 0.0,
+                "q1": 1.0,
+                "median": 2.0,
+                "mean": 2.0,
+                "q3": 3.0,
+                "maximum": 4.0,
+            },
+            "survives": {
+                "count": 1,
+                "minimum": 0.0,
+                "q1": 0.0,
+                "median": 0.0,
+                "mean": 0.0,
+                "q3": 0.0,
+                "maximum": 0.0,
+            },
+            "does_not_survive": {
+                "count": 1,
+                "minimum": 4.0,
+                "q1": 4.0,
+                "median": 4.0,
+                "mean": 4.0,
+                "q3": 4.0,
+                "maximum": 4.0,
+            },
+        },
+        "high_examples": [
+            {
+                "manto_id": "p1",
+                "place_label": "Test Place",
+                "target_label": "does_not_survive",
+                "value": 4.0,
+            }
+        ],
+        "low_examples": [
+            {
+                "manto_id": "p2",
+                "place_label": "Other Place",
+                "target_label": "survives",
+                "value": 0.0,
+            }
+        ],
+    }
+    data = {
+        "available": True,
+        "release": {"record_id": 19446255},
+        "sample_count": 2,
+        "feature_details": [kin_detail],
+    }
+
+    with TemporaryDirectory() as tmpdir:
+        generate_manto_place_survival_feature_pages(
+            data,
+            tmpdir,
+            "Pausanias Analysis",
+        )
+        feature_dir = Path(tmpdir) / "places" / "model-features"
+        pages = sorted(feature_dir.glob("*.html"))
+        index_html = (feature_dir / "index.html").read_text(encoding="utf-8")
+        kin_html = (
+            feature_dir / "kin-linked-neighbor-count.html"
+        ).read_text(encoding="utf-8")
+
+    assert len(pages) == 42
+    assert index_html.count('class="hub-card feature-index-card"') == 41
+    assert 'href="kin-linked-neighbor-count.html"' in index_html
+    assert "Number of operational neighbours linked through kin." in kin_html
+    assert "Test Place" in kin_html
+    assert "-1.275" in kin_html
+    assert "Return to all 41 features" in kin_html
+    assert 'href="kin-linked-place-count.html"' in kin_html
 
 
 def test_manto_network_page_embeds_source_hover_data():

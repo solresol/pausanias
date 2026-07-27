@@ -451,6 +451,39 @@ def create_website_structure(output_dir):
         background-color: #776b5d;
     }
 
+    .feature-index-section {
+        margin-top: 30px;
+    }
+
+    .feature-index-card {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .feature-index-card h3 a {
+        background: none;
+        color: #4d4338;
+        display: inline;
+        margin: 0;
+        padding: 0;
+        text-decoration: underline;
+    }
+
+    .feature-index-card h3 a:hover {
+        background: none;
+        color: #776b5d;
+    }
+
+    .feature-card-meta {
+        border-top: 1px solid #d5cabd;
+        margin-top: auto;
+        padding-top: 10px;
+    }
+
+    .feature-example-grid section {
+        margin: 24px 0;
+    }
+
     .deprecated {
         border-left: 5px solid #9d8771;
     }
