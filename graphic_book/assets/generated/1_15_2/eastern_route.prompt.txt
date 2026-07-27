@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: subordinate relief-atlas inset for a sophisticated illustrated Pausanias coffee-table book
+Primary request: create a painterly oblique relief panorama of the eastern Mediterranean linking the southern Black Sea coast, Athens, and Troy.
+Scene/backdrop: northern Aegean and Black Sea geography rendered as a richly textured historical atlas, with credible coastlines, mountain systems, wooded valleys, islands, sea depth, and atmospheric haze.
+Subject: the Thermodon and Themiscyra region on the southern Black Sea coast, Athens in Attica, and Troy near the Dardanelles must all be spatially distinguishable, with subtle ancient settlement architecture integrated into the terrain.
+Style/medium: high-resolution watercolor-and-gouache relief atlas, archaeological coffee-table-book finish, textured terrain rather than diagrammatic mapping.
+Composition/framing: wide 16:9 oblique aerial view, Black Sea upper right, Troy near the straits near upper center, Athens lower left; open space for locally drawn route lines and labels.
+Lighting/mood: warm parchment-toned daylight with atmospheric depth.
+Color palette: muted blue-green water, ochre and olive terrain, pale stone settlements, umber mountains.
+Constraints: geographically credible orientation and relief; settlements tiny and integrated, never icons.
+Avoid: text, labels, symbols, routes, borders, compass roses, modern boundaries, satellite-photo appearance, flat vector shapes, blocky mountains, rectangular seas, classroom-map style, sticker icons, decorative pseudo-writing.

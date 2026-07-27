@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: main panel for a sophisticated illustrated Pausanias coffee-table book
+Primary request: reconstruct the interior viewing experience of the Painted Stoa in classical Athens, with two adjacent monumental narrative paintings dominating the long shaded wall.
+Scene/backdrop: a deep classical Greek colonnade with warm daylight entering between stone columns, painted plaster, worn paving, timber roof, restrained visitors, and glimpses of the Athenian Agora beyond.
+Subject: the left mural depicts Athenians led by Theseus fighting fully armoured or fully clothed Amazons in disciplined combat; the right mural depicts the Greek kings assembled after the capture of Troy, with Ajax under accusation, Cassandra fully clothed beside a small archaic sanctuary image of Athena, and captive Trojan women grouped with dignity. The two murals must be visibly distinct yet part of one coherent stoa display.
+Style/medium: richly painted archaeological reconstruction, painterly realism, monumental mural pigments integrated into a credible architectural interior, museum-catalogue finish.
+Composition/framing: panoramic 3:2 view down the colonnade; left and right murals both large and legible; visitors small and subordinate; calm plaster and column areas available for later local leaders.
+Lighting/mood: warm side light, cool interior shadow, solemn and contemplative rather than theatrical.
+Color palette: mineral red, ochre, ivory, charcoal, muted blue, olive, weathered bronze, parchment tonal unity.
+Constraints: every human figure fully clothed or fully armoured; Cassandra dignified and protected beside Athena's sanctuary image; historically plausible classical Greek dress, armour, architecture, and painted-plaster surfaces.
+Avoid: text, labels, captions, borders, inscriptions, pseudo-writing, nudity, exposed bodies, eroticized poses, depiction of assault, gore, corpses, sensational violence, modern museum fittings, Roman armour, fantasy Amazons, cartoons, flat-vector style, schematic icons, classroom-diagram appearance, glossy 3D rendering, sparse concept art.

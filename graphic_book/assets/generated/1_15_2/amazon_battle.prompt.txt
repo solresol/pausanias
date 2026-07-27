@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: scenic inset for a sophisticated illustrated Pausanias coffee-table book
+Primary request: depict Theseus and Athenian hoplites fighting the Amazons outside ancient Athens in a polished monumental-history tableau.
+Scene/backdrop: rocky Attic ground with the Acropolis and early city walls in the middle distance, olive scrub, dust, bronze and painted shields.
+Subject: Theseus, fully armoured, leads Athenians from the left; fully armoured or fully clothed Amazon cavalry and infantry press from the right. The formations and opposing sides must be spatially clear, with courageous women represented as serious warriors rather than fantasy figures.
+Style/medium: high-resolution painterly archaeological reconstruction with the compositional gravity of a restored classical mural and the detail of a museum coffee-table book.
+Composition/framing: wide 16:9 battle tableau, two readable forces, Theseus identifiable by central command position but without divine attributes, Acropolis visible for geographic orientation.
+Lighting/mood: late-afternoon dust and warm raking light, tense but restrained.
+Color palette: bronze, deep red, ochre, ivory, muted blue, olive, weathered plaster.
+Constraints: all figures fully clothed or fully armoured; historically plausible equipment; no exposed bodies.
+Avoid: text, labels, captions, borders, inscriptions, pseudo-writing, blood, gore, corpses, nudity, eroticization, severed limbs, fantasy armour, modern objects, Roman armour, cartoon style, flat-vector terrain, stick figures, schematic iconography, glossy 3D rendering.

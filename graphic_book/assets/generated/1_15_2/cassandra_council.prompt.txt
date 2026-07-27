@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: scenic inset for a sophisticated illustrated Pausanias coffee-table book
+Primary request: depict the solemn Greek council after the capture of Troy, focused on the accusation against Ajax and the sanctuary refuge of Cassandra.
+Scene/backdrop: a ruined but non-graphic Trojan sacred precinct at dawn, fallen roof tiles and smoke haze in the distance, an intact small archaic sanctuary image of Athena under a columned shelter.
+Subject: Cassandra stands fully clothed in layered Trojan robes immediately beside Athena's sanctuary image; Ajax, fully armoured, stands apart under accusation; Greek kings sit and stand in a grave semicircle; captive Trojan women, fully clothed and treated with dignity, gather behind Cassandra. Show moral reckoning after violence, not the assault itself.
+Style/medium: richly painted archaeological reconstruction, restrained tragic history painting, sophisticated museum-catalogue realism.
+Composition/framing: wide 16:9 tableau; Cassandra and the Athena image at left-center, accused Ajax separated at right, kings forming the visual arc between them; clear spaces for later local leaders.
+Lighting/mood: cool dawn through smoke with warm sanctuary light, solemn, judicial, compassionate.
+Color palette: ash blue, mineral red, ivory, muted gold, weathered stone, deep umber.
+Constraints: every figure fully clothed or fully armoured; Cassandra dignified and unharmed; no physical contact between Ajax and Cassandra; no explicit destruction or injury.
+Avoid: text, labels, captions, borders, inscriptions, pseudo-writing, nudity, exposed bodies, eroticization, depiction of assault, blood, gore, corpses, screaming melodrama, modern objects, Roman armour, cartoon style, flat-vector forms, schematic iconography, glossy 3D rendering.
