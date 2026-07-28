@@ -1,0 +1,11 @@
+Use case: mythic-historical scene
+Asset type: scenic inset for a sophisticated illustrated Pausanias coffee-table book
+Primary request: depict the heroic and divine figures included in the ancient Marathon battle painting as a solemn epiphany on the edge of the battlefield.
+Scene/backdrop: the Marathon plain at dawn with distant hoplite formations, low dust, reeds, olive scrub, and mountains fading into haze.
+Subject: the bearded local hero Marathon stands watchfully at the edge of the plain; Athena appears fully clothed and armoured with spear and round shield; Heracles stands fully clothed in a lion-skin mantle over a tunic, carrying a club; Theseus rises from a fissure in the earth only from the waist upward, fully armoured, uncanny but dignified. They are distinct figures sharing one coherent scene, not a lineup or icon sheet.
+Style/medium: richly painted archaeological reconstruction with the gravity of a restored classical mural, sophisticated museum coffee-table-book realism, subtle supernatural atmosphere.
+Composition/framing: wide 16:9 tableau; Marathon to the left overlooking the plain, Theseus emerging near the centre foreground, Athena and Heracles standing apart at right; open visual gaps for later leader lines.
+Lighting/mood: warm dawn breaking through cool mist, numinous and restrained, no theatrical magical effects.
+Color palette: bronze, deep red, ivory, olive, umber, muted blue, weathered plaster.
+Constraints: every figure fully clothed or fully armoured; Theseus's emergence is clean and symbolic without injury; historically plausible equipment and dress.
+Avoid: text, labels, captions, borders, inscriptions, pseudo-writing, nudity, exposed chest, exposed bodies, eroticization, blood, gore, corpses, body horror, halos, lightning, fantasy magic, superhero poses, icon-sheet composition, cartoon style, flat-vector forms, schematic symbols, glossy 3D rendering.

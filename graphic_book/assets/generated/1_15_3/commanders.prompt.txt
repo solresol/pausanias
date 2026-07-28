@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: scenic inset for a sophisticated illustrated Pausanias coffee-table book
+Primary request: depict the prominent Greek combatants in the Marathon painting—Callimachus, Miltiades, and the mysterious hero Echetlos—within the disciplined Athenian and Plataean battle line.
+Scene/backdrop: dusty Marathon plain with Persian ranks in the middle distance, mountains and a hint of coastal haze behind.
+Subject: Callimachus in full hoplite armour rallies the line from a central command position; Miltiades, likewise fully armoured, directs the formation beside him; Echetlos fights nearby with a plausible ancient ploughshare or plough-beam weapon, visually unusual but not fantastical. Athenian and Plataean hoplites maintain ordered ranks around them, with modest variations in shield devices and cloak colors distinguishing contingents without written markings.
+Style/medium: richly painted monumental history tableau, archaeological realism, restored classical mural pigments with detailed bronze, linen, wood, dust, and cloth, museum-catalogue finish.
+Composition/framing: wide 16:9 scene; three focal figures spaced clearly across the Greek line with open spaces for later local leader lines; formations remain believable and the figures are not isolated portrait cutouts.
+Lighting/mood: warm side light through battle dust, determined and restrained.
+Color palette: bronze, mineral red, ivory, muted blue, ochre, umber, olive.
+Constraints: historically plausible early fifth-century BCE hoplite arms and armour; every figure fully clothed or fully armoured; no modern emblems or written names.
+Avoid: text, labels, captions, borders, inscriptions, pseudo-writing, blood, gore, corpses, severed limbs, exposed bodies, nudity, Roman armour, medieval armour, fantasy weapons, superhero poses, cartoon style, flat-vector forms, icon-sheet composition, schematic figures, glossy 3D rendering.

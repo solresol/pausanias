@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: main panoramic panel for a sophisticated illustrated Pausanias coffee-table book
+Primary request: reconstruct the Battle of Marathon as an oblique, geographically legible panorama of the real Marathon plain in northeast Attica, viewed from inland high ground toward the curved bay.
+Scene/backdrop: rugged Attic mountain ridges and olive scrub behind a broad cultivated plain; a substantial reedy coastal marsh to one side; pale beach and the Aegean bay beyond; morning haze and credible dry late-summer terrain.
+Subject and sequence: in the middle distance, compact Athenian and Plataean hoplite ranks meet a larger Persian infantry line in disciplined combat; farther toward the marsh the Persian ranks visibly break and retreat; at the shore, Phoenician ships lie drawn close in shallow water while Greek soldiers contest the embarkation. The geography and three successive zones of action must be visually distinct within one coherent landscape.
+Style/medium: richly painted archaeological reconstruction, watercolor and gouache over detailed historical illustration, museum-catalogue realism, sophisticated naturalistic terrain and atmospheric depth.
+Composition/framing: panoramic 3:2 oblique aerial view; mountains upper left/inland, central plain and battle across the middle, reedy marsh upper right, curved bay and ships along the lower-right shore; clear calm patches for later local labels and leader lines; no single oversized figure.
+Lighting/mood: warm raking dawn light, dusty tension, grave and historical rather than sensational.
+Color palette: olive, ochre, umber, mineral red, bronze, reed green, muted Aegean blue, parchment tonal unity.
+Constraints: historically plausible early fifth-century BCE Greek and Persian clothing, armour, shields, formations, ships, and landscape; all figures fully clothed or armoured; combat readable but distant and restrained.
+Avoid: text, labels, captions, borders, inscriptions, pseudo-writing, modern structures, modern roads, modern national symbols, Roman armour, fantasy armour, cavalry dominating the scene, blood, gore, corpses, exposed bodies, nudity, cartoon style, flat-vector terrain, game-map appearance, classroom diagram, icons, repeated symbolic figures, glossy 3D rendering, sparse concept art.
