@@ -8,6 +8,7 @@ from sentence_tag_batch import (
     bucket_from_flags,
     completion_body,
     mode_prompt_version,
+    parse_batch_error_records,
     unprocessed_sql,
 )
 
@@ -146,6 +147,36 @@ class SentenceTagBatchTests(unittest.TestCase):
         self.assertIn("sentence_llm_grammar_analyses", sql)
         self.assertIn("sentence_discourse_mode_tags", sql)
         self.assertIn("greek-sentence-grammar-v1", sql)
+
+    def test_parse_batch_error_records_preserves_request_errors(self):
+        text = "\n".join(
+            [
+                '{"custom_id":"senttag:discourse:run-1:1","response":'
+                '{"status_code":400,"body":{"error":{"message":"invalid prompt"}}}}',
+                '{"custom_id":"senttag:discourse:run-1:2","response":'
+                '{"status_code":429,"body":{"error":{"message":"rate limited"}}}}',
+            ]
+        )
+
+        errors, unassigned = parse_batch_error_records(
+            text,
+            run_id="run-1",
+            item_lookup={1: {}, 2: {}},
+        )
+
+        self.assertEqual(errors, {1: "invalid prompt", 2: "rate limited"})
+        self.assertEqual(unassigned, [])
+
+    def test_parse_batch_error_records_reports_unmatched_records(self):
+        errors, unassigned = parse_batch_error_records(
+            '{"custom_id":"senttag:discourse:other-run:1","error":"failed"}',
+            run_id="run-1",
+            item_lookup={1: {}},
+        )
+
+        self.assertEqual(errors, {})
+        self.assertEqual(len(unassigned), 1)
+        self.assertIn("belongs to other-run", unassigned[0])
 
 
 if __name__ == "__main__":

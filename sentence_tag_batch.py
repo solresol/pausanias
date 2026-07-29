@@ -990,6 +990,45 @@ def extract_tool_arguments(record: dict) -> tuple[dict, dict]:
     return json.loads(arguments_text), body.get("usage") or {}
 
 
+def batch_error_text(record: dict) -> str:
+    response = record.get("response") or {}
+    body = response.get("body") or {}
+    error = body.get("error") if isinstance(body, dict) else None
+    if isinstance(error, dict) and error.get("message"):
+        return str(error["message"])
+    if record.get("error"):
+        return str(record["error"])
+    return f"Batch request failed with status {response.get('status_code')}"
+
+
+def parse_batch_error_records(
+    text: str,
+    *,
+    run_id: str,
+    item_lookup: dict[int, dict],
+) -> tuple[dict[int, str], list[str]]:
+    errors = {}
+    unassigned_errors = []
+    for line in text.splitlines():
+        if not line.strip():
+            continue
+        try:
+            record = json.loads(line)
+            _mode, output_run_id, request_number = parse_custom_id(
+                record.get("custom_id", "")
+            )
+            if output_run_id != run_id:
+                raise ValueError(
+                    f"Error custom_id belongs to {output_run_id}, expected {run_id}"
+                )
+            if request_number not in item_lookup:
+                raise ValueError(f"No stored input row for request {request_number}")
+            errors[request_number] = batch_error_text(record)
+        except Exception as exc:
+            unassigned_errors.append(str(exc))
+    return errors, unassigned_errors
+
+
 def request_counts_text(result) -> str:
     counts = getattr(result, "request_counts", None)
     if not counts:
@@ -1273,7 +1312,61 @@ def fetch_batches(
             print(f"{run_id}: remote status is {result.status}; not fetching yet.")
             continue
         if not result.output_file_id:
-            print(f"{run_id}: completed but has no output file.")
+            item_lookup = load_batch_items(psql, run_id)
+            errors_by_request = {}
+            unassigned_errors = []
+            if result.error_file_id:
+                error_output = client.files.content(result.error_file_id)
+                errors_by_request, unassigned_errors = parse_batch_error_records(
+                    error_output.text,
+                    run_id=run_id,
+                    item_lookup=item_lookup,
+                )
+            fallback_error = "Completed batch returned no output record"
+            if not result.error_file_id:
+                fallback_error += " or error file"
+            item_updates = [
+                {
+                    "request_number": request_number,
+                    "input_tokens": 0,
+                    "output_tokens": 0,
+                    "status": "failed",
+                    "error": errors_by_request.get(request_number, fallback_error),
+                }
+                for request_number in sorted(item_lookup)
+            ]
+            completed_at = now_iso()
+            notes = (
+                f"failures={len(item_updates)}; "
+                f"fetched_error_file_from_batch={run['openai_batch_id']}"
+            )
+            if unassigned_errors:
+                notes += f"; unassigned_error_records={len(unassigned_errors)}"
+            write_results(
+                psql,
+                {
+                    "run": {
+                        "run_id": run_id,
+                        "completed_at": completed_at,
+                        "status": "completed_with_failures",
+                        "model": run["model"],
+                        "prompt_version": run["prompt_version"],
+                        "input_tokens": 0,
+                        "output_tokens": 0,
+                        "processed_count": 0,
+                        "request_count": len(item_lookup),
+                        "openai_output_file_id": result.output_file_id,
+                        "openai_error_file_id": result.error_file_id,
+                        "retrieved_at": completed_at,
+                        "notes": notes,
+                    },
+                    "items": item_updates,
+                },
+            )
+            print(
+                f"Fetched {run['mode']} run {run_id}: 0/{len(item_lookup)} saved, "
+                f"0 tokens, {len(item_updates)} failures."
+            )
             continue
 
         item_lookup = load_batch_items(psql, run_id)
