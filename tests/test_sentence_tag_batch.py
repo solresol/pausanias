@@ -1,5 +1,7 @@
 import argparse
 import unittest
+from types import SimpleNamespace
+from unittest.mock import Mock, patch
 
 from sentence_tag_batch import (
     DISCOURSE_MODE_PROMPT_VERSION,
@@ -7,10 +9,12 @@ from sentence_tag_batch import (
     GRETA_BOTH_BATCH_PROMPT_VERSION,
     bucket_from_flags,
     completion_body,
+    fetch_batches,
     mode_prompt_version,
     parse_batch_error_records,
     unprocessed_sql,
 )
+from section_people_batch import fetch_batches as fetch_people_batches
 
 
 def args_for_mode(mode):
@@ -177,6 +181,83 @@ class SentenceTagBatchTests(unittest.TestCase):
         self.assertEqual(errors, {})
         self.assertEqual(len(unassigned), 1)
         self.assertIn("belongs to other-run", unassigned[0])
+
+    @patch("sentence_tag_batch.update_batch_ids")
+    @patch("sentence_tag_batch.load_batch_runs")
+    @patch("sentence_tag_batch.now_iso", return_value="2026-07-31T00:00:00+00:00")
+    def test_expired_sentence_batch_is_finalized(
+        self, _now_iso, load_batch_runs, update_batch_ids
+    ):
+        load_batch_runs.return_value = [
+            {
+                "run_id": "run-1",
+                "openai_batch_id": "batch-1",
+                "mode": "discourse-batch",
+                "model": "model",
+                "prompt_version": "prompt",
+            }
+        ]
+        client = SimpleNamespace(
+            batches=SimpleNamespace(
+                retrieve=Mock(
+                    return_value=SimpleNamespace(
+                        status="expired",
+                        output_file_id=None,
+                        error_file_id="error-1",
+                    )
+                )
+            )
+        )
+
+        fetch_batches(Mock(), client, batch_run_id=None)
+
+        update_batch_ids.assert_called_once_with(
+            unittest.mock.ANY,
+            run_id="run-1",
+            status="batch_expired",
+            openai_output_file_id=None,
+            openai_error_file_id="error-1",
+            retrieved_at="2026-07-31T00:00:00+00:00",
+            completed_at="2026-07-31T00:00:00+00:00",
+        )
+
+    @patch("section_people_batch.update_batch_ids")
+    @patch("section_people_batch.load_batch_runs")
+    @patch("section_people_batch.now_iso", return_value="2026-07-31T00:00:00+00:00")
+    def test_expired_people_batch_is_finalized(
+        self, _now_iso, load_batch_runs, update_batch_ids
+    ):
+        load_batch_runs.return_value = [
+            {
+                "run_id": "run-1",
+                "openai_batch_id": "batch-1",
+                "model": "model",
+                "prompt_version": "prompt",
+            }
+        ]
+        client = SimpleNamespace(
+            batches=SimpleNamespace(
+                retrieve=Mock(
+                    return_value=SimpleNamespace(
+                        status="expired",
+                        output_file_id=None,
+                        error_file_id=None,
+                    )
+                )
+            )
+        )
+
+        fetch_people_batches(Mock(), client, batch_run_id=None)
+
+        update_batch_ids.assert_called_once_with(
+            unittest.mock.ANY,
+            run_id="run-1",
+            status="batch_expired",
+            openai_output_file_id=None,
+            openai_error_file_id=None,
+            retrieved_at="2026-07-31T00:00:00+00:00",
+            completed_at="2026-07-31T00:00:00+00:00",
+        )
 
 
 if __name__ == "__main__":

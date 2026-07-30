@@ -863,15 +863,26 @@ def fetch_batches(psql: PsqlRunner, client: OpenAI, *, batch_run_id: str | None)
     for run in runs:
         run_id = run["run_id"]
         result = client.batches.retrieve(run["openai_batch_id"])
+        status = f"batch_{result.status}"
+        terminal_at = (
+            now_iso()
+            if result.status != "completed" and status in TERMINAL_RUN_STATUSES
+            else None
+        )
         update_batch_ids(
             psql,
             run_id=run_id,
-            status=f"batch_{result.status}",
+            status=status,
             openai_output_file_id=result.output_file_id,
             openai_error_file_id=result.error_file_id,
+            retrieved_at=terminal_at,
+            completed_at=terminal_at,
         )
         if result.status != "completed":
-            print(f"{run_id}: remote status is {result.status}; not fetching yet.")
+            if terminal_at:
+                print(f"{run_id}: recorded terminal remote status {result.status}.")
+            else:
+                print(f"{run_id}: remote status is {result.status}; not fetching yet.")
             continue
         if not result.output_file_id:
             print(f"{run_id}: completed but has no output file.")
