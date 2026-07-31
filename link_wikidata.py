@@ -28,7 +28,7 @@ from pausanias_db import add_database_argument, connect
 WIKIDATA_ENDPOINT = "https://query.wikidata.org/sparql"
 
 # OpenAI model for disambiguation
-DISAMBIGUATION_MODEL = "gpt-5.4-mini"
+DISAMBIGUATION_MODEL = "gpt-5.6-luna"
 
 # User-Agent for Wikidata requests
 USER_AGENT = "PausaniasProject/1.0 (ancient geography research)"

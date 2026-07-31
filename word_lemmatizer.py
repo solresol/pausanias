@@ -21,7 +21,7 @@ from openai import OpenAI
 
 
 DEFAULT_DATABASE_URL = "dbname=pausanias user=gregb"
-DEFAULT_MODEL = "gpt-5.4-mini"
+DEFAULT_MODEL = "gpt-5.6-luna"
 DEFAULT_PROMPT_VERSION = "greek-word-lemmas-v1"
 
 GREEK_TOKEN_RE = re.compile(

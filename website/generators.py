@@ -1108,7 +1108,7 @@ def generate_classifier_comparison_pages(comparison, output_dir, title):
         <div class="breadcrumb"><a href="../index.html">Annotations</a> &rsaquo; Classifier Comparison</div>
         <h2>Original vs. Greta-inspired</h2>
         <p>Each Greek sentence is tagged by two independent classifiers
-        (both <code>gpt-5.4-mini</code>, temperature&nbsp;0):</p>
+        (both <code>gpt-5.6-luna</code>, temperature&nbsp;0):</p>
         <ul>
             <li><strong>Original</strong> (<code>original-myth-history-other</code>) &mdash;
             the simple prompt that forces every sentence into exactly one of
@@ -2007,7 +2007,7 @@ def generate_stylometry_pages(stylometry_data, output_dir, title):
     metrics = data.get("metrics") or {}
     feature_sets = data.get("feature_sets") or []
     timestamp = datetime.now().strftime("%Y-%m-%d at %H:%M:%S")
-    model = data.get("model") or "gpt-5.4-mini"
+    model = data.get("model") or "gpt-5.6-luna"
     method_notes = _render_stylometry_notes(data.get("method_notes"))
     coverage_notes = _render_stylometry_notes(data.get("coverage_notes"))
     feature_cards = _render_stylometry_feature_cards(feature_sets)
@@ -3017,7 +3017,7 @@ def generate_stylometric_sentence_model_pages(model_data, output_dir, title):
     <div class="container wide-container">
         <div class="breadcrumb"><a href="index.html">Analyses</a> &rsaquo; <a href="stylometry.html">Stylometry</a> &rsaquo; Sentence Classifiers</div>
         <h2>Mythic, Historical, and Other from Stylometric Features</h2>
-        <p>These models predict sentence labels using style-oriented feature families derived from the current <code>{html.escape(data.get('model') or 'gpt-5.4-mini')}</code> grammar parses. The evaluation is cross-validated on the parsed subset and compared with a majority-label chance baseline inside each fold.</p>
+        <p>These models predict sentence labels using style-oriented feature families derived from the current <code>{html.escape(data.get('model') or 'gpt-5.6-luna')}</code> grammar parses. The evaluation is cross-validated on the parsed subset and compared with a majority-label chance baseline inside each fold.</p>
         <div class="metric-strip">
             <div><strong>{int(metrics.get('parsed_sentence_count') or 0):,}</strong><span>parsed sentences</span></div>
             <div><strong>{int(metrics.get('token_count') or 0):,}</strong><span>word tokens</span></div>
@@ -4119,7 +4119,7 @@ def generate_analysis_pages(greta_analysis, section_people_analysis, discourse_a
         <div class="hub-grid">
             <section class="hub-card">
                 <h3>LLM Grammar Stylometry</h3>
-                <p>Passage-level morphosyntactic features from the gpt-5.4-mini grammar parser, with word-frequency and character n-gram baselines.</p>
+                <p>Passage-level morphosyntactic features from the gpt-5.6-luna grammar parser, with word-frequency and character n-gram baselines.</p>
                 <a href="stylometry.html">Open Stylometry</a>
             </section>
             <section class="hub-card">
@@ -8223,13 +8223,13 @@ def _render_grammar_sentence_card(sentence):
 
 
 def generate_llm_grammar_pages(grammar_data, output_dir, title):
-    """Generate passage-level pages for stored gpt-5.4-mini grammar parses."""
+    """Generate passage-level pages for stored gpt-5.6-luna grammar parses."""
     grammar_dir = os.path.join(output_dir, "grammar")
     os.makedirs(grammar_dir, exist_ok=True)
 
     data = grammar_data or {}
     passages = data.get("passages") or []
-    model = data.get("model") or "gpt-5.4-mini"
+    model = data.get("model") or "gpt-5.6-luna"
     timestamp = datetime.now().strftime("%Y-%m-%d at %H:%M:%S")
     prompt_versions = ", ".join(data.get("prompt_versions") or [])
     created_summary = ""

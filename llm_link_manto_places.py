@@ -28,7 +28,7 @@ from link_manto_places import (
 from pausanias_db import add_database_argument, connect, initialize_schema
 
 
-DEFAULT_MODEL = "gpt-5.4-mini"
+DEFAULT_MODEL = "gpt-5.6-luna"
 DEFAULT_CANDIDATE_LIMIT = 10
 
 LINK_TOOL = {

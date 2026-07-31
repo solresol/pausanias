@@ -24,7 +24,7 @@ from scipy.stats import chi2_contingency
 from pausanias_db import schema_path
 
 
-DEFAULT_MODEL = "gpt-5.4-mini"
+DEFAULT_MODEL = "gpt-5.6-luna"
 DEFAULT_PROMPT_VERSION = "section-people-v1"
 DEFAULT_BUCKET_PROMPT_VERSION = "original-myth-history-other"
 DEFAULT_TOKENS_PER_SECTION = 2500

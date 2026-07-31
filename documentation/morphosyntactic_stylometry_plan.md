@@ -6,8 +6,8 @@ This specification turns the June 2026 Greg/Greta/Ben discussion into a build pl
 
 ## Current repo state
 
-- We are going to use the `gpt-5.4-mini` LLM grammar parser rather than the UDPipe models because spot-checking found the UDPipe parses were not accurate enough for evidence-bearing Ancient Greek stylometry.
-- `sentence_llm_grammar.py` asks `gpt-5.4-mini` for parser-style token annotations and stores CoNLL-U-like output in `sentence_llm_grammar_analyses` plus queryable token rows in `sentence_llm_grammar_tokens`.
+- We are going to use the `gpt-5.6-luna` LLM grammar parser rather than the UDPipe models because spot-checking found the UDPipe parses were not accurate enough for evidence-bearing Ancient Greek stylometry.
+- `sentence_llm_grammar.py` asks `gpt-5.6-luna` for parser-style token annotations and stores CoNLL-U-like output in `sentence_llm_grammar_analyses` plus queryable token rows in `sentence_llm_grammar_tokens`.
 - The older `sentence_udpipe.py` and `sentence_trankit.py` parser lanes remain useful background and possible sanity checks, but they are not the planned primary source for morphosyntactic stylometry.
 - Downstream stylometry should not hard-code any single parser table. Build a normalized token-source adapter that reads the LLM grammar tables first, with fields:
   `parser_family`, `model_name`, `prompt_version`, `passage_id`, `sentence_number`, `token_order`, `token_id`, `form`, `lemma`, `pos`, `xpos`, `feats`, `head_token_id`, `deprel`, `confidence`, `note`, `is_syntactic_token`.
@@ -16,7 +16,7 @@ This specification turns the June 2026 Greg/Greta/Ben discussion into a build pl
 ## What I'd Do For Pausanias
 
 1. Keep the current content classifier as content analysis. It can support claims about mythic/historical vocabulary, but it should not be presented as stylometry.
-2. Parse the Greek with the `gpt-5.4-mini` LLM grammar parser, then spot-check Book 4, Book 8, and control passages before treating any parse-derived feature as evidence.
+2. Parse the Greek with the `gpt-5.6-luna` LLM grammar parser, then spot-check Book 4, Book 8, and control passages before treating any parse-derived feature as evidence.
 3. Build chunk-level feature matrices, not whole-book points. Use non-overlapping chunks for statistical comparisons and rolling overlapping chunks for visualization.
 4. Use Pausanias 4.4.1-4.27.1 as the precise Messenian Wars test span. Compare it with nearby Book 4, the rest of Pausanias, and Book 8 as a likely content outlier.
 5. Run multiple feature families: function/high-frequency word forms, character n-grams, masked/content-controlled lexical features, LLM-derived morphosyntactic feature combinations, and syntax-word/path features.
@@ -182,7 +182,7 @@ Before a full stylometry claim:
    - 10 from surrounding Book 4;
    - 10 from Book 8;
    - 20 from control books.
-2. For the `gpt-5.4-mini` grammar parser and prompt version, review:
+2. For the `gpt-5.6-luna` grammar parser and prompt version, review:
    - tokenization of enclitics, elision, punctuation, numerals;
    - UPOS/XPOS;
    - high-value morphology: Case, Number, Gender, Tense, Mood, Voice, VerbForm, Person;
@@ -218,7 +218,7 @@ Recommended robustness grid:
 - feature counts: 100, 300, 500, 1000, 2500/3000 where applicable;
 - char n: 3, 4, 5;
 - metrics: cosine, Euclidean, Burrows Delta, Eder Simple/Delta;
-- parser families: primary `llm-grammar/gpt-5.4-mini`; optional UDPipe/UD or Trankit/AGDT diagnostic comparison only;
+- parser families: primary `llm-grammar/gpt-5.6-luna`; optional UDPipe/UD or Trankit/AGDT diagnostic comparison only;
 - parser prompt versions: at least the production prompt plus any revised prompt used after spot-checking;
 - normalization: polytonic-preserved primary, accent-stripped sensitivity.
 

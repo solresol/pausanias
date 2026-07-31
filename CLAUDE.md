@@ -51,7 +51,7 @@ PostgreSQL, `dbname=pausanias`, user `gregb`. The **live** database is on
 
 Scripts call OpenAI (the `openai` package) for classification, translation,
 sentence splitting, lemmatization, and tagging. Models are passed via flags
-(e.g. `--model gpt-5.4-mini`). Heavier passes use OpenAI's **batch API** (see
+(e.g. `--model gpt-5.6-luna`). Heavier passes use OpenAI's **batch API** (see
 `sentence_tag_batch.py`, which submits batches and polls with `--fetch-batches`).
 Token spend is tracked in per-task tables (e.g. `content_queries`). Requires an
 OpenAI API key in the environment.

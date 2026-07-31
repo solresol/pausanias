@@ -13,7 +13,7 @@ uv run passage_place_state_batch.py --database-url "$DATABASE_URL" --fetch-batch
 uv run passage_place_state_batch.py \
   --database-url "$DATABASE_URL" \
   --use-batch-api \
-  --model gpt-5.4-mini \
+  --model gpt-5.6-luna \
   --token-budget 1000000 \
   --candidate-first \
   --skip-if-submitted-hours 18

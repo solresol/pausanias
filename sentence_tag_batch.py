@@ -25,15 +25,15 @@ from sentence_mythic_sceptic_analyser import LEGACY_PROMPT_VERSION, legacy_tool
 #   greta-both -> "greta-inspired-myth-history-other" (two-flag, calibrated to Greta/Rosie)
 GRETA_BATCH_PROMPT_VERSION = "original-myth-history-other"
 GRETA_BOTH_BATCH_PROMPT_VERSION = "greta-inspired-myth-history-other"
-DEFAULT_GRETA_MODEL = "gpt-5.4-mini"
+DEFAULT_GRETA_MODEL = "gpt-5.6-luna"
 DEFAULT_LEGACY_MODEL = "gpt-5.5"
-DEFAULT_DISCOURSE_MODEL = "gpt-5.4-mini"
+DEFAULT_DISCOURSE_MODEL = "gpt-5.6-luna"
 DEFAULT_GRETA_TOKENS_PER_SENTENCE = 545
 DEFAULT_GRETA_BOTH_TOKENS_PER_SENTENCE = 680
 DEFAULT_LEGACY_TOKENS_PER_SENTENCE = 540
 DEFAULT_DISCOURSE_TOKENS_PER_SENTENCE = 1000
 DISCOURSE_MODE_PROMPT_VERSION = "discourse-mode-v1"
-DEFAULT_GRAMMAR_MODEL = "gpt-5.4-mini"
+DEFAULT_GRAMMAR_MODEL = "gpt-5.6-luna"
 DEFAULT_GRAMMAR_PROMPT_VERSION = "greek-sentence-grammar-v1"
 GRETA_MODES = {"greta", "greta-both"}
 DISCOURSE_MODES = [

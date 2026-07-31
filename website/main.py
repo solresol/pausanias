@@ -126,8 +126,8 @@ def parse_arguments():
                         help="File containing OpenAI API key (default: ~/.openai.key)")
     parser.add_argument("--model", default="gpt-5",
                         help="OpenAI model to use for translations (default: gpt-5)")
-    parser.add_argument("--grammar-model", default="gpt-5.4-mini",
-                        help="LLM grammar model to publish on grammar pages (default: gpt-5.4-mini)")
+    parser.add_argument("--grammar-model", default="gpt-5.6-luna",
+                        help="LLM grammar model to publish on grammar pages (default: gpt-5.6-luna)")
 
     return parser.parse_args()
 

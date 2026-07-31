@@ -39,8 +39,8 @@ def parse_arguments():
     )
     parser.add_argument(
         "--model",
-        default="gpt-5.4-mini",
-        help="OpenAI model to use (default: gpt-5.4-mini)",
+        default="gpt-5.6-luna",
+        help="OpenAI model to use (default: gpt-5.6-luna)",
     )
     parser.add_argument(
         "--fallback-model",

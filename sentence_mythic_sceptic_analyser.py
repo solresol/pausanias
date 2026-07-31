@@ -19,7 +19,7 @@ LEGACY_PROMPT_VERSION = "legacy-mythic-scepticism-v1"
 GRETA_PROMPT_VERSION = "greta-myth-history-other-v1"
 GRETA_BOTH_PROMPT_VERSION = "greta-myth-history-both-other-v1"
 DEFAULT_MODEL = "gpt-5"
-DEFAULT_COMPARISON_MODEL = "gpt-5.4-mini"
+DEFAULT_COMPARISON_MODEL = "gpt-5.6-luna"
 DEFAULT_JUDGE_MODEL = "gpt-5.4"
 BUCKETS = ("mythic", "historical", "other")
 

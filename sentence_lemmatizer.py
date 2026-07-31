@@ -19,7 +19,7 @@ from pathlib import Path
 from openai import OpenAI
 
 
-DEFAULT_MODEL = "gpt-5.4-mini"
+DEFAULT_MODEL = "gpt-5.6-luna"
 DEFAULT_PROMPT_VERSION = "greek-sentence-lemmas-v1"
 DEFAULT_DATABASE_URL = "dbname=pausanias user=gregb"
 

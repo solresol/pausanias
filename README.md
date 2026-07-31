@@ -332,7 +332,7 @@ for lemma-focused work.
 
 ## LLM grammar annotations
 
-The LLM grammar runner asks `gpt-5.4-mini` for parser-style token annotations:
+The LLM grammar runner asks `gpt-5.6-luna` for parser-style token annotations:
 lemma, UPOS, detailed morphology, UD-style features, head token, and dependency
 relation. Results are stored separately from deterministic parser output in
 `sentence_llm_grammar_runs`, `sentence_llm_grammar_analyses`, and

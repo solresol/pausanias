@@ -26,7 +26,7 @@ run_batch --fetch-batches
 run_batch \
   --mode greta-both \
   --use-batch-api \
-  --model gpt-5.4-mini \
+  --model gpt-5.6-luna \
   --token-budget 1500000 \
   --priority-books-first 3 \
   --priority-books-last 4,8 \
@@ -37,7 +37,7 @@ run_batch \
 run_batch \
   --mode greta \
   --use-batch-api \
-  --model gpt-5.4-mini \
+  --model gpt-5.6-luna \
   --token-budget 500000 \
   --priority-books-last 4,8 \
   --skip-if-submitted-hours 6
@@ -45,7 +45,7 @@ run_batch \
 run_batch \
   --mode discourse \
   --use-batch-api \
-  --model gpt-5.4-mini \
+  --model gpt-5.6-luna \
   --token-budget 100000 \
   --random-order \
   --sample-seed discourse-mode-v1 \

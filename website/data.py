@@ -97,7 +97,7 @@ RHETORIC_MARKER_WORDS = list(
     dict.fromkeys(RHETORIC_MARKER_LEMMAS + RHETORIC_MARKER_SURFACE_FORMS)
 )
 
-DEFAULT_LLM_GRAMMAR_MODEL = "gpt-5.4-mini"
+DEFAULT_LLM_GRAMMAR_MODEL = "gpt-5.6-luna"
 DISCOURSE_MODE_PROMPT_VERSION = "discourse-mode-v1"
 DISCOURSE_MODES = [
     "route_locative_description",
@@ -2132,7 +2132,7 @@ def get_manual_label_sensitivity_analysis(
             gpt_scope,
             "gpt_book3",
             "GPT labels on manual Book 3 scope",
-            "Uses the active GPT-5.4-mini three-way tags, restricted to sentences that have manual Book 3 labels.",
+            "Uses the active GPT-5.6 Luna three-way tags, restricted to sentences that have manual Book 3 labels.",
             None,
         ),
         (
@@ -5027,7 +5027,7 @@ def get_stylometry_page_data(conn=None, grammar_data=None, model=DEFAULT_LLM_GRA
         "book_counts": dict(sorted(book_counts.items())),
         "method_notes": [
             "This first website implementation uses each parsed passage as one stylometric unit because the current LLM grammar table is still growing.",
-            "The production parser target is gpt-5.4-mini; the older UDPipe-style parsers are retained only as historical scripts.",
+            "The production parser target is gpt-5.6-luna; the older UDPipe-style parsers are retained only as historical scripts.",
             "When grammar coverage is dense enough, the same feature families can be aggregated into larger rolling chunks for stronger authorship-style statistics.",
         ],
     }

@@ -24,7 +24,7 @@ from recover_place_state_outputs import (
 )
 
 
-DEFAULT_MODEL = "gpt-5.4-mini"
+DEFAULT_MODEL = "gpt-5.6-luna"
 DEFAULT_PROMPT_VERSION = "passage-place-state-v1"
 DEFAULT_TOKENS_PER_PASSAGE = 3500
 TERMINAL_RUN_STATUSES = {
