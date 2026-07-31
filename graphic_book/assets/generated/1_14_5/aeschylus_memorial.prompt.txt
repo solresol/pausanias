@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: scenic inset for a premium illustrated classical-history coffee-table book
+Primary request: Show the elderly Greek poet and veteran Aeschylus choosing how he will be remembered: fully clothed beside a newly carved but completely text-free funerary stele, one hand resting on a round hoplite shield, with the grove and shoreline of Marathon visible beyond.
+Input images: Images 1 and 2 are approved Pausanias page references for painterly ambition, parchment-compatible palette, archaeological richness, and coffee-table-book finish; do not reproduce their page layout or text.
+Scene/backdrop: Quiet late-day Attic landscape overlooking the Marathon plain and sea; olive and plane trees form a grove, distant dark ships approach the pale shore, and a few abandoned Persian wicker shields sit far in the background as subdued memory rather than active battle.
+Subject: Aeschylus is elderly, dignified, bearded, and fully clothed in a travel-worn Greek mantle. The blank stone stele and hoplite shield are clear foreground objects; he appears reflective, not theatrical.
+Style/medium: Sophisticated naturalistic gouache and oil historical illustration with fine material texture and museum-publication restraint.
+Composition/framing: Wide landscape inset. Aeschylus and blank stele occupy opposing thirds; the shield bridges them; grove and shore remain clearly readable in depth. Leave a little calm space along the top edge for a locally rendered label.
+Lighting/mood: Amber dusk, reflective and grave, controlled dramatic light, no supernatural effects.
+Constraints: No embedded text, letters, inscription, pseudo-writing, watermark, border, collage, split screen, modern objects, active combat, gore, nudity, exposed torso, or theatrical laurel-crowned cliché.
+Avoid: flat vector art, classroom illustration, cartoon, icon figures, sparse backdrop, glossy 3D render, generic philosopher portrait, readable gibberish.

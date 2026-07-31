@@ -1,0 +1,12 @@
+Use case: historical-scene
+Asset type: dominant raster art panel for a premium illustrated classical-history coffee-table book
+Primary request: Reconstruct the Athenian Temple of Eukleia, Good Fame, as a sanctuary of civic memory built from spoils captured from the Persian force that landed at Marathon.
+Input images: Images 1 and 2 are approved Pausanias page references for painterly ambition, parchment-compatible palette, archaeological richness, and coffee-table-book finish; do not reproduce their page layout or text.
+Scene/backdrop: A small but dignified classical Greek temple in an Athenian sanctuary precinct, with the distant Acropolis and Attic hills supplying geographic orientation. Captured Persian wicker shields, decorated round shields, quivers, spear bundles, and restrained trophy standards are arranged as votive offerings. A carved stone relief beside the temple visibly depicts the grove, beach, beached Persian vessels, and opposing hoplite lines at Marathon, without inscriptions.
+Subject: The temple and its offerings dominate. Fully clothed Athenian attendants carry the final captured shield toward the dedication; the relief and trophies connect the sanctuary unmistakably to Marathon.
+Style/medium: Sophisticated painterly archaeological reconstruction, richly textured naturalistic gouache and oil illustration, museum-publication accuracy, visual density and finish comparable to a premium illustrated history volume.
+Composition/framing: Wide 3:2 landscape with strong depth from votive trophies in the near foreground, through temple columns and relief, to Athens in the distance. Keep modest calm areas at upper corners and lower edge for locally added callout labels while retaining a rich scene.
+Lighting/mood: Warm late-afternoon Mediterranean side light, solemn civic pride, weathered stone, convincing metal and woven textures, subtle atmospheric depth.
+Color palette: Aged limestone, ochre earth, olive and cypress greens, bronze, faded Persian reds and blues, dusty Attic sky.
+Constraints: Historically grounded Greek and Achaemenid material culture; all people fully clothed; no active violence or gore; no embedded text, letters, inscription, pseudo-writing, border, watermark, collage, split screen, modern objects, nudity, or fantasy spectacle.
+Avoid: flat vector art, classroom diagram, icon figures, sparse layout, cartoon styling, glossy 3D render, generic Roman palace, triumphal-arch imagery, modern museum display, readable gibberish.

@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: unlabeled geographic relief base for a subordinate orientation inset
+Primary request: Create a painterly oblique-relief atlas view centered on Attica and southern Euboea, with Athens near the lower center, Marathon on the northeastern Attic coast, Salamis in the Saronic Gulf to the southwest, and Artemisium at the northern end of Euboea. Keep all four locations geographically distinguishable for exact local labels added later.
+Scene/backdrop: Credible Greek topography with Mount Parnes and Pentelic ridges, the Marathon plain and bay, the straits around Salamis, the long mountainous island of Euboea, and deep blue Aegean water.
+Style/medium: Sophisticated antique atlas relief painted in gouache and watercolor on subtly aged parchment, richly textured and geographically credible, matching a premium classical-history coffee-table book.
+Composition/framing: Portrait-oriented relief suitable for a narrow inset; north at the top; Attica occupies the lower half, Euboea runs up the right, and the northern Euboean straits remain visible. Provide enough open water and terrain margins for thin locally drawn leaders and route marks.
+Lighting/mood: Warm raking relief light, scholarly and elegant.
+Constraints: Unlabeled base only; no text, letters, symbols, pins, route lines, borders, compass, ships, people, buildings, pseudo-writing, or watermark.
+Avoid: flat vector polygons, rectangular sea, blunt block mountains, classroom map, cartoon islands, satellite-photo realism, sparse schematic composition.
