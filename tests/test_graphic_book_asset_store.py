@@ -35,3 +35,22 @@ def test_verify_rows_reports_missing_and_mismatched_files(tmp_path: Path) -> Non
 
     assert len(errors) == 1
     assert errors[0].startswith("size mismatch:")
+
+
+def test_changed_rows_selects_missing_or_stale_assets() -> None:
+    local_rows = [
+        {"s3_key": "assets/a.png", "bytes": 3, "sha256": "aaa"},
+        {"s3_key": "assets/b.png", "bytes": 4, "sha256": "bbb"},
+        {"s3_key": "assets/c.png", "bytes": 5, "sha256": "ccc"},
+    ]
+    remote_rows = [
+        {"s3_key": "assets/a.png", "bytes": 3, "sha256": "aaa"},
+        {"s3_key": "assets/b.png", "bytes": 4, "sha256": "old"},
+    ]
+
+    changed = store.changed_rows(local_rows, remote_rows)
+
+    assert [row["s3_key"] for row in changed] == [
+        "assets/b.png",
+        "assets/c.png",
+    ]

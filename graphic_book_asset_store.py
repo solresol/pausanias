@@ -12,6 +12,7 @@ import os
 import shlex
 import subprocess
 import sys
+from io import StringIO
 from pathlib import Path
 from typing import Iterable
 
@@ -92,16 +93,24 @@ def write_manifest(rows: Iterable[dict[str, object]], manifest_path: Path) -> No
 
 
 def load_manifest(manifest_path: Path) -> list[dict[str, object]]:
-    rows: list[dict[str, object]] = []
     with manifest_path.open("r", encoding="utf-8") as handle:
-        for line_number, line in enumerate(handle, start=1):
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                rows.append(json.loads(line))
-            except json.JSONDecodeError as exc:
-                raise ValueError(f"{manifest_path}:{line_number}: invalid JSON: {exc}") from exc
+        return load_manifest_lines(handle, str(manifest_path))
+
+
+def load_manifest_lines(
+    lines: Iterable[str],
+    source: str,
+) -> list[dict[str, object]]:
+    """Load manifest rows from an iterable while retaining useful error context."""
+    rows: list[dict[str, object]] = []
+    for line_number, line in enumerate(lines, start=1):
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            rows.append(json.loads(line))
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"{source}:{line_number}: invalid JSON: {exc}") from exc
     return rows
 
 
@@ -140,10 +149,43 @@ def run_aws(args: list[str]) -> None:
     subprocess.run(["aws", *args], check=True)
 
 
+def load_remote_manifest(s3_uri: str) -> list[dict[str, object]]:
+    """Return the remote asset manifest, or an empty list for a new store."""
+    manifest_uri = s3_uri_for(s3_uri, "assets/manifest.jsonl")
+    result = subprocess.run(
+        ["aws", "s3", "cp", manifest_uri, "-", "--only-show-errors"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        return []
+    return load_manifest_lines(StringIO(result.stdout), manifest_uri)
+
+
+def changed_rows(
+    local_rows: Iterable[dict[str, object]],
+    remote_rows: Iterable[dict[str, object]],
+) -> list[dict[str, object]]:
+    """Select local rows whose remote checksum or byte count is absent or stale."""
+    remote_by_key = {
+        str(row["s3_key"]): (int(row["bytes"]), str(row["sha256"]))
+        for row in remote_rows
+    }
+    return [
+        row
+        for row in local_rows
+        if remote_by_key.get(str(row["s3_key"]))
+        != (int(row["bytes"]), str(row["sha256"]))
+    ]
+
+
 def upload_assets(root: Path, manifest_path: Path, s3_uri: str) -> None:
     rows = build_manifest(root)
     write_manifest(rows, manifest_path)
-    for row in rows:
+    remote_rows = load_remote_manifest(s3_uri)
+    rows_to_upload = changed_rows(rows, remote_rows)
+    for row in rows_to_upload:
         run_aws(
             [
                 "s3",
@@ -165,6 +207,10 @@ def upload_assets(root: Path, manifest_path: Path, s3_uri: str) -> None:
             "--content-type",
             "application/x-ndjson",
         ]
+    )
+    print(
+        f"uploaded {len(rows_to_upload)} changed asset(s); "
+        f"{len(rows) - len(rows_to_upload)} already matched the remote manifest"
     )
 
 

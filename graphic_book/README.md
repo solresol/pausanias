@@ -58,8 +58,9 @@ pausanias@raksasa:~/pausanias-graphic-book/images/
 Use:
 
 ```bash
-./sync_graphic_book_images.sh push
-./sync_graphic_book_images.sh pull
+./sync_graphic_book_backups.sh push
+./sync_graphic_book_backups.sh pull
+./sync_graphic_book_backups.sh verify
 ```
 
 The S3 mirror for graphic-book image assets is:
@@ -68,12 +69,16 @@ The S3 mirror for graphic-book image assets is:
 PAUSANIAS_GRAPHIC_BOOK_S3_URI=s3://pausanias-graphic-book-assets-849621205733
 ```
 
-The finished page images under `graphic_book/images/` still sync with:
+The combined backup command keeps three stores current:
 
-```bash
-./sync_graphic_book_images.sh push
-./sync_graphic_book_images.sh pull
-```
+- finished pages under `graphic_book/images/` are mirrored to `raksasa`;
+- finished pages are uploaded under the S3 `images/` prefix;
+- component art and the title page are uploaded under the S3 `assets/` prefix.
+
+`PAUSANIAS_GRAPHIC_BOOK_S3_URI` can override the bucket, but the project bucket
+above is the default. The component uploader compares the remote checksum
+manifest and transfers only missing or changed assets. S3 object versioning is
+enabled so overwritten or deleted objects remain recoverable.
 
 The source/component image binaries under `graphic_book/assets/generated/` and
 the PDF title page image under `graphic_book/assets/pausanias-title-page.png`
@@ -232,4 +237,5 @@ For each new passage image:
    `graphic_book/images/<book>/<chapter>/<section>.png`.
 11. Run `uv run build_graphic_book.py --image-dir graphic_book/images --output-dir pausanias_site/graphic-book`
    and inspect the generated HTML/PDF.
-12. Run `./sync_graphic_book_images.sh push` so `raksasa` has the mirror copy.
+12. Run `./sync_graphic_book_backups.sh push` so `raksasa` and S3 both have
+    current mirror copies.
