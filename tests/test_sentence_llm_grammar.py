@@ -5,6 +5,7 @@ from sentence_llm_grammar import (
     effective_token_budget,
     get_daily_token_usage,
     get_sentences,
+    reasoning_effort_for_chat_completions,
     tokens_to_conllu,
     tokenize_for_llm,
     validate_and_normalize_tokens,
@@ -40,6 +41,30 @@ def test_analyse_sentence_passes_explicit_reasoning_effort():
         )
 
     assert client.chat.completions.request["reasoning_effort"] == "none"
+
+
+def test_analyse_sentence_defaults_gpt_5_6_function_tools_to_no_reasoning():
+    client = FakeClient()
+
+    with pytest.raises(RuntimeError, match="request capture"):
+        analyse_sentence(
+            client,
+            model="gpt-5.6-luna",
+            passage_id="8.10.7",
+            sentence_number=1,
+            sentence="Ἄρατος δὲ ἀπὸ συγκειμένου·",
+        )
+
+    assert client.chat.completions.request["reasoning_effort"] == "none"
+
+
+def test_chat_completions_leaves_other_model_reasoning_unspecified():
+    assert reasoning_effort_for_chat_completions("gpt-5.4-mini", None) is None
+
+
+def test_chat_completions_rejects_gpt_5_6_reasoning_with_function_tools():
+    with pytest.raises(ValueError, match="require --reasoning-effort none"):
+        reasoning_effort_for_chat_completions("gpt-5.6-luna", "high")
 
 
 def test_tokenize_for_llm_splits_greek_words_and_punctuation():

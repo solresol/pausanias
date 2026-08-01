@@ -101,6 +101,20 @@ def total_api_tokens(run: dict) -> int:
     return int(run["input_tokens"]) + int(run["output_tokens"])
 
 
+def reasoning_effort_for_chat_completions(
+    model: str, requested_effort: str | None
+) -> str | None:
+    """Return a function-tool-compatible Chat Completions reasoning effort."""
+    if model.startswith("gpt-5.6-"):
+        if requested_effort not in (None, "none"):
+            raise ValueError(
+                f"{model} function tools through Chat Completions require "
+                "--reasoning-effort none"
+            )
+        return "none"
+    return requested_effort
+
+
 def forms_match_except_accents(returned_form: str, expected_form: str) -> bool:
     """Return whether forms differ only by acute, grave, or circumflex accents."""
 
@@ -133,7 +147,10 @@ def parse_arguments() -> argparse.Namespace:
         "--reasoning-effort",
         choices=("none", "minimal", "low", "medium", "high", "xhigh", "max"),
         default=None,
-        help="Optional API reasoning effort; use none for gpt-5.6-sol function calls.",
+        help=(
+            "Optional API reasoning effort; gpt-5.6 models default to none because "
+            "Chat Completions function tools do not support reasoning effort."
+        ),
     )
     parser.add_argument("--prompt-version", default=DEFAULT_PROMPT_VERSION)
     parser.add_argument("--stop-after", type=int, default=None)
@@ -537,8 +554,11 @@ def analyse_sentence(
         "tools": grammar_tool(),
         "tool_choice": {"type": "function", "function": {"name": "save_sentence_grammar"}},
     }
-    if reasoning_effort is not None:
-        request["reasoning_effort"] = reasoning_effort
+    request_reasoning_effort = reasoning_effort_for_chat_completions(
+        model, reasoning_effort
+    )
+    if request_reasoning_effort is not None:
+        request["reasoning_effort"] = request_reasoning_effort
     response = client.chat.completions.create(**request)
     input_tokens, output_tokens = safe_usage(response)
     tool_calls = response.choices[0].message.tool_calls
