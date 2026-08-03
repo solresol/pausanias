@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: scenic inset resembling an ancient sanctuary painting
+Primary request: the battle of Centaurs and Lapiths with Theseus visibly standing beside a Centaur he has already slain while the remaining struggle is evenly balanced
+Scene/backdrop: a tense ancient feast hall opening to rocky Thessalian landscape; overturned vessels and shields; multiple paired struggles in depth
+Subject: armored, fully clothed Theseus as the compositional anchor; one fallen Centaur; balanced conflict elsewhere
+Style/medium: sophisticated reconstruction of a lost classical wall painting, rich mineral pigments, dramatic but restrained movement, painterly depth
+Composition/framing: horizontal narrative tableau; Theseus left of center; paired struggles across the rest of the frame
+Constraints: all human figures fully clothed or armored; the Centaurs' animal bodies are non-erotic and anatomically restrained; no readable inscriptions; no text; no watermark; no border
+Avoid: gore, nudity, exposed human torsos, fantasy illustration, cartoon anatomy, flat vector treatment

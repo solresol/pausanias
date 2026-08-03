@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: scenic inset resembling an ancient sanctuary painting
+Primary request: an ancient Greek Amazonomachy battle painting, Athenians fighting Amazons, presented as a richly painted reconstructed mural scene
+Scene/backdrop: compressed heroic battlefield with shields, spears, dust, and disciplined groups; Amazons in historically inspired Scythian-patterned tunics and trousers; Athenians in armor
+Subject: balanced conflict between Athenians and Amazons, legible at inset scale
+Style/medium: refined encaustic-and-gouache reconstruction of a lost classical mural, painterly modeling, warm mineral pigments, aged but vivid surface
+Composition/framing: horizontal frieze-like scene with strong diagonals and a clear central clash
+Constraints: all figures fully clothed or armored; no readable inscriptions; no text; no watermark; no border
+Avoid: gore, nudity, eroticized poses, comic-book style, flat vector shapes, modern fantasy armor, photoreal cosplay

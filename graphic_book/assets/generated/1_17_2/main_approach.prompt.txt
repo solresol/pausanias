@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: main art panel for an illustrated scholarly coffee-table book
+Primary request: reconstruct the civic approach in Roman-period Athens between Ptolemy's colonnaded gymnasium and the nearby sanctuary of Theseus, with the Acropolis visible beyond
+Scene/backdrop: sunlit second-century CE Athens; a broad stone-paved civic precinct; substantial colonnades; a dignified gymnasium court with multiple stone Herms and one prominent bronze royal statue; a neighboring sanctuary whose shaded portico suggests painted battle murals; Acropolis rising clearly in the distance
+Subject: spatial relationship among gymnasium, sanctuary, sculpture, and Athenian landmark; citizens and philosophers provide scale
+Style/medium: richly detailed historical gouache and oil illustration with archaeological plausibility, natural textures, atmospheric depth, sophisticated editorial art, warm parchment-compatible palette
+Composition/framing: wide horizontal view from an elevated oblique angle; gymnasium on the left, sanctuary on the right, Acropolis upper center; leave visually calm areas near the edges for later local callouts
+Lighting/mood: late-afternoon Mediterranean light; learned, civic, monumental
+Constraints: historically plausible Greek and Roman clothing; all figures fully clothed; no readable inscriptions; no modern objects; no fantasy architecture; no watermark; no border
+Avoid: flat vector art, classroom diagram, icon figures, empty plaza, schematic map, text, labels, exaggerated ruins, gore, nudity
