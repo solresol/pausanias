@@ -1,0 +1,10 @@
+# Page plan: Pausanias 1.17.3
+
+- **Passage ID:** 1.17.3
+- **Key places, events, and objects:** Micon's incomplete and age-darkened third-wall painting in the sanctuary of Theseus; Minos's voyage with Theseus, Periboia, and the Athenian youths toward Crete; Minos's challenge and seal-ring; Theseus returning from the sea with the recovered ring and Amphitrite's golden crown.
+- **Main visual:** A rich, historically grounded painterly reconstruction of Theseus rising from the deep beside the Cretan-bound ship, holding Minos's seal-ring and Amphitrite's crown. Underwater light, marine architecture, and the looming hull make the ordeal spatially intelligible without relying on text.
+- **Insets:** (1) a tense shipboard confrontation in which a fully clothed Theseus blocks Minos's advance toward Periboia; (2) an aged sanctuary-wall study showing Micon's incomplete narrative, with losses and fading made visually explicit; (3) a subordinate textured relief-map inset showing Athens, the Aegean crossing, and Crete.
+- **Orientation strategy:** The main panel establishes sea, ship, and depth; exact local callouts identify the ring, crown, ship, and sea surface. The small relief map provides geographic orientation without becoming the page's visual identity. A caption ties the painted story back to Micon's third wall in Athens.
+- **Reference pages:** `graphic_book/images/1/1/4.png` and `graphic_book/images/1/1/5.png` are the approved anchors for rich parchment-atlas art, layered panels, exact local labels, and coffee-table-book impact. `graphic_book/images/1/17/2.png` is used only for immediate layout continuity.
+- **Content suitability:** All human figures are fully clothed in historically plausible garments; no nudity, eroticized poses, or gore. Minos's misconduct is conveyed through blocking, gesture, and tension rather than contact.
+- **Text policy:** Generated art contains no lettering. Passage text, labels, captions, route names, and evidence note are measured and rendered locally.

@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: main scenic panel for a Pausanias graphic-book page
+Primary request: Theseus rises through the deep Aegean water toward a dark ancient ship hull, carrying Minos's recovered gold seal-ring in one hand and a radiant but plausible golden crown given by Amphitrite in the other.
+Scene/backdrop: luminous underwater Aegean; shafts of sun from the surface; rocky seabed with restrained traces of a divine marine palace; the ship and small figures at its rail visible above through the water.
+Subject: fully clothed athletic young Theseus in a belted off-white Greek tunic, powerful swimming pose, clearly holding two distinct objects: a signet ring and an ornate golden crown.
+Style/medium: sophisticated historical illustration, painterly realism with oil-and-gouache texture, archaeological reconstruction quality, richly layered, natural anatomy, subtle antique palette, cinematic depth.
+Composition/framing: landscape; Theseus in the lower-middle foreground rising diagonally; crown and ring readable as objects; ship hull across upper quarter; generous margins for local callouts.
+Lighting/mood: dramatic underwater sunbeams, blue-green and warm-gold contrast, ordeal turning to triumph.
+Constraints: no lettering, no labels, no border, no watermark; historically plausible materials; all people fully clothed; suitable for a professional coffee-table book.
+Avoid: cartoon style, flat vector shapes, iconography, schematic diagram, modern diving equipment, fantasy armor, visible nudity, eroticism, gore, extra limbs, fused hands, illegible objects.

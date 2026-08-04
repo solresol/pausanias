@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: archaeological scenic inset for a Pausanias graphic-book page
+Primary request: an oblique interior view of an ancient Athenian sanctuary wall bearing a large, age-darkened painted narrative of Theseus, Minos, a ship, and the sea; important portions are faded or missing so the story is visibly incomplete, while surviving figures retain refined classical draftsmanship.
+Scene/backdrop: quiet stone sanctuary interior, plaster wall, warm raking daylight, discreet architectural moldings.
+Subject: the wall painting itself, with cracked plaster, pigment loss, smoke-darkening, and incomplete narrative zones; no modern visitors.
+Style/medium: museum-grade archaeological reconstruction rendered as sophisticated painterly realism; believable ancient fresco pigments and surface texture; rich but restrained.
+Composition/framing: landscape oblique view; mural dominates; one damaged edge and several lacunae visible; space for locally added labels.
+Constraints: no readable lettering, no labels, no border, no watermark; all depicted figures fully clothed; suitable for a professional coffee-table book.
+Avoid: crude cave painting, cartoon fresco, flat diagram, modern museum signage, pristine Renaissance mural, visible nudity, gore.

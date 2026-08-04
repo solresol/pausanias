@@ -1,0 +1,8 @@
+Use case: historical-scene
+Asset type: subordinate geographic orientation inset for a Pausanias graphic-book page
+Primary request: an unlabeled oblique relief view of the Aegean basin from Attica in the northwest to Crete in the south, with recognizable island chains and coastlines, designed as an antique painted atlas base.
+Scene/backdrop: textured blue Aegean, warm ochre and olive land relief, softly modeled mountains, restrained parchment edge atmosphere.
+Style/medium: sophisticated hand-painted relief cartography with gouache and engraved-atlas texture; geographically credible, richly textured, elegant rather than schematic.
+Composition/framing: landscape; mainland Greece upper-left, Cyclades through center, Crete along lower edge; clear open-water corridor for a locally drawn route.
+Constraints: no lettering, no labels, no route line, no symbols, no border, no watermark.
+Avoid: flat vector polygons, classroom map, fantasy geography, oversized islands, satellite photography, modern political boundaries, map text.
