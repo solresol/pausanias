@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: scenic inset for a Pausanias graphic-book page
+Primary request: a Thesprotian counterattack breaks the invading column of Theseus in a rugged river valley; shield-bearing defenders press downhill while the invaders retreat across wet stony ground and abandon spears.
+Scene/backdrop: ancient Epirus in north-west Greece, steep wooded slopes, a broad river bend, storm clouds opening to amber light, distant fortified hill; historically plausible small war band rather than huge armies.
+Subject: the collapse of the expedition is obvious through broken formation, retreat, and surrendered equipment, but there is no gore or visible bodily injury.
+Style/medium: finished painterly historical illustration, oil-and-gouache texture, naturalistic figures, complex atmospheric depth, sophisticated muted palette, archaeological reconstruction quality.
+Composition/framing: landscape, dynamic diagonal from advancing defenders to retreating invaders, readable at inset size, no central text-like empty banner.
+Constraints: no lettering, labels, border, watermark, gore, corpses, nudity, eroticism, fantasy armor, Roman legionary gear; all people fully clothed.
+Avoid: cartoon, concept sketch, flat terrain, diagrammatic battle arrows, icon soldiers, repetitive cloned figures, extra limbs, fused weapons.

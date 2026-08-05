@@ -1,0 +1,7 @@
+Use case: geographic-orientation
+Asset type: subordinate relief-map art base for a Pausanias graphic-book page
+Primary request: oblique bird's-eye relief of southern Greece, the Ionian Sea, and north-west Greece/Epirus, with recognisable coastlines, mountain chains, gulfs, islands, and a highlighted natural corridor from Attica toward Thesprotia, but without any words or symbols.
+Style/medium: richly textured antique atlas painting blended with realistic shaded relief, hand-painted coastal detail, deep blue-green sea, ochre and olive land, subtle parchment patina, refined rather than schematic.
+Composition/framing: portrait-friendly regional view with Attica in the lower-right area and Thesprotia in the upper-left area; enough clear terrain for a route overlay and three local labels added later.
+Constraints: no lettering, labels, border, watermark, compass text, modern boundaries, flags, flat color polygons, rectangular sea, or oversized icons.
+Avoid: classroom map, satellite screenshot, fantasy geography, crude coastline, blunt mountain triangles, text artifacts.

@@ -1,0 +1,8 @@
+Use case: historical-landscape
+Asset type: scenic orientation inset for a Pausanias graphic-book page
+Primary request: a historically plausible approach to the ancient hill settlement of Cichyrus in Thesprotia, seen above the Acheron river plain near the Ionian coast, with irregular stone walls, timber-roofed dwellings, a guarded gate, tracks, reeds, and distant mountains.
+Scene/backdrop: north-west Greek river landscape after rain; braided water and marshy traces in the plain; wooded limestone ridges; small travelers on the road for scale.
+Style/medium: richly detailed painterly archaeological landscape reconstruction, oil-and-gouache texture, warm parchment-compatible colors, aerial depth, sophisticated coffee-table book illustration.
+Composition/framing: wide landscape; settlement clearly perched on a defensible rise, river plain and road leading the eye toward the gate, distant Ionian light; readable at inset size.
+Constraints: no lettering, labels, border, watermark, modern roads or buildings, giant palace, grand marble temple, fantasy towers, nudity, or bodies.
+Avoid: flat vector map, classroom diagram, crude block mountains, icon buildings, modern tourism reconstruction, excessive ruins.
