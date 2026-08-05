@@ -146,11 +146,27 @@ class SentenceTagBatchTests(unittest.TestCase):
         self.assertEqual(tool["name"], "save_discourse_mode_tag")
         self.assertIn("route_locative_description", tool["parameters"]["properties"]["discourse_mode"]["enum"])
         self.assertEqual(body["temperature"], 0)
+        self.assertEqual(body["reasoning_effort"], "none")
 
         sql = unprocessed_sql(args)
         self.assertIn("sentence_llm_grammar_analyses", sql)
         self.assertIn("sentence_discourse_mode_tags", sql)
         self.assertIn("greek-sentence-grammar-v1", sql)
+
+    def test_other_batch_models_leave_reasoning_unspecified(self):
+        args = args_for_mode("discourse")
+        args.model = "gpt-5.4-mini"
+        body = completion_body(
+            args,
+            {
+                "passage_id": "7.1.1",
+                "sentence_number": 2,
+                "sentence": "Greek",
+                "english_sentence": "English",
+            },
+        )
+
+        self.assertNotIn("reasoning_effort", body)
 
     def test_parse_batch_error_records_preserves_request_errors(self):
         text = "\n".join(

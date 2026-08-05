@@ -509,12 +509,16 @@ def completion_body(args: argparse.Namespace, row: dict) -> dict:
         "english_sentence": row["english_sentence"],
     }
     if args.mode == "greta":
-        return greta_completion_body(**kwargs)
-    if args.mode == "greta-both":
-        return greta_both_completion_body(**kwargs)
-    if args.mode == "discourse":
-        return discourse_completion_body(**kwargs)
-    return legacy_completion_body(**kwargs)
+        body = greta_completion_body(**kwargs)
+    elif args.mode == "greta-both":
+        body = greta_both_completion_body(**kwargs)
+    elif args.mode == "discourse":
+        body = discourse_completion_body(**kwargs)
+    else:
+        body = legacy_completion_body(**kwargs)
+    if model.startswith("gpt-5.6-"):
+        body["reasoning_effort"] = "none"
+    return body
 
 
 def custom_id(mode: str, run_id: str, request_number: int) -> str:
