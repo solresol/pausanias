@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: scenic inset for a sophisticated parchment-atlas graphic book
+Primary request: a richly painted Bronze Age Aegean sailing ship carrying Theseus, blown off its intended course toward the mountainous island of Scyros
+Scene/backdrop: choppy indigo sea under a breaking summer storm, steep Scyros cliffs emerging through rain and sun shafts, distant protected cove
+Subject: a historically plausible single-masted wooden vessel under shortened square sail, fully clothed sailors hauling lines, a cloaked dignified passenger braced near the mast, spray and wind conveying an involuntary diversion rather than a shipwreck
+Style/medium: museum-quality maritime historical painting, painterly realism, fine rigging and timber detail, atmospheric depth, restrained bronze-and-blue palette
+Composition/framing: horizontal inset, ship large in foreground moving toward the island at upper right, open water and coastline clearly legible, no map graphics
+Constraints: no lettering, no labels, no borders, no watermark; all figures fully clothed; seaworthy vessel; no injury
+Avoid: flat vector art, cartoon waves, schematic boat, modern yacht, trireme ram, fantasy storm, nudity, gore

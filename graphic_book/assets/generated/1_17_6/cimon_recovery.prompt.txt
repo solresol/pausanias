@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: scenic inset for a sophisticated parchment-atlas graphic book
+Primary request: Cimon's fifth-century-BCE expedition respectfully recovering the ancient remains of Theseus on Scyros for return to Athens
+Scene/backdrop: rocky island terrace above an Aegean anchorage at clear dawn, excavated ancient stone grave, a classical Greek transport ship waiting below
+Subject: Cimon in a modest commander’s cloak supervising fully clothed workers and hoplites as they raise a closed weathered stone reliquary or lidded coffin with ropes; reverent civic procession mood, no human remains visible
+Style/medium: richly detailed archaeological historical painting, naturalistic classical figures, warm stone, bronze and sea tones, museum reconstruction quality
+Composition/framing: horizontal inset with the closed stone container central, Cimon at one side, ship and sea providing geographic context in the background
+Constraints: no lettering, no labels, no borders, no watermark; fully clothed figures; no visible bones, corpse, nudity, or gore
+Avoid: icon-like poses, flat vector art, modern excavation equipment, triumphal fantasy, giant skeleton, graphic remains

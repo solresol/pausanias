@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: subordinate geographic orientation inset beneath locally rendered route labels
+Primary request: a richly textured oblique aerial relief of the central Aegean from Attica and Euboea south-east to Scyros and south to Crete, suited to a historical atlas
+Scene/backdrop: realistic Greek coastlines and island chains, deep blue sea, mountainous relief, pale rocky lowlands, subtle atmospheric perspective and parchment-toned edge light
+Subject: Attica and Athens region at upper left, long Euboea nearby, Scyros clearly isolated east of Euboea, northern Crete along the lower edge; enough geographic separation for later route overlays
+Style/medium: sophisticated painterly shaded-relief raster, satellite-informed terrain translated into a warm historical-atlas aesthetic, rich natural texture rather than diagram shapes
+Composition/framing: wide oblique view with north approximately up; no labels, pins, lines, compass, borders, or symbols; keep coastlines recognizable and uncluttered
+Constraints: no lettering, no labels, no routes, no watermark, no invented cities
+Avoid: flat vector map, rectangular sea, blunt polygon mountains, classroom diagram, sticker icons, fantasy geography

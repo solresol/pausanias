@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: main illustrated panel for a sophisticated parchment-atlas graphic book
+Primary request: a museum-quality cinematic historical reconstruction of Theseus being welcomed by King Lycomedes on the high sea cliffs of Scyros, moments before the king's concealed plot, late Bronze Age Aegean
+Scene/backdrop: steep pale-rock island cliff path above a sheltered Scyros harbour, dark blue Aegean water, rugged mountain folds, wind-bent shrubs and olives, a storm clearing into amber late-afternoon light, a small period sailing ship below
+Subject: travel-worn but dignified Theseus in a dark red cloak and bronze-age Greek clothing; outwardly gracious King Lycomedes in a pale royal mantle guiding him toward a cliff-edge overlook; three cautious fully clothed attendants behind them; the king's ambiguous hand gesture and the dangerous drop communicate concealed betrayal without depicting violence
+Style/medium: richly detailed painterly realism, historical matte painting with naturalistic figures, textured stone and sea, restrained classical palette, sophisticated coffee-table-book art, no modern fantasy armour
+Composition/framing: wide landscape, elevated three-quarter view; figures prominent in the middle foreground, winding cliff path and harbour create strong spatial orientation; leave visually calm edge zones for later callout labels
+Lighting/mood: dramatic storm-cleared sunlight, tense hospitality, believable atmospheric depth
+Constraints: no lettering, no labels, no borders, no watermark; all figures fully clothed; accurate limbs and faces; no visible death or fall
+Avoid: flat vector art, diagrammatic terrain, classroom-map appearance, cartoon style, nudity, gore, corpse, exposed bones, fantasy palace, oversized weapons
