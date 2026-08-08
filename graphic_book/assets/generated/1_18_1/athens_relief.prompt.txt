@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: subordinate geographic orientation inset beneath locally rendered labels
+Primary request: a richly textured oblique aerial reconstruction of classical Athens focused on the Acropolis and its north slope, suited to a historical atlas
+Scene/backdrop: the Acropolis rock rising above ancient Athens, dense but believable low tiled-roof city, Agora to the northwest, footpaths and terraces around the north slope, distant Attic hills under clear Mediterranean light
+Subject: recognizable Acropolis plateau and sheer north face near centre, Agora basin below-left, north-slope sanctuary terraces visible but without inventing a precise highlighted building footprint; enough open visual structure for later local overlays
+Style/medium: sophisticated painterly shaded-relief raster blended with archaeological city reconstruction, warm earth and limestone textures, atmospheric perspective, coffee-table historical atlas quality
+Composition/framing: wide oblique view looking south-east toward the Acropolis, north approximately toward the viewer; no labels, pins, lines, compass, borders, or symbols
+Constraints: no lettering, no watermark, no modern buildings, no giant temples outside the Acropolis, no invented highlighted sanctuary
+Avoid: flat vector map, classroom diagram, rectangular city blocks, blunt polygon hills, sticker icons, fantasy skyline

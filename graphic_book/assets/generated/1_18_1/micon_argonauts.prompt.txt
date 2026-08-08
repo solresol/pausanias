@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: scenic inset for a sophisticated parchment-atlas graphic book
+Primary request: a lost monumental Greek wall painting reconstructed as Jason and the Argonauts preparing to sail for Colchis, with Acastus and his horses receiving the strongest foreground emphasis exactly as Pausanias notes
+Scene/backdrop: dawn on a rocky Greek shore, the wooden Argo drawn near the water with sail furled, heroic crew loading gear, distant hills and luminous sea, all rendered as an early classical painted narrative on aged plaster
+Subject: Acastus prominent in the foreground beside two exceptionally painted, calm matched horses with detailed bridles; Jason and other fully clothed Argonauts gather beside the Argo in the middle distance; the horses are a deliberate painterly showpiece without obscuring the maritime expedition
+Style/medium: museum-quality reconstruction of a fifth-century-BCE monumental Greek painting, sophisticated naturalistic horse anatomy, mineral pigments, layered spatial composition, subtle aged fresco texture
+Composition/framing: wide horizontal scene; Acastus and horses occupy the principal foreground third, Argo and Jason remain clearly legible behind; no border, lettering, labels, or inscription
+Constraints: no text, no watermark; fully clothed figures; historically plausible ship and tack; accurate limbs, hands, horse legs and rigging
+Avoid: flat vector art, cartoon frieze, icon figures, modern horse gear, Roman armour, fantasy ship, nudity, battle, gore
