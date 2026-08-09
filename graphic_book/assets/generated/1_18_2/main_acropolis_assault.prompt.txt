@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: main illustrated panel for a sophisticated parchment-atlas graphic book
+Primary request: a museum-quality cinematic reconstruction of the Persian ascent of the Athenian Acropolis in 480 BCE, emphasizing the terrifying steepness of the rock and the route used to reach defenders behind a timber palisade
+Scene/backdrop: wide oblique view of the Acropolis north-east and east cliffs before the Parthenon existed, rugged pale limestone dropping into densely roofed archaic Athens, hazy Attic hills beyond, a small rock-cut sanctuary terrace partway down the face
+Subject: small groups of historically plausible Persian soldiers in Median and Persian dress carefully climbing a narrow cleft and broken ledges; fully clothed Athenian defenders visible behind a timber-and-palisade barrier at the summit; archaic Greek sacred buildings on top, including the Old Temple of Athena rather than the later classical Parthenon; the cliff and route dominate more than the figures
+Style/medium: richly detailed painterly historical realism, archaeological reconstruction, natural limestone texture, atmospheric depth, sophisticated nineteenth-century historical illustration refined to modern museum quality, coffee-table-book impact
+Composition/framing: landscape panorama with a sweeping diagonal ascent from lower right toward the summit at upper centre; broad cliff faces and identifiable ledges leave calm edge areas for later local callouts; no montage or split screen
+Lighting/mood: late-afternoon amber light, smoke haze and gathering tension, restrained drama without spectacle or gore
+Constraints: no lettering, no labels, no borders, no watermark; all figures fully clothed; no corpses, wounds, flames engulfing people, or visible gore; historically plausible shields, clothing, timberwork, archaic rooflines, and scale
+Avoid: Parthenon or Periclean Acropolis, modern Athens, flat vector map, classroom diagram, fantasy citadel, giant soldiers, Roman armour, medieval battlements, nude heroic figures, gore, text

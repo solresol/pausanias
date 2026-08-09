@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: scenic historical inset for a sophisticated parchment-atlas graphic book
+Primary request: Athenian defenders in 480 BCE reinforcing the Acropolis with timber beams and a dense wooden palisade because they interpret the oracle's “wooden wall” literally
+Scene/backdrop: the archaic Acropolis summit at dawn, limestone paving, sacred precinct walls and early tiled temples, the steep city slope visible beyond
+Subject: fully clothed Athenian citizens and hoplites urgently fitting rough-hewn beams, stakes, lashings, and braced palisade sections across an exposed approach; a grey-haired defender studies the barrier while others carry timber; sacred buildings remain secondary
+Style/medium: richly detailed painterly archaeological reconstruction, realistic wood joinery and limestone, sophisticated historical illustration, strong material texture
+Composition/framing: wide close scene with diagonal braced timber giving depth; workers and defenders distributed naturally; open upper edge for later local labels
+Lighting/mood: clear dawn light, anxious resolve, disciplined civic labour rather than battle spectacle
+Constraints: no lettering, no labels, no borders, no watermark; no Parthenon; all figures fully clothed; accurate limbs, tools, timberwork, archaic Greek equipment
+Avoid: medieval castle palisade, Roman legionaries, modern lumber, fantasy armour, violence, gore, flat vector art, classroom diagram, text
