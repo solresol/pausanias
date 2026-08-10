@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: main illustrated panel for a sophisticated parchment-atlas graphic book
+Primary request: a museum-quality archaeological reconstruction of the interior of the Athenian Prytaneion, presenting it as both civic archive and sacred communal hearth
+Scene/backdrop: a dignified late-classical Greek public hall in central Athens, limestone walls and columns, painted timber ceiling, bronze lamps, open doorway admitting clear Attic light, no modern objects
+Subject: a glowing civic hearth in a bronze-lined stone setting near the centre; two distinct fully clothed female cult statues representing Hestia and Peace in calm classical drapery; displayed wooden and bronze law tablets associated with Solon along one wall; a receding gallery of honorific male statues and inscribed stone bases, with every inscription left blank or illegible
+Style/medium: richly detailed painterly historical realism, archaeological reconstruction, luminous mineral pigments, sophisticated nineteenth-century historical illustration refined to modern museum quality, coffee-table-book impact
+Composition/framing: wide horizontal interior with deep architectural perspective; hearth near lower centre, divine statues separated clearly, law display on the left wall, honorific gallery on the right; calm edge areas for later local callouts; no montage or split screen
+Lighting/mood: warm sacred firelight balanced by cool daylight, civic dignity, accumulated memory, quiet ceremonial gravity
+Constraints: no readable lettering, no labels, no borders, no watermark; all figures fully clothed; historically plausible materials and architecture; the divine statues must be visually distinct from living attendants
+Avoid: Parthenon interior, Roman basilica, fantasy palace, church altar, flat vector art, classroom diagram, nude statuary, modern museum cases, legible pseudo-text

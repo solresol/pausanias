@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: subordinate geographic orientation inset beneath locally rendered labels
+Primary request: a richly textured oblique aerial reconstruction of ancient central Athens linking the Acropolis, Agora basin, and lower civic district where the Prytaneion is generally sought
+Scene/backdrop: classical-era Athens under clear Mediterranean light, Acropolis rock rising in the background, Agora and civic streets in the middle distance, dense but irregular tiled-roof neighbourhoods, surrounding Attic hills
+Subject: recognizable Acropolis and Agora with plausible terrain and street grain; a broad lower civic zone remains visually available for a later locally drawn uncertainty marker, without highlighting or inventing an exact Prytaneion footprint
+Style/medium: sophisticated painterly shaded-relief raster blended with archaeological city reconstruction, warm earth and limestone textures, atmospheric perspective, coffee-table historical atlas quality
+Composition/framing: wide oblique view looking toward the Acropolis, central civic district in the foreground and Agora between foreground and rock; no labels, pins, routes, compass, borders, or symbols
+Constraints: no lettering, no watermark, no modern buildings, no highlighted exact building, historically plausible scale and topography
+Avoid: flat vector map, classroom diagram, rectangular city grid, blunt polygon hills, sticker icons, fantasy skyline, giant monuments
