@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: scenic inset for a luxury illustrated archaeological graphic book
+Primary request: Reconstruct the ceremonial forecourt of the Olympieion with four stone statues of Hadrian and a separate gathering of bronze civic figures representing colonies before the temple columns.
+Scene/backdrop: Sunlit processional forecourt directly before an immense Corinthian colonnade, with garlands, offering vessels, and a small fully clothed civic delegation.
+Subject: Four distinct emperor statues on individual pedestals are visually grouped: two carved from luminous pale Thasian marble and two from dark mottled Egyptian stone. Beyond them stands a varied row and cluster of life-size bronze civic personifications and city dedications, unmistakably metal statuary rather than living people. The contrast of pale stone, dark stone, and bronze must be immediately readable.
+Style/medium: richly detailed painterly historical realism, sophisticated material texture, restrained ceremonial grandeur, premium illustrated-history quality.
+Composition/framing: wide 3:2 landscape, oblique approach view with the four Hadrian statues clearly countable and bronze figures visibly separate; leave margins for local labels and leaders.
+Constraints: second-century Roman Greek clothing and sculpture; visitors fully clothed; statues stand on stable pedestals.
+Avoid: more or fewer than four prominent stone Hadrian statues, identical repeated clones, statues appearing alive, modern military uniforms, nudity, eroticism, flat infographic treatment, readable text, inscriptions, labels, border, watermark.

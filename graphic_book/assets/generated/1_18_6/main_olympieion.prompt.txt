@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: main panel for a luxury illustrated archaeological graphic book
+Primary request: Reconstruct Hadrian's completed sanctuary of Olympian Zeus in second-century CE Athens as a magnificent, statue-filled sacred precinct.
+Scene/backdrop: Elevated oblique view from just outside the enclosure, with the immense Corinthian Olympieion dominating the foreground and the Acropolis recognisable in the middle distance; the Ilissos landscape and Attic hills provide spatial depth.
+Subject: The completed dipteral temple with forest-like marble columns, a large walled precinct crowded with many distinct honorary statues and civic dedications, processional paths, altars, visitors, priests, and delegations. Behind the temple, include one especially colossal standing statue of Hadrian erected by Athens. The image should immediately communicate extraordinary scale, urban position, and a precinct full of dedications.
+Style/medium: sophisticated painterly archaeological reconstruction, naturalistic gouache and oil texture, coffee-table history-book quality, richly detailed but coherent.
+Composition/framing: wide 16:9 landscape; temple mass and precinct dominate; leave some uncluttered sky and paving zones for local labels and leader lines.
+Lighting/mood: warm clear Attic late-afternoon light, long shadows, monumental but inhabited.
+Color palette: Pentelic marble, weathered limestone, bronze, terracotta, olive and cypress green, dusty gold, restrained blue sky.
+Constraints: historically plausible Roman Athens around 170 CE; human figures fully clothed and small enough to establish scale; statues read as stone or bronze objects, not living giants; no modern reconstruction cranes.
+Avoid: flat vector art, diagrammatic aerial plan, fantasy spectacle, modern buildings, ruined temple, empty sparse precinct, Parthenon dominating the scene, readable text, inscriptions, labels, borders, watermark, nudity.

@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: subordinate locator inset for a luxury historical atlas page
+Primary request: Create a richly textured oblique relief view of central ancient Athens, clearly relating the Acropolis, the completed Olympieion southeast of it, and the Ilissos corridor.
+Scene/backdrop: Attic basin with credible ridges, dry stream valley, ancient road network, dense but low second-century city fabric, and atmospheric mountains.
+Subject: The Acropolis is prominent but not oversized; the Olympieion is separately visible as a huge rectangular Corinthian sanctuary in the lower city; the Ilissos landscape runs beyond it.
+Style/medium: painterly topographic relief, antiquarian atlas realism, natural landform texture, warm parchment-gouache finish.
+Composition/framing: landscape 3:2, oblique aerial, strong geographic legibility, room for local labels and route overlays.
+Constraints: historically plausible broad geography rather than a surveyed plan; no labels or markers baked into the art.
+Avoid: flat vector polygons, classroom diagram, satellite imagery, oversized sticker landmarks, political borders, icons, pins, routes, readable text, compass, watermark.

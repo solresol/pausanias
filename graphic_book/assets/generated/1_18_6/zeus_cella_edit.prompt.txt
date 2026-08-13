@@ -1,0 +1,5 @@
+Use case: precise-object-edit
+Asset type: scenic inset for a professional archaeological graphic book
+Primary request: Change only the seated Zeus statue's exposed upper torso by covering the chest, abdomen, and shoulders with dignified layered gold drapery appropriate to a monumental ancient chryselephantine cult image.
+Constraints: Preserve the exact composition, camera, face, seated pose, hands, sceptre, Nike, throne, scale, columns, lamps, visitors, lighting, material richness, and every other element. Keep pale ivory visible only on face, neck, hands, and feet. The result must be suitable for a general professional audience with no exposed chest, abdomen, buttocks, genitals, or eroticised body.
+Avoid: Changing the background, adding text, changing the number or positions of visitors, fantasy glow, labels, borders, watermark.

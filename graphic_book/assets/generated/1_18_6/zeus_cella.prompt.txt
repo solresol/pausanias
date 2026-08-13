@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: scenic inset for a luxury illustrated archaeological graphic book
+Primary request: Show the colossal seated gold-and-ivory statue of Olympian Zeus within the deep cella of Hadrian's Olympieion in Athens.
+Scene/backdrop: Monumental shadowed temple interior framed by immense Corinthian architecture, bronze lamps, patterned stone pavement, and a distant bright doorway.
+Subject: A vast dignified seated Zeus fashioned as an ancient chryselephantine cult image: pale ivory-like flesh surfaces, richly worked gold drapery and throne, sceptre and small Nike; several fully clothed visitors and attendants at floor level establish the breathtaking scale.
+Style/medium: cinematic painterly archaeological reconstruction, museum-quality material detail, sophisticated chiaroscuro, coffee-table book finish.
+Composition/framing: wide 3:2 landscape, low human viewpoint, statue fully legible and dominant, clear gold-versus-ivory material contrast, space for local callouts.
+Constraints: cult statue reads as a crafted object rather than a living giant; all human visitors fully clothed; restrained religious atmosphere.
+Avoid: nudity, eroticism, fantasy lightning, glowing eyes, Christian church features, medieval throne, modern objects, readable text, inscriptions, labels, border, watermark.
