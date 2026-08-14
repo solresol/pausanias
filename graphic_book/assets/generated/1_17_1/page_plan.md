@@ -1,0 +1,11 @@
+# Page plan: passage 1.17.1
+
+- **Passage ID:** 1.17.1
+- **Key places, events, and objects:** the Athenian Agora; the altar of Mercy (Eleos); Athenians extending humane protection amid reversals of fortune; associated altars of Shame (Aidos), Rumor (Pheme), and Impulse (Horme); civic piety and good fortune.
+- **Main visual:** a richly painted oblique reconstruction of the Athenian Agora in Pausanias's second-century CE setting, looking toward the Acropolis. A dignified open-air marble altar anchors the foreground as fully clothed supplicants and citizens approach it, making mercy a visible civic practice rather than an abstract emblem. The altar is shown as an interpretive reconstruction, not assigned to a disputed excavated foundation.
+- **Insets:** (1) a textured aerial relief view of Athens connecting the Agora, Acropolis, city walls, and routes from Piraeus; (2) an intimate, historically grounded altar scene in which an older citizen offers protection to a displaced family; (3) three modest civic altars under an Agora colonnade, locally labelled Shame, Rumor, and Impulse.
+- **Orientation strategy:** the Acropolis and Agora are locally labelled in the main scene; the aerial inset situates the Agora within Athens and Attica; the passage panel's footer states the setting and period. A local note makes the exact location of Pausanias's altar explicitly uncertain.
+- **Approved reference pages:** `graphic_book/images/1/1/4.png` and `graphic_book/images/1/1/5.png` for parchment atlas grammar, visual richness, readable callouts, and coffee-table spread quality.
+- **Continuity reference:** `graphic_book/images/1/16/3.png` for the measured passage panel, framed panoramic art, and lower-register rhythm only; it does not replace the approved anchors.
+- **Content suitability:** all figures are fully clothed in historically plausible garments; no nudity, eroticized posing, violence, or bodily exposure; the scene emphasizes refuge, civic attention, and ritual dignity.
+- **Evidence boundary:** Pausanias securely places an altar of Mercy in an Athenian marketplace, but modern scholarship disputes which agora and does not securely identify a surviving altar. The page therefore orients the reader in Roman-era Athens without claiming a precise excavated footprint.
