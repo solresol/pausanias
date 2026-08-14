@@ -1,0 +1,5 @@
+Use case: precise-object-edit
+Asset type: scenic architectural inset for a premium illustrated classical-history book
+Primary request: change only the ancient bronze Zeus statue on the right so its entire upper body, shoulders, chest, abdomen, hips, and legs are fully covered by a dignified heavy ancient Greek draped robe; preserve the staff, head, hands, bronze patina, pose, pedestal, temple, cult figures in the doorway, paving, plants, Olympieion columns, lighting, camera, and composition unchanged
+Constraints: no exposed torso, chest, abdomen, hips, or thighs; the statue must be fully clothed; no text, labels, arrows, borders, watermark, or new objects
+Avoid: nudity, transparent fabric, short tunic, erotic pose, changing the architecture or crop

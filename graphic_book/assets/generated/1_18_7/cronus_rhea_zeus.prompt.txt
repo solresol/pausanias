@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: scenic architectural inset for a premium illustrated classical-history book
+Primary request: reconstruct the small temple of Cronus and Rhea and a separate ancient bronze statue of Zeus within the Olympieion precinct in Roman Athens
+Scene/backdrop: intimate sacred courtyard of honey-coloured limestone, monumental Olympieion columns glimpsed beyond, restrained votive plantings and worn paving
+Subject: a modest dignified Greek temple for Cronus and Rhea with two cult figures only dimly suggested inside the doorway, and beside but clearly separate from it a much older weathered bronze standing Zeus with dark green-brown patina
+Style/medium: refined painterly archaeological reconstruction, rich material detail, sophisticated natural light, museum-catalogue quality
+Composition/framing: landscape architectural study; temple fills the left and centre, bronze Zeus clearly visible on the right, enough negative space for local callouts
+Lighting/mood: quiet morning light, age, continuity of cult, subdued dignity
+Constraints: all any visible figures fully clothed; no text, inscriptions, labels, arrows, borders, watermark, modern objects, modern skyline, colossal seated gold Zeus, or fused temple-and-statue composition
+Avoid: flat vector temple, cartoon gods, iconography sheet, theatrical fantasy, visible nudity, pristine white surfaces, sparse placeholder scene

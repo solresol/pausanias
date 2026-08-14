@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: mythic-historical scenic inset for a premium illustrated classical-history book
+Primary request: depict the Athenian tradition that water from the flood in Deucalion's time receded through a fissure in the earth
+Scene/backdrop: an archaic Attic limestone basin after a tremendous storm, floodwater visibly withdrawing across rock and sparse olive scrub toward a narrow natural cleft; distant low mountains beneath clearing clouds
+Subject: Deucalion and Pyrrha, both fully clothed in heavy archaic Greek garments, stand safely on a rocky rise observing the receding water; the drainage fissure is visible but natural and modest, not a supernatural abyss
+Style/medium: dramatic sophisticated painterly realism, richly textured water, limestone, wet earth, fabric, and storm light; historically grounded myth illustration suitable for an archaeological atlas
+Composition/framing: wide landscape with the two small human witnesses to one side, the flow of water guiding the eye toward the fissure; leave clear sky and rock areas for local labels
+Lighting/mood: storm breaking into pale gold, awe without catastrophe spectacle, ancient remembered landscape
+Constraints: archaic setting with no classical Acropolis or Parthenon; all figures fully clothed; no text, labels, arrows, borders, watermark, modern structures, boats, animals, corpses, nudity, glowing magic, or enormous sinkhole
+Avoid: biblical ark imagery, action-movie disaster, fantasy portal, flat illustration, cartoon figures, iconography, generic seascape

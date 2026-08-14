@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: subordinate orientation inset for a premium illustrated archaeological atlas
+Primary request: create a richly textured oblique relief reconstruction of central Roman Athens showing the Acropolis and the Olympieion enclosure southeast of it
+Scene/backdrop: Attic basin and low mountains under clear Mediterranean light, dense but historically plausible ancient city fabric, the Acropolis high on its limestone rock, the enormous Olympieion enclosure beside the Ilissos corridor
+Subject: geographic relationship between Acropolis and Olympieion, with the Earth Olympias area represented as a small precinct within the larger sanctuary enclosure
+Style/medium: highly detailed painterly aerial reconstruction based on believable terrain relief, parchment-atlas warmth, naturalistic landform and architecture, visually rich rather than schematic
+Composition/framing: wide oblique aerial view with north generally toward the upper left; keep the Acropolis and Olympieion spatially separated and easy to identify later with locally drawn labels
+Constraints: no text, labels, pins, routes, arrows, borders, legend, watermark, modern buildings, modern roads, flat polygons, rectangular sea, sticker icons, or symbolic diagram shapes
+Avoid: classroom map, satellite-photo UI, fantasy city, exaggerated mountains, sparse terrain, modern Athens, overly dominant locator graphics

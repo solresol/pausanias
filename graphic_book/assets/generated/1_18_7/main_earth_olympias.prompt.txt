@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: main art panel for a premium illustrated classical-history coffee-table book
+Primary request: reconstruct the annual offering at the sacred fissure of Earth Olympias inside the Olympieion enclosure in Roman Athens, as described by Pausanias
+Scene/backdrop: warm late-afternoon light within the monumental sanctuary enclosure southeast of the Acropolis; colossal Corinthian columns of the completed Olympieion frame the scene, with the Acropolis recognisable in the distance; a smaller Greek temple of Cronus and Rhea and a weathered ancient bronze Zeus stand separately in the precinct
+Subject: in the foreground, two fully clothed Greek ritual attendants reverently pour a thick mixture of wheat meal and honey from a ceramic vessel into a narrow natural fissure in worn limestone ground, about one cubit across; the action and fissure are unmistakable
+Style/medium: sophisticated historically grounded painterly realism, richly textured stone, bronze patina, fabric, honey, grain, atmospheric depth; museum-quality reconstruction with the visual ambition of an illustrated archaeological atlas
+Composition/framing: wide landscape, elevated three-quarter viewpoint; fissure and offering prominent in the lower centre, bronze Zeus to one side, Cronus–Rhea temple readable behind, Olympieion columns and Acropolis providing orientation; leave modest clear areas for local callout overlays
+Lighting/mood: luminous Mediterranean gold and blue, solemn civic ritual, believable shadows, subtle age and weathering
+Constraints: period-appropriate architecture, garments, vessels, and landscape; all people fully clothed; no text, letters, labels, borders, arrows, watermark, modern objects, modern skyline, or anachronistic classical Parthenon in a pre-classical myth scene; the main ritual scene itself is Roman-period Athens
+Avoid: flat vector art, classroom diagram, icon figures, sparse composition, fantasy spectacle, excessive crowds, eroticism, visible nudity, gigantic chasm, lava, glowing magic, disaster imagery
