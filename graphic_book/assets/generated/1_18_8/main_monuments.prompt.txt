@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: main art panel for a premium illustrated classical-history coffee-table book
+Primary request: reconstruct the monument ensemble described by Pausanias in the completed Olympieion precinct of Roman Athens: Persian architectural support figures carved from richly veined Phrygian marble holding aloft an elegant bronze tripod, beside but clearly separate from a tall column bearing a dignified statue of the elderly Athenian orator Isocrates
+Scene/backdrop: vast sacred enclosure in warm Mediterranean light, colossal Corinthian columns of the Olympieion receding behind the monuments, worn marble paving, restrained votive greenery, and the Acropolis recognisable in the distance
+Subject: the Phrygian-marble Persian figures and bronze tripod are the magnificent foreground focus; their poses are formal architectural support poses, fully clothed in historically informed long-sleeved garments and trousers rendered in stone; the bronze tripod is structurally clear above them; Isocrates appears as a fully draped elderly civic portrait statue high on a separate column
+Style/medium: sophisticated painterly archaeological reconstruction, museum-catalogue realism, richly textured veined marble, aged bronze patina, stone, cloth carving, and atmospheric depth; visual ambition suited to a luxury archaeological atlas
+Composition/framing: wide elevated three-quarter view; tripod group fills the lower centre and right, Isocrates' column stands left of centre, Olympieion columns and distant Acropolis establish orientation; provide modest uncluttered areas for later local labels
+Lighting/mood: luminous late-afternoon gold and blue, contemplative civic grandeur, believable shadows, subtle weathering
+Constraints: all human figures and statues fully clothed; no text, inscriptions, letters, labels, arrows, borders, watermark, modern objects, modern skyline, battle scene, chains, humiliation imagery, or visible nudity
+Avoid: flat vector art, caryatid icon sheet, classroom diagram, crude columns, sparse composition, fantasy palace, modern Athens, generic Roman forum, cartoon figures, giant glowing objects

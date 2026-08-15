@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: scenic biographical inset for a premium illustrated classical-history book
+Primary request: depict the elderly Athenian orator Isocrates continuing to teach a small circle of attentive pupils late in his long life
+Scene/backdrop: refined but restrained fourth-century BCE Athenian school courtyard with stuccoed walls, timber shade, wax tablets and papyrus rolls, warm stone paving, no monumental temple interior
+Subject: Isocrates is nearly one hundred, dignified and thoughtful, seated or standing at the centre while explaining a text to several adult and late-adolescent male pupils; he and every pupil wear fully covering ancient Greek garments; the emphasis is patient teaching and intellectual continuity
+Style/medium: sophisticated painterly historical realism, intimate museum-quality scene, nuanced faces, textiles, papyrus and architecture, rich but natural palette
+Composition/framing: landscape group portrait with Isocrates clearly distinct at centre-left, pupils gathered in a readable semicircle, room for local callouts
+Lighting/mood: gentle morning light, attentive silence, disciplined scholarship rather than theatrical declamation
+Constraints: no text, readable writing, labels, arrows, borders, watermark, modern furniture, modern books, modern school objects, political assembly, battle, death scene, nudity, exposed torsos, or children
+Avoid: philosopher stereotype, toga party, cartoon classroom, flat illustration, empty architecture, generic library, melodrama

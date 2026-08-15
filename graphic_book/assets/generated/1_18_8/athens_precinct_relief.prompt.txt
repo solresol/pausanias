@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: subordinate orientation inset for a premium illustrated archaeological atlas
+Primary request: create a richly textured oblique relief reconstruction of central Roman Athens showing the Acropolis and the completed Olympieion enclosure southeast of it, with the nearby lower-ground zone where Athenians pointed out the grave of Deucalion
+Scene/backdrop: Attic basin and low mountains under clear Mediterranean light, dense historically plausible ancient city fabric, Acropolis on its limestone rock, vast Olympieion enclosure beside the Ilissos corridor, subtle paths and topographic relief
+Subject: credible geographic relationship between Acropolis, Olympieion, and the adjacent broad grave zone; the grave itself should be visually modest because its exact location is uncertain
+Style/medium: highly detailed painterly aerial reconstruction based on believable terrain relief, parchment-atlas warmth, naturalistic landform and architecture, visually rich rather than schematic
+Composition/framing: wide oblique aerial view with north generally toward the upper left; keep Acropolis and Olympieion spatially separated and identifiable later with locally drawn labels
+Constraints: no text, labels, pins, routes, arrows, borders, legend, watermark, modern buildings, modern roads, flat polygons, sticker icons, or symbolic diagram shapes
+Avoid: classroom map, satellite-photo interface, fantasy city, exaggerated mountains, sparse terrain, modern Athens, dominant locator graphics
