@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: scenic inset for a scholarly illustrated graphic-book page
+Primary request: reconstruct one richly decorated room in Hadrian's Athenian common sanctuary, combining books, painting, sculpture, gilt, and alabaster exactly as Pausanias describes
+Scene/backdrop: intimate oblique interior with a gilded coffered ceiling, pale translucent alabaster wall panels, framed painted panels, one fully draped marble statue, and open wooden cupboards filled with papyrus scrolls; a robed reader studies a scroll at a low table
+Subject: the coordinated material richness and visible book collection
+Style/medium: sophisticated naturalistic historical illustration, painterly museum reconstruction, nuanced textures and deep interior light, premium coffee-table-book finish
+Composition/framing: landscape room view, ceiling and scroll cupboards clearly visible, separate visual zones for later local callouts
+Lighting/mood: shafts of warm daylight, reflected gold, quiet learned atmosphere
+Color palette: cream alabaster, old gold, walnut wood, muted fresco reds and blues, white marble
+Constraints: second-century Greco-Roman material culture; every person fully clothed; no generated words on scrolls or paintings; no labels, borders, arrows, or typography
+Avoid: medieval library, bound codex shelves, modern furniture, fantasy palace, nudity, flat vector art, schematic scene, text, watermark

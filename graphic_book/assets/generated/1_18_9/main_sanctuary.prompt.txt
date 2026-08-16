@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: main scenic panel for a scholarly illustrated graphic-book page
+Primary request: reconstruct the principal court and porticoes of Hadrian's common sanctuary for all the gods in second-century CE Athens, as a sumptuous lived architectural space
+Scene/backdrop: wide elevated oblique view across a grand sanctuary court; many tall columns and matching portico wall revetment in richly veined rose-purple Phrygian marble; open rooms reveal gilded coffered ceilings, translucent cream alabaster panels, dignified fully draped statues, painted wall panels, and wooden cupboards of papyrus scrolls; the ancient Acropolis and the colossal Olympieion columns are visible far beyond for broad orientation
+Subject: architecture, materials, court, porticoes, and decorated rooms are the heroes; a few small fully clothed second-century visitors establish scale
+Style/medium: sophisticated museum-quality painterly historical reconstruction, richly textured naturalistic gouache and oil detail, atmospheric depth, comparable in ambition to a premium coffee-table archaeology book
+Composition/framing: wide landscape, strong perspective into the court, columns framing glimpses of the decorated rooms, generous feature separation for later local callouts
+Lighting/mood: late-afternoon Attic sunlight, luminous stone, restrained ceremonial grandeur
+Color palette: parchment gold, warm limestone, rose-purple veined marble, cream alabaster, muted blue sky, deep portico shadows
+Constraints: historically plausible Roman Athens; all figures fully clothed; exact distant skyline used only for broad orientation; no words, inscriptions, labels, cartouches, borders, arrows, or typography
+Avoid: flat vector art, diagram, classroom map, simplistic geometry, fantasy palace, modern Athens, Parthenon in pristine anachronistic condition, excessive crowds, nudity, extra text, watermark

@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: scenic inset for a scholarly illustrated graphic-book page
+Primary request: reconstruct Hadrian's hundred-column gymnasium in second-century CE Athens, emphasizing its dark Libyan-stone colonnade and spacious palaestra
+Scene/backdrop: broad sunlit palaestra surrounded by repeated dark grey polished stone columns with subtle mineral variation; porticoes, exercise court, benches, and a few athletes and teachers in modest period-appropriate tunics or wrapped himatia
+Subject: architectural scale, rhythm of the hundred-column colonnade, and the material distinction of Libyan stone
+Style/medium: museum-quality painterly historical reconstruction, naturalistic perspective and material grain, premium coffee-table archaeology illustration
+Composition/framing: wide landscape with a deep diagonal colonnade receding into space, court visible, clean feature separation for local labels
+Lighting/mood: clear Attic morning, long rhythmic shadows, civic energy without spectacle
+Color palette: dark charcoal-grey columns, warm paving, ochre plaster, muted cloth, blue sky
+Constraints: historically plausible Roman Athens; all bodies modestly covered; no words, numerals, inscriptions, labels, borders, arrows, or typography
+Avoid: visible nudity, modern sportswear, bathhouse, fantasy arena, flat vector art, classroom diagram, repetitive synthetic pillars, text, watermark
