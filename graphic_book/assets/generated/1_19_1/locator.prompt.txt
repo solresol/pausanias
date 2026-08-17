@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: subordinate textured orientation inset for a scholarly illustrated coffee-table page
+Primary request: oblique bird's-eye reconstruction of southeast Athens in the second century CE, providing credible geographic orientation between the Olympieion, the Ilissos valley, the lower Acropolis slopes, and nearby modest sanctuary precincts
+Scene/backdrop: sunlit Attic basin with richly textured rocky terrain, olive groves, roads, city fabric and the Ilissos stream; the completed Olympieion is the dominant known landmark; the Acropolis stands in the middle distance
+Subject: a visually coherent Roman-period urban landscape with two smaller plausible sanctuary zones near and beyond the Olympieion reserved for later local labels identifying the conjectural Delphinion and Pythian Apollo monument
+Style/medium: sophisticated painterly archaeological reconstruction and relief-map art, naturalistic aerial perspective, warm parchment-compatible ochres, muted greens, limestone and Aegean blue, dense terrain texture, elegant atlas atmosphere
+Composition/framing: wide oblique landscape, Olympieion clearly readable, Acropolis and Ilissos visible, two smaller precincts distinguishable without invented labels, clear negative-space corridors for local leaders
+Constraints: no text, no labels, no border, no watermark; terrain must look rich and credible rather than schematic; Roman-period Athens only; exact small-sanctuary placements should look interpretive, not surveyed
+Avoid: flat vector map, classroom diagram, solid-color polygons, modern Athens, modern roads, satellite-photo look, oversized icons, sticker labels, fantasy city, empty terrain, crude repeated buildings

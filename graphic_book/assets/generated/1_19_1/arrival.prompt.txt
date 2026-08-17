@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: scenic narrative inset for a scholarly illustrated coffee-table page
+Primary request: Theseus arriving unknown at the unfinished sanctuary of Apollo Delphinios just before his feat of strength
+Scene/backdrop: archaic Athenian building site with a partly built limestone wall, timber roof beams, wooden scaffolding, tools and an empty ox-cart nearby; no later classical skyline
+Subject: young athletic Theseus fully clothed in a refined ankle-length woven robe with carefully arranged shoulder-length hair, walking alone with calm dignity; several fully clothed roof builders pause their work and mockingly gesture toward him, mistaking his appearance for that of a bridal maiden; the tone is narrative rather than cruel caricature
+Style/medium: sophisticated naturalistic painterly historical illustration, expressive faces and gestures, fine fabric, timber and stone textures, warm Attic sunlight, parchment-friendly color harmony
+Composition/framing: wide landscape inset, Theseus full-length and unmistakable, builders elevated on roof beams, empty cart visible as narrative foreshadowing, balanced depth and clear silhouettes
+Constraints: no text, no labels, no border, no watermark; all figures fully clothed; no physical attack; historically plausible archaic dress, tools and construction
+Avoid: nudity, exposed chest, erotic styling, modern construction equipment, Parthenon, Roman imperial buildings, slapstick cartoon expressions, flat vector art, diagram, fantasy glow, gibberish inscriptions

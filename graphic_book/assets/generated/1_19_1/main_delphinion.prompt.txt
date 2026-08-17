@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: dominant art panel for a scholarly illustrated coffee-table page
+Primary request: richly detailed painterly historical reconstruction of the legendary Theseus episode at the unfinished sanctuary of Apollo Delphinios in early Athens
+Scene/backdrop: an archaic Greek temple building site with stone walls, timber roof trusses and wooden scaffolding, dusty warm Attic landscape, distant low pre-classical Acropolis without the Parthenon
+Subject: athletic young Theseus, fully clothed in an elegant flowing ankle-length woven robe, has just lifted and hurled an entire empty wooden two-wheeled ox-cart high above the unfinished roof frame; the cart is visibly airborne and intact; roof builders recoil in astonishment on the masonry and scaffolding; the two unyoked oxen stand safely on the ground well away from the action
+Style/medium: sophisticated museum-quality historical illustration, naturalistic painterly realism, fine architectural and textile detail, parchment-friendly warm ochre, limestone, faded blue and terracotta palette, dramatic but plausible sunlight, human expressions and anatomy handled with restraint
+Composition/framing: wide landscape scene, Theseus fully visible in the lower middle, airborne cart clearly silhouetted above the roofline, builders readable at two heights, generous edges for later local labels, strong depth and coffee-table-book impact
+Constraints: no text, no labels, no border, no watermark; Theseus fully clothed from shoulders to ankles; historically plausible archaic materials and tools; cart contains no people or animals; oxen are unyoked and safe on the ground; semantic action instantly legible
+Avoid: Parthenon, classical marble Acropolis monuments, Roman architecture, modern cranes, fantasy magic glow, superhero costume, nudity, exposed chest, erotic styling, cartoon look, flat vector art, diagram, icon figures, extra limbs, mangled cart wheels, gibberish inscriptions

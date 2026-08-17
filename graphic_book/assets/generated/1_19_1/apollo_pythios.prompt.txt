@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: scenic inset for a scholarly illustrated coffee-table page
+Primary request: dignified architectural study of a statue of Apollo Pythios in a modest open Athenian precinct near the Olympieion
+Scene/backdrop: small sacred enclosure of weathered limestone, votive tripods and laurel, with the huge columns of the Olympieion visible beyond in warm late-afternoon light
+Subject: idealized Apollo statue on a stone base, fully draped in a long classical garment, holding a laurel branch and small lyre, no exposed torso; a few respectfully dressed visitors establish scale
+Style/medium: refined museum-quality painterly historical illustration, naturalistic stone and textile texture, warm parchment-compatible palette, quiet sacred atmosphere
+Composition/framing: landscape inset, statue dominant and fully visible, Olympieion clearly secondary in the distance, open areas for later local callouts
+Constraints: no text, no inscriptions, no labels, no border, no watermark; all figures fully clothed; historically plausible materials and objects
+Avoid: nudity, exposed chest, erotic pose, colossal fantasy statue, modern objects, Byzantine or Christian imagery, cartoon style, flat vector rendering, diagram, gibberish writing
