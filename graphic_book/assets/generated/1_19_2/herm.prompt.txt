@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: archaeological object-study inset for a scholarly illustrated coffee-table page
+Primary request: dignified close study of the unusual square Herm-like image of Heavenly Aphrodite that Pausanias saw near the temple in the Gardens
+Scene/backdrop: shaded sacred forecourt with flowering myrtle, weathered limestone paving, a low offering table and soft glimpses of garden foliage
+Subject: a restrained ancient Greek herm form: serene female marble head with fully covered neck and shoulders set above a tall plain quadrangular stone pillar, subtly weathered; nearby rest a spindle, measured thread and small closed tablets as understated symbols of Fate, but no writing
+Style/medium: refined museum-quality painterly archaeological illustration, convincing carved stone, botanical and bronze textures, quiet sacred atmosphere, warm parchment-compatible palette, precise naturalistic detail
+Composition/framing: landscape object portrait, herm dominant and fully visible from head to base, quadrangular geometry unmistakable, symbolic objects secondary, space for later local labels
+Constraints: no text, no inscription, no labels, no border, no watermark; female form fully covered; plain pillar without anatomical carving; historically plausible materials
+Avoid: nudity, exposed chest, exposed genital carving, erotic styling, Hermaphroditus, male beard, modern museum display, fantasy glow, broken face, cartoon, flat vector, diagram, gibberish writing

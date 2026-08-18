@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: subordinate textured orientation inset for a scholarly illustrated coffee-table page
+Primary request: oblique bird's-eye reconstruction of southeast Athens in the second century CE, orienting the route from the Olympieion toward the Ilissos sanctuary landscape and a plausible cultivated Gardens zone
+Scene/backdrop: dense sunlit Attic city fabric, rocky Acropolis, completed Olympieion, Ilissos watercourse, roads, orchards, cultivated plots and sanctuary precincts embedded in richly textured terrain
+Subject: the Olympieion is the major landmark; the Ilissos bends through the lower landscape; a modest green sanctuary precinct near the river is visually distinguishable but not marked as a certain excavated footprint, leaving open areas for later local labels
+Style/medium: sophisticated painterly archaeological reconstruction and relief-map art, naturalistic aerial perspective, warm parchment-compatible ochres, muted olive greens, limestone and soft blue, dense credible topography, elegant atlas atmosphere
+Composition/framing: wide oblique landscape, Acropolis and Olympieion legible, river course visible, garden precinct subordinate but readable, clear negative-space corridors for later leaders
+Constraints: no text, no labels, no route strokes, no border, no watermark; Roman-period Athens only; terrain rich and credible; sanctuary placement must look interpretive rather than surveyed
+Avoid: flat vector map, classroom diagram, solid-color polygons, rectangular river, modern Athens, modern roads, satellite-photo look, oversized icons, sticker labels, fantasy city, empty terrain, crude repeated buildings

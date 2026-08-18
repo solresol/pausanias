@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: scenic craft inset for a scholarly illustrated coffee-table page
+Primary request: Alcamenes and assistants completing the celebrated Aphrodite in the Gardens in a late-fifth-century BCE Athenian sculptor's workshop
+Scene/backdrop: open stone workshop court with timber shade, marble chips, chisels, bow drill, measuring cords and partially worked blocks; warm Attic light enters from one side
+Subject: mature sculptor Alcamenes and two fully clothed assistants carefully finish a monumental marble Aphrodite wrapped in substantial opaque drapery from shoulders to feet; one assistant polishes folds while Alcamenes judges the silhouette; the exact lost pose is presented as a plausible reconstruction rather than a copied surviving statue
+Style/medium: sophisticated museum-quality painterly historical illustration, naturalistic anatomy and gestures, exceptional marble, tool, dust and textile detail, warm parchment-compatible ochre and stone palette, contemplative craftsmanship
+Composition/framing: wide landscape workshop scene, fully draped statue dominant at one side and sculptors clearly engaged with it, strong light and depth, usable open space for local callouts
+Constraints: no text, no signatures, no labels, no border, no watermark; all people fully clothed; statue fully covered from shoulders to feet with opaque drapery; historically plausible tools and workshop
+Avoid: nudity, exposed breast, exposed buttocks, transparent wet drapery, erotic pose, Venus de Milo, modern power tools, Renaissance studio, Roman toga portrait, fantasy glow, cartoon, flat vector art, diagram, gibberish writing
