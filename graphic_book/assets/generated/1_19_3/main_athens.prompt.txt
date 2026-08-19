@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: dominant art panel for a scholarly illustrated coffee-table page
+Primary request: richly detailed oblique reconstruction of the eastern and southeastern approaches to Athens in the second century CE, showing the separate sanctuary landscapes of Cynosarges and the Lyceum
+Scene/backdrop: sunlit Attic basin outside the city walls, rocky Acropolis and dense ancient Athens in the distance, the Ilissos crossing cultivated terrain, roads threading through olive groves and gymnasium grounds, warm mountains beyond
+Subject: in the nearer southern landscape, a wooded Cynosarges precinct with a modest Heracles temple, altar court and athletes; farther east, clearly separate, the Lyceum as a broad sacred grove and exercise ground with a small sanctuary of Apollo Lyceius; visitors and athletes in dignified ancient dress create scale
+Style/medium: sophisticated museum-quality painterly archaeological reconstruction, naturalistic aerial perspective, dense credible topography, exceptional foliage, limestone, dust and textile detail, warm parchment-compatible ochres, olive greens and muted blue, coffee-table-book impact
+Composition/framing: wide landscape with strong foreground-to-distance depth; Acropolis, Ilissos, Cynosarges and Lyceum all visually readable; leave calm corridors near major features for later local leaders and labels
+Constraints: no text, no labels, no border, no watermark; all figures fully clothed; historically plausible Roman-period Athens; two sanctuaries visibly separate; no claim of exact surveyed precinct boundaries
+Avoid: nudity, modern Athens, Parthenon reconstruction fantasy, flat vector map, classroom diagram, solid-color terrain, oversized icons, sparse landscape, repeated block buildings, cartoon, generated writing

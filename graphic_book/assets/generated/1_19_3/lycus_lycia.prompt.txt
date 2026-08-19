@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: scenic migration inset for a scholarly illustrated coffee-table page
+Primary request: Lycus son of Pandion arriving among the Termilae in the rugged landscape later called Lycia, illustrating Pausanias' reported naming tradition
+Scene/backdrop: dramatic southwest Anatolian coastal mountains, pine and cedar slopes, limestone crags, a river valley and distant blue Mediterranean, with an early fortified hill settlement and local travellers
+Subject: a weary but dignified Lycus in fully covering Greek travel clothes descends a mountain path with two companions and is met cautiously by fully clothed Termilae elders; travel packs and staffs signal flight from Athens without depicting violence
+Style/medium: sophisticated museum-quality painterly historical illustration, naturalistic figures and landscape, exceptional rock, vegetation, textile and atmospheric detail, golden late-afternoon light, warm parchment-compatible palette, epic but evidence-conscious
+Composition/framing: wide landscape with Lycus' party in the foreground, Termilae greeters and settlement in the middle distance, coast and mountains establishing Anatolian orientation, room for later local callouts
+Constraints: no text, no labels, no border, no watermark; all figures fully clothed; Bronze or early Iron Age visual vocabulary without precise archaeological overclaim; migration tradition presented as a scene, not documentary certainty
+Avoid: battle, blood, royal coronation, modern Turkey, Roman legionaries, medieval castle, fantasy armor, nudity, cartoon, flat vector art, diagram, gibberish writing

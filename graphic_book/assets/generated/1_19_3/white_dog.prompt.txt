@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: scenic oracle inset for a scholarly illustrated coffee-table page
+Primary request: a restrained ancient sanctuary scene evoking Pausanias' unexplained oracle concerning a white dog at Cynosarges
+Scene/backdrop: shaded outer court of a Heracles sanctuary near Athens, worn limestone paving, altar smoke, olive and plane trees, bronze offering vessels and a small temple glimpsed beyond
+Subject: a healthy white dog stands alert beside the boundary of the sacrificial court while two fully clothed priests and a visitor consult a closed oracle tablet and gesture toward the animal; the moment feels significant but its meaning remains deliberately unresolved
+Style/medium: refined museum-quality painterly historical illustration, naturalistic dog and human anatomy, rich stone, smoke, wool and foliage textures, dramatic warm side light, parchment-compatible palette
+Composition/framing: wide landscape scene, white dog visually prominent but natural, priests grouped to one side, clear space for later local callouts
+Constraints: no text, no readable tablet, no inscription, no labels, no border, no watermark; all people fully clothed; historically plausible ritual objects; dog unharmed
+Avoid: animal sacrifice, injured dog, fantasy prophecy effects, glowing magic, nudity, modern dog breed styling, modern collars, cartoon, flat vector art, diagram, gibberish writing
