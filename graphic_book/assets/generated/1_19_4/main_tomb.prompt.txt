@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: main illustrated panel for a luxury historical atlas page
+Primary request: a richly painted oblique reconstruction of the landscape immediately behind the Lyceum in classical Athens, with a dignified stone tomb monument of the Megarian king Nisus prominent in the near foreground beside a sacred road, the wooded Lyceum precinct and exercise grounds around it, the Ilissos valley beyond, and the Acropolis clearly visible in the distance
+Scene/backdrop: late fifth-century BCE Attica, dry Mediterranean terrain, olive and plane trees, credible paths, low stone boundary walls, scattered Athenians in historically plausible dress
+Style/medium: sophisticated museum-quality gouache and oil historical illustration, finely textured, atmospheric, spatially coherent, suitable for a coffee-table archaeology book
+Composition/framing: wide landscape, elevated three-quarter viewpoint, tomb at lower centre-left with clear visual prominence, Lyceum grove across the middle distance, Acropolis high at upper left, generous clean visual zones for later local callout labels
+Lighting/mood: warm late-afternoon sun, long soft shadows, elegiac but not gloomy
+Color palette: parchment gold, warm limestone, olive green, dusty blue distance, restrained purple accent only on a small funerary ribbon
+Materials/textures: weathered limestone, packed earth, cypress and olive foliage, distant stucco and tile roofs
+Constraints: no written text, no labels, no borders, no modern objects, no fantasy architecture, no nudity, no violence; historically plausible Greek clothing; the tomb must visibly read as a commemorative monument and the scene must have rich depth rather than a diagrammatic map
+Avoid: flat vector terrain, classroom diagram, cartoon, icon-like figures, empty sparse landscape, oversaturated fantasy, aerial satellite look, illegible pseudo-writing, watermark

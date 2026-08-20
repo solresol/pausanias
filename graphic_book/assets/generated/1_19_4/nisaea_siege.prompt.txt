@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: scenic inset for a luxury historical atlas page
+Primary request: the Cretan siege of Nisaea, Megara's fortified harbour, with Nisus' defenders on substantial stone walls above the harbour while Minos' Cretan ships and an organized shore camp close in
+Scene/backdrop: Bronze Age Greek fortified coastal settlement, rugged Megarian hills enclosing a defensible blue harbour, stone citadel walls, timber ships with square sails and oars
+Style/medium: richly detailed museum historical painting, painterly realism, atmospheric depth, sophisticated coffee-table-book illustration
+Composition/framing: wide cinematic view from outside the harbour, fortress and defenders clearly readable at upper right, Cretan fleet entering from lower left, shore camp and siege pressure in the middle ground; leave uncluttered corners for later local labels
+Lighting/mood: tense golden evening light, distant smoke but no graphic destruction
+Color palette: warm limestone, deep Aegean blue, ochre sailcloth, smoky amber sky
+Constraints: no written text, no labels, no borders, no modern objects, no gore, no nudity, no fantasy armor; fully clothed figures; geographically convincing land-and-sea siege
+Avoid: flat map, classroom diagram, cartoon ships, icon figures, generic medieval castle, Roman legion equipment, text, watermark
