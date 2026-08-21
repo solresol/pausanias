@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: main illustrated panel for a luxury historical atlas page
+Primary request: a richly painted elevated oblique reconstruction of southeast classical Athens organized by the Ilissus river valley, with the smaller urban Eridanus stream visibly joining it, the walled city and Acropolis clearly visible beyond, and a modest sacred riverside precinct and separate memorial marker along the Ilissus
+Scene/backdrop: late fifth-century BCE Attica, the Ilissus flowing through a broad green ribbon of plane trees and reeds below dry ochre slopes, footpaths, small bridges, olive groves, scattered fully clothed Athenians, dense lower city climbing toward the Acropolis
+Style/medium: sophisticated museum-quality gouache and oil historical illustration, finely textured, atmospheric, spatially coherent, suitable for a coffee-table archaeology book
+Composition/framing: wide landscape, elevated three-quarter viewpoint looking northwest along the Ilissus toward Athens; main river sweeps from lower right through the centre, narrower Eridanus joins from upper left, Acropolis high at upper left, riverside altar and memorial visible but not oversized; generous clean zones for later local callout labels
+Lighting/mood: clear warm morning after rain, luminous water, long soft shadows, calm geographic clarity
+Color palette: parchment gold, limestone cream, olive and plane-tree green, muted river blue, dusty violet mountains
+Materials/textures: rippling water, reed beds, weathered limestone, packed earth, terracotta roofs, layered foliage
+Constraints: no written text, no labels, no borders, no modern objects, no fantasy architecture, no nudity; historically plausible Greek clothing; the two watercourses and their confluence must be spatially readable; rich depth rather than a diagrammatic map
+Avoid: flat vector terrain, classroom diagram, satellite map, icon-like people, empty sparse landscape, oversized temple, rectangular water, illegible pseudo-writing, watermark

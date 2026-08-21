@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: scenic inset for a luxury historical atlas page
+Primary request: a violent north wind destroying much of the Persian fleet of triremes off the rocky Magnesian coast, with multiple ancient warships driven toward reefs, torn square sails, broken oars, and crews struggling to keep formation in towering dark-blue seas
+Scene/backdrop: the Aegean off Mount Pelion and Cape Sepias during the Persian invasion, steep forested coastline and dangerous rocks under a storm front
+Style/medium: richly detailed museum maritime painting, painterly realism, atmospheric depth, sophisticated historical-book illustration
+Composition/framing: wide cinematic view from above the wave line, battered Persian triremes across the foreground and middle distance, rocky coast at right, intact ships vanishing into rain at left; leave clean upper corners for later local labels
+Lighting/mood: cold storm light pierced by one distant amber break, violent weather and historical scale without graphic suffering
+Color palette: deep indigo and slate sea, storm grey, wet timber brown, muted ochre sailcloth, pale foam
+Materials/textures: heavy water, spray, wet timber hulls, torn linen sails, rain-blurred forested rock
+Constraints: no written text, no labels, no borders, no modern ships, no gore, no visible bodies in the sea, no fantasy vessels; historically plausible ancient triremes and fully clothed crews; the storm must be the dominant destructive force
+Avoid: cartoon waves, generic pirate ships, Roman galleons, flat diagram, burning fleet, graphic casualties, pseudo-writing, watermark
