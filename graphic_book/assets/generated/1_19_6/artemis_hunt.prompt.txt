@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: scenic inset for a scholarly illustrated coffee-table book page
+Primary request: Artemis beginning her first hunt after arriving from Delos, in the Attic landscape near the Ilisos and Agrai
+Scene/backdrop: rocky Mediterranean river-valley scrub with olive, pine, reeds, and distant low Attic hills
+Subject: Artemis as an adult ancient Greek goddess, fully clothed in a long practical chiton with a short mantle and sturdy sandals, drawing a bow as a deer bounds safely through brush ahead of her; a small distant view of the Ilisos valley anchors the episode geographically
+Style/medium: sophisticated naturalistic historical painting, fine brushwork, museum-illustration quality, rich atmospheric depth, parchment-compatible palette
+Composition/framing: wide landscape inset; Artemis prominent at right, moving leftward; deer at mid-distance, clearly uninjured; bow and landscape immediately legible; room for later local labels near the upper corners
+Lighting/mood: clear dawn light, alert and purposeful, nonviolent
+Constraints: historically grounded clothing and bow; all bodies fully covered; no arrow striking the animal; no blood, wounds, erotic pose, exposed breast, nudity, exact text, symbols, border, watermark, or modern object
+Avoid: pin-up goddess, cartoon, flat vector, silhouette, generic fantasy huntress, glowing magic effects

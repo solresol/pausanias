@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: scenic inset for a scholarly illustrated coffee-table book page
+Primary request: Roman-period workers extracting a monumental white marble block from the quarries of Mount Pentelicus for Herodes Atticus's stadium at Athens
+Scene/backdrop: high sunlit Pentelic quarry with stepped white-marble faces, Attic plain and distant Athens hazy below
+Subject: fully clothed quarry workers using iron wedges, wooden levers, ropes, rollers, and a timber lowering frame; one immense squared marble block being carefully eased toward a sturdy ox-drawn timber sledge
+Style/medium: richly detailed naturalistic historical painting, archaeological-industrial realism, museum-publication quality, textured stone dust and timber, parchment-compatible warm whites and ochres
+Composition/framing: wide landscape inset; quarried block is the visual focus; stepped quarry establishes origin, rigging and ox sledge establish transport; no crowded foreground; space for later labels
+Lighting/mood: hard clear Attic daylight, strenuous controlled work, monumental scale
+Constraints: credible ancient tools and engineering; workers fully clothed; no modern machinery, steel cable, hard hats, explosives, cranes, rails, exact text, letters, border, watermark, nudity, or injury
+Avoid: classroom diagram, flat vector, modern quarry, fantasy machinery, icon-like figures, sparse placeholder scene

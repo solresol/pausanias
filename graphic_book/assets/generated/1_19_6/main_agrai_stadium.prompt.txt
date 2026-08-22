@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: dominant main panel for a scholarly illustrated coffee-table book page
+Primary request: richly painted oblique reconstruction of Agrai across the Ilisos in second-century CE Athens, dominated by Herodes Atticus's immense white Pentelic-marble stadium fitted into a natural crescent-shaped hill whose two arms descend toward the river
+Scene/backdrop: broad elevated view across a green river valley; shallow winding Ilisos and a stone crossing in the foreground; stadium seating and long arena clearly embedded within the folded hillside; a modest small Ionic sanctuary of Artemis Agrotera nearby; Athens and the Acropolis on the opposite side for orientation; pale Mount Pentelicus visible in the far distance
+Style/medium: sophisticated historical landscape painting with archaeological reconstruction discipline, naturalistic light, intricate stone and vegetation texture, restrained parchment-compatible ochres, olives, blue-grey mountains, museum-publication quality
+Composition/framing: wide landscape; river crossing leads the eye from foreground to Agrai; stadium is unmistakable and visually dominant at centre-right; sanctuary is separate and smaller; Athens/Acropolis left background; Pentelicus far right background; leave useful clear areas for later local labels
+Lighting/mood: warm late-afternoon Mediterranean light, atmospheric depth, dignified and inviting
+Constraints: Roman-period Athens; credible scale; stadium is open-air and horseshoe/crescent-shaped with two hillside arms; white marble catches the light; no modern reconstructed stadium, roads, flags, floodlights, railings, or modern city; no exact text, letters, labels, borders, map pins, or callouts; no nudity; no watermark
+Avoid: flat vector terrain, classroom diagram, aerial-photo look, schematic map, icon-like people, fantasy architecture, Parthenon dominating the foreground
