@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: scenic inset for a luxury illustrated classical-history book
+Input images: Images 1 and 2 are approved style and quality references; use their warm painterly finish and historical richness, not their subjects or layouts.
+Primary request: Create a close, museum-like historical study of the satyr sculpture that Praxiteles prized, displayed in an ancient Athenian choragic sanctuary beside a bronze tripod and a carved relief panel.
+Scene/backdrop: Intimate stone niche or small temple interior opening toward warm daylight, with aged bronze and veined marble textures.
+Subject: A graceful youthful satyr sculpture in a relaxed contrapposto, unmistakably marked by small pointed ears and a subtle rustic attribute, but fully draped from shoulders to below the knees and professionally suitable. A bronze tripod and narrative relief are visible behind it.
+Style/medium: Sophisticated naturalistic oil-and-gouache historical illustration, refined anatomy through drapery, luminous stone, subtle patina, tactile surfaces.
+Composition/framing: Landscape inset, sculpture dominant and fully visible, tripod and relief subordinate but readable, useful clean areas for later local labels.
+Constraints: No visible nudity; no erotic pose; no exact text, labels, captions, arrows, frames, or watermark.
+Avoid: generic modern museum display, bare anatomy, cartoon fantasy satyr, horns, goat legs, icon-like rendering, flat vector art, crude schematic scene.

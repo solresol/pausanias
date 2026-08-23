@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: scenic inset for a luxury illustrated classical-history book
+Input images: Images 1 and 2 are approved style and quality references; use their warm painterly richness, not their subjects or layouts.
+Primary request: Illustrate the anecdote in which Phryne's servant rushes into Praxiteles' sculpture workshop and falsely reports a fire, causing the sculptor to turn in alarm toward the works he values most.
+Scene/backdrop: A busy fourth-century BCE Athenian sculpture workshop with unfinished marble figures, clay models, chisels, mallets, wood supports, stone dust, and warm daylight; only a faint harmless haze at a distant doorway, no active conflagration.
+Subject: Fully clothed Phryne watches closely; her fully clothed servant has just rushed in and gestures urgently; Praxiteles turns sharply toward a group of prized sculptures with an alarmed expression. Their body language makes the ruse understandable without text.
+Style/medium: Rich naturalistic oil-and-gouache historical illustration, sophisticated faces, textiles, stone textures, warm chiaroscuro, composed like a classical narrative painting but historically grounded.
+Composition/framing: Landscape inset, three figures clearly separated and fully visible, workshop works surrounding them, strong diagonal movement from messenger to sculptor to sculptures, room for later local labels.
+Constraints: Historically plausible Greek clothing and tools; all people and sculptures fully draped; no exact text, speech bubbles, labels, captions, frames, arrows, fire damage, injury, nudity, or watermark.
+Avoid: melodramatic inferno, modern studio tools, cartoon acting, flat vector scene, schematic storyboard, exposed anatomy, eroticized Phryne.

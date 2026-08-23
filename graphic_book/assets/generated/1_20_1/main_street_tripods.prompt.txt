@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: main scenic panel for a luxury illustrated classical-history book
+Input images: Images 1 and 2 are approved style and quality references for rich parchment-atlas scenic art; Image 3 is a recent continuity reference for warm painterly realism and historical density. Do not copy their subjects or layouts.
+Primary request: Create a richly painted oblique street-level reconstruction of the Street of the Tripods in second-century CE Athens, beginning near the Prytaneion quarter and climbing along the eastern and southern foot of the Acropolis.
+Scene/backdrop: Warm late-afternoon Attic light; the Acropolis and its classical temples rise clearly above the urban slope; a paved narrow street recedes in convincing perspective through dense ancient Athenian buildings and workshops.
+Subject: A sequence of compact elegant choragic monuments resembling small temple-fronted structures, each crowned by a large bronze tripod. Several monuments carry sculpted relief panels. Citizens in historically plausible draped clothing walk the street, giving scale and life.
+Style/medium: Sophisticated painterly historical reconstruction, finely detailed, naturalistic architectural concept art with oil-and-gouache texture, muted ochre limestone, aged bronze, dusty olive green, deep atmospheric blue; polished enough for a coffee-table book.
+Composition/framing: Wide landscape view, strong depth along the street, Acropolis unmistakable in upper background, monuments and bronze tripods prominent at midground and foreground, room around named features for later local callouts.
+Lighting/mood: Warm directional sunlight, long soft shadows, dignified and inhabited rather than theatrical.
+Constraints: Historically plausible Greek architecture and clothing; coherent connected street geometry; several clearly visible bronze tripods and relief-bearing monument faces; no exact text, signs, labels, frames, captions, arrows, borders, or watermark.
+Avoid: flat vector terrain, classroom diagram, icon-like buildings, fantasy ruins, Roman triumphal arches, modern objects, empty sterile street, schematic map treatment, nudity, erotic poses, crude or cartoon rendering.
