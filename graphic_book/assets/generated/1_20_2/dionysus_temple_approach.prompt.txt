@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: scenic orientation inset for a luxury illustrated classical-history book
+Input images: Images 1 and 2 are approved style and quality references; Image 3 is the immediate continuity reference for the Street of the Tripods. Use its coherent Athenian urban slope and painterly finish without copying the exact view.
+Primary request: Create a richly painted oblique exterior approach to a compact temple of Dionysus just off the Street of the Tripods in second-century CE Athens.
+Scene/backdrop: A narrow paved street and stepped side lane beneath the Acropolis, dense stone-and-tile urban fabric, olive and cypress greenery, choragic monuments with bronze tripods visible along the main street, and the Acropolis rising unmistakably beyond.
+Subject: A modest but dignified temple of Dionysus at the end of the stepped side lane, its open doorway glowing warmly; small fully clothed groups approach with vessels and wreaths; the visual connection between temple, Tripod Street, and Acropolis is spatially clear.
+Style/medium: Sophisticated naturalistic oil-and-gouache historical reconstruction, detailed architecture and terrain, warm Attic palette, tactile masonry, polished coffee-table-book quality.
+Composition/framing: Wide landscape inset; temple prominent at one side, connected street receding past choragic monuments, Acropolis high in background; room for later local labels and leaders.
+Lighting/mood: Clear late-afternoon light, dignified urban atmosphere, rich detail without spectacle.
+Constraints: Historically plausible Greek architecture and clothing; all figures fully clothed; no exact text, signs, labels, captions, arrows, frames, borders, or watermark.
+Avoid: flat classroom map, icon-like buildings, fantasy ruins, modern objects, schematic geometry, oversized empty plazas, nudity, crude or cartoon rendering.

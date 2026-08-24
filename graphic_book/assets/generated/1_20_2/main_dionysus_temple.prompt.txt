@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: main scenic panel for a luxury illustrated classical-history book
+Input images: Images 1 and 2 are approved style and quality references for rich parchment-atlas scenic art; Image 3 is the immediate continuity reference for warm painterly Athenian architecture. Use their finish and historical density, not their subjects or page layouts.
+Primary request: Create a richly painted oblique interior reconstruction of a compact temple of Dionysus in second-century CE Athens, near the Street of the Tripods beneath the Acropolis.
+Scene/backdrop: Warm directional daylight enters through the open doorway and clerestory, revealing aged painted plaster, ochre stone, bronze fittings, votive vessels, carved architectural details, and a glimpse of the urban Athenian slope outside.
+Subject: Two clearly separate sculptural displays. In the principal illuminated niche stands a youthful Satyr represented as a fully clothed boy in a knee-length Greek chiton, extending a drinking-cup in one hand. In a second niche stands a distinct group by another sculptor: fully draped youthful Eros beside mature, fully robed Dionysus with restrained ivy attributes. Worshippers in historically plausible draped clothing give scale but do not obscure the statues.
+Style/medium: Sophisticated naturalistic oil-and-gouache historical illustration, detailed museum-quality reconstruction, tactile stone and bronze, warm parchment-compatible palette, polished enough for a coffee-table book.
+Composition/framing: Wide landscape interior with convincing depth; Satyr dominant on the left-center, Eros-and-Dionysus group clearly separate on the right; clean space around each named feature for later local labels and leader lines.
+Lighting/mood: Reverent golden daylight, quiet inhabited sanctuary, rich chiaroscuro without theatrical smoke.
+Constraints: Historically plausible Greek temple interior and clothing; all living figures and sculptures fully clothed; no exact text, signs, labels, captions, arrows, frames, borders, or watermark.
+Avoid: nudity, exposed chest or buttocks, erotic poses, adult faun anatomy, horns or goat legs, fantasy temple, Roman triumphal imagery, flat vector art, classroom diagram, schematic iconography, empty sterile room, crude or cartoon rendering.

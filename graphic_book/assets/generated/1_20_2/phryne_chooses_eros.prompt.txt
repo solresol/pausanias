@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: scenic inset for a luxury illustrated classical-history book
+Input images: Images 1 and 2 are approved style and quality references; Image 3 is the immediate continuity reference for Praxiteles' workshop and the same anecdote. Preserve the warm painterly richness, professional clothing, and historical density without copying its layout.
+Primary request: Illustrate the quiet resolution of Phryne's workshop stratagem: Praxiteles has learned there was no fire, and Phryne deliberately chooses his Eros after his alarm revealed which works he valued most.
+Scene/backdrop: An active fourth-century BCE Athenian sculpture workshop with marble chips, hand tools, clay studies, wooden supports, dusty golden light, and two prized fully draped sculptures displayed separately.
+Subject: Fully clothed Phryne extends an open hand toward the fully draped youthful Eros sculpture in a clear gesture of selection. Fully clothed Praxiteles stands nearby, visibly relieved but recognizing the clever choice. The second prized work, a clothed youthful Satyr, remains distinguishable in the background.
+Style/medium: Rich naturalistic oil-and-gouache historical illustration, sophisticated faces and body language, convincing textiles, stone dust, timber, and marble, composed like a restrained classical narrative painting.
+Composition/framing: Landscape inset; Phryne, Eros, Praxiteles, and the separate Satyr all legible; the selection gesture is unmistakable; clean areas remain for later local labels.
+Lighting/mood: Warm daylight after tension has passed, poised and intelligent rather than romantic or melodramatic.
+Constraints: Historically plausible Greek clothing and tools; all people and sculptures fully clothed; no fire, smoke, damage, exact text, labels, captions, arrows, frames, or watermark.
+Avoid: nudity, eroticized Phryne, romantic embrace, cartoon acting, flat vector scene, schematic storyboard, modern studio tools, crude rendering.
