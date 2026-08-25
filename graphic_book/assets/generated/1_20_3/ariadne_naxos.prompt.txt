@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: scenic mythological inset for a luxury illustrated classical-history book
+Input images: Images 1 and 2 are approved style and quality references; Image 3 is the immediate continuity reference for rich painterly depth and professional full clothing. Use their finish without copying their scene.
+Primary request: Illustrate the painted Ariadne episode as one spatially clear moment: Ariadne sleeps on the Naxian shore, Theseus is already sailing away, and Dionysus arrives to receive her.
+Scene/backdrop: A historically imagined Naxian cove with volcanic rock, low scrub, a small sacred grove, luminous Aegean water, distant island ridges, and an archaic Greek sailing ship pulling away under a square sail.
+Subject: Fully clothed Ariadne sleeps peacefully on layered cloaks beneath an olive tree, entirely covered in opaque ankle-length drapery. Theseus' ship is visibly departing in the middle distance. Fully robed Dionysus approaches from the opposite side with two restrained, fully clothed attendants carrying ivy and a covered vessel; his gesture is protective and calm, not possessive or erotic.
+Style/medium: Sophisticated naturalistic oil-and-gouache mythological landscape, detailed coast and sea, subtle narrative gestures, tactile cloth and vegetation, warm parchment-compatible palette, polished coffee-table-book quality.
+Composition/framing: Wide landscape inset with a clear triangular narrative: Ariadne central foreground, departing ship across the water, arriving Dionysus at the opposite edge; clean areas remain for later local labels and leaders.
+Lighting/mood: Early morning after dawn, quiet transition, melancholy giving way to reassurance.
+Constraints: All figures fully clothed in opaque drapery; Ariadne fully covered from shoulders to ankles; no erotic pose, contact, or exposed body; no exact text, signs, labels, captions, arrows, frames, borders, or watermark.
+Avoid: nudity, bare shoulders or chest, eroticized sleeping pose, abduction imagery, satyrs or maenad frenzy, modern ship, fantasy island, cartoon scene, flat vector terrain, schematic storyboard, crude rendering.
