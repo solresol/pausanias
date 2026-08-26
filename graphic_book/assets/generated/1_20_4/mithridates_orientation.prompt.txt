@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: scenic geographic-orientation inset for a scholarly illustrated page
+Primary request: Create a richly painted oblique relief panorama orienting the kingdom of Mithridates VI from the Euxine/Black Sea across Pontus and mountainous Asia Minor toward the Aegean and distant Athens. In the lower foreground, a fully clothed Mithridates in Hellenistic Pontic royal dress stands with a few advisers and soldiers overlooking harbours, mountain routes, and coastal cities; ships and roads visually connect the broad geography. The topography must feel credible and expansive, not like a flat map. Exact place labels and route lines will be added locally.
+Scene/backdrop: Black Sea coast, Pontic mountains, Anatolian plateau, Aegean islands, and a far western horizon in one atlas-like oblique panorama.
+Subject: geographic reach of the Pontic king around the Euxine and into Asia, with Athens as the distant western consequence.
+Style/medium: sophisticated illuminated relief-map painting blended with naturalistic historical gouache and fine ink, tactile parchment-atlas palette, museum-publishing quality.
+Composition/framing: wide landscape, strong topographic depth, clear sea and mountain forms, leave several uncluttered zones for local labels.
+Lighting/mood: burnished dawn light, strategic scale, controlled drama.
+Constraints: no text, no labels, no flags with writing, no border, no watermark; all figures fully clothed and period-appropriate; geography dominates over portraiture.
+Avoid: modern national borders, modern uniforms, fantasy king, giant character, flat vector map, simple icons, classroom diagram, rectangular seas, sticker-like graphics.

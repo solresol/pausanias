@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: main raster art panel for a scholarly illustrated page
+Primary request: Create a richly painted oblique reconstruction of the Odeion of Pericles beside the Theatre of Dionysus on the south slope of the Athenian Acropolis. The great rectangular music hall has a broad steep roof descending from a central high point like a royal Persian pavilion; a restrained architectural cutaway reveals many orderly interior stone columns, timber roof structure, seating, and a central performance area. The adjacent open-air Theatre of Dionysus, sanctuary precinct, Acropolis cliffs, and ancient Athens must make the location immediately legible.
+Scene/backdrop: Athens in the later Hellenistic or early Roman period, viewed from the south-east in warm late-afternoon light, layered Attic hills in the distance.
+Subject: the odeion is the hero, architecturally plausible, monumental, dense, and richly detailed; theatre and Acropolis are orientation landmarks.
+Style/medium: sophisticated historical gouache and watercolor over fine ink, naturalistic archaeological reconstruction, tactile parchment-atlas palette, museum-publishing quality, strong depth and atmosphere.
+Composition/framing: wide landscape, elevated three-quarter view, useful clear zones near the outer edges for later locally rendered labels and leader lines; no decorative frame.
+Lighting/mood: warm raking sunlight, dignified and observational.
+Materials/textures: Pentelic stone, terracotta, dark aged roof timber, worn paving, olive and cypress vegetation.
+Constraints: no text, no labels, no symbols, no border, no watermark; all people small, fully clothed, and period-appropriate; keep the odeion distinct from the open theatre; preserve credible structural connections and perspective.
+Avoid: modern Athens, Parthenon-style substitution for the odeion, fantasy palace, domes, flat vector terrain, classroom diagram, icon figures, schematic cutaway, empty sparse scene, exposed bodies.

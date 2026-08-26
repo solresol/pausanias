@@ -1,0 +1,16 @@
+Use case: historical-scene
+Asset type: scenic inset for a scholarly illustrated page
+Primary request: Depict the capture of Athens by Sulla's Roman army in 86 BCE as a dramatic but non-graphic historical tableau. From a high south-slope viewpoint, Roman troops with late-Republican shields and standards advance through smoke while the great timber roof of the Odeion of Pericles burns below the Acropolis; the Theatre of Dionysus and walls anchor the scene. The fire belongs clearly to the odeion, not the Acropolis temples.
+Scene/backdrop: Athens at night and first light, smoke and amber fire against blue-grey stone, Acropolis rising behind.
+Subject: destruction of the odeion amid the Roman capture; figures remain secondary and no person is shown personally setting the fire.
+Style/medium: sophisticated historical gouache and watercolor over fine ink, naturalistic, museum-publishing quality, tactile parchment-atlas palette.
+Composition/framing: wide landscape, layered depth, strong architectural silhouette, space near upper corners for later local labels.
+Lighting/mood: grave, smoky, historically grounded, visually rich rather than sensational.
+Constraints: no text, no labels, no border, no watermark; fully clothed figures; distant non-graphic conflict; period-appropriate arms and architecture.
+Avoid: gore, corpses, exposed bodies, Hollywood explosion, modern city, medieval armor, flat illustration, silhouettes, classroom diagram.
+
+Revision applied to the selected first generation:
+
+Use case: precise-object-edit
+Primary request: Change only the foreground and midground Roman soldiers' equipment to historically plausible late-Republican Roman equipment for 86 BCE: mail shirts (lorica hamata) over tunics, simple Montefortino-style bronze helmets, oval or early rectangular scuta, pila and standards appropriate to Sulla's army. Remove all segmented plate armour (lorica segmentata) and other imperial-era equipment.
+Constraints: preserve the composition, viewpoint, burning Odeion, Theatre of Dionysus, Acropolis, city, fire, smoke, lighting, painterly finish, fully clothed figures, and non-graphic tone; no text, labels, border, or watermark.
