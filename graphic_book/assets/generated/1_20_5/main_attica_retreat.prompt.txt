@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: main raster art panel for a scholarly illustrated page
+Primary request: Create a richly painted oblique military-geography reconstruction of Athens and Piraeus in 87–86 BCE immediately after a Roman victory. The Acropolis and walled city of Athens occupy the upper right; Piraeus and its three natural harbours occupy the lower left; the Long Walls corridor, roads, low ridges, olive groves, and the coastal plain connect them. Two small, clearly separated streams of fully clothed retreating troops move away from the central battlefield: Aristion's Athenian faction toward the city, pursued at a distance by Roman troops, while Archelaus's Pontic force withdraws toward Piraeus. The landscape and destinations, not combat spectacle, are the focus.
+Scene/backdrop: Attica from an elevated south-western viewpoint, Saronic Gulf foreground, layered Hymettus and Attic hills beyond, warm late-afternoon haze.
+Subject: the spatial split between retreat to Athens and withdrawal to Piraeus after the Roman victory.
+Style/medium: sophisticated historical gouache and watercolor over fine ink, naturalistic archaeological reconstruction, tactile parchment-atlas palette, museum-publishing quality, strong topographic depth and atmosphere.
+Composition/framing: wide landscape; keep Athens, Piraeus, battlefield plain, and connecting corridor visually distinct; leave useful clear zones around the outer edges for later locally rendered labels and leaders; no decorative frame.
+Lighting/mood: burnished raking sunlight, tense but controlled and observational.
+Materials/textures: pale Attic limestone, dusty roads, olives and scrub, terracotta roofs, blue-green sea, worn shields and cloth.
+Constraints: no text, no labels, no symbols, no route arrows, no border, no watermark; all people small, fully clothed, and appropriate to the early first century BCE; Roman troops use late-Republican mail and helmets; no exact claim about the battlefield site.
+Avoid: gore, corpses, exposed bodies, modern Athens, medieval armour, imperial segmented armour, fantasy fortifications, flat vector terrain, classroom diagram, icon figures, schematic map, sparse empty scene.

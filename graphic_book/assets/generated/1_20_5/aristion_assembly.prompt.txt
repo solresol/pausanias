@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: scenic inset for a scholarly illustrated page
+Primary request: Depict Aristion addressing an Athenian civic assembly in 88 BCE as an elegant, historically grounded tableau. Aristion, fully clothed as an affluent Athenian envoy, speaks from a low stone platform to an animated popular faction; at one side several soberly dressed prominent Athenians turn away and move toward two restrained Roman envoys, visually expressing the divided response without caricature.
+Scene/backdrop: an open Athenian meeting space with stone seating, civic buildings, votive monuments, and a glimpse of the Acropolis, in warm daylight.
+Subject: persuasion, political division, and choice rather than violence.
+Style/medium: sophisticated historical gouache and watercolor over fine ink, naturalistic, tactile parchment-atlas palette, museum-publishing quality, expressive but restrained faces and gestures.
+Composition/framing: wide landscape, Aristion and the popular faction occupy the central visual action; the withdrawing notables remain clearly visible at one side; leave clear upper corners for locally rendered labels.
+Lighting/mood: charged civic debate, dignified and observational.
+Constraints: no text, no labels, no border, no watermark; all figures fully clothed in plausible late-Hellenistic Greek or Roman dress; no modern political symbols.
+Avoid: mob caricature, raised modern placards, violence, exposed bodies, theatrical villain pose, flat illustration, icon figures, classroom diagram.

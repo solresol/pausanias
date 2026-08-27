@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: scenic geographic-history inset for a scholarly illustrated page
+Primary request: Depict the earlier defeat of Archelaus's Pontic expedition among the Magnesians around Mount Sipylus as a non-graphic historical landscape tableau. In rugged foothills below the immense layered mountain, disciplined local Magnesian troops drive back a larger Pontic force along a constricted valley road. Archelaus, fully clothed in Hellenistic command armour, is visibly wounded in the arm and supported onto a horse while his troops withdraw; no dead or mutilated bodies are shown.
+Scene/backdrop: western Asia Minor near Magnesia ad Sipylum, steep ochre and grey Mount Sipylus, wooded gullies, rocky terraces, distant settlement and Hermus valley.
+Subject: the terrain-assisted Magnesian victory and Archelaus's wounding, with the mountain providing unmistakable geographic orientation.
+Style/medium: sophisticated historical gouache and watercolor over fine ink, naturalistic landscape and period detail, tactile parchment-atlas palette, museum-publishing quality.
+Composition/framing: wide landscape, mountain mass dominant, action readable but subordinate to terrain; leave upper corners and a lower edge clear for locally rendered labels and caption.
+Lighting/mood: cool dawn haze with warm light on the mountain, tense, restrained, historically grounded.
+Constraints: no text, no labels, no border, no watermark; all figures fully clothed; early first-century BCE Hellenistic equipment; wound indicated only by a wrapped arm and support, no blood.
+Avoid: gore, corpses, exposed bodies, giant hero, medieval or Roman imperial armour, fantasy mountains, flat vector terrain, silhouettes, classroom diagram.
