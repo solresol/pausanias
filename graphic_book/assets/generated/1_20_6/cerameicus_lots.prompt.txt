@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: scenic urban-history inset for a scholarly illustrated page
+Primary request: Depict the restrained aftermath in Athens's Cerameicus after Sulla's return in 86 BCE. A group of fully clothed Athenian prisoners stands under guard among the cemetery road's stone monuments, grave stelai, boundary walls, and sparse cypresses. In the foreground a sober Roman officer draws one marked clay lot from a wide ceramic vessel while a scribe records the result on a wax tablet. The scene communicates detention, uncertainty, and selection by lot; no execution or physical harm is shown.
+Scene/backdrop: the ancient Cerameicus district outside and within the city gate, with funerary monuments, dusty road, damaged wall masonry in the distance, and subdued late-afternoon sky.
+Subject: confinement in the Cerameicus and the ominous drawing of lots after the wall of Athens fell.
+Style/medium: sophisticated historical gouache and watercolor over fine ink, naturalistic figures and archaeology, tactile parchment-atlas palette, museum-publishing quality.
+Composition/framing: wide landscape; the lot vessel, officer, and scribe are clearly readable in the foreground; prisoners and Cerameicus monuments establish context behind them; leave upper corners and lower edge clear for locally rendered labels and caption.
+Lighting/mood: grave, restrained, humane, observational; tension without spectacle.
+Constraints: no text, no labels, no border, no watermark; all figures fully clothed in plausible first-century BCE Greek or Roman dress; no execution, weapons raised, wounds, blood, bodies, or humiliation.
+Avoid: gore, corpses, exposed bodies, firing-squad composition, theatrical villainy, triumphant poses, imperial segmented armour, modern cemetery, flat illustration, icon figures, classroom diagram.

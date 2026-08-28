@@ -1,0 +1,5 @@
+Use case: precise-object-edit
+Asset type: scenic urban-history inset for a scholarly illustrated page
+Primary request: Replace only the small cross-shaped grave monument in the middle-right background with a historically plausible late-Classical or Hellenistic Greek rectangular grave stele topped by a simple pediment. Preserve every other element exactly: the Roman officer drawing a lot, the ceramic vessel, the scribe and wax tablet, the fully clothed prisoners and guards, city wall and gate, Acropolis, other funerary stelai, lighting, watercolor-and-gouache texture, framing, expressions, poses, and palette.
+Constraints: change only that one cross-shaped monument; no cross or Christian symbol anywhere; no text, labels, border, watermark, execution, wounds, blood, bodies, or nudity; preserve the exact composition and quality.
+Avoid: changes to faces, hands, clothing, vessel, prisoner count, wall, Acropolis, lighting, crop, or overall style.
