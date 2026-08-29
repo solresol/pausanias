@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: scenic inset for a scholarly coffee-table graphic-book page
+Primary request: depict Athens flourishing again under Emperor Hadrian in the second century CE, as a luminous urban recovery after the devastation of Sulla
+Scene/backdrop: a panoramic Hadrianic Athens with the completed Olympieion and active civic precinct in the foreground, repaired streets and buildings, citizens and craftspeople, the Acropolis rising behind as geographic anchor
+Subject: a thriving, inhabited city rather than a portrait of Hadrian; masons finishing fine stonework, citizens moving through colonnades, gardens and fountains giving a sense of restoration and prosperity
+Style/medium: sophisticated museum-quality historical illustration, painterly realism, detailed architecture and atmospheric depth, warm Mediterranean colour, appropriate to a premium illustrated history book
+Composition/framing: wide landscape inset, Olympieion readable in the lower half and Acropolis behind, open sky and layered city depth; leave small clear zones for later local labels
+Lighting/mood: clear morning after rain, luminous, calm, renewed, dignified rather than triumphalist
+Constraints: historically plausible second-century dress and architecture; all figures fully clothed; no modern structures; no ruins-only view; no generated text, captions, labels, signs, borders, or watermark
+Avoid: fantasy city, pristine empty theme park, flat vector art, schematic map, cartoon, collage, giant emperor statue dominating the scene

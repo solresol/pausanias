@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: scenic inset for a scholarly coffee-table graphic-book page
+Primary request: illustrate the Pythia giving an oracle to secret Athenian envoys at Delphi after Sulla's sack of Athens, with the ordinary wineskin motif visibly present but without any written oracle
+Scene/backdrop: the intimate interior or sheltered threshold of Apollo's sanctuary at Delphi, carved stone, laurel branches, the omphalos and a bronze tripod, mountain light entering from one side
+Subject: a fully clothed mature Pythia seated with dignity on the tripod, three weary fully clothed Athenian envoys listening anxiously, and a tied leather wineskin resting clearly beside them as the oracle's visual motif
+Style/medium: richly textured museum-quality historical painting, archaeological realism, subtle encaustic and gouache character, sophisticated faces and fabric, warm restrained palette
+Composition/framing: wide inset composition, Pythia left-of-centre, envoys right-of-centre, wineskin visible in the lower middle, enough breathing room for later local labels
+Lighting/mood: sacred, hushed, uncertain, shafts of cool mountain daylight and warm lamplight
+Constraints: all figures fully clothed; no trance caricature; no smoke spectacle; no nudity; no eroticism; no generated text, Greek letters, captions, labels, signs, frame, or watermark
+Avoid: fantasy magic, glowing eyes, modern archaeology, Roman imperial costume, flat vector art, classroom diagram, cartoon, theatrical melodrama

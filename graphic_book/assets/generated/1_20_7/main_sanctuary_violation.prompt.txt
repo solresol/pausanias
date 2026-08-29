@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: main landscape panel for a scholarly coffee-table graphic-book page
+Primary request: create a richly detailed, historically grounded panoramic reconstruction of Aristion being forcibly removed from a sanctuary of Athena in Athens by soldiers acting under Sulla after the Roman sack of 86 BCE
+Scene/backdrop: an Athenian sanctuary threshold below or near the Acropolis, damaged city walls and smoke-softened Athens beyond, sacred olive tree, stone altar and boundary markers, cult statue visible deep inside the shrine; the Acropolis provides unmistakable geographic orientation but should show a plausible late-Hellenistic skyline rather than modern ruins
+Subject: Aristion, a dignified exhausted Greek man in a modest draped himation, clings to the sanctuary boundary while two late-Republican Roman soldiers pull him away; other soldiers and alarmed Athenians witness the sacrilege; emphasize violated asylum and tense restraint, not combat
+Style/medium: sophisticated museum-quality historical illustration, painterly realism with fine archaeological detail, warm earth pigments, layered atmospheric depth, textured surfaces, natural human anatomy, comparable to an expensive illustrated history volume
+Composition/framing: wide 3:2 panoramic scene with sanctuary and Aristion clearly visible in the middle-left, Roman soldiers across the centre, damaged Athens and Acropolis readable behind; leave some uncluttered visual zones near the outer edges for later local labels
+Lighting/mood: late-afternoon light through smoke and dust, solemn, morally charged, restrained
+Materials/textures: Pentelic and local limestone, terracotta roofs, worn bronze, linen, leather, mail, carved stone, olive foliage
+Constraints: late-Republican Roman equipment only—mail shirts, bronze helmets, scuta or oval shields, pila and standards; all bodies fully clothed; no execution; no blood; no gore; no nudity; no eroticism; no generated text, letters, captions, labels, signs, borders, maps, or watermark
+Avoid: Imperial segmented armour, medieval armour, fantasy costume, modern ruins, modern excavation features, giant supernatural figures, flat vector art, schematic composition, icon figures, cartoon styling, collage, split-screen, decorative lettering
