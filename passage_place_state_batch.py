@@ -15,6 +15,7 @@ from typing import Any
 
 from openai import OpenAI
 
+from openai_batch_utils import wait_for_batch_file_processing
 from pausanias_db import add_database_argument, connect, initialize_schema
 from place_state_candidate_importer import DEFAULT_SOURCE_VERSION
 from recover_place_state_outputs import (
@@ -501,6 +502,7 @@ def submit_batch(conn, client: OpenAI, args: argparse.Namespace) -> None:
     write_submission(conn, payload)
     with batch_file.open("rb") as handle:
         batch_input_file = client.files.create(file=handle, purpose="batch")
+    wait_for_batch_file_processing(client, batch_input_file.id)
     result = client.batches.create(
         input_file_id=batch_input_file.id,
         endpoint="/v1/chat/completions",

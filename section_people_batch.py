@@ -21,6 +21,7 @@ import pandas as pd
 from openai import OpenAI
 from scipy.stats import chi2_contingency
 
+from openai_batch_utils import wait_for_batch_file_processing
 from pausanias_db import schema_path
 
 
@@ -592,6 +593,7 @@ def submit_batch(psql: PsqlRunner, client: OpenAI, args: argparse.Namespace) -> 
     write_submission(psql, payload)
     with batch_file.open("rb") as handle:
         batch_input_file = client.files.create(file=handle, purpose="batch")
+    wait_for_batch_file_processing(client, batch_input_file.id)
     result = client.batches.create(
         input_file_id=batch_input_file.id,
         endpoint="/v1/chat/completions",
