@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: scenic inset for a scholarly coffee-table graphic-book page
+Primary request: illustrate the restrained dream of a Lacedaemonian commander encamped during an invasion of Attica, in which Dionysus commands him to honour the newly dead “Siren” with customary funeral rites
+Scene/backdrop: a historically plausible Spartan military camp in Attica at night, inside or just beyond a simple command tent, with a bronze helmet, round shield, folded red cloak, oil lamp, and distant watchfires; no battle is occurring
+Subject: a fully clothed middle-aged Spartan commander asleep on a campaign couch while a dignified fully robed Dionysus appears in the dream, calm and commanding, gesturing toward a laurel wreath and theatre mask as visual clues to the dead poet; the deity should be human-scaled and solemn rather than theatrical
+Style/medium: richly textured museum-quality historical painting, archaeological realism, subtle encaustic and gouache character, sophisticated faces and fabric, premium illustrated-history quality
+Composition/framing: wide inset composition, sleeping commander in the lower right, robed Dionysus standing left-of-centre, laurel and theatre mask clearly visible between them, enough quiet edge space for later local labels
+Lighting/mood: moonlit indigo and warm oil-lamp gold, numinous, hushed, authoritative, not frightening
+Constraints: all figures fully clothed; historically plausible armour and camp furnishings; no literal winged or bird-bodied Siren; no battle, blood, corpses, nudity, eroticism, generated text, Greek letters, captions, signs, borders, or watermark
+Avoid: fantasy magic beams, glowing eyes, Christian angel imagery, Roman imperial segmented armour, medieval tent, flat vector art, classroom diagram, cartoon, melodrama

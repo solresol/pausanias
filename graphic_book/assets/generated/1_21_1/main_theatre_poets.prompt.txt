@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: main landscape panel for a scholarly coffee-table graphic-book page
+Primary request: create a richly detailed oblique reconstruction of the Theatre of Dionysus on the south slope of the Athenian Acropolis in the Roman-period city known to Pausanias, emphasizing the theatre's display of poet statues
+Scene/backdrop: an inhabited ancient Athens, the stone theatre with orchestra and stage building below, a statue-lined approach and terraces in the foreground, and the Acropolis rising unmistakably above; show complete ancient architecture rather than modern excavated ruins
+Subject: three visually distinct, fully draped honorific statues of male poets prominently placed along the approach, with additional less prominent statues, theatre visitors, attendants, and citizens giving scale; the three principal statues will later be labelled locally as Menander, Euripides, and Sophocles
+Style/medium: sophisticated museum-quality historical illustration, painterly archaeological realism, layered atmospheric depth, fine stone and fabric texture, warm Mediterranean earth colours, comparable to an expensive illustrated history volume
+Composition/framing: wide panoramic 3:2 scene, theatre readable through the centre, three principal poet statues prominent across the lower foreground without crowding, stage building and orchestra visible, Acropolis high in the background; leave calm outer-edge areas for later local labels
+Lighting/mood: clear late-afternoon Attic light, dignified, cultivated, inhabited, with restrained dramatic clouds
+Materials/textures: Pentelic and local limestone, bronze and marble statuary, terracotta roofs, worn steps, linen and wool garments, sparse Mediterranean vegetation
+Constraints: historically plausible Greek and Roman-period dress and architecture; all statues and living figures fully clothed; no modern ruins, railings, signs, cranes, or tourists; no generated text, letters, captions, labels, maps, borders, or watermark
+Avoid: flat vector art, schematic plan, classroom diagram, empty archaeological site, fantasy city, Renaissance theatre, giant portrait heads, duplicated statues, nudity, cartoon, collage, split-screen

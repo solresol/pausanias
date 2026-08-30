@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: scenic inset for a scholarly coffee-table graphic-book page
+Primary request: depict Athenians honouring the dead poet Sophocles with customary funeral rites after the Spartan commander's dream
+Scene/backdrop: a solemn classical Athenian funeral procession moving along a stone road outside the city in soft dawn light, with Attic hills and a distant city wall; historically plausible and intimate rather than grandiose
+Subject: fully clothed mourners accompany a covered bier for an elderly honoured poet; laurel branches, a theatre mask, and a small lyre signify Sophocles and the charm of poetry; actors and citizens walk together with restrained grief
+Style/medium: sophisticated museum-quality historical illustration, painterly realism, fine archaeological detail, warm muted earth pigments, natural anatomy and fabric, appropriate to a premium illustrated history book
+Composition/framing: wide landscape inset, procession moving left to right, covered bier central, theatre mask and lyre clearly readable in the foreground, layered depth and room near edges for later local labels
+Lighting/mood: pale dawn, solemn, tender, civic honour, poetic dignity
+Constraints: non-graphic funeral; bier fully covered; all bodies and figures fully clothed; no corpse visible; no literal mythological Siren; no generated text, captions, labels, signs, borders, or watermark
+Avoid: triumphal parade, Roman imperial funeral, Christian symbols, exposed body, grief caricature, fantasy, flat vector art, schematic illustration, cartoon, collage

@@ -1,0 +1,5 @@
+Use case: precise-object-edit
+Edit target: the generated Sophocles funeral procession.
+Change only the decorated horizontal band along the lower edge of the covered bier cloth: remove every pseudo-letter, pseudo-word, glyph, inscription, symbol sequence, or writing-like mark, and replace the band with a simple historically plausible woven geometric meander and plain fringe that cannot be mistaken for text.
+Preserve the entire composition, figures, faces, poses, fully covered bier, theatre mask, lyre, laurel, landscape, lighting, palette, crop, and painterly style unchanged.
+Ensure there is no readable or pseudo-readable text anywhere in the image. No nudity, no corpse visible, no watermark.
