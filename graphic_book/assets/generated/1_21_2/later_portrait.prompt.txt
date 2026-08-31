@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: scenic inset for a scholarly coffee-table graphic-book page
+Primary request: depict the later addition of a fully draped portrait statue of Aeschylus to the poet display at the Theatre of Dionysus in Roman-period Athens
+Scene/backdrop: an inhabited ancient theatre terrace below the Athenian Acropolis, with stone seating and stage architecture glimpsed behind, older poet monuments already weathered along a statue-lined approach
+Subject: attendants and stoneworkers carefully position a dignified fully draped marble portrait statue of an older bearded poet on a prepared base; nearby older monuments show more weathering, making the installation read as a later commemoration without modern machinery
+Style/medium: sophisticated museum-quality historical painting, archaeological realism, warm Mediterranean earth pigments, nuanced faces, stone, dust, fabric, and bronze texture, premium illustrated-history quality
+Composition/framing: wide landscape inset, new portrait statue prominent just off centre, attendants using historically plausible ropes and timber levers, older monuments and theatre context visible in layered depth, room at edges for local labels
+Lighting/mood: clear late-afternoon Attic light, reflective, civic, commemorative, inhabited
+Constraints: all statues and living figures fully clothed; no generated inscriptions, text, letters, captions, labels, signs, borders, cranes, modern ruins, tourists, or watermark
+Avoid: construction accident, triumphal Roman emperor, flat vector art, schematic installation diagram, empty archaeological site, modern conservation equipment, nudity, cartoon, collage

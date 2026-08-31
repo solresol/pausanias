@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: scenic inset for a scholarly coffee-table graphic-book page
+Primary request: depict ancient Athenian viewers studying a monumental painted commemoration of the battle of Marathon, the earlier artwork Pausanias uses to date Aeschylus' later portrait
+Scene/backdrop: a shaded classical Athenian painted-stoa interior with a very large framed wall painting; the painting itself shows the Marathon coastal plain, ordered Greek hoplites pressing forward, Persian ranks withdrawing toward ships, and distant hills, all non-graphic and clearly rendered as painted imagery rather than a live battle
+Subject: fully clothed citizens, a veteran, and a young viewer stand before the battle painting; one older viewer gestures toward the painted hoplite line and shore, emphasizing civic memory and the artwork's prior existence
+Style/medium: museum-quality historical illustration with a richly painted encaustic wall panel inside a painterly architectural scene, archaeological realism, sophisticated layered textures, premium illustrated-history quality
+Composition/framing: wide landscape inset, monumental battle painting occupying most of the upper and central frame, viewers along the lower edge at varied scales, Marathon plain and ships legible inside the artwork, calm edge areas for later local labels
+Lighting/mood: warm reflected daylight in the stoa, solemn civic memory, no spectacle or gore
+Constraints: historically plausible late-archaic or classical hoplite equipment within the painting; all real and painted figures fully clothed; non-graphic battle; no readable or pseudo-readable writing anywhere; no captions, labels, signs, borders, or watermark
+Avoid: live battlefield mistaken for the display, Roman segmented armour, medieval weapons, blood, bodies, exposed flesh, flat vector mural, modern museum, generated text, cartoon, collage

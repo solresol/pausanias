@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: main landscape panel for a scholarly coffee-table graphic-book page
+Primary request: illustrate the youthful Aeschylus asleep while guarding grape clusters in an Attic field as a dignified Dionysus appears beside him and commands him to compose tragedy
+Scene/backdrop: a richly cultivated ancient Greek vineyard at the last blue moment before sunrise, vine rows descending through an Attic landscape, baskets and hanging clusters of ripe dark grapes near a modest field shelter, the eastern horizon beginning to glow
+Subject: young Aeschylus, fully clothed in a simple linen chiton and mantle, asleep against a folded cloak while keeping watch over the grapes; a human-scaled, fully robed Dionysus stands beside him in restrained dream light and gestures toward a wax tablet, stylus, and plain theatre mask; the scene should clearly connect vineyard watch, divine command, and the coming daybreak
+Style/medium: sophisticated museum-quality historical illustration, painterly archaeological realism with subtle encaustic and gouache character, layered atmospheric depth, fine vine, grape, earth, fabric, and wood texture, premium illustrated-history quality
+Composition/framing: wide panoramic 3:2 scene, sleeping youth in the lower centre-left, Dionysus standing centre-right, grape clusters prominent in the foreground, wax tablet and mask readable but not oversized, brightening horizon behind; leave calm outer-edge areas for later local labels
+Lighting/mood: indigo night yielding to amber dawn, numinous but intimate, cultivated, expectant, no theatrical magic effects
+Materials/textures: dusty soil, gnarled vine wood, translucent grape skins, woven baskets, linen and wool garments, wax tablet, aged wood mask
+Constraints: historically plausible archaic or early-classical Greek clothing and field objects; all figures fully clothed; Dionysus dignified and human-scaled; no generated text, letters, captions, labels, signs, maps, borders, or watermark
+Avoid: flat vector art, classroom diagram, icon figures, fantasy deity, glowing beams, modern vineyard wires or bottles, Renaissance costume, giant mask, nudity, eroticism, cartoon, collage, split-screen
