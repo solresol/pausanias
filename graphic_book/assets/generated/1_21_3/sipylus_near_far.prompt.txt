@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: scenic landscape inset for a Pausanias graphic-book page
+Input images: 1.1.4 and 1.1.5 are style and finish references only; do not copy their page layouts, labels, frames, or text
+Primary request: create one seamless painterly diptych of the same weathered rock formation on Mount Sipylus in Lydia, seen close up on the left and from farther down the mountain on the right, visualizing Pausanias' observation that near at hand it is merely rock but from a distance resembles a bowed grieving woman shedding tears
+Scene/backdrop: rugged Anatolian limestone cliff, sparse pines and scrub, wet mineral streaks on the rock; left close view emphasizes fissures, strata, lichen and water with no literal human face; right distant view shows the identical formation naturally cohering into the subtle silhouette of a seated or bowed mourning woman, with mineral water suggesting tears
+Style/medium: sophisticated romantic archaeological landscape painting, rich natural texture, atmospheric perspective, restrained visual ambiguity, coffee-table-book finish
+Composition/framing: wide landscape, natural central transition between close and distant viewpoints, same rock unmistakably related across both halves, generous scenery, no hard divider and no text
+Lighting/mood: overcast after rain with a break of warm light, mournful but not supernatural horror
+Constraints: landscape feature only, not a living giant woman; no labels, signs, inscriptions, letters, pseudo-text, watermark, people, nudity, or modern structures
+Avoid: split-screen infographic, optical-illusion gimmick, face carved like a statue, flat vector mountains, classroom diagram, fantasy creature

@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: main painterly art panel for a Pausanias graphic-book page
+Input images: 1.1.4 and 1.1.5 are style and ambition references only; do not copy their layouts, labels, frames, or text
+Primary request: reconstruct the south slope of the Athenian Acropolis in Pausanias' Roman-period setting, viewed obliquely upward from above the Theatre of Dionysus
+Scene/backdrop: inhabited stone theatre in the foreground, rugged south-slope limestone and sparse Mediterranean vegetation in the middle, massive Acropolis southern fortification wall above; a natural rocky cave sits high above the theatre, with a bronze tripod monument clearly visible immediately above its entrance; on the wall is a distinct gilded head of Medusa surrounded by a round protective aegis, architectural ornament rather than a living monster
+Style/medium: sophisticated historical matte painting with the luminous hand-painted richness, layered topography, atmospheric depth, fine stone texture, and coffee-table-book finish of the references
+Composition/framing: wide 3:2 landscape, theatre foreground leading the eye upward through cave and tripod to the Southern Wall; ornament, cave, and tripod separated clearly enough for later local callout leaders; no decorative frame
+Lighting/mood: warm late-afternoon Attic light, restrained human activity, scholarly and evocative
+Constraints: historically plausible classical and Roman-period materials; all people fully clothed; no Parthenon-dominant postcard composition; no modern objects; no labels; no signs; no lettering; no watermark
+Avoid: flat vector terrain, classroom diagram, icon figures, fantasy monster, readable or pseudo-readable text, excessive gold, nudity, violence

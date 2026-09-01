@@ -1,0 +1,6 @@
+Use case: precise-object-edit
+Asset type: scenic landscape inset for a Pausanias graphic-book page
+Input image: edit target; preserve the painterly Anatolian mountain setting, left close rock, lighting, palette, wet mineral streaks, and wide composition
+Primary request: change only the distant formation on the right so it no longer resembles a giant head, skull, animal, or fantasy creature. Make it a credible irregular mountain outcrop whose overall mass, only from this distant viewpoint, subtly suggests the silhouette of a fully draped woman seated and bowed forward in grief. The suggestion should come from ridge, shadow, and one narrow mineral-water streak, not from carved facial features, eyes, mouth, hair, limbs, or a literal statue.
+Constraints: preserve a natural geological landscape; no people; no text; no divider; no modern structures; no watermark; no nudity
+Avoid: giant profile, ape-like rock, skull, fantasy being, carved colossus, obvious optical-illusion gimmick, human anatomy rendered in stone

@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: scenic inset for a Pausanias graphic-book page
+Input images: 1.1.4 and 1.1.5 are style and finish references only; do not copy their page layouts, labels, frames, or text
+Primary request: show the image Pausanias reports inside a rocky Athenian cave, represented as an ancient painted relief or mural in which Apollo and Artemis pursue the children of Niobe
+Scene/backdrop: dim honey-coloured cave interior, textured painted plaster or shallow relief illuminated by a small shaft of daylight; fully robed Apollo with bow and fully robed Artemis with bow at opposite sides, frightened but fully clothed Niobid youths moving away between them
+Style/medium: richly painted archaeological reconstruction, sophisticated, tactile mineral pigments and stone, dramatic but restrained
+Composition/framing: wide landscape panel, clearly an artwork within a cave rather than a literal battlefield; figures large and readable; leave edges free of lettering
+Lighting/mood: solemn museum-quality reconstruction, warm light against cool cave shadow
+Constraints: non-graphic; no arrows striking bodies; no wounds, blood, corpses, exposed breasts, genitals, buttocks, erotic posing, labels, inscriptions, pseudo-text, or watermark
+Avoid: action-movie violence, horror, flat diagram, cartoon, iconography sheet, modern museum display
