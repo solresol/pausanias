@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: scenic inset for a premium illustrated classical-history book
+Primary request: Create a solemn reconstruction of the legendary first homicide trial in Athens, with Ares standing before an early council of judges on the rocky Areopagus.
+Scene/backdrop: An open-air judicial gathering on a rugged Athenian rock at dusk, with the Acropolis mass and ancient city subdued in the distance. Seated elders form a grave semicircle around a central speaking space; simple stone seats, oil lamps, and staffs establish civic ritual rather than spectacle.
+Subject: Ares appears as a powerful but fully clothed warrior-god with helmet set aside and weapons lowered or absent, standing to answer the council. Alcippe, also fully clothed, remains safely beside older family attendants at the edge of the assembly. The image must foreground judgment, testimony, and the origin of homicide law. Do not depict Halirrhothius, the assault, or the killing.
+Style/medium: Museum-quality historical gouache, watercolor, and fine ink on warm paper; complex faces, layered stone, cloth, lamplight, and atmospheric distance; restrained and credible rather than theatrical fantasy.
+Composition/framing: Wide landscape inset with Ares central-left, judges in a curved arrangement, Alcippe protected at one side, and the rocky civic setting clearly legible. No empty foreground and no internal text.
+Lighting/mood: Late dusk with warm oil-lamp pools against cool violet-grey stone; solemn, judicial, humane, and non-graphic.
+Color palette: Warm ochre and umber, muted iron red, charcoal, lapis-grey distance, amber lamplight, cream and olive garments.
+Constraints: All figures fully clothed; no assault; no killing; no corpse; no injury; no blood; no raised weapons; no nudity or eroticization; no readable inscriptions; no labels; no border; no watermark.
+Avoid: Courtroom furniture, Roman imperial dress, fantasy armor, battle scene, punishment scene, flat icon figures, empty stage, pseudo-text, cartoon expressions.

@@ -1,0 +1,9 @@
+Use case: historical-scene
+Asset type: subordinate orientation-map raster for a premium illustrated classical-history book
+Primary request: Create a richly textured oblique relief panorama of the central and eastern Mediterranean suitable as the base for a tiny route inset, showing southern Italy and Sicily at left, mainland Greece and Athens near the upper centre, Crete below, and the surrounding Aegean and Ionian seas.
+Scene/backdrop: Geographic bird's-eye terrain with credible coastlines, mountain relief, islands, and deep blue-green water, viewed from a high oblique angle.
+Style/medium: Hand-painted historical atlas relief in watercolor, gouache, fine ink, and subtle aged-paper texture; sophisticated museum-book cartography with atmospheric depth.
+Composition/framing: Wide landscape strip with Sicily, Athens, and Crete all clearly within frame and enough open water for a locally drawn route. Geographic readability matters more than decorative detail.
+Lighting/mood: Warm raking light over ochre-green relief, restrained haze, dark teal sea.
+Constraints: No labels, no letters, no route line, no pins, no compass rose, no border, no people, no ships, no monuments, no watermark.
+Avoid: Flat classroom map, solid-color polygons, rectangular sea, blocky mountains, fantasy geography, satellite-photo look, pseudo-text, iconography.
