@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: dynamic scenic inset for a scholarly illustrated coffee-table book
+Primary request: ancient Sarmatian mounted rope tactic on the open Eurasian steppe: a rider has thrown a rope around an enemy and wheels the horse sharply to pull the entangled opponent off balance
+Scene/backdrop: windswept grass steppe beneath a dramatic but natural sky, distant low ridges, no buildings
+Subject: two fully clothed Sarmatian horsemen with compact ancient tack; the foreground rider turns a powerful horse while a taut rope visibly loops around the torso and arms of a standing armed opponent who is being pulled off balance; a second rider supports in the middle distance
+Style/medium: cinematic painterly historical realism, energetic equestrian anatomy, richly textured coffee-table-book illustration
+Composition/framing: wide landscape action, rope path unmistakably readable from rider's hand to entangled opponent, horse visibly pivoting, no embedded labels
+Lighting/mood: late-afternoon light, dust and motion, tense but non-graphic
+Color palette: tawny grass, storm blue, chestnut horses, muted wool and leather
+Constraints: historically plausible ancient clothing, weapons, tack, and rope; all figures fully clothed; no wounds, gore, or visible injury; no text; no watermark
+Avoid: cowboy imagery, modern saddle, stirrups, plate armour, fantasy costume, lasso around neck, gore, flat vector style, silhouetted icon figures

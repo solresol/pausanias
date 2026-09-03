@@ -1,0 +1,12 @@
+Use case: historical-scene
+Asset type: dominant main-panel art for a scholarly illustrated coffee-table book
+Primary request: an archaeological reconstruction of the Sarmatian breastplate described by Pausanias, displayed among precious objects in an Athenian sanctuary-gallery of the second century CE
+Scene/backdrop: warm Greek stone interior with a receding colonnade, restrained votive objects, and sunlit dust; the breastplate stands on a simple dark wooden support
+Subject: a sophisticated scale cuirass made from hundreds of small overlapping pale horn or hoof-like plates, individually shaped and pierced, joined with dark leather lacing, with reinforced shoulder pieces and a believable flexible torso construction
+Style/medium: richly detailed painterly historical realism, museum-quality reconstruction, subtle engraved-atlas character, tactile materials, natural depth
+Composition/framing: wide landscape, breastplate large and dominant slightly off centre, three-quarter view, enough surrounding context for local callout leaders; no embedded labels
+Lighting/mood: warm raking Mediterranean light, burnished highlights, contemplative discovery
+Color palette: parchment gold, honey limestone, umber leather, ivory horn, muted red-brown
+Materials/textures: individually varied horn scales, worn leather thongs, aged wood, carved limestone, soft dust
+Constraints: historically plausible ancient setting; armour clearly reads as ingenious non-iron construction; no people; no text; no labels; no watermark; no modern museum fittings
+Avoid: flat vector art, diagram, iconography, schematic cutaway, modern glass cases, steel armour, chainmail, fantasy armour, empty sparse setting

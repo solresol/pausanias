@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: scenic inset for a scholarly illustrated coffee-table book
+Primary request: a Sarmatian craftsperson shaping bone spear and arrow points and assembling a composite horn bow because iron is unavailable
+Scene/backdrop: richly textured timber-and-felt steppe workshop, workbench with bone blanks, horn strips, sinew, leather cord, awl, scraper, and finished bone-tipped darts
+Subject: one fully clothed ancient Sarmatian craftsperson in practical wool and leather clothing, hands actively fitting a pale bone point to a wooden shaft; an elegant horn bow lies visibly under construction nearby
+Style/medium: painterly historical realism, archaeological reconstruction, tactile natural materials, subtle engraved-atlas character
+Composition/framing: wide intimate workshop scene, hands and materials clearly readable, no embedded labels, useful open edges for local callouts
+Lighting/mood: warm side light from a doorway, concentrated craftsmanship
+Color palette: dark timber, ochre felt, ivory bone, amber horn, muted red and brown clothing
+Constraints: period-plausible tools and clothing; fully clothed figure; bone points and horn bow visually unmistakable; no text; no watermark; no modern tools
+Avoid: factory, forge, iron weapons, fantasy costume, nudity, flat illustration, diagram, clutter that hides the key craft action

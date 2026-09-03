@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: subordinate geographic orientation inset base for a scholarly illustrated atlas page
+Primary request: richly textured oblique relief view spanning the Aegean, Anatolia, the Black Sea, and the north-Pontic Eurasian steppe, suitable for later local labels connecting Athens to the Sarmatian world
+Scene/backdrop: regional terrain from southern Greece through the Black Sea to broad northern grasslands, with believable coastlines, mountain relief, river valleys, and atmospheric distance
+Style/medium: painterly shaded-relief atlas art blended with historical landscape painting, tactile parchment undertone, sophisticated and geographically credible
+Composition/framing: wide east-west panorama with Athens/Aegean toward lower left, Black Sea central, open steppe across the upper and right areas; no labels or borders
+Lighting/mood: soft oblique sunrise revealing topography
+Color palette: deep desaturated blue water, olive-brown Mediterranean land, ochre-green steppe, pale mountain ridges
+Constraints: no text; no labels; no route line; no pins; no watermark; visually rich enough for a small inset
+Avoid: classroom map, flat polygons, rectangular seas, oversized mountains, icons, modern political borders, satellite-photo look
