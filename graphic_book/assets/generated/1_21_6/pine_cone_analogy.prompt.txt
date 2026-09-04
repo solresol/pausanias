@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: scenic comparison inset for a luxury illustrated historical atlas page
+Primary request: natural-history still life comparing a fresh green pine cone with pierced horse-hoof armour scales and a small finished sample of overlapping scale armour
+Scene/backdrop: dark warm wooden work surface with linen, awl, sinew, and softly blurred steppe-workshop background
+Subject: green pine cone scales and translucent horn-brown hoof plates arranged so their overlapping geometry is immediately comparable; no anatomical remains
+Style/medium: sophisticated archaeological still-life painting, photoreal tactile detail, warm parchment-atlas palette
+Composition/framing: wide landscape crop with pine cone on the left, prepared scales at centre, laced armour sample on the right; clean negative space near upper corners for local labels
+Lighting/mood: warm raking museum light, precise and contemplative
+Constraints: no written text, no labels, no watermark, no people, no blood or gore
+Avoid: classroom diagram, split-screen infographic, flat vector shapes, metal scales, plastic appearance, pseudo-lettering

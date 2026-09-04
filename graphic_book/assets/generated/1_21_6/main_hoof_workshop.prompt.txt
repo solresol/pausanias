@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: main raster panel for a luxury illustrated historical atlas page
+Primary request: depict a Sarmatian craftsperson manufacturing a breastplate from cleaned and split horse-hoof scales, piercing the pieces and sewing overlapping rows with sinew
+Scene/backdrop: richly detailed leather-and-timber workshop at the open edge of a north-Pontic steppe camp, horse herd visible beyond the felt tent
+Subject: fully clothed adult artisan at a workbench; pale translucent-brown hoof scales in clear production stages; shaped cuirass support; awl, sinew cord, drilled holes, and a finished hoof-scale breastplate nearby
+Style/medium: sophisticated museum-grade historical reconstruction, painterly realism, tactile materials, warm parchment-atlas palette, fine archaeological illustration
+Composition/framing: wide landscape composition; artisan and armour central; readable foreground production sequence; leave modest darker margins for local callouts
+Lighting/mood: warm directional daylight, dignified and industrious, rich depth and texture
+Constraints: no written text, no labels, no watermark; historically grounded Iron Age steppe clothing and tools; clearly show that scales are hoof material rather than metal; every person fully clothed
+Avoid: blood, slaughter, carcasses, severed animal parts, gore, nudity, modern tools, fantasy armour, flat vector style, diagrammatic layout, cartoon imagery, pseudo-lettering

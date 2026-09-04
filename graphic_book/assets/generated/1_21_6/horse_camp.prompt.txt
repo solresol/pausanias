@@ -1,0 +1,10 @@
+Use case: historical-scene
+Asset type: scenic contextual inset for a luxury illustrated historical atlas page
+Primary request: a historically grounded nomadic Sarmatian camp with a large horse herd moving across the north-Pontic grassland
+Scene/backdrop: broad dry-green steppe beneath a dramatic but natural sky, felt tents and timber carts in the middle distance
+Subject: fully clothed riders and herders managing many horses; tack, packs, and mobile camp life visible; no combat
+Style/medium: sophisticated panoramic historical painting, painterly realism, fine environmental and textile detail, warm parchment-atlas palette
+Composition/framing: wide landscape panorama with herd sweeping diagonally through the scene, camp clearly visible, strong depth and spatial orientation; leave small quiet areas for local callouts
+Lighting/mood: late-afternoon gold, expansive and dignified
+Constraints: no written text, no labels, no watermark, all figures fully clothed, historically plausible Iron Age steppe material culture
+Avoid: sacrifice, slaughter, blood, carcasses, gore, modern saddles or vehicles, fantasy costume, flat vector style, cartoon imagery, pseudo-lettering

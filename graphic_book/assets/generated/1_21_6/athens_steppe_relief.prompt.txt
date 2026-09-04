@@ -1,0 +1,8 @@
+Use case: historical-scene
+Asset type: subordinate geographic-orientation inset for a luxury illustrated historical atlas page
+Primary request: an oblique painted relief view from Athens and the Aegean across the Black Sea to the north-Pontic steppe
+Scene/backdrop: credible Mediterranean, Balkan, Anatolian, Black Sea, and steppe topography seen as a refined hand-painted relief map
+Style/medium: richly textured antique atlas relief, painterly terrain and coastlines, parchment earth tones, deep blue-green seas
+Composition/framing: wide horizontal strip; Athens region at lower left, Black Sea central, north-Pontic steppe upper right; geography legible without labels
+Constraints: no written text, no labels, no borders, no route line, no watermark; local code will add exact annotations
+Avoid: flat classroom map, block colours, geometric icons, oversized mountains, modern political boundaries, pseudo-lettering
