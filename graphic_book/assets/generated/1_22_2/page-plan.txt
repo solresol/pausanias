@@ -1,0 +1,13 @@
+Passage: 1.22.2, earliest missing image in numeric order of local SQLite translations.
+Key subjects: Theseus sends Hippolytus to Pittheus at Troezen; Theseus later comes for purification after killing Pallas and his sons; Phaedra first sees Hippolytus; Troezen's pierced myrtle tradition.
+Main visual: richly painted Bronze Age-inspired Troezen courtyard with Phaedra watching Hippolytus from a shaded portico and distant Saronic water. No literal violence or erotic staging.
+Insets: Hippolytus entrusted to elderly Pittheus; close myrtle study with visibly pierced leaves and a bronze hairpin.
+Orientation: exact local text identifies Troezen in northeastern Peloponnese across Saronic Gulf from Athens; main scene includes coastal landscape. Reconstructed architecture is explicitly labelled, not archaeological evidence.
+Approved style references inspected: graphic_book/images/1/1/4.png and 1/1/5.png. Parchment framing, sepia typography and leaders with rich painterly raster art. Layout continuity: renderer 1.22.1.
+Text: verbatim local SQLite English translation, all typography rendered locally with measured wrapping and actual bbox validation, padded rectangles, fail before save on overflow.
+
+Acceptance review, 2026-09-08:
+Built-in imagegen generated courtyard.png and studies.png from the two saved prompts. Insets use equal halves of studies.png, contained without subject clipping. Main art fit to 932x622.
+13 deterministic actual-bbox checks passed with 12px padding; exact SQLite translation at 18px, smallest auxiliary text 15px. No overflowing block. Full-size candidate and final PDF raster visually inspected: rich art, clear orientation, relevant figure leaders, no border collisions, unreliable baked text or unsuitable content. Final PNG matches inspected candidate.
+HTML reader identifies 1.22.2 as 129 of 129; PDF has 130 pages. Combined backup push and verify passed: 357 component assets match, two new uploads; S3 and raksasa finished page verified against local bytes/checksum.
+Final PNG SHA-256: f525955ce85f93989ef09e33d2436293160bf434e22cb068b0eb994f7d9c4368.
