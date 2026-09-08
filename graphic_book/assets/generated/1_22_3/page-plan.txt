@@ -1,0 +1,9 @@
+Passage: 1.22.3, earliest missing image in numeric order in local SQLite translations.
+Key subjects: Theseus' unification of Attic demes; Aphrodite Pandemos and Peitho; replacement cult statues; Earth Kourotrophos and Demeter Chloe; priests explain epithets.
+Main visual: rich painted reconstruction of an Athenian sanctuary terrace beneath the Acropolis; two fully draped female cult statues, worshippers and altar. Architecture and statue forms are illustrative, not an archaeological reconstruction of known layouts.
+Insets: civic gathering and offerings (Theseus' institution of common worship); priest explaining worship beside green grain and a mother with clothed child (Earth and Demeter epithets).
+Orientation: Athens, Attica; sanctuary sequence on the approach to the Acropolis, with explicit reconstruction boundary. No map necessary for this primarily cultic passage.
+Approved style references viewed: graphic_book/images/1/1/4.png and 1/1/5.png. Layout continuity: renderer for 1.22.2.
+Exact English translation from local pausanias.sqlite; all typography measured with padded actual-bbox checks before save. All figures and statues fully clothed.
+
+Review: Full-size candidate inspected; initial leader at column moved onto the left cult statue. Revised page and rendered PDF page 131 accepted: detailed raster art, clear Athens orientation, correct subject fit, fully clothed figures, no text collisions. All 12 actual-bbox text checks passed with 12px padding, exact SQLite passage at 20px; minimum auxiliary font 15px. Final image copied from inspected candidate. Local build passed with 130 illustrated passages and 131 PDF pages. Built-in imagegen supplied both component assets; local Pillow renderer adds all typography and leader/frame elements.
