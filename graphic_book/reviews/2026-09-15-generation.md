@@ -35,3 +35,7 @@ Final normal build: PASS, 136 illustrated passages / 137 PDF pages; target page 
 Final backup push and combined verify: PASS, 381 assets and manifest; raksasa image mirror and S3 finished pages match. Independent local/raksasa/downloaded-S3 replacement hashes all 8cc70998e2d96f34898376330801c6ba11a57287b3289029b6e74d9e70e76509.
 New 1.23.1 remained unchanged, SHA-256 f4a412269450dea9d235c62e5e9eeb8bd110c6be7e9ac351b3b5cd54206e5dc4. Original and all prior component art retained outside the canonical page tree. Pre-existing README modification excluded.
 Replacement source commit: this report is included with renderer, revision prompt, page plan, archived source text and asset manifest in the replacement commit; push result recorded in automation memory after command completion.
+
+## User-requested caveat removal — 2026-09-15
+
+Removed the complete bottom caveat beginning “Illustrative terrain and troop positions” at the user's request. Artwork, labels and complete verbatim passage unchanged. Revised candidate retained as output/replacements/1_20_5/20260915T023624Z/candidate-no-caveat.png and promoted to canonical 1/20/5.png. Seven measured blocks pass; body remains 29/28px. Full PNG and rebuilt PDF page 119 visually reviewed. HTML/PDF build and combined raksasa/S3 backup push/verify pass; 381 component assets unchanged. Current local/raksasa/downloaded-S3 SHA-256: ef756018553712a4a89af788bcc5618e153bbe226784f6bb4da0afbeaee66d8b. Earlier hashes above describe the prior accepted version; original archive remains intact.

@@ -44,7 +44,6 @@ def render(output: Path, preflight=False):
     text('orientation',(24,870,1576,935),'ATTICA · Athens inland / Piraeus on the coast · The separate retreats in Pausanias’ account',25,23,True)
     text('translation-1',(24,950,772,1328),parts[0],29,26)
     text('translation-2',(808,950,1576,1328),parts[1],29,26)
-    text('interpretation',(24,1340,1576,1410),'Illustrative terrain and troop positions, not a surveyed battlefield. The earlier fighting near Sipylus belongs to western Asia Minor.',24,22)
     draw.line((790,968,790,1308),fill='#a6a294',width=1)
     # Endpoints visually verified on the Acropolis and Piraeus harbour quay.
     for start, end in [((1330,205),(1288,286)), ((420,670),(630,500))]:
