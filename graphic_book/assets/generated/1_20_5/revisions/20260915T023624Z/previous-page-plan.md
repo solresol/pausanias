@@ -1,0 +1,12 @@
+# Page plan — Pausanias 1.20.5
+
+- **Passage ID:** 1.20.5.
+- **Key places, events, and objects:** Aristion's embassies for Mithridates; the divided Athenian response; the Roman victory and pursuit into Athens; Archelaus and the Pontic forces withdrawing into Piraeus; Archelaus's earlier invasion and defeat among the Magnesians around Mount Sipylus.
+- **Main visual:** a richly painted oblique military-geography reconstruction of Athens and Piraeus in 87–86 BCE. The city, Long Walls corridor, roads, harbours, Acropolis, and surrounding terrain establish the two divergent retreats after the Roman victory: Aristion's Athenians toward the city and Archelaus's forces toward Piraeus. Exact labels, route strokes, and callouts are added locally.
+- **Inset 1:** a historically grounded civic assembly scene in Athens, with Aristion addressing a turbulent popular faction while soberly dressed notable Athenians withdraw toward a Roman delegation. The crowd remains non-caricatured and all figures are fully clothed.
+- **Inset 2:** a non-graphic battle tableau in the foothills of Mount Sipylus, where local Magnesian troops repel Archelaus's Pontic force and wound the general; distant fallen troops are omitted.
+- **Orientation strategy:** the main panel provides the immediate Attic geography and separates Athens from Piraeus. The Sipylus inset widens the frame to western Asia Minor and explains Pausanias's retrospective account of Archelaus.
+- **Approved style anchors:** `graphic_book/images/1/1/4.png` and `graphic_book/images/1/1/5.png` for parchment-atlas grammar, topographic depth, rich scenic finish, and coffee-table-book ambition.
+- **Continuity reference:** `graphic_book/images/1/20/4.png` for the current chapter's panel hierarchy and restrained local labels only; it does not supersede the approved anchors.
+- **Evidence boundary:** Pausanias supplies Aristion's role, the split among Athenians, the decisive Roman victory, the separate retreats toward Athens and Piraeus, and Archelaus's earlier reverse near Sipylus. Exact battlefield locations, formations, road alignments, clothing, gestures, viewpoints, and the visual form of the assembly are reconstructions. The main panel is an orientation reconstruction, not a claim to a precisely located engagement.
+- **Suitability:** all figures fully clothed; fighting is distant and non-graphic; no bodies, gore, nudity, eroticized figures, logos, watermarks, or generated lettering.
