@@ -57,7 +57,7 @@ def render(output: Path, preflight=False):
         page.save(output)
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--output',type=Path,default=ROOT/'graphic_book/images/1/23/5.png')
+    parser.add_argument('--output',type=Path,default=ROOT/'graphic_book/images/1/23/6.png')
     parser.add_argument('--preflight',action='store_true')
     args=parser.parse_args()
     render(args.output,args.preflight)
