@@ -1,0 +1,5 @@
+Use case: precise-object-edit
+Asset type: corrected principal raster illustration for Pausanias 1.23.7
+Primary request: change only the distant exterior background visible through and above the left colonnade. Remove the modern-looking white city buildings, hilltop monument and any post-antique skyline. Replace them with unbuilt ancient Attic terrain: low dry blue-grey hills, sparse olive scrub and clear sky, with no structures.
+Invariants: preserve exactly the bronze boy and his basin, the bronze Perseus, the seated fully draped marble Artemis, deer, stoa, shrine, columns, olive tree, pedestals, paving, composition, crop, perspective, cool morning lighting, shadows, colors and all foreground detail. Do not alter any figure, statue, hand, face, clothing, object or architecture.
+Constraints: no text, pseudo-writing, labels, borders, watermark, modern buildings, city skyline or hilltop monument.

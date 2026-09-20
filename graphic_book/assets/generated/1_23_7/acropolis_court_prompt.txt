@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: principal raster illustration for a coffee-table edition of Pausanias 1.23.7
+Primary request: an evocative ancient Athenian Acropolis sculpture court near the city sanctuary of Artemis Brauronia, presenting the three works Pausanias names without claiming a recovered exact arrangement
+Scene/backdrop: an open sacred enclosure south of the Propylaia, with a limestone stoa and two restrained closed wings rather than an invented temple; glimpses of the Attic sky and distant hills, no modern ruins or museum setting
+Subject: in the near foreground, a finely modeled bronze statue of a fully clothed Greek boy in a knee-length chiton holding a broad shallow lustral basin; farther within the court, a life-size bronze Perseus in a short belted chiton and cloak, with helmet and a small stylized gorgoneion emblem referring to Medusa but no severed head or violence; in the architectural shadow, a larger-than-life seated, fully draped marble Artemis with youthful braided hair, visible as the sanctuary's cult image
+Style/medium: sophisticated naturalistic editorial painting with archaeological restraint, detailed bronze patina, marble, cloth folds and worn limestone; rich finished raster art, not a reconstruction diagram
+Composition/framing: tall portrait canvas, medium-wide eye-level oblique view down the court; the boy and basin dominate the lower foreground, Perseus provides a middle-distance counterpoint, and the seated Artemis anchors the shaded rear; every statue fully within frame with generous headroom
+Lighting/mood: cool clear morning light entering laterally, blue-violet architectural shade and restrained sunlit highlights; contemplative rather than theatrical
+Color palette: deep bronze and malachite patina, pale limestone, muted indigo shadow, small restrained terracotta accents
+Constraints: historically plausible Greek clothing and materials; all figures fully clothed; no Parthenon façade as backdrop; no exact claim about a lost arrangement; no living worshippers; no nudity; no blood; no pseudo-writing; no text, labels, borders, callouts or watermark; art fills the canvas
+Avoid: museum display, fantasy armor, Roman imperial costume, warm sunset ochre, flat vector terrain, schematic composition, icon-like figures, dramatic decapitation

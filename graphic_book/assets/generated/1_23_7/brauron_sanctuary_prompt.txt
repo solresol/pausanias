@@ -1,0 +1,11 @@
+Use case: historical-scene
+Asset type: secondary raster illustration for a coffee-table edition of Pausanias 1.23.7
+Primary request: a historically restrained landscape portrait of the principal sanctuary of Artemis at Brauron on the east coast of Attica, evoking the place of the ancient wooden image mentioned by Pausanias
+Scene/backdrop: low sacred precinct beside the Erasinos wetland and a rocky Attic hillside, with the sanctuary's Doric stoa, stone courtyard and modest shrine spaces integrated into the landscape; no sea cliff, city skyline or Acropolis monuments
+Subject: the sanctuary architecture and marsh-edge landscape are primary; within a shadowed open shrine at one side, a small upright ancient wooden cult image of a fully robed goddess is visible but not presented as a precise reconstruction; no mythic event and no imagined Taurian scene
+Style/medium: refined naturalistic archaeological landscape painting, dimensional stone, timber, reeds, water and cypress, subtle age and atmospheric depth; sophisticated raster illustration
+Composition/framing: wide landscape canvas from a low approach across the wetland edge, sanctuary spreading laterally with a clear path into the court; the small wooden image is subordinate but discernible
+Lighting/mood: pearly overcast coastal morning with soft green reflected light, quiet and geographically grounded
+Color palette: celadon reeds, weathered grey limestone, dark cypress, pale silver sky, muted russet timber
+Constraints: no invented ritual, no children, no nudity, no weapons, no modern buildings, no pseudo-writing, no text, labels, borders, callouts or watermark; art fills the canvas
+Avoid: fantasy temple, grand Parthenon-like façade, warm sunset ochre, flat map, diagram, classroom illustration, icon figures
