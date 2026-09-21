@@ -1,0 +1,12 @@
+Use case: historical-scene
+Asset type: main illustrated panel for a scholarly coffee-table graphic-book page
+Primary request: Create a sophisticated, historically grounded painterly raster illustration of the monumental bronze Trojan Horse dedication described by Pausanias on the Athenian Acropolis. It is an ancient bronze sculptural work on a plain limestone plinth, not a living horse and not a wooden siege reconstruction. Discreet rectangular openings high in the upper flank and neck reveal several fully clothed bronze Greek warrior figures peering outward; three faces should be especially legible, corresponding to Menestheus, Teucer, and the sons of Theseus as a group. Their presence should look integral to the bronze artwork rather than like living men trapped inside.
+Scene/backdrop: an evocative ancient Acropolis court with restrained column and masonry fragments, distant unbuilt Attic ridges, and no confidently reconstructed temple facade
+Style/medium: richly modeled painterly historical illustration with convincing bronze patina, subtle hammering and casting texture, dimensional stone, atmospheric depth, and the visual finish of a museum-quality coffee-table book
+Composition/framing: very wide landscape ratio about 1.95:1; close low front-three-quarter view; the monumental horse dominates the frame from left-centre to right, all four legs and the complete plinth visible; openings and bronze figures readable at page scale; allow some clear sky and court depth without making architecture the subject
+Lighting/mood: crisp rose dawn with hard raking light catching bronze edges, calm and contemplative rather than theatrical
+Color palette: charcoal and dark umber bronze, restrained blue-green oxidation, pale limestone, dusty violet and rose sky
+Materials/textures: aged cast bronze, subtle seams and hammered surface, worn limestone, sparse Mediterranean plants
+Text: none
+Constraints: all warrior figures fully clothed in plausible Greek armour or tunics; treat the exact lost appearance and arrangement as interpretive; sculpture must remain visibly bronze; no cutaway diagram, labels, arrows, inset, or schematic construction
+Avoid: wooden horse, active siege, Troy burning, combat, corpses, nudity, modern visitors or railings, museum interior, readable inscriptions, pseudo-text, logos, watermark, Roman imperial armour, fantasy ornament, giant Acropolis hill or modern skyline in the background
