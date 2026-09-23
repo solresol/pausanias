@@ -1,0 +1,6 @@
+Use case: precise-object-edit
+Asset type: corrected principal raster illustration for a historical graphic-book page
+Primary request: remove every visible handwritten, inscribed, letter-like, numeral-like, seal-impression, or pseudo-text mark from all wax tablets and bound tablet bundles on the table and in the foreground man's hands. Replace those marked surfaces with plain dark wax or plain aged wooden covers, with only subtle natural scratches and binding cords that cannot be read as writing.
+Input images: the initial Phormio settlement illustration is the edit target.
+Constraints: change only the tablet surfaces and any letter-like marks on them. Preserve exactly the mature central Phormio figure, every person's pose and clothing, the silver pieces and balance scale, wooden table, lamp, command staff and folded cloak, columns, harbour, ships and masts, crop, perspective, painterly realism, cool north light, warm table light, palette, and all other details. Keep all figures fully clothed. No new objects, no text, no labels, no watermark.
+Avoid: readable writing, pseudo-writing, letters, numerals, signatures, stamped emblems on tablets, modern paper, modern ledger.
