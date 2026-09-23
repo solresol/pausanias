@@ -13,7 +13,7 @@
 - Combined backup push/verify: PASS; 406 component assets verified; raksasa and S3 finished pages and S3 component assets agree.
 - Finished-page SHA-256, independently matched locally, on raksasa and from S3: `caccb874fa5f4a6a6190e101c90a8b15a29bb119ac9c81719f727e12010fc79a`.
 - Corrected component SHA-256, independently matched locally and from S3: `f5ed5004005420ba10402a74c11cee2f1489a94f91f58e3928ca80169fcd4c02`.
-- New-page source commit: `543d96520d71e97921f58db32e9dc9e2bebcdb81`, pushed to `origin/main`.
+- New-page source commit: `543d96588f8253055a08a9e35ae7f1940405ce71`, pushed to `origin/main`.
 
 ## Occasional replacement decision
 
