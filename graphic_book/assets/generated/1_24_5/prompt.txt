@@ -1,0 +1,9 @@
+Passage 1.24.5. Generate only the two selected raster art components specified in page_plan.md. Exact passage text, headings, captions and labels are added locally; generated images must contain no writing.
+
+Component A: finished sophisticated archaeological oil-and-watercolour illustration of the east facade of the fifth-century BCE Parthenon on the ancient Athenian Acropolis, oblique close architectural view, Doric columns and richly modelled east pediment sculpture evoking Athena's birth without claiming exact lost poses, Attic sky beyond. Aspect ratio about 901:590. Pale warm-white marble, cool blue shadows, crisp high midday light, strong material texture and credible depth. No modern structures, inscriptions, lettering, diagrams, borders, or nudity.
+
+Component B: finished sophisticated historical object portrait, imagined close study of the fully armoured and draped Athena Parthenos head and ornate helmet in ivory and gold. The small Sphinx figure rises in the centre of the helmet and one griffin is fashioned on each side, visibly integrated into the helmet rather than free animals. Aspect ratio about 851:699. Eye-level near view, dark ultramarine atmospheric backdrop, controlled cool light and intricate gold/ivory craft. Treat as interpretive reconstruction, not a surviving photographed statue. No text, inscriptions, modern museum furniture, nudity, or fantasy weapons.
+
+Revision A: edit only the east pediment's bare-chested sculptural figures to give them carved marble himation or drapery covering torso and hips; preserve the architecture, figures, perspective and light.
+
+Revision B: edit only the tiny gold Sphinx on Athena's helmet to cover its bare chest with worked gold cuirass or drapery; preserve its head, wings, paws, side griffins, helmet, Athena, palette and crop.
