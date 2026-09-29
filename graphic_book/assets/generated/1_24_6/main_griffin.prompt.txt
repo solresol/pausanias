@@ -1,0 +1,7 @@
+Use case: historical-fantasy book illustration
+Asset type: main scenic panel for Pausanias graphic-book page 1.24.6
+Subject: Aristeas of Proconnesus reports griffins guarding earth-born gold against Arimaspi beyond the Issedones. Show one imposing griffin with a realistic lion body, powerful eagle wings and eagle beak, guarding a natural vein of muted gold in broken mineral rock. A few small, fully clothed distant human figures suggest the reported rivals without claiming a literal reconstruction of their legendary one eye.
+Composition: panoramic 1.95:1 crop; close low three-quarter viewpoint from the gold-bearing rock, griffin foreground, rugged cold far mountains and sparse steppe receding into deep space. Keep the griffin complete within a wide crop. No text area is needed in the art; the full translation is rendered locally below.
+Style: sophisticated, richly textured painterly raster illustration for a coffee-table history book; credible anatomy, detailed feathers and fur, mineral texture, atmospheric depth, nuanced edges. Myth presented as an ancient literary report, not a scientific specimen.
+Light and palette: cold dawn backlight, lapis, slate, iron grey, restrained natural gold accents; dramatic but legible.
+Avoid: text, pseudo-writing, inscriptions, maps, icon figures, diagrammatic terrain, flat vector style, cartoon forms, extra heads, horns, dragon anatomy, violence, gore, nudity, modern artefacts, invented architecture.
