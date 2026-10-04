@@ -1,0 +1,6 @@
+Use case: historical-scene
+Asset type: main raster illustration for a Pausanias graphic-book page
+Primary request: A sophisticated, painterly historical landscape of the aftermath of the Battle of Chaeronea in Boeotia, 338 BCE. The scene is the historical hinge preceding the passage's later account of Athenian resistance to Macedonian rule.
+Composition/framing: very wide 2.80:1 panorama, ground-level low camera across a textured stony field toward foothills and an ancient Greek plain. Deep atmospheric perspective and a strong, coherent landscape composition. A few abandoned round shields and spears in the near foreground; small, fully clothed ancient Greek and Macedonian formations far apart in the middle distance, with no specific moment of fighting depicted.
+Lighting/palette: crisp diffuse post-storm light, cool blue-grey sky, muted olive and umber earth, restrained glints on bronze. Rich, detailed, finished raster painting suitable for a coffee-table history book.
+Historical constraints: plausible fourth-century BCE equipment. The composition is interpretive, not a reconstruction of the exact battlefield. No lion monument or later memorial; no portrait of Philip, Alexander or Antipater; no invented city, gore, nudity, modern objects, inscriptions, lettering, labels, map symbols or watermarks. Do not generate text.
