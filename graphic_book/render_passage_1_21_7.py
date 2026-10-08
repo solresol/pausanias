@@ -1,87 +1,99 @@
 #!/usr/bin/env python3
-"""Render 1.21.7 from generated art and measured, exact local typography."""
+"""Render the reviewed 1.21.7 replacement without touching its canonical page."""
 from __future__ import annotations
+
+import argparse
+from dataclasses import asdict
 import json
+from pathlib import Path
 import sqlite3
 import sys
-from dataclasses import asdict
-from pathlib import Path
+
+from PIL import Image, ImageDraw, ImageOps
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from PIL import Image, ImageDraw, ImageFont, ImageOps
-from graphic_book.render_passage_1_3_2 import (
-    BODY_FONT, TITLE_FONT, FitRecord, make_parchment, framed_panel,
-    paste_with_shadow, fit_text_block, add_border, draw_leader,
-)
-from graphic_book.render_passage_1_10_1 import validate_fit_records
+from graphic_book.render_passage_1_3_2 import BODY_FONT, TITLE_FONT, FitRecord, fit_text_block  # noqa: E402
+from graphic_book.render_passage_1_10_1 import validate_fit_records  # noqa: E402
 
-ASSETS = ROOT / 'graphic_book/assets/generated/1_21_7'
-PASSAGE_ID = '1.21.7'
+PASSAGE_ID = "1.21.7"
+RUN = "20261008T171009Z"
+ART = ROOT / "graphic_book/assets/generated/1_21_7/gryneium_corselet_revision_20261008T171009Z.png"
+DEFAULT_OUTPUT = ROOT / f"graphic_book/output/replacements/1_21_7/{RUN}/candidate.png"
 
 
-def render():
-    """Fail before saving if any measured text escapes its padded rectangle."""
-    with sqlite3.connect(ROOT / 'pausanias.sqlite') as conn:
-        translation = conn.execute('SELECT english_translation FROM translations WHERE passage_id=?', (PASSAGE_ID,)).fetchone()[0]
-    records = []
-    page = make_parchment((1402, 1122)).convert('RGBA')
+def render(output: Path, preflight: bool = False) -> None:
+    """Fit all copy before using art and save only at a nonexisting path."""
+    with sqlite3.connect(ROOT / "pausanias.sqlite") as conn:
+        row = conn.execute("SELECT english_translation FROM translations WHERE passage_id = ?", (PASSAGE_ID,)).fetchone()
+    if not row or not row[0]:
+        raise RuntimeError(f"Missing translation for {PASSAGE_ID}")
+    passage = row[0]
+    sentences = [part if part.endswith(".") else part + "." for part in passage.split(". ")]
+    if len(sentences) != 3 or " ".join(sentences) != passage:
+        raise RuntimeError("Unexpected SQLite sentence split")
+
+    page = Image.new("RGB", (1800, 1600), "#e8eae7")
     draw = ImageDraw.Draw(page)
+    records: list[FitRecord] = []
 
-    def text(rect, content, size=20, minimum=16, title=False, box=False, name='text'):
-        if box:
-            panel = framed_panel((rect[2]-rect[0], rect[3]-rect[1]))
-            paste_with_shadow(page, panel, rect[:2])
-        font, wrapped, _, record = fit_text_block(draw, rect, content, TITLE_FONT if title else BODY_FONT, size, minimum, 12, name, spacing_ratio=.14)
-        # Correct for font ascenders: verify the actual draw coordinates and bbox.
-        raw = draw.multiline_textbbox((0,0), wrapped, font=font, spacing=max(2,round(record.font_size*.14)))
-        xy = (rect[0]+12-raw[0], rect[1]+12-raw[1])
-        actual = draw.multiline_textbbox(xy, wrapped, font=font, spacing=max(2,round(record.font_size*.14)))
-        if actual[2] > rect[2]-12 or actual[3] > rect[3]-12:
-            raise RuntimeError(f'{name}: actual text overflow')
-        draw.multiline_text(xy, wrapped, font=font, spacing=max(2,round(record.font_size*.14)), fill='#2a1e13')
-        records.append(FitRecord(name,rect,record.font_path,record.font_size,actual,wrapped))
+    def block(name: str, rect: tuple[int, int, int, int], content: str,
+              size: int, minimum: int, *, heading: bool = False) -> None:
+        font, wrapped, _, fit = fit_text_block(
+            draw, rect, content, TITLE_FONT if heading else BODY_FONT,
+            size, minimum, 12, name, spacing_ratio=0.17,
+        )
+        spacing = max(2, round(fit.font_size * 0.17))
+        raw = draw.multiline_textbbox((0, 0), wrapped, font=font, spacing=spacing)
+        xy = (rect[0] + 12 - raw[0], rect[1] + 12 - raw[1])
+        actual = draw.multiline_textbbox(xy, wrapped, font=font, spacing=spacing)
+        if (actual[0] < rect[0] + 12 or actual[1] < rect[1] + 12 or
+                actual[2] > rect[2] - 12 or actual[3] > rect[3] - 12):
+            raise RuntimeError(f"{name}: glyphs overflow target rectangle")
+        draw.multiline_text(xy, wrapped, font=font, spacing=spacing, fill="#26343b")
+        records.append(FitRecord(name, rect, fit.font_path, fit.font_size, actual, wrapped))
 
-    paste_with_shadow(page, framed_panel((378,650)), (28,24))
-    text((44,40,390,100),'PASSAGE 1.21.7',26,22,True,True,'passage-id')
-    text((44,112,390,442),translation,21,16,name='translation')
-    text((44,462,390,560),'GRYNEIUM • AEOLIS\nCoastal western Asia Minor, across the Aegean from Greece.',18,16,box=True,name='orientation')
-    text((44,572,390,658),'Reconstruction: architecture, grove planting and corselet construction are illustrative.',15,12,name='boundary')
-    paste_with_shadow(page,framed_panel((960,650)),(414,24))
-    main = ImageOps.fit(Image.open(ASSETS/'sanctuary.png').convert('RGB'),(932,622),method=Image.Resampling.LANCZOS)
-    page.paste(main,(428,38))
-    text((768,50,1176,106),'LINEN OFFERED TO APOLLO',22,18,True,True,'main-title')
-    for label,rect,point,start in [
-        ('LINEN CORSELET',(444,566,688,624),(578,357),(565,566)),
-        ("APOLLO’S SANCTUARY",(1060,572,1346,630),(1202,350),(1202,572)),
-        ('THE SACRED GROVE',(886,144,1170,194),(1067,261),(1028,194)),
-    ]:
-        draw_leader(draw,point,start)
-        text(rect,label,18,16,True,True,label)
-    studies=Image.open(ASSETS/'material_studies.png').convert('RGB')
-    for i,(heading,caption,note) in enumerate([
-        ('IRON CAN PIERCE', 'Pausanias says iron weapons can penetrate linen corselets when driven with force.', 'Material study: a spear point through woven linen.'),
-        ('TEETH ENTANGLED', 'For hunting, he says linen catches even the teeth of lions and leopards.', 'Illustration of his account: a lion grips loose linen.'),
-    ]):
-        x=28+i*690
-        paste_with_shadow(page,framed_panel((656,392)),(x,702))
-        half=studies.crop((i*studies.width//2,0,(i+1)*studies.width//2,studies.height))
-        art=ImageOps.fit(half,(336,350),method=Image.Resampling.LANCZOS)
-        page.paste(art,(x+16,718))
-        text((x+364,720,x+642,782),heading,20,17,True,name=f'inset-{i}-title')
-        text((x+364,798,x+642,954),caption,21,17,name=f'inset-{i}-caption')
-        text((x+364,974,x+642,1076),note,16,14,name=f'inset-{i}-note')
-    add_border(draw)
+    block("id", (34, 16, 358, 72), "PASSAGE 1.21.7", 31, 26, heading=True)
+    block("title", (380, 16, 1766, 72), "LINEN CORSELETS AT GRYNEIUM", 43, 31, heading=True)
+    block("orientation", (34, 82, 1766, 134),
+          "GRYNEIUM  ·  COASTAL AEOLIS, WESTERN ASIA MINOR  ·  APOLLO'S GROVE", 25, 20, heading=True)
+    block("caption", (34, 1063, 1766, 1116),
+          "Interpretive view of a dedicated linen corselet and Apollo's grove; construction and sanctuary appearance are uncertain.", 23, 20)
+    block("translation-1", (34, 1140, 560, 1564), sentences[0], 35, 29)
+    block("translation-2", (586, 1140, 1114, 1564), sentences[1], 35, 29)
+    block("translation-3", (1140, 1140, 1766, 1564), sentences[2], 35, 29)
+
     validate_fit_records(records)
-    output=ROOT/'graphic_book/images/1/21/7.png'
+    actual_passage = " ".join(" ".join(r.text.split()) for r in records
+                              if r.name.startswith("translation-"))
+    if actual_passage != " ".join(passage.split()):
+        raise RuntimeError("Rendered translation differs from SQLite")
+    report = {"passage_id": PASSAGE_ID, "run": RUN, "preflight": preflight,
+              "translation_matches_sqlite": True, "text_blocks_checked": len(records),
+              "fit_records": [asdict(r) for r in records]}
+    (ROOT / "tmp").mkdir(exist_ok=True)
+    (ROOT / "tmp/passage_1_21_7_replacement_layout_report.json").write_text(json.dumps(report, indent=2))
+    print(json.dumps({k: v for k, v in report.items() if k != "fit_records"}))
+    print("Font sizes:", [(r.name, r.font_size) for r in records])
+    if preflight:
+        return
     if output.exists():
-        raise RuntimeError('Refusing to overwrite an accepted page')
-    output.parent.mkdir(parents=True,exist_ok=True)
-    report={'passage_id':PASSAGE_ID,'text_blocks_checked':len(records),'translation_matches_sqlite':' '.join(next(r.text for r in records if r.name=='translation').split())==' '.join(translation.split()),'fit_records':[asdict(r) for r in records]}
-    (ROOT/'tmp').mkdir(exist_ok=True)
-    (ROOT/'tmp/passage_1_21_7_layout_report.json').write_text(json.dumps(report,indent=2))
-    page.convert('RGB').save(output)
-    print(json.dumps(report,indent=2))
+        raise RuntimeError(f"Refusing to overwrite existing output: {output}")
+    if not ART.exists():
+        raise RuntimeError(f"Missing art: {ART}")
+    rect = (34, 150, 1766, 1055)
+    art = Image.open(ART).convert("RGB")
+    page.paste(ImageOps.fit(art, (rect[2]-rect[0], rect[3]-rect[1]),
+                            method=Image.Resampling.LANCZOS), rect[:2])
+    ImageDraw.Draw(page).rectangle((rect[0]-1, rect[1]-1, rect[2], rect[3]),
+                                   outline="#596e70", width=2)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    page.save(output)
 
-if __name__=='__main__':
-    render()
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--preflight", action="store_true")
+    args = parser.parse_args()
+    render(args.output, args.preflight)
