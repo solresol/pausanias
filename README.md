@@ -349,3 +349,15 @@ uv run python sentence_llm_grammar.py --ssh-host raksasa \
 
 The script validates each response before storing it: token count, token forms,
 UPOS tags, and dependency heads must align with the input token list.
+
+## Legacy MANTO scraper
+
+`uv run scraper.py` preserves the original Raksasa scraper. It prompts for a
+normal MANTO username and password, or reads `MANTO_USER` and `MANTO_PASS`.
+It exports `pausanias_sources.json` and `pausanias_objects.json` in the current
+directory; it does not run the research pipeline or update PostgreSQL.
+Local `.manto.conf` authentication is ignored by Git. Login credentials are
+never printed.
+
+The scraper's tests use fake HTTP responses and require no MANTO login:
+`uv run pytest tests/test_legacy_scraper.py`.

@@ -26,3 +26,6 @@ documentation/pausanias_project_presentation.out
 documentation/pausanias_project_presentation.pdf
 documentation/pausanias_project_presentation.snm
 documentation/pausanias_project_presentation.toc
+
+# Local MANTO authentication stays on its originating host.
+.manto.conf

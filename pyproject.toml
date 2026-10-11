@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "beautifulsoup4>=4.15.0",
     "matplotlib>=3.10.1",
     "moms-apriltag>=2023.1.15",
     "networkx>=3.4.2",
