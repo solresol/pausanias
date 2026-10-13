@@ -1,0 +1,12 @@
+# Pausanias graphic-book generation — 2026-10-14
+
+Run time (UTC): 2026-10-13T17:12:03.942058+00:00
+New passage: **1.26.4**. New-page source commit `45845df`, pushed to `origin/main`; bounded build, combined backup verification and independent page/component hashes passed.
+
+One `random.SystemRandom().random()` draw: **0.06717939344615809**. Optional replacement status: **triggered**.
+
+Replacement selection: one shuffled eligible list of 142 accepted passage IDs, excluding the six latest pages, 1.1.4/1.1.5, and accepted replacements. The first shuffled ID was **1.16.2**; its actual PNG visibly had a tall left prose panel, a large right scene and three lower insets, so it was the sole target for this run. Original canonical SHA-256: `6b6a038798b8034157c1276a5beea7dec85e06449c6a1e234b719fdc7a3550f8`. Previous renderer and page plan copied to `graphic_book/assets/generated/1_16_2/revisions/20261013T171203Z/` before editing; old component art retained.
+
+Replacement composition: broad central Lysimacheia aftermath between two ordered upper prose fields and one wide lower prose field. The corrected Hellenistic settlement raster replaced a later-looking town in the initial component. Full-size and thumbnail review against original, six preceding and two following pages **PASS**; it visibly removes the repetitive sidebar/insets. Exact 812-character translation in three measured fields at 39px with ten total measured blocks **PASS**. Temporary image-tree reader and 166-page PDF preview **PASS**, including visually reviewed page 92.
+
+**replacement_status: accepted**. Archived original at `graphic_book/assets/generated/1_16_2/revisions/20261013T171203Z/previous-page.png`, S3 key `assets/generated/1_16_2/revisions/20261013T171203Z/previous-page.png`; archive local/downloaded-S3 hash matched before promotion. The candidate was atomically promoted only after canonical original hash recheck. After hash `19f83f25399956f7a8dbf6c0322f4fa027ee6be9f8742c1c509b70814a30213c` matches canonical local, raksasa and downloaded S3. Normal build 165 illustrations/166 PDF pages **PASS**; PDF page 92 exactly matches preview raster. Combined backup push/verify **PASS** for 457 assets. Accepted component local/downloaded-S3 hash `1f58b9c3cbc63a130136dfa03c414df9d3cfb720b1fe516e308d4259028b0135` matches. Source commit/push to be recorded after completion.
