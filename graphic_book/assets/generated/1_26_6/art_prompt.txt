@@ -1,0 +1,7 @@
+Use case: historical-scene
+Asset type: one wide raster art panel for a sophisticated illustrated coffee-table book, aspect ratio 1.94:1
+Primary request: interpretive ancient Athenian Acropolis sanctuary scene showing an archaic fully draped wooden cult image of Athena and a separate small finely worked gold lamp dedicated by Callimachus, both described by Pausanias 1.26.6.
+Composition: broad human-height three-quarter interior view; wooden Athena image is the principal middle-ground subject; gold lamp clear in foreground on a stone support; credible spatial relation, layered depth, no inset panels or text reserve within the art.
+Style: exceptionally detailed painterly historical illustration with tactile painted wood, carved stone, metalwork, atmospheric depth, lifelike material texture; fine-art editorial finish.
+Lighting and palette: soft cool early-morning sidelight, dusty teal shadows, aged limestone, restrained polychrome wood and warm gold highlights.
+Constraints: archaic, modest fully clothed Athena cult image; interpretive rather than exact reconstruction; no falling-from-heaven action, no invented ritual, no recognizable later Parthenon facade, no Roman/medieval/modern objects, no nudity, no legible writing, labels, cartouches, borders or watermark. The final page text is added locally.
