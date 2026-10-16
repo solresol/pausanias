@@ -1,0 +1,9 @@
+# Pausanias graphic-book generation — 2026-10-17
+
+- New passage: **1.26.7**, earliest numeric translated passage without a canonical image at selection. Accepted image: `graphic_book/images/1/26/7.png`.
+- Craft anchors: actual 1.1.4 and 1.1.5 PNGs. Six immediate predecessor PNGs compared: 1.26.1–1.26.6; 1.25.8 was also included for context. Selected tall left lamp-and-bronze-palm art with three right translation fields. Full-size and thumbnail variety, quality, historical, semantic, orientation and suitability review **PASS**. Initial component with duplicate hilltop temple rejected and corrected.
+- Text: complete exact 646-character SQLite English translation in source order, six measured blocks with 12px padding; all three prose fields at 40px; deterministic glyph bounds **PASS**.
+- Local build: 168 illustrated passages, reader 168 of 168, 169-page PDF; last PDF page visually inspected **PASS**.
+- Backup: combined `push` and `verify` **PASS**, 461 component assets. Local assets, S3 manifest and finished pages, and raksasa finished pages agree. Finished page SHA-256 `e8aa825830770e8c3befd9d75dd717c4ab0af1c46e68ca5c9e634dfc1f0daaea` independently matches local, raksasa and downloaded S3. Accepted component art SHA-256 `80cb200968fba1c1f5a8eb2e8dd422984143f1bedeef206dbd61be8f3256015b` matches local and downloaded S3.
+- New-page source commit `08378e2` pushed to `origin/main`. Only its renderer, prompt, page plan and two manifest rows were staged; unrelated unfinished 1.20.4 source and manifest rows remain untouched. Binary art, canonical image, SQLite and site output remain ignored.
+- One `random.SystemRandom().random()` draw: **0.46869638823217774**. Threshold `< 0.20` was not met. Optional replacement **skipped**; no older target selected or changed. Reuse this recorded draw on any retry of this daily run.
