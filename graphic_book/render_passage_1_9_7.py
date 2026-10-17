@@ -12,6 +12,8 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
+from graphic_book_corpus import snapshot_path
+
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageOps
 
 from graphic_book.render_passage_1_3_2 import (
@@ -43,7 +45,7 @@ EPIRUS_ART = ASSET_DIR / "epirus_royal_tombs.png"
 
 
 def load_translation() -> str:
-    db_path = root_dir() / "pausanias.sqlite"
+    db_path = snapshot_path()
     if not db_path.exists():
         raise RuntimeError(f"Missing local SQLite database: {db_path}")
     with sqlite3.connect(db_path) as conn:

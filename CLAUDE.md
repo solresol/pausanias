@@ -45,7 +45,17 @@ PostgreSQL, `dbname=pausanias`, user `gregb`. The **live** database is on
   Prefer normal relational tables with typed columns, foreign keys, and indexes;
   use child tables or typed raw-text columns for variable key/value data.
 - The root `pausanias.sqlite` is a legacy artifact; `migrate_sqlite_to_postgres.py`
-  was the one-time migration. Current work is Postgres-only.
+  was the one-time migration. Never read that file for current work.
+- The graphic-book cloud exchange uses a separate, deliberately exported SQLite
+  snapshot at `graphic_book/workflow/corpus.sqlite`, backed by
+  `s3://pausanias-graphic-book-assets-849621205733/workflow/corpus.sqlite`.
+  PostgreSQL remains authoritative for the corpus. Read
+  `graphic_book/cloud_workflow.md` before generating or replacing pages.
+  Renderers use `graphic_book_corpus.snapshot_path()` / `load_translation()`.
+  All snapshot writers use conditional S3 writes and the shared active-worker
+  claim; never replace the snapshot with `aws s3 cp` or the legacy database.
+- `database/graphic_book_exchange.sql` defines the typed result/catalog tables
+  and is also applied by `pausanias_db.initialize_schema()`.
 
 ## LLM usage
 
@@ -75,7 +85,11 @@ the authoritative dependency graph:
 10. `passage_place_state_daily.sh` → `passage_place_state_batch.py` — passage-level
     place-state extraction with deterministic candidate hints and Batch API
     submission/fetch.
-11. `create_website.py` + `build_graphic_book.py` — generate the static site into
+11. `graphic_book_exchange.py sync` — import completed cloud results into typed
+    PostgreSQL tables, verify/materialize accepted pages, and refresh the full
+    SQLite corpus export under a conditional S3 claim. An active daytime
+    worker causes this step to skip; the existing accepted site still builds.
+12. `create_website.py` + `build_graphic_book.py` — generate the static site into
     `pausanias_site/`, then `rsync` to `merah` (the web host, behind Cloudflare).
 
 Supporting tools not in the daily run: `check_proper_noun_spellings.py` (spelling

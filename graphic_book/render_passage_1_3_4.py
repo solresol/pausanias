@@ -9,13 +9,15 @@ import sqlite3
 import sys
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+
+from graphic_book_corpus import snapshot_path
 from PIL import Image, ImageDraw, ImageOps
 from graphic_book.render_passage_1_3_2 import BODY_FONT, TITLE_FONT, FitRecord, fit_text_block
 from graphic_book.render_passage_1_10_1 import validate_fit_records
 ASSETS = ROOT / 'graphic_book/assets/generated/1_3_4'
 
 def render(output: Path, preflight=False):
-    with sqlite3.connect(ROOT / 'pausanias.sqlite') as conn:
+    with sqlite3.connect(snapshot_path()) as conn:
         passage = conn.execute('SELECT english_translation FROM translations WHERE passage_id=?', ('1.3.4',)).fetchone()[0]
     words = passage.split(' ')
     # Preserve exact lexical order while balancing three measured columns.

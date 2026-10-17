@@ -12,6 +12,8 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
+from graphic_book_corpus import snapshot_path
+
 from PIL import Image, ImageDraw
 
 from graphic_book.render_passage_1_3_2 import (
@@ -49,7 +51,7 @@ LOCATOR_ART = ASSET_DIR / "greece_relief.png"
 
 
 def load_translation() -> str:
-    with sqlite3.connect(root_dir() / "pausanias.sqlite") as conn:
+    with sqlite3.connect(snapshot_path()) as conn:
         row = conn.execute(
             "SELECT english_translation FROM translations WHERE passage_id = ?",
             (PASSAGE_ID,),

@@ -12,6 +12,7 @@ models/trankit-oga/
 transcripts/
 graphic_book/images/
 graphic_book/output/
+graphic_book/workflow/
 graphic_book/assets/generated/**/*.jpeg
 graphic_book/assets/generated/**/*.jpg
 graphic_book/assets/generated/**/*.png

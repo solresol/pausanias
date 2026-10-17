@@ -9,6 +9,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+
+from graphic_book_corpus import snapshot_path
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 from graphic_book.render_passage_1_3_2 import (
     BODY_FONT, TITLE_FONT, FitRecord, make_parchment, framed_panel,
@@ -22,7 +24,7 @@ PASSAGE_ID = '1.22.1'
 
 def render():
     """Fail before saving if any measured text escapes its padded rectangle."""
-    with sqlite3.connect(ROOT / 'pausanias.sqlite') as conn:
+    with sqlite3.connect(snapshot_path()) as conn:
         translation = conn.execute('SELECT english_translation FROM translations WHERE passage_id=?', (PASSAGE_ID,)).fetchone()[0]
     records = []
     page = make_parchment((1402, 1122)).convert('RGBA')

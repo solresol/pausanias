@@ -11,7 +11,10 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from pausanias_db import connect
+from graphic_book_fonts import BODY_FONT, TITLE_FONT, DISPLAY_FONT
+
+import sqlite3
+from graphic_book_corpus import snapshot_path
 
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont, ImageOps
 
@@ -27,9 +30,6 @@ INK = "#2a1e13"
 RULE = "#6f5130"
 SEA = "#315f79"
 
-TITLE_FONT = "/System/Library/Fonts/Supplemental/Georgia Bold.ttf"
-BODY_FONT = "/System/Library/Fonts/Supplemental/Georgia.ttf"
-DISPLAY_FONT = "/Users/gregb/Library/Fonts/EBGaramond-VariableFont_wght.ttf"
 
 
 @dataclass
@@ -47,9 +47,9 @@ def root_dir() -> Path:
 
 
 def load_translation() -> str:
-    with connect() as conn:
+    with sqlite3.connect(snapshot_path()) as conn:
         row = conn.execute(
-            "SELECT english_translation FROM translations WHERE passage_id = %s",
+            "SELECT english_translation FROM translations WHERE passage_id = ?",
             (PASSAGE_ID,),
         ).fetchone()
     if not row or not row[0]:

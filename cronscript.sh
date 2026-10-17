@@ -26,6 +26,9 @@ uv run analyse_noun_network.py
 ./sentence_llm_grammar_daily.sh
 ./section_people_daily.sh
 ./passage_place_state_daily.sh
+AWS_PROFILE="${PAUSANIAS_GRAPHIC_BOOK_AWS_PROFILE:-pausanias-graphic-book}" \
+  AWS_SHARED_CREDENTIALS_FILE="${PAUSANIAS_GRAPHIC_BOOK_AWS_CREDENTIALS:-$HOME/.aws/credentials.pausanias-exchange}" \
+  uv run graphic_book_exchange.py sync --image-dir "$GRAPHIC_BOOK_IMAGE_DIR"
 uv run create_website.py --graphic-book-image-dir "$GRAPHIC_BOOK_IMAGE_DIR"
 uv run build_graphic_book.py --image-dir "$GRAPHIC_BOOK_IMAGE_DIR" --output-dir pausanias_site/graphic-book
 rsync -az pausanias_site/ merah:/var/www/vhosts/pausanias.symmachus.org/htdocs/

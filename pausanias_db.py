@@ -48,6 +48,7 @@ def schema_path() -> Path:
 def initialize_schema(conn: psycopg.Connection) -> None:
     """Create the canonical schema if it does not already exist."""
     conn.execute(schema_path().read_text(encoding="utf-8"))
+    conn.execute((schema_path().parent / "graphic_book_exchange.sql").read_text(encoding="utf-8"))
     conn.commit()
 
 

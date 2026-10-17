@@ -13,7 +13,8 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from pausanias_db import connect
+import sqlite3
+from graphic_book_corpus import snapshot_path
 
 from graphic_book.render_passage_1_3_2 import (
     BODY_FONT,
@@ -48,9 +49,9 @@ PASSAGE_ID = "1.3.3"
 
 
 def load_translation() -> str:
-    with connect() as conn:
+    with sqlite3.connect(snapshot_path()) as conn:
         row = conn.execute(
-            "SELECT english_translation FROM translations WHERE passage_id = %s",
+            "SELECT english_translation FROM translations WHERE passage_id = ?",
             (PASSAGE_ID,),
         ).fetchone()
     if not row or not row[0]:

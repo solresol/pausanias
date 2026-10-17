@@ -14,6 +14,8 @@ from PIL import Image, ImageDraw, ImageOps
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from graphic_book_corpus import snapshot_path
+
 from graphic_book.render_passage_1_3_2 import BODY_FONT, TITLE_FONT, FitRecord, fit_text_block  # noqa: E402
 from graphic_book.render_passage_1_10_1 import validate_fit_records  # noqa: E402
 
@@ -23,7 +25,7 @@ RUN = "20260920T181257Z"
 
 def load_translation() -> str:
     """Load the exact local SQLite translation."""
-    with sqlite3.connect(ROOT / "pausanias.sqlite") as conn:
+    with sqlite3.connect(snapshot_path()) as conn:
         row = conn.execute(
             "SELECT english_translation FROM translations WHERE passage_id = ?",
             ("1.16.3",),

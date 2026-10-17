@@ -14,6 +14,8 @@ from PIL import Image, ImageDraw, ImageOps
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from graphic_book_corpus import snapshot_path
+
 from graphic_book.render_passage_1_3_2 import (  # noqa: E402
     BODY_FONT,
     TITLE_FONT,
@@ -27,7 +29,7 @@ ASSETS = ROOT / "graphic_book/assets/generated/1_23_9"
 
 def render(output: Path, preflight: bool = False) -> None:
     """Render the page, or validate its deterministic text geometry."""
-    with sqlite3.connect(ROOT / "pausanias.sqlite") as conn:
+    with sqlite3.connect(snapshot_path()) as conn:
         passage = conn.execute(
             "SELECT english_translation FROM translations WHERE passage_id = ?",
             ("1.23.9",),
