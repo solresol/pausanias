@@ -81,12 +81,12 @@ SSH/combined-backup instructions for exchange-based runs.
    dirty files out of Git. Record the full commit SHA. Then checkpoint the result:
 
    ```sh
-   uv run graphic_book_exchange.py record-result --passage 1.26.8 \
-     --image graphic_book/images/1/26/8.png --source-commit <full-commit-sha> \
-     --file graphic_book/render_passage_1_26_8.py \
-     --file graphic_book/assets/generated/1_26_8/page_plan.md \
-     --file graphic_book/assets/generated/1_26_8/main.prompt.txt \
-     --file graphic_book/assets/generated/1_26_8/main.png
+   uv run graphic_book_exchange.py record-result --passage 1.27.1 \
+     --image graphic_book/images/1/27/1.png --source-commit <full-commit-sha> \
+     --file graphic_book/render_passage_1_27_1.py \
+     --file graphic_book/assets/generated/1_27_1/page_plan.md \
+     --file graphic_book/assets/generated/1_27_1/main.prompt.txt \
+     --file graphic_book/assets/generated/1_27_1/main.png
    ```
 
    Replace the example paths with the actual passage and pass `--file` for
