@@ -1,0 +1,30 @@
+# Pausanias 1.27.2 — Athena's olive and Pandrosos
+
+Source: complete 518-character exported English translation via `graphic_book_corpus.load_translation("1.27.2")`. Craft anchors: actual PNGs 1.1.4 and 1.1.5. The following records the six preceding accepted PNGs inspected at thumbnail scale; their plans were also read.
+
+| Passage | Actual composition and translation placement | Scenic panels | Viewpoint | Dominant palette and lighting |
+| --- | --- | ---: | --- | --- |
+| 1.26.3 | Four upper prose columns, broad lower landscape | 1 | ground-level wide plain | indigo, olive, chalk; clear light after rain |
+| 1.26.4 | Paired upper sculpture portraits, paired lower prose | 2 | close oblique studies | verdigris, pale stone; diffuse daylight |
+| 1.26.5 | Two upper prose fields, narrow central interior panorama, two lower fields | 1 | low architectural sweep | sea green, blue shadow; shaft of light |
+| 1.26.6 | Broad upper sanctuary scene, three lower prose columns | 1 | human-height room view | gold, painted wood; subdued morning |
+| 1.26.7 | Full-height left lamp/palm art, three stacked right fields | 1 | close and slightly low interior | deep teal, bronze, blue grey; flame and dawn |
+| 1.27.1 | Two upper prose fields, lower-left votive interior, lower-right prose | 1 | medium eye-level ensemble | plum, green, silvery stone; soft cool daylight |
+
+## Three compositions before art
+
+1. **Selected: one broad upper prose statement, a dominant central olive-courtyard landscape, and two ordered lower prose fields.** The first statement explains the tree's significance; the image then anchors the Acropolis setting; the lower fields cover Persian burning and renewed growth, then the adjacent shrine and Pandrosos. The central image occupies over half the page, substantially deeper than 1.26.5's narrow architectural band. The top is one full-width statement rather than two fields. It differs from both immediate predecessors, has no left sidebar, and is the second central-art-between-text arrangement in candidate plus five predecessors.
+2. Rejected: tall left translation beside a large right courtyard view. Its silhouette would return to the old left-sidebar formula and underplay the short closing passage.
+3. Rejected: chronological three-panel fire/regrowth/shrine strip. It would imply a documented visual sequence and risk making the page diagrammatic; the text itself can distinguish testimony from observation.
+
+Canvas 1800×1600. Header and orientation `(28,16)–(1772,141)`. Complete translation in source order across three measured rectangles: `(28,158)–(1772,304)`, `(28,1192)–(1080,1564)`, `(1130,1192)–(1772,1564)`. The split markers are “They also relate the following:” and “Adjacent to the temple”; joining the three chunks with spaces must reproduce the exact exported text. Main art `(28,328)–(1772,1148)`, aspect ratio 2.13:1. Text fit is checked before art generation using portable `graphic_book_fonts`, Pillow glyph bounds and 12px padding; it fails below 33px. No optional captions or insets.
+
+The raster is a historically restrained, interpretive exterior courtyard study on the Athenian Acropolis, with a single mature olive tree visibly rooted between the sanctuary structures associated with Athena and adjacent Pandrosos. Rather than depicting a literal time-lapse or invented action, show scorched bark with credible vigorous new shoots as a visual cue for the reported renewal. Architectural details are deliberately nonspecific. Ground-level oblique view, textured masonry and soil, Attic hills in the distance, clear spatial relationship between tree and two adjoining modest shrines. No modern buildings, Classical Parthenon, duplicate hilltop temple, soldiers, flames, inscriptions or legible text. Sophisticated painterly raster with botanical and stone detail. Dominant silvery olive green, cool limestone and muted sky blue in crisp mid-morning light. Compared with 1.27.1, the camera moves from a medium interior still life to a wide exterior eye-level view; the palette moves from plum/dark green to silvery green/sky blue; architecture and living landscape replace votive objects. These choices serve the tree, reported regrowth, and adjacent shrine. The header provides Athens/Acropolis orientation; the broad scene provides local spatial orientation.
+
+## Review
+
+Pre-art and final deterministic fit **PASS**: three measured translation blocks at 43px, all with 12px padding and glyph-bound checks; the exact 518-character exported translation remains in order. Passage ID, title and orientation also fit. The full 1800×1600 PNG was inspected: the olive tree, old darkened trunk and vigorous shoots are clear; two adjacent shrines and inland hills establish spatial context. The scene is interpretive, not a claim to reconstruct the lost shrines or to prove the reported regrowth. No baked wording, nudity, irrelevant event, unsupported callout or locator appears. Art quality, historical restraint, semantic fit, orientation, suitability, hierarchy and text clearance **PASS** beside 1.1.4 and 1.1.5.
+
+The actual seven-page thumbnail sheet `/tmp/pausanias_1272_comparison.jpg` compares 1.26.3–1.27.2. This page's single upper statement, deep central outdoor image and two lower prose blocks differ from 1.26.7's tall left art and 1.27.1's upper pair/lower asymmetric L. Compared with 1.26.5, its central image is much deeper and its upper statement is uninterrupted; the central-art family occurs twice in the candidate-plus-five window. No tall left sidebar. Exterior ground-level camera, silvery-green/blue palette and brighter daylight change at least three art choices from 1.27.1 for passage-specific reasons. Variety **PASS**.
+
+The bounded local build completed with 170 illustrated passages. Reader `pausanias_site/graphic-book/1/27/2.html` links the correct PNG and reports 170 of 170. The 171-page PDF's final page was rendered and inspected, matching the reviewed PNG. Local page SHA-256: `bb9dabe4e98d1b3af78a48a2650289e9038044a40f59af439ec5fc239cb09d47`.
