@@ -1,0 +1,233 @@
+{
+  "passage_id": "1.27.3",
+  "preflight": false,
+  "translation_characters": 977,
+  "translation_matches_export": true,
+  "translation_utf8_sha256": "0e11c6a67348b75dbbc666083eca7bd11c0e50e77a5f9634484c82e7883c9eb9",
+  "body_font_size": 37,
+  "padding": 14,
+  "canvas": [
+    2000,
+    1800
+  ],
+  "reading_order": "upper left, lower left, upper right, lower right (numbered 1\u20134)",
+  "text_blocks_checked": 12,
+  "fit_records": [
+    {
+      "name": "passage-id",
+      "rect": [
+        28,
+        18,
+        454,
+        88
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 35,
+      "text_bbox": [
+        42,
+        32,
+        360,
+        58
+      ],
+      "text": "PASSAGE 1.27.3"
+    },
+    {
+      "name": "title",
+      "rect": [
+        492,
+        18,
+        1972,
+        88
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 46,
+      "text_bbox": [
+        506,
+        32,
+        1537,
+        67
+      ],
+      "text": "THE ARREPHOROI: A NIGHT DESCENT"
+    },
+    {
+      "name": "orientation",
+      "rect": [
+        28,
+        101,
+        1972,
+        154
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 25,
+      "text_bbox": [
+        42,
+        115,
+        897,
+        140
+      ],
+      "text": "ATHENS | THE ACROPOLIS | APHRODITE IN THE GARDENS"
+    },
+    {
+      "name": "section-1",
+      "rect": [
+        28,
+        175,
+        490,
+        219
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 22,
+      "text_bbox": [
+        42,
+        189,
+        300,
+        205
+      ],
+      "text": "1 THE ATTENDANTS"
+    },
+    {
+      "name": "translation-1",
+      "rect": [
+        28,
+        225,
+        490,
+        835
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 37,
+      "text_bbox": [
+        42,
+        239,
+        475,
+        726
+      ],
+      "text": "But what caused me\nthe greatest\nwonder\u2014though it is\nnot fully\nunderstandable to\nall\u2014I will nevertheless\ndescribe as it occurs.\nTwo maidens dwell not\nfar from the temple of\nAthena Polias, whom\nthe Athenians call\nArrephoroi."
+    },
+    {
+      "name": "section-2",
+      "rect": [
+        28,
+        875,
+        490,
+        919
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 22,
+      "text_bbox": [
+        42,
+        889,
+        282,
+        905
+      ],
+      "text": "2 THE NIGHT RITE"
+    },
+    {
+      "name": "translation-2",
+      "rect": [
+        28,
+        925,
+        490,
+        1750
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 37,
+      "text_bbox": [
+        42,
+        939,
+        474,
+        1631
+      ],
+      "text": "They remain for a\ncertain period in\nservice to the goddess,\nand when the festival\narrives, they perform\nthe following rite at\nnight. They put upon\ntheir heads what is\nhanded to them by the\npriestess of Athena,\nwho gives without\nknowing herself\nexactly what it is she\ngives, nor do the\nmaidens themselves\ncomprehend what they\ncarry."
+    },
+    {
+      "name": "section-3",
+      "rect": [
+        1510,
+        175,
+        1972,
+        219
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 22,
+      "text_bbox": [
+        1524,
+        189,
+        1732,
+        205
+      ],
+      "text": "3 THE DESCENT"
+    },
+    {
+      "name": "translation-3",
+      "rect": [
+        1510,
+        225,
+        1972,
+        920
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 37,
+      "text_bbox": [
+        1524,
+        239,
+        1949,
+        644
+      ],
+      "text": "Within the city, not far\naway, is an enclosure\nsacred to the goddess\nknown as Aphrodite in\nthe Gardens, and\nthere, descending\nthrough it, is a natural\nunderground passage.\nBy this way the\nmaidens go down."
+    },
+    {
+      "name": "section-4",
+      "rect": [
+        1510,
+        960,
+        1972,
+        1004
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 22,
+      "text_bbox": [
+        1524,
+        974,
+        1718,
+        990
+      ],
+      "text": "4 THE RETURN"
+    },
+    {
+      "name": "translation-4",
+      "rect": [
+        1510,
+        1010,
+        1972,
+        1750
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 37,
+      "text_bbox": [
+        1524,
+        1024,
+        1949,
+        1470
+      ],
+      "text": "Below they leave what\nthey carried, and take\nup some other hidden\nobject, bringing it\nback covered up.\nAfterward they are\nreleased and depart,\nand other maidens are\nchosen in their stead\nand taken up to the\nAcropolis."
+    },
+    {
+      "name": "interpretation-caption",
+      "rect": [
+        528,
+        1684,
+        1472,
+        1750
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 25,
+      "text_bbox": [
+        542,
+        1698,
+        1324,
+        1722
+      ],
+      "text": "Interpretive nocturne; the sacred contents remain concealed."
+    }
+  ]
+}
