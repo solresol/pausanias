@@ -356,5 +356,11 @@
     "1.13.9",
     "1.14.1"
   ],
-  "archive_directory": "graphic_book/assets/generated/1_13_8/revisions/20261021T075600Z"
+  "archive_directory": "graphic_book/assets/generated/1_13_8/revisions/20261021T075600Z",
+  "outcome": "accepted",
+  "replacement_result_id": "63d67950e631428ca90a033b2824b644",
+  "source_commit": "e826109968641cf6e08c0000834b7bcbb216fc74",
+  "candidate_sha256": "9a9f6362e4fbfbd2cc107b77ff2ec2efa956cbb8a1898f8cca1c67273725c4ce",
+  "original_archive_verified": true,
+  "import_status_at_checkpoint": "pending"
 }
