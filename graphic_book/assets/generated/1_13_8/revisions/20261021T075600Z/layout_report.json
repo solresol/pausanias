@@ -1,0 +1,198 @@
+{
+  "passage_id": "1.13.8",
+  "revision": "20261021T075600Z",
+  "preflight": false,
+  "translation_characters": 607,
+  "translation_matches_export": true,
+  "translation_utf8_sha256": "b3c69d571a5ccec59ba8d0d116bbcb0447f23dd80b67cba32d6300bd4a1b0b8d",
+  "body_font_size": 35,
+  "padding": 12,
+  "canvas": [
+    1800,
+    1600
+  ],
+  "reading_order": "three numbered upper prose fields, left to right",
+  "text_blocks_checked": 10,
+  "fit_records": [
+    {
+      "name": "passage-id",
+      "rect": [
+        28,
+        18,
+        387,
+        83
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 31,
+      "text_bbox": [
+        40,
+        30,
+        322,
+        53
+      ],
+      "text": "PASSAGE 1.13.8"
+    },
+    {
+      "name": "title",
+      "rect": [
+        411,
+        18,
+        1772,
+        83
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 39,
+      "text_bbox": [
+        423,
+        30,
+        1287,
+        59
+      ],
+      "text": "PYRRHUS IN THE STREETS OF ARGOS"
+    },
+    {
+      "name": "orientation",
+      "rect": [
+        28,
+        100,
+        1772,
+        151
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 25,
+      "text_bbox": [
+        40,
+        112,
+        1276,
+        137
+      ],
+      "text": "ARGOS | PYRRHUS'S DEATH | LOCAL TRADITION AND THE SANCTUARY OF DEMETER"
+    },
+    {
+      "name": "section-1",
+      "rect": [
+        28,
+        175,
+        576,
+        219
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 25,
+      "text_bbox": [
+        40,
+        187,
+        369,
+        205
+      ],
+      "text": "1 THE ISOLATED KING"
+    },
+    {
+      "name": "translation-1",
+      "rect": [
+        28,
+        225,
+        576,
+        602
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 35,
+      "text_bbox": [
+        40,
+        237,
+        552,
+        498
+      ],
+      "text": "While the fighting was\nalready taking place around\ntemples, houses, narrow\nstreets, and scattered places\nthroughout the city, Pyrrhus\nbecame isolated and was\nwounded in the head."
+    },
+    {
+      "name": "section-2",
+      "rect": [
+        626,
+        175,
+        1174,
+        219
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 25,
+      "text_bbox": [
+        638,
+        187,
+        974,
+        205
+      ],
+      "text": "2 THE TWO ACCOUNTS"
+    },
+    {
+      "name": "translation-2",
+      "rect": [
+        626,
+        225,
+        1174,
+        602
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 35,
+      "text_bbox": [
+        638,
+        237,
+        1161,
+        498
+      ],
+      "text": "They say Pyrrhus died when\nstruck by a roof-tile thrown\nby a woman; the Argives,\nhowever, claim it was not a\nwoman who killed him, but\nDemeter herself, disguised in\nthe form of a woman."
+    },
+    {
+      "name": "section-3",
+      "rect": [
+        1224,
+        175,
+        1772,
+        219
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 25,
+      "text_bbox": [
+        1236,
+        187,
+        1502,
+        205
+      ],
+      "text": "3 LOCAL MEMORY"
+    },
+    {
+      "name": "translation-3",
+      "rect": [
+        1224,
+        225,
+        1772,
+        602
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 35,
+      "text_bbox": [
+        1236,
+        237,
+        1749,
+        583
+      ],
+      "text": "The Argives themselves\nrecount these details about\nPyrrhus' death, and the local\nguide Lyceas has recorded\nthem in verse. At the spot\nwhere Pyrrhus died there is\na sanctuary of Demeter, as\nthe oracle of the god had\npreviously instructed them."
+    },
+    {
+      "name": "interpretive-caption",
+      "rect": [
+        28,
+        1532,
+        1772,
+        1585
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 24,
+      "text_bbox": [
+        40,
+        1544,
+        1317,
+        1567
+      ],
+      "text": "Interpretive view of the reported roof-tile episode; the identification with Demeter is an Argive tradition."
+    }
+  ]
+}
