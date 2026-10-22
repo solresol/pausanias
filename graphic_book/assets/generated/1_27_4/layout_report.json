@@ -1,0 +1,179 @@
+{
+  "passage_id": "1.27.4",
+  "preflight": false,
+  "translation_characters": 403,
+  "translation_matches_export": true,
+  "translation_utf8_sha256": "6f2871e6600cb949b9e5ce449656f09c45879b5dfe91e8352ced2796cdbeba36",
+  "body_font_size": 41,
+  "padding": 12,
+  "canvas": [
+    1800,
+    1600
+  ],
+  "reading_order": "numbered lower fields, left then right",
+  "text_blocks_checked": 9,
+  "fit_records": [
+    {
+      "name": "passage-id",
+      "rect": [
+        28,
+        18,
+        385,
+        82
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 31,
+      "text_bbox": [
+        40,
+        30,
+        322,
+        53
+      ],
+      "text": "PASSAGE 1.27.4"
+    },
+    {
+      "name": "title",
+      "rect": [
+        409,
+        18,
+        1772,
+        82
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 41,
+      "text_bbox": [
+        421,
+        30,
+        1308,
+        67
+      ],
+      "text": "SMALL IMAGE, BRONZE OPPONENTS"
+    },
+    {
+      "name": "orientation",
+      "rect": [
+        28,
+        98,
+        1772,
+        150
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 26,
+      "text_bbox": [
+        40,
+        110,
+        950,
+        136
+      ],
+      "text": "ATHENS | THE ACROPOLIS | NEAR THE TEMPLE OF ATHENA"
+    },
+    {
+      "name": "handmaid-caption",
+      "rect": [
+        28,
+        1120,
+        574,
+        1173
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 24,
+      "text_bbox": [
+        40,
+        1132,
+        453,
+        1155
+      ],
+      "text": "Small image \u2014 interpretive study."
+    },
+    {
+      "name": "bronzes-caption",
+      "rect": [
+        620,
+        1120,
+        1772,
+        1173
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 24,
+      "text_bbox": [
+        632,
+        1132,
+        1565,
+        1155
+      ],
+      "text": "Interpretive bronzes; names and inherited tradition are distinguished below."
+    },
+    {
+      "name": "section-1",
+      "rect": [
+        28,
+        1200,
+        574,
+        1248
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 26,
+      "text_bbox": [
+        40,
+        1212,
+        315,
+        1231
+      ],
+      "text": "1 THE HANDMAID"
+    },
+    {
+      "name": "translation-1",
+      "rect": [
+        28,
+        1254,
+        574,
+        1568
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 41,
+      "text_bbox": [
+        40,
+        1266,
+        547,
+        1490
+      ],
+      "text": "Near the temple of\nAthena stands a small,\nelderly woman, about a\ncubit high, called the\nhandmaid of Lysimache."
+    },
+    {
+      "name": "section-2",
+      "rect": [
+        620,
+        1200,
+        1772,
+        1248
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 26,
+      "text_bbox": [
+        632,
+        1212,
+        1253,
+        1231
+      ],
+      "text": "2 THE OPPONENTS AND THE TRADITION"
+    },
+    {
+      "name": "translation-2",
+      "rect": [
+        620,
+        1254,
+        1772,
+        1568
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 41,
+      "text_bbox": [
+        632,
+        1266,
+        1758,
+        1536
+      ],
+      "text": "There are also large bronze statues of men arrayed\nagainst each other for battle: one is named\nErechtheus, the other Eumolpus. Yet those among the\nAthenians who have knowledge of ancient tradition\nhave not forgotten that it was in fact Immaradus, son\nof Eumolpus, who was slain by Erechtheus."
+    }
+  ]
+}
