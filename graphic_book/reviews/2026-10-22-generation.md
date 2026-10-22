@@ -13,3 +13,13 @@ Actual craft anchors **1.1.4/1.1.5** and actual predecessors **1.26.5, 1.26.6, 1
 Full-size components, full-page PNG and seven-page thumbnail review **PASS**. Tactile sculpture, visibly bronze opponents on bases, modest sculpted clothing, complete crop, no violence reenactment, no nudity, no baked wording, no invented landmark or irrelevant callout. The handmaid's material and the lost statues' precise appearance are treated as interpretive. Complete prose preserves the distinction between Eumolpus and Immaradus. Art quality, historical restraint, semantic fit, orientation, suitability, hierarchy and measured typography pass against the anchors.
 
 Local HTML/PDF **PASS**: 172 illustrations, 173 PDF pages including the existing title page. Reader 1.27.4 identifies 172 of 172 and links the exact reviewed PNG. PDF page 173 was rasterized and visually inspected. Page SHA-256 **`7504aca91534dc2df3690fcc15ac85998942c6f35157375011b937e0277f3f49`**. Source delivery and conditional checkpoint follow; the optional draw must only be obtained after that checkpoint succeeds. Public website publication remains the overnight raksasa job.
+
+## Checkpoint and replacement decision
+
+Source commit **`2196f13042a64d127b510c5a372ea54a2df4a202`** was pushed successfully to `origin/main`. Only the scoped renderer, two prompts, page plan, measured layout report and this review were committed; no raster, workflow database/session, generated site, legacy database or unrelated file entered Git.
+
+`record-result` uploaded the final PNG and all eight supporting source/component/review files, read the uploaded objects back for SHA-256/size verification, and successfully conditionally checkpointed new-page result **`93f90dbdea9b4b0d828ea5f940691b6d`**. The complete result remains subject to the overnight PostgreSQL import; daytime checkpointing does not publish the website.
+
+The one persisted replacement draw was **`0.2880182516300539`**, above 0.20. `replacement-decision --outcome skipped` succeeded and reused exactly that draw. Outcome **skipped**; no older target was selected, no candidate shuffle was needed and no older-page art was generated. Exactly one new illustrated passage was produced by this recovery cycle.
+
+The report and decision are committed before ending the same run with `finish`, whose acknowledgement and the remote `runs`/`active_worker` state are authoritative evidence of release. Credentials, other repositories, global asset manifests and schedules remain unchanged. Public website publication is reserved for the overnight raksasa job.
