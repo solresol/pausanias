@@ -1,0 +1,198 @@
+{
+  "passage_id": "1.27.5",
+  "preflight": false,
+  "translation_characters": 988,
+  "translation_utf8_sha256": "dafae6765df50abc376af9f857b416c725759edaddf9e50a8130adcbf5c323a8",
+  "translation_matches_export": true,
+  "body_font_size": 34,
+  "minimum_body_font_size": 33,
+  "padding": 14,
+  "canvas": [
+    2000,
+    1800
+  ],
+  "reading_order": "three upper columns, left to right",
+  "text_blocks_checked": 10,
+  "fit_records": [
+    {
+      "name": "passage-id",
+      "rect": [
+        30,
+        15,
+        430,
+        83
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 34,
+      "text_bbox": [
+        44,
+        29,
+        353,
+        54
+      ],
+      "text": "PASSAGE 1.27.5"
+    },
+    {
+      "name": "title",
+      "rect": [
+        465,
+        15,
+        1970,
+        83
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 39,
+      "text_bbox": [
+        479,
+        29,
+        1622,
+        65
+      ],
+      "text": "TOLMIDES: COASTAL VICTORIES, INLAND DEFEAT"
+    },
+    {
+      "name": "orientation",
+      "rect": [
+        30,
+        91,
+        1970,
+        145
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 26,
+      "text_bbox": [
+        44,
+        105,
+        1338,
+        131
+      ],
+      "text": "ATHENS, ACROPOLIS: STATUES AND MEMORY | BELOW: GYTHIUM, LACONIAN COAST"
+    },
+    {
+      "name": "section-1",
+      "rect": [
+        30,
+        146,
+        650,
+        192
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 25,
+      "text_bbox": [
+        44,
+        160,
+        445,
+        178
+      ],
+      "text": "1 STATUES AND THE FLEET"
+    },
+    {
+      "name": "translation-1",
+      "rect": [
+        30,
+        188,
+        650,
+        700
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 34,
+      "text_bbox": [
+        44,
+        202,
+        624,
+        679
+      ],
+      "text": "Upon the pedestal are also\nstatues of Theaenetus, who gave\nprophecies to Tolmides, and of\nTolmides himself. It was Tolmides\nwho, commanding the Athenian\nfleet, did great harm to various\npeoples and ravaged those\nregions of Peloponnesus\ninhabited along the coast. He\nburned the Lacedaemonians'\ndockyards at Gythium, captured\nBoeae from the Perioeci, and also\ntook the island of Cythera."
+    },
+    {
+      "name": "section-2",
+      "rect": [
+        690,
+        146,
+        1310,
+        192
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 25,
+      "text_bbox": [
+        704,
+        160,
+        1164,
+        178
+      ],
+      "text": "2 SICYON AND THE COLONISTS"
+    },
+    {
+      "name": "translation-2",
+      "rect": [
+        690,
+        188,
+        1310,
+        700
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 34,
+      "text_bbox": [
+        704,
+        202,
+        1289,
+        524
+      ],
+      "text": "After making a landing in the\nterritory of the Sicyonians, he\nencountered resistance while\ndevastating the land; he defeated\nhis opponents and pursued them\nclosely up to the city itself. Later,\nupon returning to Athens, he sent\nout Athenian colonists to settle in\nEuboea and Naxos."
+    },
+    {
+      "name": "section-3",
+      "rect": [
+        1350,
+        146,
+        1970,
+        192
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 25,
+      "text_bbox": [
+        1364,
+        160,
+        1740,
+        178
+      ],
+      "text": "3 THE BOEOTIAN DEFEAT"
+    },
+    {
+      "name": "translation-3",
+      "rect": [
+        1350,
+        188,
+        1970,
+        700
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 34,
+      "text_bbox": [
+        1364,
+        202,
+        1953,
+        598
+      ],
+      "text": "Then he invaded Boeotia with an\narmy and, having ravaged much\nof the land there and attacked\nChaeroneia with siege, proceeded\nto the territory of Haliartus,\nwhere he fell in battle himself,\nand his entire army was\ndecisively defeated. Such, I\nlearned, were the actions of\nTolmides. There are also statues\nof Athena here."
+    },
+    {
+      "name": "caption",
+      "rect": [
+        30,
+        1708,
+        1970,
+        1780
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 27,
+      "text_bbox": [
+        44,
+        1722,
+        1952,
+        1749
+      ],
+      "text": "Gythium\u2019s dockyards burn during Tolmides\u2019s naval campaign. Interpretive reconstruction; the later defeat at Haliartus is recounted above."
+    }
+  ]
+}
