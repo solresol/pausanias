@@ -1,0 +1,131 @@
+{
+  "passage_id": "1.27.6",
+  "preflight": false,
+  "canvas": [
+    2000,
+    1800
+  ],
+  "art_rectangle": [
+    36,
+    184,
+    1236,
+    1664
+  ],
+  "reading_order": "single continuous right-hand translation, top to bottom",
+  "translation_characters": 659,
+  "translation_utf8_sha256": "e6f3e4cf175c2a6f0c8ba6249536116aca1c6c9a79bc474cf6a1864d6406b664",
+  "translation_matches_export": true,
+  "minimum_body_font_size": 38,
+  "padding": 18,
+  "text_blocks_checked": 6,
+  "fit_records": [
+    {
+      "name": "passage-id",
+      "rect": [
+        36,
+        18,
+        476,
+        102
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 38,
+      "text_bbox": [
+        54,
+        36,
+        400,
+        65
+      ],
+      "text": "PASSAGE 1.27.6"
+    },
+    {
+      "name": "title",
+      "rect": [
+        510,
+        18,
+        1964,
+        102
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 45,
+      "text_bbox": [
+        528,
+        36,
+        1589,
+        70
+      ],
+      "text": "SCULPTURES THAT SURVIVED THE FIRE"
+    },
+    {
+      "name": "orientation",
+      "rect": [
+        36,
+        108,
+        1964,
+        170
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 26,
+      "text_bbox": [
+        54,
+        126,
+        1221,
+        152
+      ],
+      "text": "ATHENS | THE ACROPOLIS | ANCIENT SCULPTURES AND THE PERSIAN SACK"
+    },
+    {
+      "name": "reading-heading",
+      "rect": [
+        1284,
+        184,
+        1964,
+        268
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 31,
+      "text_bbox": [
+        1302,
+        202,
+        1885,
+        225
+      ],
+      "text": "PAUSANIAS ON THE SURVIVORS"
+    },
+    {
+      "name": "translation",
+      "rect": [
+        1284,
+        274,
+        1964,
+        1664
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 44,
+      "text_bbox": [
+        1302,
+        292,
+        1944,
+        1609
+      ],
+      "text": "These sculptures are very\nancient, and although none\nof them melted, they\nbecame darker in color and\nweaker to withstand blows.\nFor these too were touched\nby flames when the Persian\nking captured a city\ndeserted by all those of\nmilitary age, since the\nAthenians had already\nembarked upon their ships.\nAmong them is depicted a\nboar hunt, about which I do\nnot know for sure whether it\nrepresents the Calydonian\none. Also shown is Cycnus\nfighting against Heracles.\nThis Cycnus, it is said, killed\nvarious other men,\nincluding Lycus the\nThracian, competing in\ncontests of single combat\nset before them, but near\nthe river Peneius he himself\nwas slain by Heracles."
+    },
+    {
+      "name": "interpretive-caption",
+      "rect": [
+        36,
+        1688,
+        1964,
+        1780
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 26,
+      "text_bbox": [
+        54,
+        1706,
+        1941,
+        1762
+      ],
+      "text": "Interpretive bronze studies: Cycnus and Heracles, with a boar hunt beyond. Their lost forms and original placement remain uncertain, as does\nthe hunt\u2019s identity."
+    }
+  ]
+}
