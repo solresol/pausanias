@@ -1,0 +1,138 @@
+{
+  "passage_id": "1.27.7",
+  "preflight": false,
+  "canvas": [
+    2000,
+    1800
+  ],
+  "art_rectangle": [
+    36,
+    182,
+    1964,
+    1764
+  ],
+  "reading_panel": [
+    36,
+    1030,
+    1135,
+    1764
+  ],
+  "reading_order": "one continuous lower-left field, top to bottom",
+  "translation_characters": 506,
+  "translation_exact": "Among the stories told in Troezen about Theseus, they say that when Heracles came to Troezen as a guest of Pittheus, he laid down the lion's skin during dinner. Then some of the Troezenian children entered the room, including Theseus, who was just reaching his seventh year. All the other boys, on seeing the skin, fled in fear, but Theseus, slipping out quietly and without great fright, seized an axe from one of the attendants and quickly returned toward it, believing the lion skin to be a living lion.",
+  "translation_utf8_sha256": "722bc72e5c94b5da51e50365698e1b836f89cc0767c43c018ebc22ae98d62ef7",
+  "translation_matches_export": true,
+  "minimum_body_font_size": 38,
+  "padding": 16,
+  "text_blocks_checked": 6,
+  "fit_records": [
+    {
+      "name": "passage-id",
+      "rect": [
+        36,
+        18,
+        476,
+        102
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 38,
+      "text_bbox": [
+        52,
+        34,
+        398,
+        63
+      ],
+      "text": "PASSAGE 1.27.7"
+    },
+    {
+      "name": "title",
+      "rect": [
+        510,
+        18,
+        1964,
+        102
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 48,
+      "text_bbox": [
+        526,
+        34,
+        1383,
+        71
+      ],
+      "text": "THESEUS AND THE LION SKIN"
+    },
+    {
+      "name": "orientation",
+      "rect": [
+        36,
+        108,
+        1964,
+        170
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 29,
+      "text_bbox": [
+        52,
+        124,
+        1439,
+        153
+      ],
+      "text": "TROEZEN | THE HOUSEHOLD OF PITTHEUS | A STORY OF THESEUS'S CHILDHOOD"
+    },
+    {
+      "name": "reading-heading",
+      "rect": [
+        64,
+        1046,
+        1105,
+        1108
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 31,
+      "text_bbox": [
+        80,
+        1062,
+        634,
+        1085
+      ],
+      "text": "THE STORY TOLD IN TROEZEN"
+    },
+    {
+      "name": "translation",
+      "rect": [
+        64,
+        1114,
+        1105,
+        1640
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 38,
+      "text_bbox": [
+        80,
+        1130,
+        1077,
+        1607
+      ],
+      "text": "Among the stories told in Troezen about Theseus,\nthey say that when Heracles came to Troezen as a\nguest of Pittheus, he laid down the lion's skin\nduring dinner. Then some of the Troezenian\nchildren entered the room, including Theseus, who\nwas just reaching his seventh year. All the other\nboys, on seeing the skin, fled in fear, but Theseus,\nslipping out quietly and without great fright, seized\nan axe from one of the attendants and quickly\nreturned toward it, believing the lion skin to be a\nliving lion."
+    },
+    {
+      "name": "interpretive-caption",
+      "rect": [
+        64,
+        1650,
+        1105,
+        1740
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 26,
+      "text_bbox": [
+        80,
+        1666,
+        1052,
+        1722
+      ],
+      "text": "Interpretive scene of the local story; the household, dress and figures are\nconjectural."
+    }
+  ]
+}
