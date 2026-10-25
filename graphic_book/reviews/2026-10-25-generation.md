@@ -14,8 +14,20 @@ Exactly one selected composition and one generated raster component. Both compon
 
 Final page SHA-256 **`58b56b732e3fcc3dcdbbf2bedbce9f88d3848fbe198e6c4046d48ba5226612ed`**, 3,475,873 bytes. Component SHA-256 **`18a9787f032cb006d9e6d903ce1fb15f22475ac52edc27517c184cfccc5536c5`**, 2,654,731 bytes. Renderer, prompt, plan, layout report and this review are scoped source deliverables; binary files, workflow snapshot/session, generated site, legacy database and global asset manifest stay out of Git.
 
-Whole local build, source push, conditional result checkpoint, persisted optional draw/outcome, Library image save and claim release will be recorded below from actual acknowledgements. Overnight PostgreSQL import and public website publication remain Raksasa's separate responsibility.
+Actual local-build, source-push, conditional-checkpoint, optional-decision and Library acknowledgements are recorded below; claim release is verified after the outcome commit. Overnight PostgreSQL import and public website publication remain Raksasa's separate responsibility.
 
 ## Local HTML/PDF acceptance
 
 Full local build **PASS**: **175** illustrated passages and **176** PDF pages including the verified title page. Actual reader 1.27.7 reports 175 of 175, links 1.27.6, the correct PNG, translation and PDF. Canonical and copied reader PNGs compare byte-identically. PDF page 176 rasterized at 2000px and inspected at full size: complete English, scene, caption, header and clear margins remain intact. Binary/cache/site exclusions verified. This is local acceptance, not a daytime publication or PostgreSQL import.
+
+## Source delivery, conditional checkpoint and optional replacement
+
+Scoped source commit **`11f82096b3fe82fe201ea7ecf9525e4d806d88b6`** pushed successfully to origin/main; remote refs/heads/main readback matched the full SHA. Exactly five text files committed: renderer, prompt, page plan, deterministic layout report and this generation review. No PNG, workflow state, generated site, obsolete database, global asset manifest or unrelated work entered Git.
+
+`record-result` successfully checkpointed **`b6b52c69476e41698a263741b0648434`** for 1.27.7. Immutable page key `workflow/results/b6b52c69476e41698a263741b0648434/page.png`; SHA-256 `58b56b732e3fcc3dcdbbf2bedbce9f88d3848fbe198e6c4046d48ba5226612ed`, 3,475,873 bytes. Every one of **six** supporting files was explicitly passed via --file: all five committed text files and the single generated component. The helper uploaded immutable objects, independently read back and hash/size-verified the page and every supporting object, then conditionally checkpointed the catalogue. A separate read-only check confirmed source SHA, image hash, all six result_files and matching local pre-outcome source/component bytes. Result import status is **pending**. The immutable review describes final art and local-build acceptance; this later Git update adds the actual post-checkpoint outcomes without rewriting immutable result files.
+
+Exactly one logical random decision persisted draw **`0.6880763602288541`**. Because the draw is at least 0.20, the helper recorded outcome **skipped**, returning that same persisted value. Target is null. No candidate shuffle, old-page generation, replacement result or duplicate 1.27.6 work occurred.
+
+The accepted locally typeset composite was saved as native Library **image**, `library_file_id` **`libfile_02e7c8ea18fc81919d973a83399784d7`**, `file_id` **`file_000000003d5881f5b75d05f090aaecfe`**, authoritative Library path `/7.png`. Current Library skill transfer helper successfully applied the returned identity attributes to the original local PNG. This saves the accepted page, not an extra generation.
+
+This outcome update is pushed before `finish --notes` releases this worker claim. The final helper acknowledgement and read-only remote status provide actual release evidence. No daytime PostgreSQL import, public deployment, canonical old-page promotion, schedule change or deployment change is claimed.
