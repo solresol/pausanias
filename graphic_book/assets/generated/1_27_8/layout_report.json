@@ -1,0 +1,150 @@
+{
+  "passage_id": "1.27.8",
+  "preflight": false,
+  "canvas": [
+    2000,
+    1800
+  ],
+  "art_rectangle": [
+    36,
+    340,
+    1964,
+    1250
+  ],
+  "translation_rectangles": [
+    [
+      36,
+      190,
+      1964,
+      320
+    ],
+    [
+      36,
+      1300,
+      1964,
+      1710
+    ]
+  ],
+  "reading_order": "upper introductory sentence, then continuous lower continuation",
+  "translation_characters": 449,
+  "translation_exact": "This is the first of the traditions held concerning him by the Troizenians. The one following it is that Aegeus placed sandals and a sword under a rock as tokens for his child, and sailed away to Athens; and that Theseus, when he reached his sixteenth year, pushed the rock aside, departed, and carried with him the deposit left by Aegeus. A representation of this story has been made on the Acropolis; all of it is of bronze alike, except the rock.",
+  "translation_chunks": [
+    "This is the first of the traditions held concerning him by the Troizenians.",
+    "The one following it is that Aegeus placed sandals and a sword under a rock as tokens for his child, and sailed away to Athens; and that Theseus, when he reached his sixteenth year, pushed the rock aside, departed, and carried with him the deposit left by Aegeus. A representation of this story has been made on the Acropolis; all of it is of bronze alike, except the rock."
+  ],
+  "translation_utf8_sha256": "49ed8f01b48f84e68fa688f8b79682be03c0d082e6e96f1208982022381a78f1",
+  "translation_matches_export": true,
+  "minimum_body_font_size": 40,
+  "padding": 16,
+  "text_blocks_checked": 6,
+  "fit_records": [
+    {
+      "name": "passage-id",
+      "rect": [
+        36,
+        18,
+        476,
+        102
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 38,
+      "text_bbox": [
+        52,
+        34,
+        398,
+        63
+      ],
+      "text": "PASSAGE 1.27.8"
+    },
+    {
+      "name": "title",
+      "rect": [
+        510,
+        18,
+        1964,
+        102
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 48,
+      "text_bbox": [
+        526,
+        34,
+        1565,
+        71
+      ],
+      "text": "THESEUS AND THE HIDDEN TOKENS"
+    },
+    {
+      "name": "orientation",
+      "rect": [
+        36,
+        108,
+        1964,
+        170
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 29,
+      "text_bbox": [
+        52,
+        124,
+        1505,
+        153
+      ],
+      "text": "ATHENS, THE ACROPOLIS | A BRONZE REPRESENTATION OF THE TROIZENIAN STORY"
+    },
+    {
+      "name": "translation-1",
+      "rect": [
+        36,
+        190,
+        1964,
+        320
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 46,
+      "text_bbox": [
+        52,
+        206,
+        1748,
+        251
+      ],
+      "text": "This is the first of the traditions held concerning him by the Troizenians."
+    },
+    {
+      "name": "translation-2",
+      "rect": [
+        36,
+        1300,
+        1964,
+        1710
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 46,
+      "text_bbox": [
+        52,
+        1316,
+        1915,
+        1573
+      ],
+      "text": "The one following it is that Aegeus placed sandals and a sword under a rock as\ntokens for his child, and sailed away to Athens; and that Theseus, when he\nreached his sixteenth year, pushed the rock aside, departed, and carried with\nhim the deposit left by Aegeus. A representation of this story has been made on\nthe Acropolis; all of it is of bronze alike, except the rock."
+    },
+    {
+      "name": "interpretive-caption",
+      "rect": [
+        36,
+        1720,
+        1964,
+        1790
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 27,
+      "text_bbox": [
+        52,
+        1736,
+        1683,
+        1763
+      ],
+      "text": "Interpretive study: bronze figure and tokens, natural stone rock. The lost design and original placement are uncertain."
+    }
+  ]
+}

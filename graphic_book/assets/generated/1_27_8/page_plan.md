@@ -1,0 +1,50 @@
+# 1.27.8 — Theseus and the hidden tokens
+
+Authorized 26 October 2026 UTC cycle in the selected published classical-texts environment. Shared conditional claim `1e5a7d027b9546f58c94b437c621747a` and authoritative next select 1.27.8; accepted 1.27.7 remains intact. Complete exported English is read with `graphic_book_corpus.load_translation("1.27.8")`, validated by `snapshot_path()`: 449 characters, 82 words. No local PostgreSQL or root legacy SQLite. Actual craft anchors 1.1.4 and 1.1.5 inspected for finished raster detail and typography, not layout imitation.
+
+## Actual preceding six accepted PNGs and plans
+
+Catalogue hashes verified using S3Store.download_verified. All six actual PNGs and available plans inspected; numeric-order sheet `/tmp/pausanias-1278-preceding-six.jpg` compared. Independent read-only composition audit also inspected every actual PNG and plan.
+
+| ID | Composition / translation placement | Scenic panels | Viewpoint | Palette / lighting |
+| --- | --- | ---: | --- | --- |
+| 1.27.2 | Upper full-width sentence, deep central courtyard, paired lower prose | 1 | wide ground-level exterior | olive silver, limestone, blue sky; bright morning |
+| 1.27.3 | Tall central descent flanked by four numbered prose fields | 1 | close low rocky passage | indigo, silver, earth; moonlight |
+| 1.27.4 | Unequal upper sculpture diptych over unequal lower prose fields | 2 | close oblique studies | pale stone, bronze, lavender; diffuse daylight |
+| 1.27.5 | Three upper prose columns over broad lower maritime panorama | 1 | wide low sea-level view | slate, smoke mauve, timber, orange; cloudy day |
+| 1.27.6 | Full-height left sculpture study beside continuous right prose | 1 | close human-height slightly low sculpture | graphite/jade, chalk, blue; raking daylight |
+| 1.27.7 | Upper-and-right room scene around lower-left reading field | 1 | medium-wide child-height domestic scene | burgundy, umber, deep blue; doorway and lamplight |
+
+## Three materially different pre-art compositions
+
+1. **Selected: broad central sculpture panorama between one upper introductory sentence and one continuous lower reading field.** No sidebar or inset. The entire group has a generous horizontal stage so the bronze youth, bronze tokens and non-bronze rock can be seen together. It differs from both immediate predecessors' vertical split and L-shaped art. Central landscape between prose is related to 1.27.2, exactly the sixth predecessor and outside candidate-plus-five (1.27.3–1.27.8); the family occurs once within the regulated six-page window. It is not a mirror of a recent page.
+2. Rejected: upper triptych of whole sculpture and two token details over a lower reading band. It fragments a single representation, duplicates conjectural designs and risks resembling 1.27.4's upper art/lower prose massing.
+3. Rejected: staggered diagonal diptych of whole monument upper-left and token detail lower-right, prose in the opposite two corners. This is materially different but unnecessarily complicates the short passage and gives speculative object forms too much emphasis.
+
+## Text-first geometry
+
+Canvas 2000×1800. Header and orientation y=18–170. Exact first sentence in `(36,190)–(1964,320)`; main art `(36,340)–(1964,1250)`, **1928×910, aspect 2.11868:1**; entire remaining exact English in `(36,1300)–(1964,1710)`. Reading order is top to bottom, with only one sentence boundary split. The two exact substrings rejoin byte-for-byte to the exported English with one intervening source space. Caption `(36,1720)–(1964,1790)` explicitly distinguishes bronze from natural stone and lost-design uncertainty. All six blocks use portable graphic_book_fonts, deterministic wrapping and actual Pillow glyph bounds with 16px padding. Body minimum 40px. Failure prevents saving; preflight must pass before art generation. Exact original text, hash, chunks, fonts and measured rectangles remain in layout_report.json.
+
+## Subject, orientation and art direction
+
+One sophisticated painterly raster of an **interpretive Acropolis sculptural representation**, not a living myth reenactment or a recovered archaeological design. A youthful Theseus cast entirely in dark green-grey bronze, fully clothed in a knee-covering belted tunic and cloak, uses both bronze hands to push a large real pale limestone rock aside. Rock visibly tilts away to reveal two bronze sandals and a bronze sheathed sword beneath its former resting place; tokens remain set down as part of the static representation, not worn by the statue. The figure's face, hair, hands and clothing are unmistakably bronze, with metal highlights and subtle patina, never flesh. The rock has rough broken mineral planes, a different material from bronze. No additional sculpture or live onlooker. No contemporaneous Aegeus/ship narrative, invented inscription, active supernatural event, nudity, injury, modern fitting or diagram.
+
+Close-to-medium broad slightly elevated three-quarter object view; whole figure, rock, hands and tokens stay comfortably within the crop. A quiet ancient sanctuary terrace and restrained nonspecific masonry, clouded Attic sky and distant inland hills establish exterior depth without an invented exact precinct plan or a second Acropolis. Focus on tactile bronze, natural stone, carefully wrought token details, cloth modelling and credible mass. Cool blue-grey, muted verdigris, silver limestone; soft overcast daylight with restrained metallic glints. No warm sunset, golden-ochre wash, scenic inset, locator or leader. All text lives outside the art. Header explicitly locates the monument in Athens/Acropolis and names the Troizenian story; caption marks design and placement as uncertain.
+
+Compared with 1.27.7: living domestic figures become static bronze objects, the child-height room becomes a slightly elevated exterior material study, burgundy/umber/deep-blue shifts to cool grey/verdigris/silver, and evening doorway/lamplight becomes soft daylight. Distance, angle, palette, light and subject balance are content-based changes. The material distinction is the passage's specific visual point.
+
+## Full-size, text and thumbnail acceptance
+
+Preflight passed before art commission; final deterministic fit **PASS**. Exact 449-character English remains in source order, with byte-identical chunk reassembly and UTF-8 SHA-256 `49ed8f01b48f84e68fa688f8b79682be03c0d082e6e96f1208982022381a78f1`. Both source-order reading fields use **46px**, above the 40px minimum. All six text blocks clear 16px padded glyph bounds. Independent source audit verified exact export, hash, all bounds and aspect. Independent Tesseract OCR of the final page recovers every passage word and punctuation in order after layout-whitespace normalization. Exact typesetting is local; no letters commissioned into art.
+
+Exactly one raster component generated for the selected design. Actual 1821×864 raster is fitted to 1928×910 with negligible height trimming, preserving the entire figure, hands, feet, stone and tokens. Component and final 2000×1800 PNG inspected at original resolution by author and independent reviewer. The dark green-grey bronze figure is visibly sculptural, with metallic face, hair, arms and cloth. Exactly two bronze sandals and one bronze sheathed sword are visible at the exposed base of the pale mineral rock. Bronze patina, sculpted drapery, fine token details, rough stone and layered clouded landscape meet the anchor craft standard. No living flesh interpretation, pseudo-writing, modern fixture, invented extra episode, diagram, nude body, gore or gratuitous callout. Torso, pelvis and thighs are clothed; exposed sculpted lower legs remain appropriate. Header locates the monument on the Athenian Acropolis and separates the Troizenian story; caption marks design and placement as uncertain. No inset or leader requires semantic targeting.
+
+Actual view reads as medium near-eye-height with mild downward obliquity rather than a strongly elevated study. Clouded diffuse daylight includes brighter sun shafts at right. These are accepted departures, not hidden failures. Palette, daylight and static metallic subject/material balance supply at least three changes from 1.27.7 without relying on distance or angle as necessary novelty evidence. The scalp has a modest but clear upper margin, and no crop touches it. Semantic fit, historical restraint, orientation, suitability, hierarchy, rich raster craft and text clearance **PASS**, independently confirmed against actual 1.1.4/1.1.5.
+
+Actual seven-PNG numeric comparison `/tmp/pausanias-1278-comparison.jpg` reviewed by author and independent auditor. Central broad art with prose above and below is visibly distinct from immediate predecessors 1.27.6's vertical split and 1.27.7's L. Its family occurs once in candidate-plus-five; related 1.27.2 is sixth predecessor and outside that window. Central portrait/flanking prose 1.27.3, upper diptych 1.27.4 and upper prose/lower panorama 1.27.5 retain different large masses. No tall left translation sidebar, mirroring or renamed composition. Variety **PASS**.
+
+Final page SHA-256 `68db9ef5612b4d7292bb22a2658b38046ff454f61a703df6d0a28e16e3727f1d`, 3,101,652 bytes. Component SHA-256 `429c769bd13cec4249c4f856f8d7cf83b85b0198e738cf1cbe83aaf1e0083cb3`, 2,991,679 bytes.
+
+## Local HTML/PDF acceptance
+
+Full hydration **PASS**, 175 existing accepted pages and recorded components verified; next re-confirmed 1.27.8 after completion. Existing title page separately hash-verified against the recorded asset entry. Required full local build **PASS**, 176 illustrated passages and 177 PDF pages including the title page. Actual `1/27/8.html` inspected: position 176 of 176, previous 1.27.7, correct PNG, translation and PDF links. Reader PNG byte-identical to final. PDF page 177 rasterized at 2000px and visually inspected at original size: full English, ID, header, bronze/rock/token scene, caption and clear margins survive. This is local acceptance; conditional checkpoint and overnight import/publication are separate.
