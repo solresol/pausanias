@@ -21,3 +21,15 @@ Required full local HTML/PDF build **PASS**, **176** illustrated passages, **177
 Accepted composite saved to Library as native **image**: `library_file_id` **`libfile_6a60f8e58bc48191b8738cf755cb7954`**, `file_id` **`file_00000000240881f59b23afb3411c1098`**, path `/8.png`, version 0. Current Library transfer helper and companion fetched into a new private directory and helper successfully persisted returned identity metadata on original local PNG. This saves the accepted composite, not another generated page.
 
 Scoped source push, immutable verified result checkpoint, persisted optional replacement decision and claim release are recorded after their acknowledgements. Binary art/pages, workflow snapshot/session, generated site, legacy database, global asset manifest and unrelated changes remain out of Git. No combined backups, direct SQLite upload, raksasa promotion, overnight PostgreSQL import, public publication or schedule change performed.
+
+## Source delivery and conditional result
+
+Scoped source commit **`a19beeb3dc3b13732d04d6db88a9b21f21754034`** pushed to origin/main; remote ref readback matched the complete SHA. Exactly five text files were committed: renderer, prompt, page plan, measured layout report and this generation report. Git exclusions verified and checkout clean after source delivery.
+
+`record-result` successfully checkpointed **`cfc6b40cddee42f6ab092ae0d2e40f42`** for new page **1.27.8**, created `2026-10-26T01:09:43.948022+00:00`. Immutable key **`workflow/results/cfc6b40cddee42f6ab092ae0d2e40f42/page.png`**, SHA-256 **`68db9ef5612b4d7292bb22a2658b38046ff454f61a703df6d0a28e16e3727f1d`**, 3,101,652 bytes. All **six** supporting files explicitly passed using --file: the five committed text files and single generated component. The helper uploaded immutable objects, retrieved each page/supporting object into temporary files and verified SHA-256 and byte count before conditional catalogue publication. Separate read-only inspection confirmed result/source SHA and all six result_files hashes against local bytes before this outcome append. Prior 1.27.7 catalogue hash remains unchanged. Import status **pending**; next overnight PostgreSQL acceptance and site publication are not claimed.
+
+## Persisted optional decision and completion
+
+One logical random decision persisted **`0.6188800640610996`**. Since it is at least 0.20, `replacement-decision --outcome skipped` returned the same draw and persisted **skipped**. Target remains **null**. No shuffle, candidate generation, replacement result or older-page promotion occurred. This outcome is retained in Git, without modifying the immutable checkpoint objects or recording a duplicate result.
+
+This outcome update is pushed before the final `finish --notes` releases the current claim. Its actual terminal acknowledgement and read-only remote state are reported in the final run response. No blockers or denied operations occurred. The accepted final composite is already in Library for native attachment; local build, uploaded/checkpointed state, and overnight publication remain distinct.
