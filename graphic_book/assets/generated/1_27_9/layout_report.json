@@ -1,0 +1,139 @@
+{
+  "passage_id": "1.27.9",
+  "preflight": false,
+  "canvas": [
+    2200,
+    2000
+  ],
+  "art_rectangle": [
+    36,
+    220,
+    1336,
+    1840
+  ],
+  "translation_rectangle": [
+    1380,
+    306,
+    2164,
+    1840
+  ],
+  "reading_order": "one continuous right-hand field, top to bottom",
+  "translation_characters": 748,
+  "translation_words": 129,
+  "translation_exact": "They also dedicated another deed of Theseus; and the account runs thus. In Crete a bull was ravaging both the main land and the region around the river Tethris. In olden times, indeed, wild beasts were more terrifying to men, such as the lion at Nemea, the serpent of Parnassus, and dragons in many places throughout Greece, and the boars around Calydon and Erymanthus, and at Crommyon in the territory of Corinth. Therefore it was said that some beasts appeared to torment the land, others were sacred to gods, and still others were sent forth as punishments upon mortals. And the Cretans say that Poseidon sent this bull upon their land, because although Minos ruled the sea, he honored no other deity among the Greeks more than Poseidon himself.",
+  "translation_utf8_sha256": "7d18f97928e33df1e9f6308b8acdcb333cd73fe053d35054ff145aaaa28affb0",
+  "translation_matches_export": true,
+  "minimum_body_font_size": 40,
+  "padding": 18,
+  "text_blocks_checked": 6,
+  "fit_records": [
+    {
+      "name": "passage-id",
+      "rect": [
+        36,
+        20,
+        590,
+        114
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 42,
+      "text_bbox": [
+        54,
+        38,
+        436,
+        70
+      ],
+      "text": "PASSAGE 1.27.9"
+    },
+    {
+      "name": "title",
+      "rect": [
+        630,
+        20,
+        2164,
+        114
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 60,
+      "text_bbox": [
+        648,
+        38,
+        1310,
+        84
+      ],
+      "text": "THE CRETAN BULL"
+    },
+    {
+      "name": "orientation",
+      "rect": [
+        36,
+        122,
+        2164,
+        194
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 33,
+      "text_bbox": [
+        54,
+        140,
+        1444,
+        173
+      ],
+      "text": "ATHENS, ACROPOLIS: A DEDICATION | CRETE: THE STORY OF THE BULL"
+    },
+    {
+      "name": "reading-heading",
+      "rect": [
+        1380,
+        220,
+        2164,
+        294
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 32,
+      "text_bbox": [
+        1398,
+        238,
+        1953,
+        261
+      ],
+      "text": "THE ACCOUNT IN PAUSANIAS"
+    },
+    {
+      "name": "translation",
+      "rect": [
+        1380,
+        306,
+        2164,
+        1840
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 46,
+      "text_bbox": [
+        1398,
+        324,
+        2138,
+        1737
+      ],
+      "text": "They also dedicated another\ndeed of Theseus; and the\naccount runs thus. In Crete a\nbull was ravaging both the\nmain land and the region\naround the river Tethris. In\nolden times, indeed, wild\nbeasts were more terrifying to\nmen, such as the lion at\nNemea, the serpent of\nParnassus, and dragons in\nmany places throughout\nGreece, and the boars around\nCalydon and Erymanthus, and\nat Crommyon in the territory of\nCorinth. Therefore it was said\nthat some beasts appeared to\ntorment the land, others were\nsacred to gods, and still others\nwere sent forth as punishments\nupon mortals. And the Cretans\nsay that Poseidon sent this bull\nupon their land, because\nalthough Minos ruled the sea,\nhe honored no other deity\namong the Greeks more than\nPoseidon himself."
+    },
+    {
+      "name": "interpretive-caption",
+      "rect": [
+        36,
+        1870,
+        2164,
+        1980
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 30,
+      "text_bbox": [
+        54,
+        1888,
+        2090,
+        1946
+      ],
+      "text": "Interpretive scene of the Cretan bull; the landscape and animal's appearance are conjectural. No precise site is asserted for the river\nTethris."
+    }
+  ]
+}
