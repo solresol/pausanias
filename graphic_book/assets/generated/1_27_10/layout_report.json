@@ -1,0 +1,188 @@
+{
+  "passage_id": "1.27.10",
+  "preflight": false,
+  "canvas": [
+    2400,
+    2100
+  ],
+  "art_rectangle": [
+    36,
+    1000,
+    2364,
+    2000
+  ],
+  "translation_rectangles": [
+    [
+      36,
+      282,
+      1170,
+      944
+    ],
+    [
+      1230,
+      282,
+      2364,
+      944
+    ]
+  ],
+  "reading_order": "numbered upper columns: left top-to-bottom, then right top-to-bottom",
+  "translation_characters": 920,
+  "translation_words": 155,
+  "translation_exact": "They say that this bull was brought from Crete into the Peloponnese, and that capturing it was also one of the so-called twelve labours of Heracles. When it was set free in the plain belonging to the Argives, it fled through the Isthmus of Corinth and made its way into Attica, finally reaching the territory of Marathon. There it slew whomever it encountered, including Androgeos, a son of Minos. Consequently Minos, sailing with his fleet against Athens\u2014since he refused to accept that the Athenians were blameless in the death of Androgeos\u2014caused them so much distress that it was ultimately agreed that they would send seven maidens and an equal number of youths to Crete, to feed the bull reputedly belonging to Minos that inhabited the Labyrinth in Knossos. Later, they say, Theseus drove the bull from Marathon to the Acropolis and sacrificed it to the goddess, and the offering belongs to the people of Marathon.",
+  "translation_chunks": [
+    "They say that this bull was brought from Crete into the Peloponnese, and that capturing it was also one of the so-called twelve labours of Heracles. When it was set free in the plain belonging to the Argives, it fled through the Isthmus of Corinth and made its way into Attica, finally reaching the territory of Marathon. There it slew whomever it encountered, including Androgeos, a son of Minos.",
+    "Consequently Minos, sailing with his fleet against Athens\u2014since he refused to accept that the Athenians were blameless in the death of Androgeos\u2014caused them so much distress that it was ultimately agreed that they would send seven maidens and an equal number of youths to Crete, to feed the bull reputedly belonging to Minos that inhabited the Labyrinth in Knossos. Later, they say, Theseus drove the bull from Marathon to the Acropolis and sacrificed it to the goddess, and the offering belongs to the people of Marathon."
+  ],
+  "translation_utf8_sha256": "a819c2cd52310f54fb8a60dc3f6d04df41fec32d8722e1c488d82a159d18aaf3",
+  "translation_matches_export": true,
+  "minimum_body_font_size": 40,
+  "body_font_size": 45,
+  "padding": 18,
+  "text_blocks_checked": 8,
+  "fit_records": [
+    {
+      "name": "passage-id",
+      "rect": [
+        36,
+        20,
+        650,
+        110
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 42,
+      "text_bbox": [
+        54,
+        38,
+        465,
+        70
+      ],
+      "text": "PASSAGE 1.27.10"
+    },
+    {
+      "name": "title",
+      "rect": [
+        680,
+        20,
+        2364,
+        110
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 54,
+      "text_bbox": [
+        698,
+        38,
+        1923,
+        79
+      ],
+      "text": "FROM MARATHON TO THE ACROPOLIS"
+    },
+    {
+      "name": "orientation",
+      "rect": [
+        36,
+        118,
+        2364,
+        188
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 33,
+      "text_bbox": [
+        54,
+        136,
+        1665,
+        169
+      ],
+      "text": "ATTICA, THE PLAIN OF MARATHON | THESEUS DRIVES THE BULL TOWARD ATHENS"
+    },
+    {
+      "name": "interpretive-caption",
+      "rect": [
+        36,
+        2016,
+        2364,
+        2098
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 31,
+      "text_bbox": [
+        54,
+        2034,
+        2325,
+        2064
+      ],
+      "text": "Theseus and the Marathon bull, before the offering. Interpretive scene: figures, dress and landscape are conjectural; no exact route is asserted."
+    },
+    {
+      "name": "reading-heading-1",
+      "rect": [
+        36,
+        204,
+        1170,
+        278
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 33,
+      "text_bbox": [
+        54,
+        222,
+        720,
+        246
+      ],
+      "text": "1 THE BULL REACHES MARATHON"
+    },
+    {
+      "name": "reading-heading-2",
+      "rect": [
+        1230,
+        204,
+        2364,
+        278
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 33,
+      "text_bbox": [
+        1248,
+        222,
+        2175,
+        246
+      ],
+      "text": "2 MINOS'S DEMAND AND THESEUS'S OFFERING"
+    },
+    {
+      "name": "translation-1",
+      "rect": [
+        36,
+        282,
+        1170,
+        944
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 45,
+      "text_bbox": [
+        54,
+        300,
+        1137,
+        802
+      ],
+      "text": "They say that this bull was brought from Crete\ninto the Peloponnese, and that capturing it was\nalso one of the so-called twelve labours of\nHeracles. When it was set free in the plain\nbelonging to the Argives, it fled through the\nIsthmus of Corinth and made its way into\nAttica, finally reaching the territory of\nMarathon. There it slew whomever it\nencountered, including Androgeos, a son of\nMinos."
+    },
+    {
+      "name": "translation-2",
+      "rect": [
+        1230,
+        282,
+        2364,
+        944
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 45,
+      "text_bbox": [
+        1248,
+        300,
+        2346,
+        915
+      ],
+      "text": "Consequently Minos, sailing with his fleet\nagainst Athens\u2014since he refused to accept that\nthe Athenians were blameless in the death of\nAndrogeos\u2014caused them so much distress that\nit was ultimately agreed that they would send\nseven maidens and an equal number of youths\nto Crete, to feed the bull reputedly belonging to\nMinos that inhabited the Labyrinth in Knossos.\nLater, they say, Theseus drove the bull from\nMarathon to the Acropolis and sacrificed it to\nthe goddess, and the offering belongs to the\npeople of Marathon."
+    }
+  ]
+}
