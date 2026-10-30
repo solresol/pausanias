@@ -1,0 +1,188 @@
+{
+  "passage_id": "1.28.1",
+  "preflight": false,
+  "canvas": [
+    2400,
+    2100
+  ],
+  "art_rectangle": [
+    510,
+    220,
+    1890,
+    2040
+  ],
+  "translation_rectangles": [
+    [
+      36,
+      430,
+      474,
+      1390
+    ],
+    [
+      1926,
+      740,
+      2364,
+      2040
+    ]
+  ],
+  "reading_order": "1: upper left top-to-bottom; 2: right top-to-bottom",
+  "translation_characters": 390,
+  "translation_words": 64,
+  "translation_exact": "Regarding Cylon, I have nothing certain to say about the precise reason why they dedicated a bronze statue of him, though he plotted to seize tyranny. However, my inference is based on these points: he was supremely handsome in appearance, gained considerable fame by winning the Olympic victory in the double foot-race, and married a daughter of Theagenes, who ruled as tyrant over Megara.",
+  "translation_chunks": [
+    "Regarding Cylon, I have nothing certain to say about the precise reason why they dedicated a bronze statue of him, though he plotted to seize tyranny.",
+    "However, my inference is based on these points: he was supremely handsome in appearance, gained considerable fame by winning the Olympic victory in the double foot-race, and married a daughter of Theagenes, who ruled as tyrant over Megara."
+  ],
+  "translation_utf8_sha256": "2c5a72dce4f790fd2cf84d7704c51a6f8223eba223ff1ddcb417d68305ac66c7",
+  "translation_matches_export": true,
+  "minimum_body_font_size": 38,
+  "body_font_size": 44,
+  "padding": 16,
+  "text_blocks_checked": 8,
+  "fit_records": [
+    {
+      "name": "passage-id",
+      "rect": [
+        36,
+        20,
+        620,
+        112
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 42,
+      "text_bbox": [
+        52,
+        36,
+        434,
+        68
+      ],
+      "text": "PASSAGE 1.28.1"
+    },
+    {
+      "name": "title",
+      "rect": [
+        654,
+        20,
+        2364,
+        112
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 60,
+      "text_bbox": [
+        670,
+        36,
+        1834,
+        82
+      ],
+      "text": "CYLON: AN UNCERTAIN HONOUR"
+    },
+    {
+      "name": "orientation",
+      "rect": [
+        36,
+        126,
+        2364,
+        196
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 32,
+      "text_bbox": [
+        52,
+        142,
+        1551,
+        174
+      ],
+      "text": "ATHENS, THE ACROPOLIS | A BRONZE PORTRAIT AND PAUSANIAS'S INFERENCE"
+    },
+    {
+      "name": "reading-heading-1",
+      "rect": [
+        36,
+        274,
+        474,
+        402
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 34,
+      "text_bbox": [
+        52,
+        290,
+        306,
+        355
+      ],
+      "text": "1 THE\nDEDICATION"
+    },
+    {
+      "name": "reading-heading-2",
+      "rect": [
+        1926,
+        560,
+        2364,
+        712
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 34,
+      "text_bbox": [
+        1942,
+        576,
+        2177,
+        641
+      ],
+      "text": "2 HIS\nINFERENCE"
+    },
+    {
+      "name": "translation-1",
+      "rect": [
+        36,
+        430,
+        474,
+        1390
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 44,
+      "text_bbox": [
+        52,
+        446,
+        442,
+        956
+      ],
+      "text": "Regarding Cylon,\nI have nothing\ncertain to say\nabout the precise\nreason why they\ndedicated a\nbronze statue of\nhim, though he\nplotted to seize\ntyranny."
+    },
+    {
+      "name": "translation-2",
+      "rect": [
+        1926,
+        740,
+        2364,
+        2040
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 44,
+      "text_bbox": [
+        1942,
+        756,
+        2322,
+        1681
+      ],
+      "text": "However, my\ninference is\nbased on these\npoints: he was\nsupremely\nhandsome in\nappearance,\ngained\nconsiderable\nfame by winning\nthe Olympic\nvictory in the\ndouble foot-race,\nand married a\ndaughter of\nTheagenes, who\nruled as tyrant\nover Megara."
+    },
+    {
+      "name": "interpretive-caption",
+      "rect": [
+        36,
+        1538,
+        474,
+        2040
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 29,
+      "text_bbox": [
+        52,
+        1554,
+        445,
+        1746
+      ],
+      "text": "An interpretive bronze\nstudy. Cylon's appearance,\nthe statue's design and its\noriginal placement are\nunknown; the dedication's\nreason remains uncertain."
+    }
+  ]
+}
