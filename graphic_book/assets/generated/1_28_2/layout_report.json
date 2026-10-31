@@ -1,0 +1,196 @@
+{
+  "passage_id": "1.28.2",
+  "preflight": false,
+  "canvas": [
+    2400,
+    2400
+  ],
+  "art_rectangles": [
+    [
+      36,
+      220,
+      1376,
+      1440
+    ],
+    [
+      1270,
+      1490,
+      2364,
+      2280
+    ]
+  ],
+  "translation_rectangles": [
+    [
+      1430,
+      350,
+      2364,
+      1440
+    ],
+    [
+      36,
+      1580,
+      1220,
+      2210
+    ]
+  ],
+  "reading_order": "1: upper right top-to-bottom; 2: lower left top-to-bottom",
+  "translation_characters": 870,
+  "translation_words": 156,
+  "translation_exact": "Apart from those which I have mentioned, there are two dedications in Athens made from the spoils of war: a bronze statue of Athena, taken as a tithe from the Medes who landed at Marathon (the work of Pheidias\u2014although they say the battle of the Lapiths with the Centaurs depicted on the shield and the rest of the carving were wrought by Mys, while Parrhasios, son of Euenor, drew these and other images for Mys). The point of this Athena's spear and the crest of her helmet can already be seen by those sailing in from Sounion. There is also placed there a bronze chariot, a tithe dedicated from the victory over the Boeotians and the Chalcidians in Euboea. In addition, two other dedications can be found: a statue of Pericles, son of Xanthippus, and a sculpture of Athena known as the Lemnian from those who dedicated it, the most worthy of Phidias' works to behold.",
+  "translation_chunks": [
+    "Apart from those which I have mentioned, there are two dedications in Athens made from the spoils of war: a bronze statue of Athena, taken as a tithe from the Medes who landed at Marathon (the work of Pheidias\u2014although they say the battle of the Lapiths with the Centaurs depicted on the shield and the rest of the carving were wrought by Mys, while Parrhasios, son of Euenor, drew these and other images for Mys). The point of this Athena's spear and the crest of her helmet can already be seen by those sailing in from Sounion.",
+    "There is also placed there a bronze chariot, a tithe dedicated from the victory over the Boeotians and the Chalcidians in Euboea. In addition, two other dedications can be found: a statue of Pericles, son of Xanthippus, and a sculpture of Athena known as the Lemnian from those who dedicated it, the most worthy of Phidias' works to behold."
+  ],
+  "translation_utf8_sha256": "f58ec2890e4c35af1309ab631c41b52376e3fcc3302aec8367c808f33bf79187",
+  "translation_matches_export": true,
+  "minimum_body_font_size": 40,
+  "body_font_size": 45,
+  "padding": 18,
+  "text_blocks_checked": 8,
+  "fit_records": [
+    {
+      "name": "passage-id",
+      "rect": [
+        36,
+        20,
+        620,
+        112
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 42,
+      "text_bbox": [
+        54,
+        38,
+        436,
+        70
+      ],
+      "text": "PASSAGE 1.28.2"
+    },
+    {
+      "name": "title",
+      "rect": [
+        654,
+        20,
+        2364,
+        112
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 62,
+      "text_bbox": [
+        672,
+        38,
+        1509,
+        85
+      ],
+      "text": "BRONZE DEDICATIONS"
+    },
+    {
+      "name": "orientation",
+      "rect": [
+        36,
+        126,
+        2364,
+        196
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 34,
+      "text_bbox": [
+        54,
+        144,
+        1351,
+        178
+      ],
+      "text": "ATHENS | THE ACROPOLIS | WAR SPOILS DEDICATED AS BRONZE"
+    },
+    {
+      "name": "reading-heading-1",
+      "rect": [
+        1430,
+        240,
+        2364,
+        320
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 38,
+      "text_bbox": [
+        1448,
+        258,
+        1989,
+        287
+      ],
+      "text": "1 ATHENA AND THE SEA"
+    },
+    {
+      "name": "reading-heading-2",
+      "rect": [
+        36,
+        1490,
+        1220,
+        1560
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 38,
+      "text_bbox": [
+        54,
+        1508,
+        679,
+        1537
+      ],
+      "text": "2 CHARIOT AND PORTRAITS"
+    },
+    {
+      "name": "translation-1",
+      "rect": [
+        1430,
+        350,
+        2364,
+        1440
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 45,
+      "text_bbox": [
+        1448,
+        368,
+        2333,
+        1153
+      ],
+      "text": "Apart from those which I have\nmentioned, there are two dedications\nin Athens made from the spoils of war:\na bronze statue of Athena, taken as a\ntithe from the Medes who landed at\nMarathon (the work of\nPheidias\u2014although they say the battle\nof the Lapiths with the Centaurs\ndepicted on the shield and the rest of\nthe carving were wrought by Mys,\nwhile Parrhasios, son of Euenor, drew\nthese and other images for Mys). The\npoint of this Athena's spear and the\ncrest of her helmet can already be\nseen by those sailing in from Sounion."
+    },
+    {
+      "name": "translation-2",
+      "rect": [
+        36,
+        1580,
+        1220,
+        2210
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 45,
+      "text_bbox": [
+        54,
+        1598,
+        1155,
+        2003
+      ],
+      "text": "There is also placed there a bronze chariot, a\ntithe dedicated from the victory over the\nBoeotians and the Chalcidians in Euboea. In\naddition, two other dedications can be found: a\nstatue of Pericles, son of Xanthippus, and a\nsculpture of Athena known as the Lemnian from\nthose who dedicated it, the most worthy of\nPhidias' works to behold."
+    },
+    {
+      "name": "interpretive-caption",
+      "rect": [
+        36,
+        2300,
+        2364,
+        2390
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 29,
+      "text_bbox": [
+        54,
+        2318,
+        2317,
+        2346
+      ],
+      "text": "Athena and the chariot: interpretive bronze studies. Lost forms, scale, setting and relative placement are uncertain; no distant sightline is reconstructed."
+    }
+  ]
+}
