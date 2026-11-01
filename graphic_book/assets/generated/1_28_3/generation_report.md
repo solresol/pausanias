@@ -39,7 +39,32 @@ Final PNG SHA-256:
 `439c4183ed0e1217c121ba2e5910ff45d7025dc2981777100c0351cc7d4ec9fa`.
 No binary image, workflow database/session, generated site, global asset
 manifest, obsolete database or unrelated file is included in Git. The result
-manifest must include renderer, plan, this report, layout report, both prompts
-and both component versions. Conditional checkpoint, persisted replacement
-decision and claim-release outcomes will be appended after their actual success.
-Overnight Raksasa PostgreSQL import and website publication remain separate.
+manifest includes renderer, plan, this report, layout report, both prompts
+and both component versions. Overnight Raksasa PostgreSQL import and website
+publication remain separate.
+
+## Checkpoint, persisted decision and release
+
+Reviewed source commit **`828c54397a916abf35236ec29799ebae9794d556`** pushed to
+origin/main, independently verified against its remote ref. `record-result`
+succeeded as **`1f52d433d4074362af76aa733cb8f715`**, with the final PNG and all
+**eight supporting files** (six source/prompt/plan/layout/review files and both
+component versions). Helper readback verified every immutable object's byte
+count and SHA-256 before the conditional catalogue checkpoint. Page key:
+`s3://pausanias-graphic-book-assets-849621205733/workflow/results/1f52d433d4074362af76aa733cb8f715/page.png`.
+The immutable review-source versions remain at the source commit above; this
+later report update records operational completion without duplicating results.
+
+Persisted replacement draw **0.6207997624096396**, above .20; repeated decision
+reused the same value and recorded **skipped**, no target. No replacement art
+or source generated and no accepted old page changed.
+
+`finish` succeeded at **2026-11-01T01:10:45.389052+00:00**, marking the run
+completed and releasing its claim. Independent read-only remote `status`
+confirmed **Active: []**, **181 illustrations**, all **3,170 passages and
+translations**, and next **1.28.4**. No duplicate checkpoint submitted.
+No blocker, denied action, environment or credential change.
+
+Result import_status remains **pending**. Overnight Raksasa PostgreSQL import,
+independent acceptance and website publication are future operations; this
+daytime run claims only successful upload/checkpoint and completed claim release.
