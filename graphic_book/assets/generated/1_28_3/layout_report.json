@@ -1,0 +1,140 @@
+{
+  "passage_id": "1.28.3",
+  "preflight": false,
+  "canvas": [
+    2400,
+    2100
+  ],
+  "art_rectangle": [
+    36,
+    220,
+    2364,
+    1440
+  ],
+  "translation_rectangle": [
+    64,
+    1648,
+    2336,
+    2064
+  ],
+  "reading_order": "one continuous lower English field, top to bottom",
+  "translation_exact": "It is said that the Pelasgians, who once inhabited under the Acropolis, built the wall around it, except the portions constructed later by Cimon the son of Miltiades. They also say that Agrolas and Hyperbius were its builders. When I inquired who these men were, I was able to gather nothing else except that they were originally Sicilians who migrated to Acarnania.",
+  "translation_characters": 366,
+  "translation_words": 62,
+  "translation_utf8_sha256": "388063d9013a592351e62e12e7675c3030009f044ec332c92d9bc703707b4e5e",
+  "translation_matches_export": true,
+  "minimum_body_font_size": 46,
+  "body_font_size": 58,
+  "padding": 18,
+  "text_blocks_checked": 6,
+  "fit_records": [
+    {
+      "name": "passage-id",
+      "rect": [
+        36,
+        20,
+        620,
+        112
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 42,
+      "text_bbox": [
+        54,
+        38,
+        436,
+        70
+      ],
+      "text": "PASSAGE 1.28.3"
+    },
+    {
+      "name": "title",
+      "rect": [
+        654,
+        20,
+        2364,
+        112
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 60,
+      "text_bbox": [
+        672,
+        38,
+        1731,
+        84
+      ],
+      "text": "THE WALL AND ITS BUILDERS"
+    },
+    {
+      "name": "orientation",
+      "rect": [
+        36,
+        126,
+        2364,
+        196
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 34,
+      "text_bbox": [
+        54,
+        144,
+        1419,
+        178
+      ],
+      "text": "ATHENS | THE ACROPOLIS | TRADITIONS ABOUT THE CIRCUIT WALL"
+    },
+    {
+      "name": "interpretive-caption",
+      "rect": [
+        36,
+        1458,
+        2364,
+        1556
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 32,
+      "text_bbox": [
+        54,
+        1476,
+        2215,
+        1538
+      ],
+      "text": "Interpretive view of the early Acropolis circuit. Masonry, setting and appearance are conjectural; the named builders remain literary\ntradition."
+    },
+    {
+      "name": "reading-heading",
+      "rect": [
+        64,
+        1574,
+        2336,
+        1642
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 34,
+      "text_bbox": [
+        82,
+        1592,
+        553,
+        1617
+      ],
+      "text": "PAUSANIAS'S ACCOUNT"
+    },
+    {
+      "name": "translation",
+      "rect": [
+        64,
+        1648,
+        2336,
+        2064
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 58,
+      "text_bbox": [
+        82,
+        1666,
+        2298,
+        1995
+      ],
+      "text": "It is said that the Pelasgians, who once inhabited under the Acropolis, built\nthe wall around it, except the portions constructed later by Cimon the son\nof Miltiades. They also say that Agrolas and Hyperbius were its builders.\nWhen I inquired who these men were, I was able to gather nothing else\nexcept that they were originally Sicilians who migrated to Acarnania."
+    }
+  ]
+}
