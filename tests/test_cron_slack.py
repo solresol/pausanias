@@ -43,6 +43,18 @@ def test_cron_exit_status(tmp_path, failure, notify_failure, expected_stage):
     events = tmp_path / "events"
     stub = tmp_path / "stub"
     stub.write_text("""#!/bin/sh
+if [ "$1" = cron_output.py ]; then
+  shift
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      --log|--stage) shift 2 ;;
+      --website-stats) shift ;;
+      --) shift; break ;;
+      *) exit 98 ;;
+    esac
+  done
+  exec "$@"
+fi
 printf '%s\\n' "$*" >> "$CRON_TEST_EVENTS"
 if [ "$1" = cron_slack.py ]; then
   if [ "$CRON_TEST_NOTIFY_FAILURE" = yes ]; then exit 9; fi
@@ -66,6 +78,8 @@ fi
         **os.environ, "CRON_TEST_EVENTS": str(events),
         "CRON_TEST_FAILURE": failure,
         "CRON_TEST_NOTIFY_FAILURE": "yes" if notify_failure else "no",
+        "PAUSANIAS_LOG_DIR": str(tmp_path / "logs"),
+        "PAUSANIAS_PIPELINE_LOCKFILE": str(tmp_path / "pipeline.lock"),
     })
     assert result.returncode == (42 if failure else 0)
     reports = [line for line in events.read_text().splitlines() if line.startswith("cron_slack.py")]
