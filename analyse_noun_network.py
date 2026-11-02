@@ -12,6 +12,7 @@ from collections import defaultdict
 import json
 
 from pausanias_db import add_database_argument, connect, read_sql_query
+from cron_reporting import routine_report
 
 NETWORK_CACHE_VERSION = 3
 NETWORK_CACHE_FILENAME = "network_analysis_manifest.json"
@@ -61,7 +62,7 @@ def clear_centrality_table(conn):
     """Clear existing centrality data before inserting new values."""
     conn.execute("DELETE FROM noun_centrality")
     conn.commit()
-    print("Cleared existing centrality data.")
+    routine_report("Cleared existing centrality data.")
 
 def get_noun_nodes(conn):
     """Get all distinct proper nouns as nodes."""
@@ -194,7 +195,7 @@ def write_network_cache(output_dir, signature_payload, centrality_df, component_
     os.makedirs(output_dir, exist_ok=True)
     with open(network_cache_path(output_dir), "w", encoding="utf-8") as f:
         json.dump(manifest, f, ensure_ascii=False, indent=2, sort_keys=True)
-    print(f"Wrote network cache manifest to {network_cache_path(output_dir)}")
+    routine_report(f"Wrote network cache manifest to {network_cache_path(output_dir)}")
 
 def build_graph(nodes_df, cooccurrences_df, min_cooccurrence=1):
     """Build a network graph where nodes are proper nouns and edges represent co-occurrences."""
@@ -238,13 +239,13 @@ def build_graph(nodes_df, cooccurrences_df, min_cooccurrence=1):
         if weight >= min_cooccurrence:
             G.add_edge(edge[0], edge[1], weight=weight)
     
-    print(f"Built graph with {G.number_of_nodes()} nodes and {G.number_of_edges()} edges.")
+    routine_report(f"Built graph with {G.number_of_nodes()} nodes and {G.number_of_edges()} edges.")
     return G
 
 def get_connected_components(G):
     """Break the graph into connected components and assign component IDs."""
     components = list(nx.connected_components(G))
-    print(f"Found {len(components)} connected components.")
+    routine_report(f"Found {len(components)} connected components.")
     
     # Create a mapping from node to component ID
     node_to_component = {}
@@ -256,14 +257,14 @@ def get_connected_components(G):
     component_graphs = []
     for i, component in enumerate(components):
         subgraph = G.subgraph(component).copy()
-        print(f"Component {i}: {subgraph.number_of_nodes()} nodes, {subgraph.number_of_edges()} edges")
+        routine_report(f"Component {i}: {subgraph.number_of_nodes()} nodes, {subgraph.number_of_edges()} edges")
         component_graphs.append((i, subgraph))
     
     return component_graphs, node_to_component
 
 def calculate_centrality_measures(G, component_id):
     """Calculate various centrality measures for a connected component."""
-    print(f"Calculating centrality measures for component {component_id}...")
+    routine_report(f"Calculating centrality measures for component {component_id}...")
     
     # Skip tiny components (1-2 nodes) for some measures
     if G.number_of_nodes() <= 2:
@@ -280,13 +281,13 @@ def calculate_centrality_measures(G, component_id):
             
         clustering_coefficient = {node: 0.0 for node in G.nodes()}
     else:
-        print("  Calculating degree centrality...")
+        routine_report("  Calculating degree centrality...")
         degree_centrality = nx.degree_centrality(G)
         
-        print("  Calculating betweenness centrality...")
+        routine_report("  Calculating betweenness centrality...")
         betweenness_centrality = nx.betweenness_centrality(G, weight='weight')
         
-        print("  Calculating eigenvector centrality...")
+        routine_report("  Calculating eigenvector centrality...")
         try:
             eigenvector_centrality = nx.eigenvector_centrality_numpy(G, weight='weight')
         except nx.NetworkXError:
@@ -297,10 +298,10 @@ def calculate_centrality_measures(G, component_id):
                 print("  Warning: Power iteration failed to converge. Using degree centrality as fallback.")
                 eigenvector_centrality = degree_centrality
         
-        print("  Calculating PageRank...")
+        routine_report("  Calculating PageRank...")
         pagerank = nx.pagerank(G, weight='weight')
         
-        print("  Calculating clustering coefficients...")
+        routine_report("  Calculating clustering coefficients...")
         clustering_coefficient = nx.clustering(G, weight='weight')
     
     # Combine all centrality measures
@@ -350,7 +351,7 @@ def save_centrality_measures(conn, centrality_df):
         )
     
     conn.commit()
-    print(f"Saved centrality measures for {len(centrality_df)} nodes.")
+    routine_report(f"Saved centrality measures for {len(centrality_df)} nodes.")
 
 def create_d3_html_template(output_dir):
     """Create HTML templates for D3 visualizations."""
@@ -1232,7 +1233,7 @@ def create_d3_html_template(output_dir):
     with open(os.path.join(output_dir, 'index.html'), 'w', encoding='utf-8') as f:
         f.write(index_html)
     
-    print(f"Created D3 HTML templates in {output_dir}")
+    routine_report(f"Created D3 HTML templates in {output_dir}")
     
     return index_html, component_html
 
@@ -1247,7 +1248,7 @@ def visualize_component(G, component_id, centrality_df, output_dir, top_n=100):
     
     # Skip visualization for very small components
     if len(component_df) <= 2:
-        print(f"Skipping visualization for component {component_id} (too small).")
+        routine_report(f"Skipping visualization for component {component_id} (too small).")
         return
     
     # Limit to top_n nodes if the component is larger
@@ -1337,7 +1338,7 @@ def visualize_component(G, component_id, centrality_df, output_dir, top_n=100):
         plt.savefig(filename, dpi=300, bbox_inches='tight')
         plt.close()
         
-        print(f"Saved component {component_id} visualization to {filename}")
+        routine_report(f"Saved component {component_id} visualization to {filename}")
     
     # Save the component network data for D3 visualization
     export_component_for_d3(G, component_id, component_df, component_dir)
@@ -1358,7 +1359,7 @@ def create_component_html(component_id, component_dir, output_dir):
     with open(component_html_path, 'w', encoding='utf-8') as f:
         f.write(component_html)
         
-    print(f"Created component HTML for component {component_id}")
+    routine_report(f"Created component HTML for component {component_id}")
 
 def export_component_for_d3(G, component_id, component_df, output_dir):
     """Export a single component's network data for D3.js visualization."""
@@ -1416,7 +1417,7 @@ def export_component_for_d3(G, component_id, component_df, output_dir):
     with open(filename, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     
-    print(f"Exported component {component_id} network data for D3 to {filename}")
+    routine_report(f"Exported component {component_id} network data for D3 to {filename}")
 
 def visualize_network(full_graph, all_centrality_df, component_graphs, output_dir, top_n=100):
     """Visualize each network component and generate an overview visualization."""
@@ -1459,7 +1460,7 @@ def visualize_network(full_graph, all_centrality_df, component_graphs, output_di
     plt.savefig(filename, dpi=300, bbox_inches='tight')
     plt.close()
     
-    print(f"Saved component map visualization to {filename}")
+    routine_report(f"Saved component map visualization to {filename}")
     
     # Visualize each component separately
     for comp_id, subgraph in component_graphs:
@@ -1535,7 +1536,7 @@ def export_for_d3(G, component_graphs, all_centrality_df, filename):
     with open(filename, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     
-    print(f"Exported full network data for D3 visualization to {filename}")
+    routine_report(f"Exported full network data for D3 visualization to {filename}")
 
 def modify_website_for_network_viz(output_dir):
     """Keep the historical call site harmless.
@@ -1544,7 +1545,7 @@ def modify_website_for_network_viz(output_dir):
     links to the network pages. Mutating the homepage here would reintroduce
     stale navigation.
     """
-    print("Main website navigation is handled by the Places hub; no nav mutation needed.")
+    routine_report("Main website navigation is handled by the Places hub; no nav mutation needed.")
 
 if __name__ == '__main__':
     args = parse_arguments()
@@ -1566,14 +1567,14 @@ if __name__ == '__main__':
             args.output_dir,
             signature_payload,
         ):
-            print(
+            routine_report(
                 "Network inputs and expected outputs are unchanged; "
                 "skipping centrality and map regeneration."
             )
             sys.exit(0)
         
         # Get nodes and co-occurrences
-        print("Fetching proper noun data...")
+        routine_report("Fetching proper noun data...")
         nodes_df = get_noun_nodes(conn)
         cooccurrences_df = get_cooccurrences(conn)
         
@@ -1581,14 +1582,14 @@ if __name__ == '__main__':
             print("No proper nouns found in the database.")
             sys.exit(0)
         
-        print(f"Found {len(nodes_df)} distinct proper nouns.")
+        routine_report(f"Found {len(nodes_df)} distinct proper nouns.")
         
         # Build the graph
-        print("Building the network graph...")
+        routine_report("Building the network graph...")
         full_graph = build_graph(nodes_df, cooccurrences_df, args.min_cooccurrence)
         
         # Break the graph into connected components
-        print("Breaking the graph into connected components...")
+        routine_report("Breaking the graph into connected components...")
         component_graphs, node_to_component = get_connected_components(full_graph)
         
         # Calculate centrality measures for each component
@@ -1602,12 +1603,12 @@ if __name__ == '__main__':
             all_centrality_df = pd.concat(all_centrality_data, ignore_index=True)
             
             # Save to database
-            print("Saving centrality measures to database...")
+            routine_report("Saving centrality measures to database...")
             clear_centrality_table(conn)
             save_centrality_measures(conn, all_centrality_df)
             
             # Visualize the network
-            print("Generating network visualizations...")
+            routine_report("Generating network visualizations...")
             visualize_network(full_graph, all_centrality_df, component_graphs, args.output_dir, args.top_nodes)
             write_network_cache(
                 args.output_dir,
@@ -1617,12 +1618,12 @@ if __name__ == '__main__':
             )
             
             # Modify main website to include network visualization link
-            print("Updating main website navigation...")
+            routine_report("Updating main website navigation...")
             modify_website_for_network_viz(args.output_dir)
         else:
             print("No centrality data to save or visualize.")
         
-        print("Network analysis complete.")
+        routine_report("Network analysis complete.")
     
     except Exception as e:
         # Let exception bubble up

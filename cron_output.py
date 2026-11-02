@@ -11,6 +11,8 @@ import subprocess
 import sys
 import threading
 
+from cron_reporting import ROUTINE_LOG_ENV
+
 
 COMPLETED_QUEUE = tuple(re.compile(pattern, re.I) for pattern in (
     r"No unsubmitted (?:sentence tagging|section people|passage place-state|greta-both-batch|greta-batch|discourse-batch) rows found\.",
@@ -67,8 +69,14 @@ def main(argv=None):
         os.fchmod(log.fileno(), 0o600)
         log.write(f"\n[{datetime.now(timezone.utc).isoformat()}] stage={args.stage}\n".encode())
         log.flush()
+        child_environment = os.environ.copy()
+        # Only explicitly marked routine reports opt into the already-private log.
+        # Other commands and ordinary interactive runs keep their existing output.
+        child_environment.pop(ROUTINE_LOG_ENV, None)
+        if args.website_stats:
+            child_environment[ROUTINE_LOG_ENV] = str(args.log.resolve())
         child = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                 start_new_session=True)
+                                 start_new_session=True, env=child_environment)
 
         def forward(signum, _frame):
             try:

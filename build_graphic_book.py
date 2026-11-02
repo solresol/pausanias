@@ -14,6 +14,7 @@ from datetime import datetime
 from pathlib import Path
 
 from PIL import Image
+from cron_reporting import routine_report
 
 
 PASSAGE_IMAGE_RE = re.compile(r"^(?P<section>\d+)\.(?:png|jpg|jpeg|webp)$", re.IGNORECASE)
@@ -544,7 +545,7 @@ def main() -> None:
     pages = build_pages(image_dir, output_dir)
     write_index(output_dir, args.title, args.byline, pages, args.pdf_name)
     write_pdf(output_dir, pages, args.pdf_name, Path(args.title_page))
-    print(f"Graphic book built in {output_dir} with {len(pages)} illustrated passages.")
+    routine_report(f"Graphic book built in {output_dir} with {len(pages)} illustrated passages.")
 
 
 if __name__ == "__main__":

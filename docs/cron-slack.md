@@ -4,8 +4,25 @@ The first increment posts two short reports: `STARTED`, then `SUCCEEDED` or
 `FAILED`. Success is reported only after the final website rsync exits zero.
 Each report includes `job: pausanias-daily`, a unique run ID, UTC timestamp,
 elapsed time, host, checkout commit, stage, and exit code. Cron mail remains
-available with the full output. Slack delivery failures do not change the
+available for actionable output. Slack delivery failures do not change the
 pipeline exit code. A killed host/process may have no final report.
+
+## Prepared quieter cron output
+
+The preparation branch retains full output in private per-run logs under
+`$HOME/.local/state/pausanias/pipeline/` (files mode `600`). Exact known empty-queue
+notices stay in the log. The predictor, network and site producers use
+`cron_reporting.routine_report()` at known routine reporting sites, including
+multiline evaluation tables and Greek coefficient rows. The cron wrapper opts
+in through `cron_output.py --website-stats`; interactive output is unchanged.
+Unmarked output, warnings, stderr and zero-exit failure diagnostics remain visible
+in cron mail. Failure to append a routine report falls back to visible output and
+a warning. The wrapper preserves the command's exit and signal status.
+
+When adding a producer report, use `routine_report()` only for normal progress,
+statistics or generated-page summaries. Leave unexpected states and actionable
+diagnostics on ordinary stdout/stderr. This keeps new unknown output visible by
+default rather than guessing its meaning from table formatting or keywords.
 
 ## Configure on raksasa
 

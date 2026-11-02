@@ -22,6 +22,7 @@ from lemma_text import (
 )
 from pausanias_db import add_database_argument, connect, read_sql_query
 from stats_utils import compute_p_q_values
+from cron_reporting import routine_report
 
 SIMPLIFIED_Q_VALUE_THRESHOLD = 0.1
 
@@ -269,7 +270,7 @@ def clear_predictor_tables(conn):
     conn.execute("DELETE FROM sentence_simplified_mythicness_predictors")
     conn.execute("DELETE FROM sentence_simplified_skepticism_predictors")
     conn.commit()
-    print("Cleared existing predictor tables.")
+    routine_report("Cleared existing predictor tables.")
 
 def get_analyzed_sentences(conn):
     """Get sentences that have been analyzed for mythicness and skepticism."""
@@ -401,7 +402,7 @@ def build_and_evaluate_simplified_model(
     selected_features = feature_names[selected_mask]
 
     if len(selected_features) == 0:
-        print(
+        routine_report(
             f"\nNo features with q < {SIMPLIFIED_Q_VALUE_THRESHOLD:.2f} for simplified {feature_label} model."
         )
         return None
@@ -438,12 +439,12 @@ def build_and_evaluate_simplified_model(
     intercept = float(model.intercept_[0])
     threshold = float(-intercept)
 
-    print(f"\n=== Simplified {feature_label.capitalize()} Model (q < {SIMPLIFIED_Q_VALUE_THRESHOLD:.2f}) ===")
-    print(classification_report(y_test, y_pred))
-    print(
+    routine_report(f"\n=== Simplified {feature_label.capitalize()} Model (q < {SIMPLIFIED_Q_VALUE_THRESHOLD:.2f}) ===")
+    routine_report(classification_report(y_test, y_pred))
+    routine_report(
         f"Baseline accuracy (always guess class {majority_label}): {baseline_accuracy:.3f}"
     )
-    print(
+    routine_report(
         f"Start at {intercept:.3f}; if the word points add up past {threshold:.3f}, classify as {feature_label}."
     )
 
@@ -503,8 +504,8 @@ def build_and_evaluate_model(
 
     # Evaluate model
     y_pred = pipeline.predict(X_test)
-    print(f"\n=== {feature_label.capitalize()} Model Evaluation ===")
-    print(classification_report(y_test, y_pred))
+    routine_report(f"\n=== {feature_label.capitalize()} Model Evaluation ===")
+    routine_report(classification_report(y_test, y_pred))
 
     # Save classification metrics to database
     save_classification_metrics(conn, metrics_table_name, y_test, y_pred)
@@ -541,19 +542,19 @@ def build_and_evaluate_model(
     top_positive_indices = sorted_indices[-top_n:]
     
     # Print top predictors
-    print(f"\nTop predictors for NOT {feature_label}:")
+    routine_report(f"\nTop predictors for NOT {feature_label}:")
     for i in top_negative_indices:
         feature = feature_names[i]
         coef = coefficients[i]
-        print(
+        routine_report(
             f"  {feature}: {coef:.4f} ({feature_label}={pos_counts[i]}, non_{feature_label}={neg_counts[i]}, p={p_values[i]:.3g}, q={q_values[i]:.3g})"
         )
 
-    print(f"\nTop predictors for {feature_label}:")
+    routine_report(f"\nTop predictors for {feature_label}:")
     for i in top_positive_indices:
         feature = feature_names[i]
         coef = coefficients[i]
-        print(
+        routine_report(
             f"  {feature}: {coef:.4f} ({feature_label}={pos_counts[i]}, non_{feature_label}={neg_counts[i]}, p={p_values[i]:.3g}, q={q_values[i]:.3g})"
         )
 
@@ -623,9 +624,9 @@ if __name__ == '__main__':
             print(f"Not enough analyzed sentences. Found {len(sentences_df)}, need at least {args.min_samples}.")
             sys.exit(0)
 
-        print(f"Found {len(sentences_df)} analyzed sentences.")
-        print(f"References mythic era: {sentences_df['references_mythic_era'].sum()} sentences")
-        print(f"Expresses skepticism: {sentences_df['expresses_scepticism'].sum()} sentences")
+        routine_report(f"Found {len(sentences_df)} analyzed sentences.")
+        routine_report(f"References mythic era: {sentences_df['references_mythic_era'].sum()} sentences")
+        routine_report(f"Expresses skepticism: {sentences_df['expresses_scepticism'].sum()} sentences")
 
         lemma_lookup = load_word_lemma_lookup(conn)
         if not lemma_lookup:
@@ -634,7 +635,7 @@ if __name__ == '__main__':
         lemma_texts, lemma_stats = build_lemma_texts(sentences_df['sentence'], lemma_lookup)
         sentences_df = sentences_df.copy()
         sentences_df['lemma_sentence'] = lemma_texts
-        print(
+        routine_report(
             "Using lemma-token sentence documents: "
             f"{lemma_stats.lemmatized_token_count}/{lemma_stats.token_count} tokens lemmatized; "
             f"{lemma_stats.missing_token_count} raw-token fallbacks "
@@ -648,7 +649,7 @@ if __name__ == '__main__':
             proper_nouns + manual_stopwords,
             lemma_lookup,
         )
-        print(
+        routine_report(
             f"Using {len(proper_nouns)} proper nouns and {len(manual_stopwords)} manual stopwords (expanded to {len(all_stopwords)} lemma-aware tokens) as stopwords for mythicness model."
         )
 
@@ -667,7 +668,7 @@ if __name__ == '__main__':
             'random_state': 42
         }
         
-        print("\nBuilding mythicness prediction model...")
+        routine_report("\nBuilding mythicness prediction model...")
         mythic_model = build_and_evaluate_model(
             sentences_df['lemma_sentence'],
             sentences_df['references_mythic_era'],
@@ -688,7 +689,7 @@ if __name__ == '__main__':
             manual_skepticism_stopwords,
             lemma_lookup,
         )
-        print(
+        routine_report(
             f"Using {len(manual_skepticism_stopwords)} manual stopwords (expanded to {len(skepticism_stopwords)} lemma-aware tokens) as stopwords for skepticism model."
         )
 
@@ -706,7 +707,7 @@ if __name__ == '__main__':
             'random_state': 42
         }
         
-        print("\nBuilding skepticism prediction model...")
+        routine_report("\nBuilding skepticism prediction model...")
         skeptic_model = build_and_evaluate_model(
             sentences_df['lemma_sentence'],
             sentences_df['expresses_scepticism'],
@@ -725,9 +726,9 @@ if __name__ == '__main__':
         if args.save_models:
             joblib.dump(mythic_model, 'sentence_mythicness_model.joblib')
             joblib.dump(skeptic_model, 'sentence_skepticism_model.joblib')
-            print("\nModels saved to disk.")
+            routine_report("\nModels saved to disk.")
         
-        print("\nProcessing complete.")
+        routine_report("\nProcessing complete.")
     
     except Exception as e:
         print(f"Error: {str(e)}")

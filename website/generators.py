@@ -11,6 +11,7 @@ from datetime import datetime
 from pathlib import Path
 from manto_place_feature_catalog import FEATURE_BY_NAME, FEATURE_CATALOG
 from .highlighting import highlight_passage
+from cron_reporting import routine_report
 
 GRAPHIC_PASSAGE_IMAGE_RE = re.compile(
     r"^(?P<section>\d+)\.(?:png|jpg|jpeg|webp)$", re.IGNORECASE
@@ -2237,7 +2238,7 @@ def generate_stylometry_pages(stylometry_data, output_dir, title):
     with open(os.path.join(analysis_dir, "stylometry-statistics.html"), "w", encoding="utf-8") as f:
         f.write(stats_page)
 
-    print(
+    routine_report(
         f"Stylometry pages generated: {int(metrics.get('passage_count') or 0)} passage units, "
         f"{len(feature_sets)} feature families."
     )
@@ -3079,7 +3080,7 @@ def generate_stylometric_sentence_model_pages(model_data, output_dir, title):
     with open(os.path.join(analysis_dir, "stylometric-book-regression.html"), "w", encoding="utf-8") as f:
         f.write(regression_page)
 
-    print(
+    routine_report(
         f"Stylometric sentence model pages generated: "
         f"{int(metrics.get('parsed_sentence_count') or 0):,} parsed sentences."
     )
@@ -3567,7 +3568,7 @@ def generate_stylometric_book_feature_trend_page(trend_data, output_dir, title):
     with open(os.path.join(analysis_dir, "stylometric-book-feature-trends.html"), "w", encoding="utf-8") as f:
         f.write(page)
 
-    print(
+    routine_report(
         f"Stylometric book feature trend page generated: "
         f"{int(metrics.get('feature_count') or 0):,} features."
     )
@@ -3913,7 +3914,7 @@ def generate_discourse_mode_aorist_page(analysis, output_dir, title):
     with open(os.path.join(analysis_dir, "discourse-mode-aorist.html"), "w", encoding="utf-8") as f:
         f.write(page)
 
-    print(
+    routine_report(
         f"Discourse-mode aorist page generated: "
         f"{int(metrics.get('tagged_sentence_count') or 0):,} tagged parsed sentences."
     )
@@ -5422,7 +5423,7 @@ def generate_manto_place_survival_feature_pages(model_data, output_dir, title):
             encoding="utf-8",
         )
 
-    print(
+    routine_report(
         "Generated MANTO place survival feature guide: "
         f"{feature_dir / 'index.html'} ({len(details)} feature pages)"
     )
@@ -6975,7 +6976,7 @@ def generate_map_page(map_data, output_dir, title):
     with open(os.path.join(map_dir, 'index.html'), 'w', encoding='utf-8') as f:
         f.write(html_content)
 
-    print(f"Map page generated with {len(map_data)} places.")
+    routine_report(f"Map page generated with {len(map_data)} places.")
 
 
 def _format_place_label(place):
@@ -7070,7 +7071,7 @@ def generate_place_pairs_page(place_pairs, output_dir, title):
     with open(os.path.join(place_pairs_dir, "index.html"), "w", encoding="utf-8") as f:
         f.write(html_content)
 
-    print(f"Place pairs page generated with {total_pairs} pairs.")
+    routine_report(f"Place pairs page generated with {total_pairs} pairs.")
 
 
 def _translation_nav(prefix, active=None):
@@ -7700,7 +7701,7 @@ def _write_translation_mythic_strength_page(analysis, translation_length_dir, ti
     ) as f:
         f.write(page_html)
 
-    print("Translation mythic/historical strength page generated.")
+    routine_report("Translation mythic/historical strength page generated.")
 
 
 def _render_sentence_bucket_summary_table(summary):
@@ -8034,7 +8035,7 @@ def generate_translation_length_page(analysis, output_dir, title):
 
     _write_translation_mythic_strength_page(analysis, translation_length_dir, title, timestamp)
 
-    print("Translation length page generated.")
+    routine_report("Translation length page generated.")
 
 
 def _grammar_passage_href(passage_id, prefix=""):
@@ -8451,7 +8452,7 @@ def generate_llm_grammar_pages(grammar_data, output_dir, title):
         with open(os.path.join(chapter_dir, f"{section}.html"), "w", encoding="utf-8") as f:
             f.write(page)
 
-    print(
+    routine_report(
         f"Grammar pages generated: {len(passages)} passages, "
         f"{int(data.get('sentence_count') or 0)} sentences for {model}."
     )
@@ -9104,10 +9105,10 @@ def generate_translation_pages(
 
     total_nouns = sum(len(v) for v in nouns_by_type.values())
     total_passages = len(passage_order)
-    print(f"Translation pages generated: {total_passages} passages across {len(books)} books.")
+    routine_report(f"Translation pages generated: {total_passages} passages across {len(books)} books.")
     if linked_graphic_passages:
-        print(f"Graphic-book links added for {linked_graphic_passages} translated passages.")
-    print(f"Proper noun index generated: {total_nouns} nouns across {len(nouns_by_type)} types.")
+        routine_report(f"Graphic-book links added for {linked_graphic_passages} translated passages.")
+    routine_report(f"Proper noun index generated: {total_nouns} nouns across {len(nouns_by_type)} types.")
 
 
 def generate_progress_page(progress_data, output_dir, title):
@@ -9305,4 +9306,4 @@ def generate_progress_page(progress_data, output_dir, title):
     with open(os.path.join(progress_dir, 'index.html'), 'w', encoding='utf-8') as f:
         f.write(page_html)
 
-    print("Progress page generated.")
+    routine_report("Progress page generated.")

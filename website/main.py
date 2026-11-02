@@ -89,6 +89,7 @@ from .generators import (
     generate_manto_place_survival_model_page,
     generate_manto_place_survival_feature_pages,
 )
+from cron_reporting import routine_report
 
 
 def add_greta_analysis_phrase_translations(greta_analysis, conn, client, model):
@@ -147,7 +148,7 @@ def main():
         api_key = load_openai_api_key(args.openai_api_key_file)
         client = OpenAI(api_key=api_key)
         create_phrase_translations_table(conn)
-        print("LLM translation enabled for missing phrase translations")
+        routine_report("LLM translation enabled for missing phrase translations")
 
     try:
         # Get data from database
@@ -217,14 +218,14 @@ def main():
             print("No sentence-level predictor data found in the database. Run the sentence analysis program.")
             sys.exit(1)
 
-        print(f"Found {len(passages_df)} analyzed passages.")
-        print(f"Found {len(mythic_predictors)} mythicness predictors.")
-        print(f"Found {len(skeptic_predictors)} skepticism predictors.")
-        print(f"Found {len(sentence_mythic_predictors)} sentence-level mythicness predictors.")
-        print(f"Found {len(sentence_skeptic_predictors)} sentence-level skepticism predictors.")
+        routine_report(f"Found {len(passages_df)} analyzed passages.")
+        routine_report(f"Found {len(mythic_predictors)} mythicness predictors.")
+        routine_report(f"Found {len(skeptic_predictors)} skepticism predictors.")
+        routine_report(f"Found {len(sentence_mythic_predictors)} sentence-level mythicness predictors.")
+        routine_report(f"Found {len(sentence_skeptic_predictors)} sentence-level skepticism predictors.")
 
         # Add translations to predictors
-        print("Adding phrase translations...")
+        routine_report("Adding phrase translations...")
         mythic_predictors = add_phrase_translations(mythic_predictors, conn, client, args.model)
         skeptic_predictors = add_phrase_translations(skeptic_predictors, conn, client, args.model)
         sentence_mythic_predictors = add_phrase_translations(sentence_mythic_predictors, conn, client, args.model)
@@ -409,11 +410,11 @@ def main():
                 source = os.path.join(source_dir, file_name)
                 if os.path.exists(source):
                     shutil.copy2(source, os.path.join(output_dir, file_name))
-                    print(f"{file_name} copied to website.")
+                    routine_report(f"{file_name} copied to website.")
                     break
 
-        print(f"Website generated successfully in '{output_dir}'")
-        print(f"Open '{os.path.join(output_dir, 'index.html')}' in a web browser to view it.")
+        routine_report(f"Website generated successfully in '{output_dir}'")
+        routine_report(f"Open '{os.path.join(output_dir, 'index.html')}' in a web browser to view it.")
     except Exception as e:
         print(f"Error: {str(e)}")
         sys.exit(1)

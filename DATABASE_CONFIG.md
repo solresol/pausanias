@@ -103,11 +103,16 @@ batch receipts and graphic-book import records before changing routes.
 ## Prepared cron output behavior
 
 The staged wrapper retains the schedule and existing Slack/failure reporting.
-`cron_output.py` stores full step stdout/stderr in private per-run logs under
-`/home/pausanias/.local/state/pausanias/pipeline/`, with mode600 files. Recognized
-website notices/statistics stay in those logs; exact known completed/empty queue
-lines are quiet in email. Unrecognized stdout remains visible even in website-
-statistics mode. Zero failure/rejection counters cannot enable a diagnostic latch;
+`cron_output.py` stores full step output in private per-run logs under
+`/home/pausanias/.local/state/pausanias/pipeline/`, with mode600 files. Predictor,
+network and site producers explicitly mark their routine reports with
+`cron_reporting.routine_report()`. The wrapper's existing `--website-stats` opt-in
+routes those reports directly to the same private log: model evaluation tables,
+Greek coefficient rows and generation summaries need no content-matching filter.
+Interactive commands retain their ordinary output. Unknown stdout and warnings
+remain visible; exact known completed/empty queue lines are quiet in email.
+Unavailable or unsafe routine-log destinations fall back to visible output with a
+warning. Zero failure/rejection counters cannot enable a diagnostic latch;
 positive failures, rejected results, missing output and failure-limit messages remain
 visible. Every stderr line and original nonzero/signal exit status is preserved.
 No paid pipeline or test Slack transmission was run to validate this behavior.
