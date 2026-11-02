@@ -12,13 +12,43 @@ import sys
 import threading
 
 
-ACTIONABLE = re.compile(r"warning|error|fail(?:ed|ure)?|exception|traceback|reject|missing|cannot|could not|unable|not found|not configured|no .*api.*key", re.I)
-COMPLETED_QUEUE = re.compile(
-    r"^No (?:unsubmitted (?:sentence tagging|section people|passage place-state) rows found\.|"
-    r"unretrieved (?:sentence tagging|section people|passage place-state) Batch API runs found\.|"
-    r"pending (?:passages|sentences|translations|summaries|proper nouns)(?: found\.| to process\.))$",
-    re.I,
-)
+COMPLETED_QUEUE = tuple(re.compile(pattern, re.I) for pattern in (
+    r"No unsubmitted (?:sentence tagging|section people|passage place-state|greta-both-batch|greta-batch|discourse-batch) rows found\.",
+    r"No unretrieved (?:sentence tagging|section people|passage place-state) Batch API runs found\.",
+    r"No pending (?:passages|sentences|translations|summaries|proper nouns)(?: found\.| to process\.)",
+    r"Found 0 proper nouns to process\.?",
+    r"No untranslated passages found in the database\.",
+    r"No unsplit passages found in the database\.",
+    r"Found 0 passages to summarise\.?",
+    r"No unprocessed LLM grammar rows found for [A-Za-z0-9_.:-]+/[A-Za-z0-9_.:-]+\.",
+    r"0 failures\.?",
+    r"rejected 0\.?",
+))
+WEBSITE_STATS = tuple(re.compile(pattern) for pattern in (
+    re.escape("LLM translation enabled for missing phrase translations"),
+    r"Found \d+ (?:analyzed passages|mythicness predictors|skepticism predictors|sentence-level mythicness predictors|sentence-level skepticism predictors)\.",
+    re.escape("Adding phrase translations..."),
+    r"Website generated successfully(?: in '[^'\r\n]+')?\.?",
+    r"Open '[^'\r\n]+' in a web browser to view it\.",
+    r"Website: \d+ passages, \d+ pages",
+    r"Graphic book built in [A-Za-z0-9_./@:+-]+ with \d+ illustrated passages\.",
+    r"(?:pausanias\.pdf|pausanias-greek\.pdf|pausanias-greek-markup\.pdf|pausanias-greek-markup\.docx|pausanias-greek-checklist\.pdf|pausanias-greek-english-parallel\.pdf) copied to website\.",
+))
+
+
+def forward_stdout(line, website_stats):
+    """Quiet only complete known routine messages; unknown output stays visible.
+
+    Classify the normal phrase-translation preamble before treating its word
+    'missing' as a failure. There is no diagnostic latch: zero counters cannot
+    turn subsequent website statistics into email, and positive failures,
+    rejections, missing output and traceback lines are never in the allowlist.
+    """
+    if not line or any(pattern.fullmatch(line) for pattern in COMPLETED_QUEUE):
+        return False
+    if website_stats and any(pattern.fullmatch(line) for pattern in WEBSITE_STATS):
+        return False
+    return True
 
 
 def main(argv=None):
@@ -49,17 +79,9 @@ def main(argv=None):
         previous = {sig: signal.signal(sig, forward) for sig in [signal.SIGTERM, signal.SIGINT, signal.SIGHUP]}
 
         def drain(stream, is_stderr):
-            diagnostic_block = False
             for raw in iter(stream.readline, b""):
                 line = raw.decode("utf-8", errors="replace").strip()
-                diagnostic = bool(ACTIONABLE.search(line))
-                if diagnostic:
-                    diagnostic_block = True
-                elif not line:
-                    diagnostic_block = False
-                show = is_stderr or diagnostic or diagnostic_block or (
-                    not args.website_stats and not COMPLETED_QUEUE.fullmatch(line)
-                )
+                show = is_stderr or forward_stdout(line, args.website_stats)
                 with lock:
                     log.write(raw)
                     log.flush()

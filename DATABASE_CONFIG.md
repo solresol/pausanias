@@ -63,10 +63,13 @@ manual/conditional reader before closing the old source. Do not move Wordspend's
 own database as part of a Pausanias reader change.
 
 The source explicitly records `wordspend CONNECT`, while the new isolated restore
-has the default database ACL. Effective CONNECT is already equal through PUBLIC;
-both existing SELECT grants restored exactly. Reproducing the named CONNECT grant
-or accepting its documented redundant metadata difference requires an explicit
-decision. No grant was added by this rehearsal.
+has the default database ACL. Current effective CONNECT is equal through PUBLIC;
+the named schema USAGE and both SELECT grants restored exactly. Wordspend is neither
+owner nor superuser and has no inherited roles. Normal peer/zero-row SELECT probes
+work on both versions without a new grant. The raw ACL difference is retained:
+revoking PUBLIC CONNECT later would leave the source's direct Wordspend entitlement
+intact, while the omitted-entry copy would lose connectivity. Preserving that future
+revocation behavior needs the named entry; no grant was added by this preparation.
 
 Graphic-book exchange uses the existing AWS profile `pausanias-graphic-book` and
 `/home/pausanias/.aws/credentials.pausanias-exchange`; never store credential values
@@ -91,7 +94,9 @@ the original PG16 database and stale PG18 candidate; verify a destination backup
 then observe an ordinary scheduled run. The staged wrapper's single-instance flock
 provides a coordination point but does not fence independent database clients.
 Permanent legacy closure needs scoped approval and a source/successor backup
-retirement mapping; the currently installed retirement policy covers Stephanos only.
+retirement mapping; the installed retirement validator accepts at most one entry and
+hardcodes canonical Stephanos. Pausanias therefore needs a reviewed bounded helper
+extension preserving Stephanos as well as its own exact source/successor mapping.
 After PG18 receives new writes, rollback requires reconciling data, sequence values,
 batch receipts and graphic-book import records before changing routes.
 
@@ -99,8 +104,10 @@ batch receipts and graphic-book import records before changing routes.
 
 The staged wrapper retains the schedule and existing Slack/failure reporting.
 `cron_output.py` stores full step stdout/stderr in private per-run logs under
-`/home/pausanias/.local/state/pausanias/pipeline/`, with mode600 files. Website and
-predictor statistics stay in those logs; known completed/empty queue lines are
-quiet in email. Stderr, diagnostic stdout (including zero-exit failure messages),
-new-work notices and real child exit codes remain visible. No paid pipeline or
-test Slack transmission was run to validate this behavior.
+`/home/pausanias/.local/state/pausanias/pipeline/`, with mode600 files. Recognized
+website notices/statistics stay in those logs; exact known completed/empty queue
+lines are quiet in email. Unrecognized stdout remains visible even in website-
+statistics mode. Zero failure/rejection counters cannot enable a diagnostic latch;
+positive failures, rejected results, missing output and failure-limit messages remain
+visible. Every stderr line and original nonzero/signal exit status is preserved.
+No paid pipeline or test Slack transmission was run to validate this behavior.
