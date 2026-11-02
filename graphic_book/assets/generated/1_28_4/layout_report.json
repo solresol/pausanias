@@ -1,0 +1,146 @@
+{
+  "passage_id": "1.28.4",
+  "preflight": false,
+  "canvas": [
+    2400,
+    2400
+  ],
+  "art_rectangle": [
+    36,
+    220,
+    2364,
+    2250
+  ],
+  "reading_panel": [
+    66,
+    1000,
+    1390,
+    2220
+  ],
+  "translation_rectangle": [
+    96,
+    1110,
+    1358,
+    2188
+  ],
+  "reading_order": "one continuous inset English field, top to bottom",
+  "translation_exact": "When you descend, not to the lower city, but just beneath the Propylaia, there is a spring of water and, close by, a sanctuary to Apollo in a cave. It is believed that here Apollo lay with Kreousa, the daughter of Erechtheus. They say that Philippides was sent as a messenger to Sparta when the Persians had landed on the Greek mainland. Upon his return, he reported that the Lacedaemonians had delayed their departure, as it was their custom not to march out for battle until the moon was at its full. Philippides also related how Pan appeared to him on Mount Parthenion, declaring his goodwill toward the Athenians and promising to come and aid them in battle at Marathon. Thus, due to this announcement, the god Pan has been honored since that time.",
+  "translation_characters": 752,
+  "translation_words": 134,
+  "translation_utf8_sha256": "7891e3e1a0dd48bd9b2227590ae7b14ba1e74f983db1574b8b36dc7967ef1d94",
+  "translation_matches_export": true,
+  "minimum_body_font_size": 44,
+  "body_font_size": 51,
+  "padding": 18,
+  "text_blocks_checked": 6,
+  "fit_records": [
+    {
+      "name": "passage-id",
+      "rect": [
+        36,
+        20,
+        620,
+        112
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 42,
+      "text_bbox": [
+        54,
+        38,
+        436,
+        70
+      ],
+      "text": "PASSAGE 1.28.4"
+    },
+    {
+      "name": "title",
+      "rect": [
+        654,
+        20,
+        2364,
+        112
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 64,
+      "text_bbox": [
+        672,
+        38,
+        1686,
+        87
+      ],
+      "text": "THE MESSENGER AND PAN"
+    },
+    {
+      "name": "orientation",
+      "rect": [
+        36,
+        126,
+        2364,
+        196
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 33,
+      "text_bbox": [
+        54,
+        144,
+        1601,
+        177
+      ],
+      "text": "ATHENS, BELOW THE PROPYLAIA | PHILIPPIDES'S STORY: MOUNT PARTHENION"
+    },
+    {
+      "name": "reading-heading",
+      "rect": [
+        96,
+        1022,
+        1358,
+        1094
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 35,
+      "text_bbox": [
+        114,
+        1040,
+        599,
+        1066
+      ],
+      "text": "PAUSANIAS'S ACCOUNT"
+    },
+    {
+      "name": "translation",
+      "rect": [
+        96,
+        1110,
+        1358,
+        2188
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 51,
+      "text_bbox": [
+        114,
+        1128,
+        1338,
+        2144
+      ],
+      "text": "When you descend, not to the lower city, but\njust beneath the Propylaia, there is a spring of\nwater and, close by, a sanctuary to Apollo in a\ncave. It is believed that here Apollo lay with\nKreousa, the daughter of Erechtheus. They say\nthat Philippides was sent as a messenger to\nSparta when the Persians had landed on the\nGreek mainland. Upon his return, he reported\nthat the Lacedaemonians had delayed their\ndeparture, as it was their custom not to march\nout for battle until the moon was at its full.\nPhilippides also related how Pan appeared to\nhim on Mount Parthenion, declaring his\ngoodwill toward the Athenians and promising\nto come and aid them in battle at Marathon.\nThus, due to this announcement, the god Pan\nhas been honored since that time."
+    },
+    {
+      "name": "interpretive-caption",
+      "rect": [
+        36,
+        2264,
+        2364,
+        2390
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 32,
+      "text_bbox": [
+        54,
+        2282,
+        2267,
+        2351
+      ],
+      "text": "Philippides's reported encounter on Mount Parthenion. Interpretive scene: figures, dress and landscape are conjectural. The spring and\nApollo's cave belong to Athens."
+    }
+  ]
+}
