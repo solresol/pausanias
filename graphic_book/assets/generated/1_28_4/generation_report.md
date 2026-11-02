@@ -40,9 +40,35 @@ departures recorded in the page plan. Source paths relative; portable fonts.
 
 ## Persistence
 
-Source commit/push, conditional immutable checkpoint, persisted replacement
-decision and final claim release follow these completed local acceptance gates.
-All new renderer, prompt, page plan, layout audit, report and component files
-will be provided individually to record-result. Binary images, workflow/session
-SQLite, generated site and global asset manifest stay out of Git. Replacement
-draw occurs only after the new-page checkpoint and is reused on retries.
+Source commit **`c95afe89fa79da55ee912188e5fc79a1055cd908`** pushed to origin/main;
+remote branch SHA independently verified. Only the five scoped textual source/
+review files were committed. Binary page/component images, workflow/session
+SQLite, generated site and global asset manifest stayed out of Git.
+
+`record-result` successfully checkpointed **`ffe753e680ee49b88f3f9dbbbd1b44f9`**
+at 2026-11-02T01:08:35Z. Immutable page object:
+`s3://pausanias-graphic-book-assets-849621205733/workflow/results/ffe753e680ee49b88f3f9dbbbd1b44f9/page.png`.
+The helper uploaded and read back the page plus **all six** separately supplied
+files: renderer, prompt, page plan, layout report, generation report and sole
+component image. Each byte count and SHA-256 verified before the successful
+conditional catalogue update. Source Greek+English framing hash is
+`90c03436b2c33fbc5473d44484e6a71ad253b0333b0a95a4ff001a721f846eb7`;
+this differs intentionally from the English-only layout hash above.
+
+Only after checkpoint, replacement-decision persisted draw
+**`0.7291474363292743`**, above 0.20. A second command reused the same draw and
+persisted outcome **`skipped`**. No target selected, no shuffle or replacement
+art commissioned, no replacement result; exactly one new page for this run.
+
+`finish` confirmed **Run completed and claim released** at
+2026-11-02T01:09:16Z. Fresh remote status: generation 110, active-worker table
+empty, 182 illustrations, authoritative next 1.28.5. Read-only final audit
+confirms completed run, same persisted draw, skipped outcome, null target,
+exactly one result and six result-file rows, expected page hash and zero active
+workers. No lease expiry, conditional failure, denied action, overlap or blocker.
+The checkpointed result's PostgreSQL import status is **pending**. Raksasa's
+next overnight import and website publication have not happened in this run.
+
+The immutable uploaded report is the pre-checkpoint review at the source commit;
+this later Git update records the checkpoint/decision/release without rewriting
+the immutable result or duplicating its accepted page.
