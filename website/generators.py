@@ -9113,8 +9113,6 @@ def generate_translation_pages(
 
 def generate_progress_page(progress_data, output_dir, title):
     """Generate a progress tracking page showing pipeline status."""
-    from datetime import datetime
-
     progress_dir = os.path.join(output_dir, 'progress')
     os.makedirs(progress_dir, exist_ok=True)
 

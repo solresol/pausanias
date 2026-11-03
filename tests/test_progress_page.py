@@ -1,7 +1,21 @@
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from unittest.mock import patch
+from datetime import datetime
 
 from website.generators import generate_progress_page
+
+
+def test_progress_page_uses_shared_render_clock():
+    class FixedClock(datetime):
+        @classmethod
+        def now(cls):
+            return cls(2026, 11, 3, 10, 0, 0)
+
+    with TemporaryDirectory() as directory, patch('website.generators.datetime', FixedClock):
+        generate_progress_page({'tasks': [], 'token_usage': []}, directory, 'Test')
+        html = (Path(directory) / 'progress/index.html').read_text()
+    assert '<footer>Generated on 2026-11-03 at 10:00:00</footer>' in html
 
 
 def test_generate_progress_page_renders_pipeline_status_details():
