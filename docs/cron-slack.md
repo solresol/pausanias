@@ -55,3 +55,16 @@ reports must not satisfy the successful-completion check.
 
 Streaming log chunks, threaded updates, and the monitoring automation are
 subsequent increments.
+
+## Full daily output and overdue detection
+
+The final reporter sends the private run log in numbered Slack messages,
+followed by the outcome. It masks OpenAI key strings and Slack webhook URLs
+in the Slack copy. The original private log remains available on raksasa.
+The pipeline records a Sydney-date delivery marker only after Slack
+acknowledges every part and the outcome, including failed outcomes.
+
+Schedule `cron_slack_watchdog.sh` at 09:15 Sydney time and hourly through
+23:15. It posts one overdue alert per Sydney date if the completion marker
+is absent. A failed Slack request can be retried by the next watchdog run.
+The separate Codex monitor can check Slack when raksasa is unreachable.

@@ -4,6 +4,7 @@ import argparse
 from datetime import datetime, timezone
 import json
 import os
+import re
 from pathlib import Path
 import socket
 import subprocess
@@ -51,10 +52,24 @@ def send_report(webhook_file: Path, payload: dict) -> None:
             raise ValueError("Slack did not acknowledge the report")
 
 
+def output_messages(path: Path, run_id: str):
+    """Keep every line, with numbered parts below Slack's message limit."""
+    output = path.read_text(encoding="utf-8", errors="replace")
+    # Provider errors can echo credentials in diagnostics.
+    output = re.sub(r"sk-[A-Za-z0-9_-]{16,}", "[redacted OpenAI key]", output)
+    output = re.sub(r"https://hooks\.slack\.com/services/[^\s\"']+", "[redacted webhook]", output)
+    chunks = [output[i:i + 10000] for i in range(0, len(output), 10000)] or [""]
+    for number, chunk in enumerate(chunks, 1):
+        yield {
+            "text": f"Pausanias cron output {number}/{len(chunks)} | run: {run_id}\n{chunk}",
+            "mrkdwn": False,
+        }
+
+
 def main() -> int:
     """Allow a dry run without credentials or any pipeline/API work."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--status", choices=("started", "succeeded", "failed"), required=True)
+    parser.add_argument("--status", choices=("started", "succeeded", "failed", "overdue"), required=True)
     parser.add_argument("--run-id", required=True)
     parser.add_argument("--started-at", type=int, required=True)
     parser.add_argument("--stage", required=True)
@@ -62,6 +77,8 @@ def main() -> int:
     parser.add_argument("--webhook-file", type=Path, default=Path(
         os.environ.get("PAUSANIAS_SLACK_WEBHOOK_FILE", "~/.config/pausanias/slack-webhook")
     ).expanduser())
+    parser.add_argument("--log", type=Path)
+    parser.add_argument("--require-webhook", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
     payload = build_message(args)
@@ -69,9 +86,16 @@ def main() -> int:
         print(payload["text"])
         return 0
     if not args.webhook_file.exists():
+        if args.require_webhook or args.log:
+            print("Slack webhook file missing", file=sys.stderr)
+            return 1
         # Optional until a webhook has been provisioned on the cron host.
         return 0
     try:
+        if args.log:
+            for part in output_messages(args.log, args.run_id):
+                send_report(args.webhook_file, part)
+                time.sleep(1.1)
         send_report(args.webhook_file, payload)
     except HTTPError as exc:
         print(f"Slack report failed: HTTP {exc.code}", file=sys.stderr)

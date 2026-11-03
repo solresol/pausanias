@@ -6,10 +6,11 @@ export PATH="$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
 
 cd "$(dirname "$0")"
 
-# Slack is additive: retain cron output and the pipeline's original exit status.
+# Preserve the pipeline exit status and record Slack delivery separately.
 cron_started_at=$(date +%s)
 cron_run_id="pausanias-daily-$(date -u +%Y%m%dT%H%M%SZ)-$$"
 cron_stage=checkout
+cron_day=$(TZ=Australia/Sydney date +%F)
 umask 077
 cron_log_dir="${PAUSANIAS_LOG_DIR:-$HOME/.local/state/pausanias/pipeline}"
 mkdir -p "$cron_log_dir"
@@ -28,18 +29,25 @@ run_website_stats() {
   uv run cron_output.py --log "$cron_log" --stage "$cron_stage" --website-stats -- "$@"
 }
 notify_slack() {
-  if ! uv run cron_slack.py --status "$1" --exit-code "$2" \
-      --run-id "$cron_run_id" --started-at "$cron_started_at" --stage "$cron_stage"; then
-    echo "Warning: Slack notification failed; see cron output for pipeline status." >&2
-  fi
+  slack_status=$1
+  slack_exit=$2
+  shift 2
+  uv run cron_slack.py --status "$slack_status" --exit-code "$slack_exit" \
+      --run-id "$cron_run_id" --started-at "$cron_started_at" --stage "$cron_stage" --require-webhook "$@"
 }
 finish_cron() {
   cron_exit_code=$1
   trap - 0
   if [ "$cron_exit_code" -eq 0 ]; then
-    notify_slack succeeded "$cron_exit_code"
+    final_status=succeeded
   else
-    notify_slack failed "$cron_exit_code"
+    final_status=failed
+  fi
+  if notify_slack "$final_status" "$cron_exit_code" --log "$cron_log"; then
+    printf '%s %s\n' "$final_status" "$cron_run_id" > "$cron_log_dir/.$cron_run_id"
+    mv "$cron_log_dir/.$cron_run_id" "$cron_log_dir/$cron_day.delivered"
+  else
+    echo "Slack delivery incomplete. Full output: $cron_log" >&2
   fi
   exit "$cron_exit_code"
 }
@@ -47,7 +55,7 @@ trap 'finish_cron $?' 0
 trap 'exit 129' HUP
 trap 'exit 130' INT
 trap 'exit 143' TERM
-notify_slack started 0
+notify_slack started 0 || echo "Slack start notification failed." >&2
 run_logged git pull -q
 
 export PAUSANIAS_DATABASE_URL="${PAUSANIAS_DATABASE_URL:-dbname=pausanias}"
@@ -57,8 +65,8 @@ if [ ! -d "$GRAPHIC_BOOK_IMAGE_DIR" ]; then
 fi
 
 cron_stage=analysis
-PAUSANIAS_QUIET_EMPTY=1 run_logged uv run mythic_sceptic_analyser.py --stop 50
-PAUSANIAS_QUIET_EMPTY=1 run_logged uv run extract_proper_nouns.py --stop 50
+run_logged uv run mythic_sceptic_analyser.py --stop 50
+run_logged uv run extract_proper_nouns.py --stop 50
 run_logged uv run link_wikidata.py --stop-after 100
 run_logged uv run translate_pausanias.py --stop 50
 run_logged uv run split_sentences.py --model gpt-5.6-luna --stop 200
