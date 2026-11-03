@@ -2625,6 +2625,18 @@ def _community_rows(graph, limit=10):
     if graph.number_of_nodes() == 0 or graph.number_of_edges() == 0:
         return []
 
+    # A fixed random seed still samples/shuffles in graph insertion order.
+    # SQL ties can return the same rows in another order after a restore, so
+    # canonicalize this analysis without mutating the shared input graph.
+    ordered = nx.Graph()
+    ordered.add_nodes_from(sorted(graph.nodes(data=True), key=lambda item: item[0]))
+    ordered.add_edges_from(sorted(
+        ((min(left, right), max(left, right), attrs)
+         for left, right, attrs in graph.edges(data=True)),
+        key=lambda item: (item[0], item[1]),
+    ))
+    graph = ordered
+
     try:
         if graph.number_of_nodes() <= 800:
             communities = nx.community.greedy_modularity_communities(graph, weight="weight")
@@ -2637,7 +2649,8 @@ def _community_rows(graph, limit=10):
 
     strengths = _weighted_strengths(graph)
     rows = []
-    for idx, community in enumerate(sorted(communities, key=len, reverse=True)[:limit], start=1):
+    ranked = sorted(communities, key=lambda group: (-len(group), tuple(sorted(group))))
+    for idx, community in enumerate(ranked[:limit], start=1):
         subgraph = graph.subgraph(community)
         entity_counts = Counter(
             graph.nodes[node].get("entity_type", "other") for node in community
