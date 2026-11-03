@@ -73,3 +73,21 @@ After checkpoint, replacement-decision persisted draw
 persisted **`skipped`**. No target, shuffle, replacement candidate, replacement
 art or replacement result. Exactly one new page. This Git report update records
 the later decision without rewriting immutable uploaded objects.
+
+## Completion audit
+
+`finish` confirmed **Run completed and claim released** at
+**2026-11-03T01:13:04Z**. Fresh remote status: generation **117**, active-worker
+table empty, **183** illustrations, current next **1.28.6**. Read-only audit
+confirms completed run, exactly one new result and six result-file rows, expected
+page hash, same persisted draw, skipped outcome and null replacement target.
+No expiry, conditional failure, denied action, overlap or blocker. Source
+Greek+English framing hash is
+`dfb19591867eba3fa55967c38dc82939ca8ae00978e989033a3d3feb6a4f0f78`;
+it intentionally differs from the English-only layout hash.
+
+Checkpoint's PostgreSQL import status remains **pending**. No production import,
+database migration, replacement promotion or website publication occurred.
+Raksasa's next overnight import and publication remain outstanding by design.
+This final scoped Git audit update does not duplicate the result or modify the
+immutable page/result files or shared SQLite snapshot.
