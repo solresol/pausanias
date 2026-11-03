@@ -51,3 +51,25 @@ component must all be passed separately to record-result. A later Git update
 will record the actual checkpoint, persisted optional replacement decision and
 claim-release outcome without rewriting the immutable result. PostgreSQL import
 and website publication are Raksasa's next overnight responsibility.
+
+## Checkpoint and persisted replacement decision
+
+Source commit **`b008607d5c94c5744339ee5ebe652497b2404ac9`** successfully pushed
+to origin/main; remote branch SHA independently verified. Only five scoped
+textual source/review files committed. Binary page/component images, workflow
+snapshot/session, generated site, global manifest and all unrelated files stayed
+out of Git.
+
+`record-result` checkpointed new page **`b93bb965e021496ea14b028a8fbd148e`**.
+Immutable page:
+`s3://pausanias-graphic-book-assets-849621205733/workflow/results/b93bb965e021496ea14b028a8fbd148e/page.png`.
+The helper uploaded/read back the page and all **six** result files separately:
+renderer, prompt, page plan, layout report, pre-checkpoint generation report and
+sole component raster. Each byte count and SHA-256 passed before conditional
+snapshot checkpoint. No duplicate new-page result was submitted.
+
+After checkpoint, replacement-decision persisted draw
+**`0.38673006477705973`**, above 0.20. Repeated call reused the same draw and
+persisted **`skipped`**. No target, shuffle, replacement candidate, replacement
+art or replacement result. Exactly one new page. This Git report update records
+the later decision without rewriting immutable uploaded objects.
