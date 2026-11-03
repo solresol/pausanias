@@ -58,7 +58,7 @@ def output_messages(path: Path, run_id: str):
     # Provider errors can echo credentials in diagnostics.
     output = re.sub(r"sk-[A-Za-z0-9_-]{16,}", "[redacted OpenAI key]", output)
     output = re.sub(r"https://hooks\.slack\.com/services/[^\s\"']+", "[redacted webhook]", output)
-    chunks = [output[i:i + 10000] for i in range(0, len(output), 10000)] or [""]
+    chunks = [output[i:i + 3500] for i in range(0, len(output), 3500)] or [""]
     for number, chunk in enumerate(chunks, 1):
         yield {
             "text": f"Pausanias cron output {number}/{len(chunks)} | run: {run_id}\n{chunk}",
