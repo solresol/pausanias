@@ -1,0 +1,140 @@
+{
+  "passage_id": "1.28.5",
+  "preflight": false,
+  "canvas": [
+    2400,
+    2300
+  ],
+  "art_rectangle": [
+    966,
+    254,
+    2358,
+    2122
+  ],
+  "translation_rectangle": [
+    64,
+    390,
+    896,
+    2000
+  ],
+  "reading_order": "one continuous left English field, top to bottom",
+  "translation_exact": "Hence also the Areopagus. It is called the \"Hill of Ares\" because Ares was the first to be tried there; the story has also informed me of these matters, that he killed Halirrhothius and why he slew him. They say that afterwards Orestes too was tried here for the murder of his mother. There is an altar dedicated to Athena Areia, which Orestes set up after being acquitted. As for the rough stones upon which defendants and their accusers stand during their trial, these they have named Respectively the Stone of Insolence (Hybris) and the Stone of Shamelessness (Anaideia).",
+  "translation_characters": 574,
+  "translation_words": 99,
+  "translation_utf8_sha256": "29862a688d2743b26f68b39fd8d5fb115e0fd0a881236b476f9d082585def384",
+  "translation_matches_export": true,
+  "minimum_body_font_size": 44,
+  "body_font_size": 54,
+  "padding": 20,
+  "text_blocks_checked": 6,
+  "fit_records": [
+    {
+      "name": "passage-id",
+      "rect": [
+        42,
+        24,
+        680,
+        120
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 44,
+      "text_bbox": [
+        62,
+        44,
+        462,
+        77
+      ],
+      "text": "PASSAGE 1.28.5"
+    },
+    {
+      "name": "title",
+      "rect": [
+        740,
+        24,
+        2358,
+        120
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 64,
+      "text_bbox": [
+        760,
+        44,
+        2024,
+        93
+      ],
+      "text": "THE STONES OF THE AREOPAGUS"
+    },
+    {
+      "name": "orientation",
+      "rect": [
+        42,
+        134,
+        2358,
+        214
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 36,
+      "text_bbox": [
+        62,
+        154,
+        1037,
+        190
+      ],
+      "text": "ATHENS | AREOPAGUS, SOUTH OF THE AGORA"
+    },
+    {
+      "name": "reading-heading",
+      "rect": [
+        64,
+        278,
+        896,
+        360
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 37,
+      "text_bbox": [
+        84,
+        298,
+        597,
+        325
+      ],
+      "text": "PAUSANIAS'S ACCOUNT"
+    },
+    {
+      "name": "translation",
+      "rect": [
+        64,
+        390,
+        896,
+        2000
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 54,
+      "text_bbox": [
+        84,
+        410,
+        865,
+        1824
+      ],
+      "text": "Hence also the Areopagus.\nIt is called the \"Hill of Ares\"\nbecause Ares was the first\nto be tried there; the story\nhas also informed me of\nthese matters, that he killed\nHalirrhothius and why he\nslew him. They say that\nafterwards Orestes too was\ntried here for the murder of\nhis mother. There is an altar\ndedicated to Athena Areia,\nwhich Orestes set up after\nbeing acquitted. As for the\nrough stones upon which\ndefendants and their\naccusers stand during their\ntrial, these they have named\nRespectively the Stone of\nInsolence (Hybris) and the\nStone of Shamelessness\n(Anaideia)."
+    },
+    {
+      "name": "interpretive-caption",
+      "rect": [
+        42,
+        2160,
+        2358,
+        2280
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 34,
+      "text_bbox": [
+        62,
+        2180,
+        2169,
+        2253
+      ],
+      "text": "The litigants' rough stones on the Areopagus: an interpretive view. Forms, spacing and ancient setting are conjectural; no\nsurviving stones are identified."
+    }
+  ]
+}
