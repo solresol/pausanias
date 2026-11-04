@@ -370,10 +370,13 @@
     }
   ],
   "selected_passage": "1.6.3",
-  "outcome": "pending",
+  "outcome": "accepted",
   "original_catalogue_sha256": "2ac6547a48d0256d33cbab1858fcad2eecfdd0722339989905375a4ba855b5af",
   "original_image_s3_key": "images/1/6/3.png",
   "local_review": "passed",
   "candidate_path": "graphic_book/output/replacements/1_6_3/20261104/candidate.png",
-  "candidate_sha256": "23614063853c5b993d822e1d9c3be7b9050663e279fb393ace39d05f0973b68f"
+  "candidate_sha256": "23614063853c5b993d822e1d9c3be7b9050663e279fb393ace39d05f0973b68f",
+  "replacement_result_id": "9d579c05e2314b8f86f007f95d8d90c0",
+  "replacement_source_commit": "33c26303a582b76b762adbeb821705a474e03a2b",
+  "independent_original_archive_key": "workflow/results/9d579c05e2314b8f86f007f95d8d90c0/previous-page.png"
 }

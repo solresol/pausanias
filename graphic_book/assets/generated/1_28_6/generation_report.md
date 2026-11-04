@@ -79,3 +79,22 @@ before art. Full exclusions/order in reviews/2026-11-04-replacement-selection.js
 Original SHA-256 **2ac6547a48d0256d33cbab1858fcad2eecfdd0722339989905375a4ba855b5af**;
 canonical original remains unchanged, with source/component/PNG copies preserved.
 Replacement review/checkpoint/release outcomes are appended after acknowledgements.
+
+## Replacement checkpoint and persisted decision
+
+Replacement source commit **33c26303a582b76b762adbeb821705a474e03a2b** pushed,
+remote SHA verified. New render/prompt/plan/layout/review/selection and preserved
+source text committed; all binary/cache/workflow/site files excluded.
+Replacement **1.6.3**, result **9d579c05e2314b8f86f007f95d8d90c0**, successfully
+checkpointed. Page and sixteen supplied files uploaded/read back; helper itself
+retrieved, immutably archived and verified original PNG. Seventeen supporting
+records include the independent archive, preserving original SHA-256.
+Same draw **0.10621672725890696** and same target persisted **accepted** after
+checkpoint. Exactly one new page and at most one replacement; no duplicate result.
+
+Replacement full-size/text/neighbour/HTML/PDF checks pass (47px exact English,
+eight measured blocks, OCR, target reader 30/184 and PDF page 31). Canonical
+original 1.6.3 remains unchanged; candidate stays outside canonical tree. Both
+results remain **pending** overnight Raksasa import/site publication and original
+hash validation before replacement promotion. No daytime deployment performed.
+This accepted outcome is saved in Git before finish releases the owned lease.

@@ -49,3 +49,22 @@ checkpoint. Every new renderer, prompt, plan, layout/review/selection and all
 component/archive images must be supplied to record-result. Helper must itself
 retrieve/archive original and verify downloads. Shared outcome remains pending
 until checkpoint succeeds; acceptance and release appended after acknowledgement.
+
+## Checkpointed replacement
+
+Source commit **33c26303a582b76b762adbeb821705a474e03a2b** pushed to origin/main;
+remote SHA verified. Twelve scoped textual files, no binary/cache/site/manifest
+or unrelated files committed. The helper successfully checkpointed replacement
+**9d579c05e2314b8f86f007f95d8d90c0** with the catalogued original hash.
+It uploaded/read back the candidate and sixteen explicitly supplied source,
+review, selection, component and local archive files, and independently retrieved,
+archived and read-back verified the previous PNG. The seventeen supporting
+records include its immutable original archive:
+workflow/results/9d579c05e2314b8f86f007f95d8d90c0/previous-page.png.
+Shared outcome **accepted** was recorded only after successful checkpoint,
+reusing draw **0.10621672725890696** and target **1.6.3**. No redraw or switch.
+
+Both results remain pending Raksasa PostgreSQL import and site publication.
+Candidate is uploaded/checkpointed, not promoted locally or deployed. Raksasa
+must independently verify the original hash before promotion. Canonical local
+original remains unchanged. Claim-release acknowledgement is recorded below.
