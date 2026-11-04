@@ -1,0 +1,191 @@
+{
+  "passage_id": "1.6.3",
+  "kind": "replacement",
+  "preflight": false,
+  "canvas": [
+    2400,
+    2300
+  ],
+  "art_rectangle": [
+    48,
+    240,
+    2352,
+    1340
+  ],
+  "translation_rectangles": [
+    [
+      48,
+      1590,
+      1174,
+      2260
+    ],
+    [
+      1226,
+      1590,
+      2352,
+      2260
+    ]
+  ],
+  "reading_order": "numbered left then right",
+  "translation_exact": "He himself crossed over into Egypt and killed Cleomenes, whom Alexander had appointed satrap of Egypt, believing him loyal to Perdiccas and therefore untrustworthy to himself. He also persuaded the Macedonians who had been appointed to carry Alexander's body to Aegae to hand it over to him. He buried the body in Memphis according to Macedonian custom; and knowing that Perdiccas would wage war against him, he kept Egypt well guarded. Perdiccas, for outward appearance, took with him on campaign Philip's son Arrhidaeus and the child Alexander, son of Alexander himself and Roxane, daughter of Oxyartes; but in reality he plotted to seize for himself Ptolemy's rule over Egypt. He was driven out of Egypt, and lost his former prestige in military affairs; furthermore, having fallen under suspicion among the Macedonians on other grounds, he was ultimately killed by his own bodyguards.",
+  "source_chunks": [
+    "He himself crossed over into Egypt and killed Cleomenes, whom Alexander had appointed satrap of Egypt, believing him loyal to Perdiccas and therefore untrustworthy to himself. He also persuaded the Macedonians who had been appointed to carry Alexander's body to Aegae to hand it over to him. He buried the body in Memphis according to Macedonian custom; and knowing that Perdiccas would wage war against him, he kept Egypt well guarded.",
+    "Perdiccas, for outward appearance, took with him on campaign Philip's son Arrhidaeus and the child Alexander, son of Alexander himself and Roxane, daughter of Oxyartes; but in reality he plotted to seize for himself Ptolemy's rule over Egypt. He was driven out of Egypt, and lost his former prestige in military affairs; furthermore, having fallen under suspicion among the Macedonians on other grounds, he was ultimately killed by his own bodyguards."
+  ],
+  "translation_characters": 888,
+  "translation_words": 142,
+  "translation_utf8_sha256": "764ce76968a94443d72d0c839f484e192ffd52dfe007c3f9b1adadf8eab7fe1d",
+  "translation_matches_export": true,
+  "source_chunks_reassemble_exactly": true,
+  "original_catalogue_sha256": "2ac6547a48d0256d33cbab1858fcad2eecfdd0722339989905375a4ba855b5af",
+  "minimum_body_font_size": 42,
+  "body_font_size": 47,
+  "padding": 20,
+  "text_blocks_checked": 8,
+  "fit_records": [
+    {
+      "name": "passage-id",
+      "rect": [
+        42,
+        24,
+        680,
+        120
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 44,
+      "text_bbox": [
+        62,
+        44,
+        432,
+        77
+      ],
+      "text": "PASSAGE 1.6.3"
+    },
+    {
+      "name": "title",
+      "rect": [
+        740,
+        24,
+        2358,
+        120
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 58,
+      "text_bbox": [
+        760,
+        44,
+        2217,
+        97
+      ],
+      "text": "A ROYAL BURIAL, A CONTESTED KINGDOM"
+    },
+    {
+      "name": "orientation",
+      "rect": [
+        42,
+        134,
+        2358,
+        214
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 36,
+      "text_bbox": [
+        62,
+        154,
+        1429,
+        190
+      ],
+      "text": "MEMPHIS, EGYPT | ALEXANDER'S BODY IN PTOLEMY'S CUSTODY"
+    },
+    {
+      "name": "interpretive-caption",
+      "rect": [
+        48,
+        1358,
+        2352,
+        1466
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 34,
+      "text_bbox": [
+        68,
+        1378,
+        2275,
+        1444
+      ],
+      "text": "Guarded custody near Memphis: an interpretive funeral scene. Figures, wagon and landscape are conjectural; no exact route is\nreconstructed."
+    },
+    {
+      "name": "reading-heading-1",
+      "rect": [
+        48,
+        1490,
+        1174,
+        1580
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 36,
+      "text_bbox": [
+        68,
+        1510,
+        678,
+        1536
+      ],
+      "text": "1 PTOLEMY TAKES CONTROL"
+    },
+    {
+      "name": "reading-heading-2",
+      "rect": [
+        1226,
+        1490,
+        2352,
+        1580
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 36,
+      "text_bbox": [
+        1246,
+        1510,
+        1806,
+        1536
+      ],
+      "text": "2 PERDICCAS'S CAMPAIGN"
+    },
+    {
+      "name": "translation-1",
+      "rect": [
+        48,
+        1590,
+        1174,
+        2260
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 47,
+      "text_bbox": [
+        68,
+        1610,
+        1140,
+        2216
+      ],
+      "text": "He himself crossed over into Egypt and\nkilled Cleomenes, whom Alexander had\nappointed satrap of Egypt, believing him\nloyal to Perdiccas and therefore\nuntrustworthy to himself. He also persuaded\nthe Macedonians who had been appointed to\ncarry Alexander's body to Aegae to hand it\nover to him. He buried the body in Memphis\naccording to Macedonian custom; and\nknowing that Perdiccas would wage war\nagainst him, he kept Egypt well guarded."
+    },
+    {
+      "name": "translation-2",
+      "rect": [
+        1226,
+        1590,
+        2352,
+        2260
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 47,
+      "text_bbox": [
+        1246,
+        1610,
+        2297,
+        2216
+      ],
+      "text": "Perdiccas, for outward appearance, took\nwith him on campaign Philip's son\nArrhidaeus and the child Alexander, son of\nAlexander himself and Roxane, daughter of\nOxyartes; but in reality he plotted to seize\nfor himself Ptolemy's rule over Egypt. He\nwas driven out of Egypt, and lost his former\nprestige in military affairs; furthermore,\nhaving fallen under suspicion among the\nMacedonians on other grounds, he was\nultimately killed by his own bodyguards."
+    }
+  ]
+}

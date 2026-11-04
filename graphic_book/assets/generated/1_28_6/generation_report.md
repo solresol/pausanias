@@ -7,7 +7,7 @@ published-version ID, authorized origin and pinned startup commit. No environmen
 substitution. Clean work branch safely fast-forwarded from 1597fdd to origin/main
 90a6c19. Required absolute Python reports 3.12.14; frozen uv sync passes before
 claim. Prescribed UV_PYTHON/UV_CACHE_DIR and uv executable retained throughout.
-No credential/binding, schedule, sibling-repository or database changes.
+No credential/binding, schedule, sibling-repository or PostgreSQL changes.
 
 Conditional begin succeeded without competing worker. Validated full export:
 **3,170 passages, 3,170 translations, 183 accepted pages**. Fresh next **1.28.6**.
@@ -60,3 +60,22 @@ Renderer, prompt, plan, layout report, this report and component must each be
 passed to record-result. Later appended Git audit records actual checkpoint,
 persisted replacement draw/outcome and release, without rewriting immutable
 objects. Raksasa overnight import and site publication remain separate.
+
+## New-page checkpoint and persisted replacement target
+
+Source commit **1d83b848fe0c15f755862ce65e554cd7d0be0f32** pushed to origin/main,
+remote SHA verified. Only five scoped textual files committed. The helper
+checkpointed **a94ec1cce2e2417ba84a019537f5c2d6**, uploading and reading back
+page.png plus all six explicitly supplied files (renderer, prompt, plan,
+layout report, pre-checkpoint report and sole raster component). SHA-256 and
+byte counts verified before conditional shared-catalogue update. New page
+is safely checkpointed; no second new-page result submitted.
+
+Single persisted replacement draw **0.10621672725890696** is below 0.20.
+A one-time shuffle of 166 eligible IDs excluded six latest 1.28.1–1.28.6,
+anchors 1.1.4/1.1.5 and ten historical/exchange successful replacements.
+First actual inspected candidate **1.6.3** qualifies; target persisted pending
+before art. Full exclusions/order in reviews/2026-11-04-replacement-selection.json.
+Original SHA-256 **2ac6547a48d0256d33cbab1858fcad2eecfdd0722339989905375a4ba855b5af**;
+canonical original remains unchanged, with source/component/PNG copies preserved.
+Replacement review/checkpoint/release outcomes are appended after acknowledgements.
