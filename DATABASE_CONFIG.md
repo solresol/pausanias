@@ -53,6 +53,16 @@ home directories and explicit DSNs are separate configuration contexts. The help
 `database_endpoint.py` prints only resolved connection identity, never credentials.
 No global PGPORT, role, password, HBA or listener change was made for this cutover.
 
+The three batch tools (`sentence_tag_batch.py`, `sentence_llm_grammar.py` and
+`section_people_batch.py`) also use that resolver through `pausanias_psql.PsqlRunner`.
+Their direct `psql` calls receive the fully resolved DSN. Each connection checks
+the actual database, role, port and server major before any application SQL;
+configured Unix-socket routes also reject a TCP connection. `psqlrc` is disabled,
+and quiet command tags keep the guard out of COPY CSV output. Explicit DSN/PG*
+precedence is unchanged, and a mismatched server fails before schema/batch SQL.
+Local and explicitly requested SSH commands share this transport; it does not
+choose an SSH host or change authentication.
+
 ## Readers and external work
 
 `wordspend` retains its existing SELECT on `public.passages` and `public.translations`.
@@ -115,8 +125,23 @@ Final rollout record:
 Historical completion records retain their then-pending backup status; later receipts
 record the actual completion rather than rewriting those earlier observations.
 
-Next ordinary run: **4 November 18:15 UTC** (5 November 05:15 Sydney). First observe
-after **18:20 UTC**, then follow that same run to its natural terminal result. Require
+The **4 November 18:15 UTC** run committed its analysis results, then failed at
+18:15:22 during sentence tagging: the former direct `psql` adapter ignored the
+profile and attempted the closed PG16 socket on5432. The original failure log and
+dated `failed` Slack delivery marker are retained. It stopped before batch retrieval,
+cloud-result sync, site generation and publication; the failed adapter's initial
+schema connection failed before creating its OpenAI client. No completed analysis
+or external processing was replayed for the routing correction.
+
+The shared batch adapter is covered by 50 focused regression tests. Isolated
+service-account probes verified all three clients on5433/PG18 using read-only SQL,
+and actual server-side guards rejected deliberately wrong database, role, port and
+major before the test's subsequent SQL. This proves routing, not a full pipeline
+acceptance. The PG16 fence remains closed and the original receipt hashes/times
+are preserved.
+
+Next unchanged ordinary run: **5 November 18:15 UTC** (6 November 05:15 Sydney).
+First observe after **18:20 UTC**, then follow that same run to its natural terminal result. Require
 committed changes on canonical PG18, successful publication and local/public output
 hash parity, unchanged PG18 routing/PG16 fence and healthy indexes/collation.
 The original 100-request and 2-request batch receipts are completed; illustration
@@ -139,7 +164,8 @@ keeps its existing email destination. Current cron bytes therefore differ from t
 cutover's restored crontab; the daily/monthly times are unchanged. See
 [`docs/cron-slack.md`](docs/cron-slack.md). Verify delivery and the dated `.delivered`
 marker at ordinary acceptance; no email alone is not proof of success. The first
-watchdog check for this run is **4 November 22:15 UTC** (5 November 09:15 Sydney).
+watchdog check for the next ordinary run is **5 November 22:15 UTC**
+(6 November 09:15 Sydney).
 
 `cron_output.py` stores full step output in private per-run logs under
 `/home/pausanias/.local/state/pausanias/pipeline/`, with mode 0600 files. Predictor,

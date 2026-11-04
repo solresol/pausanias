@@ -8,8 +8,6 @@ import io
 import json
 import os
 import re
-import shlex
-import subprocess
 import sys
 import unicodedata
 import uuid
@@ -20,8 +18,10 @@ from typing import Any
 
 from openai import OpenAI
 
+from pausanias_db import add_database_argument
+from pausanias_psql import PsqlRunner
 
-DEFAULT_DATABASE_URL = "dbname=pausanias user=gregb"
+
 DEFAULT_MODEL = "gpt-5.6-luna"
 DEFAULT_PROMPT_VERSION = "greek-sentence-grammar-v1"
 DEFAULT_SAMPLE_SEED = "sentence-llm-grammar-sample-v1"
@@ -138,7 +138,7 @@ def parse_arguments() -> argparse.Namespace:
             "analyses comparable to parser CoNLL-U output."
         )
     )
-    parser.add_argument("--database-url", default=DEFAULT_DATABASE_URL)
+    add_database_argument(parser)
     parser.add_argument("--ssh-host", default=None)
     parser.add_argument("--psql-bin", default="psql")
     parser.add_argument("--openai-api-key-file", default="~/.openai.key")
@@ -202,43 +202,6 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument("--schema-only", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     return parser.parse_args()
-
-
-class PsqlRunner:
-    def __init__(self, database_url: str, *, psql_bin: str = "psql", ssh_host: str | None = None):
-        self.database_url = database_url
-        self.psql_bin = psql_bin
-        self.ssh_host = ssh_host
-
-    def command(self) -> list[str]:
-        if not self.ssh_host:
-            return [
-                self.psql_bin,
-                self.database_url,
-                "-v",
-                "ON_ERROR_STOP=1",
-                "-P",
-                "pager=off",
-            ]
-        remote = (
-            f"{shlex.quote(self.psql_bin)} {shlex.quote(self.database_url)} "
-            "-v ON_ERROR_STOP=1 -P pager=off"
-        )
-        return ["ssh", self.ssh_host, remote]
-
-    def run(self, sql: str) -> str:
-        proc = subprocess.run(
-            self.command(),
-            input=sql,
-            text=True,
-            encoding="utf-8",
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-        if proc.returncode != 0:
-            print(proc.stderr, file=sys.stderr)
-            raise RuntimeError(f"psql failed with exit code {proc.returncode}")
-        return proc.stdout
 
 
 def schema_sql() -> str:

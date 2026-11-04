@@ -9,9 +9,6 @@ import itertools
 import json
 import math
 import os
-import shlex
-import subprocess
-import sys
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -22,7 +19,8 @@ from openai import OpenAI
 from scipy.stats import chi2_contingency
 
 from openai_batch_utils import wait_for_batch_file_processing
-from pausanias_db import schema_path
+from pausanias_db import add_database_argument, schema_path
+from pausanias_psql import PsqlRunner
 
 
 DEFAULT_MODEL = "gpt-5.6-luna"
@@ -71,43 +69,6 @@ def load_openai_api_key(key_file: str) -> str:
         return handle.read().strip()
 
 
-class PsqlRunner:
-    def __init__(self, database_url: str, *, psql_bin: str, ssh_host: str | None):
-        self.database_url = database_url
-        self.psql_bin = psql_bin
-        self.ssh_host = ssh_host
-
-    def command(self) -> list[str]:
-        if not self.ssh_host:
-            return [
-                self.psql_bin,
-                self.database_url,
-                "-v",
-                "ON_ERROR_STOP=1",
-                "-P",
-                "pager=off",
-            ]
-        remote = (
-            f"{shlex.quote(self.psql_bin)} {shlex.quote(self.database_url)} "
-            "-v ON_ERROR_STOP=1 -P pager=off"
-        )
-        return ["ssh", self.ssh_host, remote]
-
-    def run(self, sql: str) -> str:
-        proc = subprocess.run(
-            self.command(),
-            input=sql,
-            text=True,
-            encoding="utf-8",
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-        if proc.returncode != 0:
-            print(proc.stderr, file=sys.stderr)
-            raise RuntimeError(f"psql failed with exit code {proc.returncode}")
-        return proc.stdout
-
-
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
@@ -115,7 +76,7 @@ def parse_arguments() -> argparse.Namespace:
             "people from numbered Pausanias sections."
         )
     )
-    parser.add_argument("--database-url", default="dbname=pausanias user=gregb")
+    add_database_argument(parser)
     parser.add_argument("--ssh-host", default=None)
     parser.add_argument("--psql-bin", default="psql")
     parser.add_argument("--openai-api-key-file", default="~/.openai.key")
