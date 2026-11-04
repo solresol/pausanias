@@ -24,15 +24,18 @@ See `TODO.md` for the live research agenda.
 
 ## Database
 
-PostgreSQL, `dbname=pausanias`, user `gregb`. The **live** database is on
-`raksasa`; the local default only works if a local server is running.
+Production is PostgreSQL 18 on `raksasa`, Unix socket `/var/run/postgresql`,
+port 5433, database and service role `pausanias`. Root `DATABASE_CONFIG.md` defines
+the installed profile, authentication, readers and retained legacy copies. Manual
+connections use their own explicit DSN and configured role; the old PG16 copy is
+closed to connections.
 
 - Connection is resolved by `pausanias_db.get_database_url()`:
   `--database-url` arg → `PAUSANIAS_DATABASE_URL` → `DATABASE_URL` → `dbname=pausanias`.
 - For local work against the live DB, open an SSH tunnel to raksasa's socket and
   point scripts at it:
   ```
-  ssh -N -L 6543:/var/run/postgresql/.s.PGSQL.5432 raksasa
+  ssh -N -L 6543:/var/run/postgresql/.s.PGSQL.5433 raksasa
   uv run some_script.py --database-url "host=127.0.0.1 port=6543 dbname=pausanias user=gregb"
   ```
 - Canonical schema is `database/schema.sql` (~60 tables, all `CREATE TABLE IF NOT

@@ -1,15 +1,17 @@
 # Production database configuration
 
-Observed on Raksasa on 2 November 2026. **Production remains PostgreSQL16/5432.**
-This preparation branch stages PG18 routing and quieter cron output; it does not
-claim a production cutover, writer pause, cloud-result import or publication.
+Cut over on Raksasa at **22:38:07 UTC on 3 November 2026**, with the backup handoff
+accepted at **00:47:20 UTC on 4 November**. Production uses **PostgreSQL 18/5433**;
+the retained PG16 source is closed to connections. The next ordinary scheduled
+application run remains an acceptance gate. Read-only reconciliation at 00:59 UTC
+confirmed the current endpoint, healthy indexes/collation and preserved receipts.
 
 | Item | Current production |
 | --- | --- |
 | Checkout | `/home/pausanias/pausanias` |
 | OS/database role | `pausanias` |
 | Database | `pausanias` |
-| Unix socket / port / major | `/var/run/postgresql` / `5432` / `16` |
+| Unix socket / port / major | `/var/run/postgresql` / `5433` / `18` |
 | Shared Python resolver | `pausanias_db.py`: `get_database_url()` and `connect()` |
 | Cron | `crontab -u pausanias -l`: daily `15 5 * * *` Australia/Sydney |
 | Daily wrapper | `/home/pausanias/pausanias/cronscript.sh` and its four daily sub-wrappers |
@@ -23,11 +25,10 @@ No endpoint overrides were found in its cron, service-account nonlogin environme
 DSNs remain caller-controlled; old documentation mentions user `gregb`, which is
 not the observed production cron identity.
 
-## Prepared PG18 profile and guard
+## Installed PG18 profile and guard
 
-The planned non-secret profile is `/home/pausanias/.config/pausanias/database.conf`,
-owned by `pausanias`, mode600, in a private directory. **It is not installed yet.**
-Its proposed contents are:
+The installed non-secret profile is `/home/pausanias/.config/pausanias/database.conf`,
+owned by `pausanias`, mode 0600, in a private directory. Its verified contents are:
 
 ```text
 DB_HOST=/var/run/postgresql
@@ -37,7 +38,7 @@ DB_USER=pausanias
 DB_EXPECTED_SERVER_MAJOR=18
 ```
 
-This branch resolves each connection field from explicit `--database-url`/
+The shared resolver resolves each connection field from explicit `--database-url`/
 `PAUSANIAS_DATABASE_URL`/`DATABASE_URL` DSN fields, then corresponding `PG*`
 environment fields, then the profile, then the legacy database-name default.
 Thus a name-only daily-wrapper DSN inherits the profile's explicit socket/port/user.
@@ -50,26 +51,28 @@ database, role, socket, port and version before returning the connection for SQL
 Run production writers as the service account so they use its profile. Other users'
 home directories and explicit DSNs are separate configuration contexts. The helper
 `database_endpoint.py` prints only resolved connection identity, never credentials.
-No global PGPORT, role, password, HBA or listener change is part of this preparation.
+No global PGPORT, role, password, HBA or listener change was made for this cutover.
 
 ## Readers and external work
 
-`wordspend` has SELECT on `public.passages` and `public.translations`, with no writes.
-Its installed `scripts/import_pausanias.py` uses `PAUSANIAS_DATABASE_URL`, falling
-back independently to `dbname=pausanias`; it does not use this project's profile.
-Its daily pipeline calls that importer only when `IMPORT_PAUSANIAS=1`; the inspected
-`35 4 * * *` Wordspend cron does not explicitly enable the flag. Coordinate this
-manual/conditional reader before closing the old source. Do not move Wordspend's
-own database as part of a Pausanias reader change.
+`wordspend` retains its existing SELECT on `public.passages` and `public.translations`.
+The installed `scripts/import_pausanias.py` supplies an explicit Unix socket,
+port 5433, database `pausanias`, role `wordspend` and expected major 18, then applies
+any deliberately supplied `PAUSANIAS_DATABASE_URL` fields. It does not use this
+project's profile or inherit an unrelated `PGPORT`. Its endpoint is checked and
+its source transaction is read-only. The cutover probe passed without running an import.
 
-The source explicitly records `wordspend CONNECT`, while the new isolated restore
-has the default database ACL. Current effective CONNECT is equal through PUBLIC;
-the named schema USAGE and both SELECT grants restored exactly. Wordspend is neither
-owner nor superuser and has no inherited roles. Normal peer/zero-row SELECT probes
-work on both versions without a new grant. The raw ACL difference is retained:
-revoking PUBLIC CONNECT later would leave the source's direct Wordspend entitlement
-intact, while the omitted-entry copy would lose connectivity. Preserving that future
-revocation behavior needs the named entry; no grant was added by this preparation.
+Wordspend's own database remains **wordspend/5432/PG16**. Its daily pipeline calls
+the Pausanias importer only when `IMPORT_PAUSANIAS=1`; the inspected cron does not
+enable that flag. No Wordspend writer or schedule was changed.
+
+The existing named `wordspend CONNECT` database right was explicitly approved and
+reproduced on the fresh PG18 successor and its two verification copies, as owner
+`pausanias`, with no grant option or new schema/table privilege. Exact normalized
+source ACL parity was verified. Historical archives omitted database-level ACLs;
+their original qualification is retained, with a checksummed metadata companion
+and separately audited replay completing the recovery bundle. PUBLIC CONNECT alone
+was not treated as equivalent to the source's named-right revocation semantics.
 
 Graphic-book exchange uses the existing AWS profile `pausanias-graphic-book` and
 `/home/pausanias/.aws/credentials.pausanias-exchange`; never store credential values
@@ -81,30 +84,65 @@ local snapshot. MANTO import is a separate operation and is not authorized here.
 
 ## Backups, rehearsal and handover gates
 
-Source and stale-candidate archives, checksums and isolated restore evidence are
-under `/var/backups/postgresql/project-rehearsals-20261102T043400Z/`. The source
-restore has84tables/30sequences; the stale candidate has81tables/30sequences and
-lacks the three graphic-book exchange tables. Both original databases are intact.
-Database-level ACL differences remain recorded separately from successful content,
-schema, object-owner/ACL, sequence and application-reader comparisons.
+Fresh source, preserved-candidate and independent destination archives, full
+restores, checksums, metadata companion, grant audits and cutover evidence are under
+`/var/backups/postgresql/pausanias-postcron-20261103T191000Z/`.
+The final frozen proof compared all 84 tables, 30 sequence states and catalog/schema,
+behind the approved source connection fence. The independently verified source
+and destination rendered 8,998 files with identical bytes/hashes. Indexes are valid
+and the PG18 collation version matches the operating system.
 
-Before production cutover: resolve that ACL decision; coordinate all writers; prove
-a fresh final consistent copy; validate endpoints and generated outputs; preserve
-the original PG16 database and stale PG18 candidate; verify a destination backup;
-then observe an ordinary scheduled run. The staged wrapper's single-instance flock
-provides a coordination point but does not fence independent database clients.
-Permanent legacy closure needs scoped approval and a source/successor backup
-retirement mapping; the installed retirement validator accepts at most one entry and
-hardcodes canonical Stephanos. Pausanias therefore needs a reviewed bounded helper
-extension preserving Stephanos as well as its own exact source/successor mapping.
+Canonical PG18 `pausanias` is OID 728836519. The previous stale PG18 OID 452938602 is
+retained as `pausanias_stale_20261014_preserved_20261103`. Original PG16 `pausanias`
+OID 452938602 is retained with `ALLOW_CONNECTIONS=false`; do not reopen it or route
+writers there as an automatic rollback. The source and successor are in different
+clusters, so their identities include port and system identifier as well as OID.
+The original schedule and pipeline lock were restored/released after 220.492 seconds.
+
+Independent post-cutover verification passed at 22:53 UTC. The coordinated backup
+refresh completed at 00:08:55 UTC, and the scoped helper/policy installation completed
+at 00:44:18 UTC. Final acceptance at 00:47:20 UTC verified both live retirement
+mappings, the unchanged Stephanos entry, exclusions, retention and backup schedule.
+The resulting encrypted offsite snapshot is
+`1128b6299cfdfb309329cb3355f90de030d158d7edb7bd5f4b8c41301d30467c`.
+Both successor archives were retrieved and checksum-verified. Four bounded native
+sample restores passed; those sample restores omit ownership/ACL/tablespaces and
+do not replace Pausanias's separate full 84-table restore and ACL replay proof.
+
+Installed receipt: `backup-policy-installed.json` in the evidence directory above.
+Final rollout record:
+`/var/backups/postgresql/retirement-validation-pausanias-20261103T231233Z-6284c282/final-pausanias-backup-rollout.json`.
+Historical completion records retain their then-pending backup status; later receipts
+record the actual completion rather than rewriting those earlier observations.
+
+Next ordinary run: **4 November 18:15 UTC** (5 November 05:15 Sydney). First observe
+after **18:20 UTC**, then follow that same run to its natural terminal result. Require
+committed changes on canonical PG18, successful publication and local/public output
+hash parity, unchanged PG18 routing/PG16 fence and healthy indexes/collation.
+The original 100-request and 2-request batch receipts are completed; illustration
+results `ffe753e680ee49b88f3f9dbbbd1b44f9` and
+`b93bb965e021496ea14b028a8fbd148e` are accepted, each with six file records and one
+page reference. Preserve their receipt times and hashes; do not resubmit or reimport
+them. New ordinary work or a legitimate active cloud lease must be reconciled by ID,
+without overriding claims or replacing snapshots. Do not submit extra paid work to
+manufacture acceptance.
 After PG18 receives new writes, rollback requires reconciling data, sequence values,
 batch receipts and graphic-book import records before changing routes.
 
-## Prepared cron output behavior
+## Installed cron output behavior
 
-The staged wrapper retains the schedule and existing Slack/failure reporting.
+The database cutover retained the schedule and reporting behavior. A subsequent,
+separate reporting change (`ae153fa`, refined by `90a6c19`) sends full numbered log
+parts and the final status to Slack, disables daily cron email with `MAILTO=""`, and
+runs `cron_slack_watchdog.sh` at `15 9-23 * * *` Sydney time. The monthly MANTO check
+keeps its existing email destination. Current cron bytes therefore differ from the
+cutover's restored crontab; the daily/monthly times are unchanged. See
+[`docs/cron-slack.md`](docs/cron-slack.md). Verify delivery and the dated `.delivered`
+marker at ordinary acceptance; no email alone is not proof of success. The first
+watchdog check for this run is **4 November 22:15 UTC** (5 November 09:15 Sydney).
+
 `cron_output.py` stores full step output in private per-run logs under
-`/home/pausanias/.local/state/pausanias/pipeline/`, with mode600 files. Predictor,
+`/home/pausanias/.local/state/pausanias/pipeline/`, with mode 0600 files. Predictor,
 network and site producers explicitly mark their routine reports with
 `cron_reporting.routine_report()`. The wrapper's existing `--website-stats` opt-in
 routes those reports directly to the same private log: model evaluation tables,
