@@ -68,3 +68,15 @@ Both results remain pending Raksasa PostgreSQL import and site publication.
 Candidate is uploaded/checkpointed, not promoted locally or deployed. Raksasa
 must independently verify the original hash before promotion. Canonical local
 original remains unchanged. Claim-release acknowledgement is recorded below.
+
+## Release and independent archive audit
+
+Finish completed and released the run at **2026-11-04T01:29:30.783152+00:00**.
+Fresh shared snapshot: completed run, zero active workers, generation 126,
+exactly two run results, draw 0.10621672725890696, sole target 1.6.3, accepted
+outcome and seventeen replacement file rows. An independent helper-archive
+S3 download matches original SHA-256
+2ac6547a48d0256d33cbab1858fcad2eecfdd0722339989905375a4ba855b5af.
+Canonical local original remains byte-identical. Replacement import remains
+pending, alongside new page 1.28.6; next unillustrated passage is 1.28.7.
+No daytime promotion/site publication, no schedule changes or remaining blocker.

@@ -98,3 +98,24 @@ original 1.6.3 remains unchanged; candidate stays outside canonical tree. Both
 results remain **pending** overnight Raksasa import/site publication and original
 hash validation before replacement promotion. No daytime deployment performed.
 This accepted outcome is saved in Git before finish releases the owned lease.
+
+## Completion audit
+
+Finish acknowledged **Run completed and claim released** at
+**2026-11-04T01:29:30.783152+00:00**. A fresh independent shared-S3 snapshot
+read confirms run completed, active-worker table empty, generation **126**,
+**184** illustrations and next passage **1.28.7**. Exactly two results for
+this run: one new page with **6** supporting files and one replacement with
+**17**. Source commits, source Greek/English framing hashes, image hashes,
+catalogue/result identity, original hash, single draw, sole target and accepted
+replacement outcome all match. Independently downloaded helper original archive
+matches **2ac6547a48d0256d33cbab1858fcad2eecfdd0722339989905375a4ba855b5af**.
+Canonical local original unchanged. No expired lease, conditional-write failure,
+forced operation, duplicate result, target switch or unresolved blocker.
+
+Both import statuses are still **pending**: uploaded/checkpointed results await
+Raksasa's overnight PostgreSQL import, original-hash check before promotion,
+full-site generation and publication. No daytime promotion/publication or
+schedule change. Outcome report commit bf673257cb2e972564815b2b80c2bda5cddc2fe7
+was pushed before finish; this final Git audit update records readback evidence
+without modifying any immutable S3 artifact or shared SQLite object.
