@@ -1,0 +1,62 @@
+# 4 November 2026 — Pausanias 1.28.6
+
+Run **c3db383fea0d453eb92edfe5e5832d25**, authorized single production invocation
+in the selected classical-texts runtime. Initial public/internal configuration
+ID mismatch resolved by parent's live catalogue mapping and runtime's identical
+published-version ID, authorized origin and pinned startup commit. No environment
+substitution. Clean work branch safely fast-forwarded from 1597fdd to origin/main
+90a6c19. Required absolute Python reports 3.12.14; frozen uv sync passes before
+claim. Prescribed UV_PYTHON/UV_CACHE_DIR and uv executable retained throughout.
+No credential/binding, schedule, sibling-repository or database changes.
+
+Conditional begin succeeded without competing worker. Validated full export:
+**3,170 passages, 3,170 translations, 183 accepted pages**. Fresh next **1.28.6**.
+Hydrate verifies 183 accepted PNGs/components; read-only parallel verified
+downloads accelerate cache. Title separately verified against existing manifest.
+No manifest rewrite, root legacy SQLite, PostgreSQL query or combined backup.
+
+Page **The revered goddesses**: one wide sanctuary scene above one continuous
+English field. Actual anchors **1.1.4 / 1.1.5** and actual six predecessors
+**1.27.10, 1.28.1, 1.28.2, 1.28.3, 1.28.4, 1.28.5** inspected in numeric
+order; all complete plans read. New plan records layouts, text positions,
+panels, viewpoints, palettes/light, three pre-art proposals and rejected reasons.
+Measurement/font helpers reused, not predecessor rectangles.
+
+Horizontal family differs from both immediate predecessors, occurs twice in
+candidate plus five with 1.28.3; no tall left sidebar. Eye-height statue/worshipper
+approach, deep reflected shade and enclosed subject balance replace elevated
+open stone/city view and raking afternoon. Actual colour subtler than requested
+blue-green; nearest statue's head margin smaller but safe. Departures documented.
+
+Only selected design generated: one raster. Three serene fully draped carved
+stone statues and two fully clothed worshippers directly explain nonterrifying
+cult images and ordinary worship. No snakes, monsters, living gods, nudity,
+horror, animal sacrifice, violence, historical portrait or pseudo-inscription.
+Tactile stone/cloth/rock/foliage and depth meet anchor craft. Number, material,
+forms, setting, altar and people are conjectural, not recovered evidence.
+Broad Athens/Areopagus orientation claims no exact site. All history remains
+in exact English. Full-size, thumbnail and every review gate **PASS**.
+
+Pre-art/final fit and independent audit **PASS**: **560 characters / 88 words**,
+original English including Nearhere, **54px** body, minimum 46px, six actual
+glyph-bound checks with 20px padding. Tesseract psm 6 recovers every word and
+punctuation after layout whitespace normalization. English SHA-256:
+1581238d1e3e8d17f804c38958e49ef66ea650dfe106f8e50bf08935bd7afc15.
+
+Canonical graphic_book/images/1/28/6.png: **2400 x 2200**, **4,747,224 bytes**,
+SHA-256 3e4088a452c33b40eeeaac10ccfca76d05bb6ad098aad5565342eb2cf821f1a4.
+Sole semnai_sanctuary.png component: **1774 x 887**, **3,298,164 bytes**,
+SHA-256 cc7af7afc5df2e87d3f9ad46ca1fa7f3c451d78a1076ed7cdf3c3752d9d2e7a5.
+Exact 2:1 fit has no crop. Imagegen original retained in output cache.
+
+Required whole HTML/PDF build **PASS**: **184 passages / 185 PDF pages**.
+Reader source, actual Chromium screenshot via temporary HTTP, navigation,
+image/hash and final PDF page 185 raster inspection pass. File-scheme browser
+restriction handled by normal local HTTP without settings changes; preview
+closed. English, ID, orientation, art and margins intact.
+
+This pre-checkpoint report accompanies scoped Git source and immutable result.
+Renderer, prompt, plan, layout report, this report and component must each be
+passed to record-result. Later appended Git audit records actual checkpoint,
+persisted replacement draw/outcome and release, without rewriting immutable
+objects. Raksasa overnight import and site publication remain separate.

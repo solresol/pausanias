@@ -1,0 +1,140 @@
+{
+  "passage_id": "1.28.6",
+  "preflight": false,
+  "canvas": [
+    2400,
+    2200
+  ],
+  "art_rectangle": [
+    48,
+    240,
+    2352,
+    1392
+  ],
+  "translation_rectangle": [
+    70,
+    1620,
+    2330,
+    2168
+  ],
+  "reading_order": "one continuous lower English field, top to bottom",
+  "translation_exact": "Nearhere is a sanctuary of goddesses whom the Athenians call Semnai (\"Revered ones\"), though Hesiod in his Theogony called them Erinyes (\"Furies\"). Aeschylus was the first to represent them with snakes entwined in their hair; but these statues here exhibit nothing terrifying, nor do any of the other subterranean gods depicted. Statues of Pluto, Hermes, and Earth also stand here. Here, sacrifices are offered by those who have been acquitted of murder at the Areopagus; but sacrifices are offered also, generally, by both foreigners and local citizens alike.",
+  "translation_characters": 560,
+  "translation_words": 88,
+  "translation_utf8_sha256": "1581238d1e3e8d17f804c38958e49ef66ea650dfe106f8e50bf08935bd7afc15",
+  "translation_matches_export": true,
+  "minimum_body_font_size": 46,
+  "body_font_size": 54,
+  "padding": 20,
+  "text_blocks_checked": 6,
+  "fit_records": [
+    {
+      "name": "passage-id",
+      "rect": [
+        42,
+        24,
+        680,
+        120
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 44,
+      "text_bbox": [
+        62,
+        44,
+        462,
+        77
+      ],
+      "text": "PASSAGE 1.28.6"
+    },
+    {
+      "name": "title",
+      "rect": [
+        740,
+        24,
+        2358,
+        120
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 64,
+      "text_bbox": [
+        760,
+        44,
+        1776,
+        93
+      ],
+      "text": "THE REVERED GODDESSES"
+    },
+    {
+      "name": "orientation",
+      "rect": [
+        42,
+        134,
+        2358,
+        214
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 36,
+      "text_bbox": [
+        62,
+        154,
+        1397,
+        190
+      ],
+      "text": "ATHENS | SANCTUARY OF THE SEMNAI, NEAR THE AREOPAGUS"
+    },
+    {
+      "name": "interpretive-caption",
+      "rect": [
+        48,
+        1408,
+        2352,
+        1514
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 34,
+      "text_bbox": [
+        68,
+        1428,
+        2209,
+        1494
+      ],
+      "text": "An interpretive sanctuary scene. Statues, setting and worshippers are conjectural; no surviving cult image or precise site is\nidentified."
+    },
+    {
+      "name": "reading-heading",
+      "rect": [
+        70,
+        1534,
+        2330,
+        1608
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 36,
+      "text_bbox": [
+        90,
+        1554,
+        589,
+        1580
+      ],
+      "text": "PAUSANIAS'S ACCOUNT"
+    },
+    {
+      "name": "translation",
+      "rect": [
+        70,
+        1620,
+        2330,
+        2168
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 54,
+      "text_bbox": [
+        90,
+        1640,
+        2304,
+        2137
+      ],
+      "text": "Nearhere is a sanctuary of goddesses whom the Athenians call Semnai\n(\"Revered ones\"), though Hesiod in his Theogony called them Erinyes (\"Furies\").\nAeschylus was the first to represent them with snakes entwined in their hair;\nbut these statues here exhibit nothing terrifying, nor do any of the other\nsubterranean gods depicted. Statues of Pluto, Hermes, and Earth also stand\nhere. Here, sacrifices are offered by those who have been acquitted of murder\nat the Areopagus; but sacrifices are offered also, generally, by both foreigners\nand local citizens alike."
+    }
+  ]
+}
