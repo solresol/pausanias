@@ -53,6 +53,27 @@ Renderer, sole prompt, page plan, deterministic layout report and this review
 will be committed/pushed before conditional record-result. Component binary
 is excluded from Git and will be included explicitly in result_files.
 
-Checkpoint, optional persisted replacement draw/outcome and claim-release
-results are recorded in a subsequent operational completion update after their
-actual execution. This reviewed source version makes no premature success claim.
+## Conditional checkpoint and replacement decision
+
+Reviewed source commit **96240c631a82cd675ce9c4c33ca5141acb5cd17e** pushed to
+origin/main and verified against the remote ref. Result helper succeeded as
+**2e41bed854834110aa0e862c6fc5ddf9**, with the final page plus all **six** new
+supporting files: renderer, sole raster prompt, component PNG, page plan,
+deterministic layout report and this generation/review report. Every immutable
+object was read back and its byte count / SHA-256 verified before conditional
+catalogue checkpoint. Page key:
+`s3://pausanias-graphic-book-assets-849621205733/workflow/results/2e41bed854834110aa0e862c6fc5ddf9/page.png`.
+Page hash is the reviewed `056548ba...458ae9b6` above. Original review/source
+file versions remain immutable at that result and source commit; this later
+operational update records execution outcomes.
+
+One persisted optional replacement draw **0.9961137382868923**, above .20.
+Recorded **skipped**, with no target, candidate, old-page alteration or second
+new page. Existing accepted 1.28.6 and replacement 1.6.3 remain intact. Decision
+outcome is persisted in the shared run and this Git report. Claim release is
+the remaining final workflow action; its result will be reported after success.
+
+Result import_status is **pending**. Next overnight raksasa PostgreSQL import,
+independent promotion and website publication are separate future operations;
+none is claimed completed by this daytime result upload. No runtime approval
+denial, ownership conflict or unresolved workflow blocker occurred.
