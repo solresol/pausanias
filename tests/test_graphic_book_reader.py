@@ -1,12 +1,71 @@
+import os
+import stat
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from build_graphic_book import build_pages, write_index
+from PIL import Image
+
+from build_graphic_book import build_pages, write_index, write_pdf
 from website.generators import generate_llm_grammar_pages, generate_translation_pages
 
 
 class GraphicBookReaderTests(unittest.TestCase):
+    def test_new_public_book_is_readable_under_private_umask(self):
+        with TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            root_mode = stat.S_IMODE(root.stat().st_mode)
+            images = root / "private-images" / "1" / "28"
+            images.mkdir(parents=True)
+            Image.new("RGB", (2, 2), "white").save(images / "6.png")
+            output = root / "site" / "graphic-book"
+            private_log = root / "private.log"
+            previous = os.umask(0o077)
+            try:
+                private_log.write_text("private diagnostics")
+                pages = build_pages(root / "private-images", output)
+                write_index(output, "Title", "Byline", pages, "book.pdf")
+                write_pdf(output, pages, "book.pdf", root / "absent-title.png")
+                # Public artifact handling must not relax the caller's umask.
+                (root / "later-private.log").write_text("still private")
+            finally:
+                os.umask(previous)
+            for relative in ["index.html", "1/28/6.html", "images/1/28/6.png", "book.pdf"]:
+                self.assertEqual(stat.S_IMODE((output / relative).stat().st_mode), 0o644)
+            for relative in ["site", "site/graphic-book", "site/graphic-book/1", "site/graphic-book/1/28",
+                             "site/graphic-book/images", "site/graphic-book/images/1/28"]:
+                self.assertEqual(stat.S_IMODE((root / relative).stat().st_mode), 0o755)
+            self.assertEqual(stat.S_IMODE(root.stat().st_mode), root_mode)
+            self.assertEqual(stat.S_IMODE(private_log.stat().st_mode), 0o600)
+            self.assertEqual(stat.S_IMODE((root / "later-private.log").stat().st_mode), 0o600)
+            self.assertEqual(private_log.read_text(), "private diagnostics")
+            self.assertIn("Passage 1.28.6", (output / "1/28/6.html").read_text())
+            self.assertTrue((output / "book.pdf").read_bytes().startswith(b"%PDF"))
+
+    def test_existing_public_modes_and_private_files_are_preserved(self):
+        with TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            image_dir = root / "images" / "1" / "28"
+            image_dir.mkdir(parents=True)
+            (image_dir / "6.png").write_bytes(b"fake image")
+            output = root / "site" / "graphic-book"
+            pages = build_pages(root / "images", output)
+            write_index(output, "Title", "Byline", pages, "book.pdf")
+            (output / "index.html").chmod(0o664)
+            (output / "1/28").chmod(0o775)
+            private = root / "private.key"
+            private.write_text("unrelated private content")
+            private.chmod(0o600)
+            previous = os.umask(0o077)
+            try:
+                write_index(output, "Title", "Byline", pages, "book.pdf")
+            finally:
+                os.umask(previous)
+            self.assertEqual(stat.S_IMODE((output / "index.html").stat().st_mode), 0o664)
+            self.assertEqual(stat.S_IMODE((output / "1/28").stat().st_mode), 0o775)
+            self.assertEqual(stat.S_IMODE(private.stat().st_mode), 0o600)
+            self.assertEqual(private.read_text(), "unrelated private content")
+
     def test_builds_reader_pages_with_direct_passage_urls(self):
         with TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)

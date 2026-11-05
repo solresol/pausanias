@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import argparse
 import html
+import os
 import posixpath
 import re
 import shutil
@@ -87,18 +88,45 @@ def discover_images(image_dir: Path) -> dict[str, Path]:
     return dict(sorted(images.items(), key=lambda item: passage_sort_key(item[0])))
 
 
+def public_directory(path: Path) -> None:
+    """Create only missing public directories with explicit traversal rights."""
+    try:
+        path.mkdir()
+    except FileNotFoundError:
+        public_directory(path.parent)
+        public_directory(path)
+    except FileExistsError:
+        if not path.is_dir():
+            raise
+    else:
+        path.chmod(0o755)
+
+
+def write_public_text(path: Path, content: str) -> None:
+    """Make new intended-public HTML readable without changing existing modes."""
+    public_directory(path.parent)
+    try:
+        descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o644)
+    except FileExistsError:
+        path.write_text(content, encoding="utf-8")
+    else:
+        with os.fdopen(descriptor, "w", encoding="utf-8") as output:
+            os.fchmod(output.fileno(), 0o644)
+            output.write(content)
+
+
 def build_pages(image_dir: Path, output_dir: Path) -> list[GraphicPage]:
     image_paths = discover_images(image_dir)
     pages: list[GraphicPage] = []
 
     site_images_dir = output_dir / "images"
-    site_images_dir.mkdir(parents=True, exist_ok=True)
+    public_directory(site_images_dir)
 
     for passage_id, source_path in image_paths.items():
         book, chapter, section = passage_id.split(".")
         site_rel = Path("images") / book / chapter / f"{section}{source_path.suffix.lower()}"
         dest = output_dir / site_rel
-        dest.parent.mkdir(parents=True, exist_ok=True)
+        public_directory(dest.parent)
         shutil.copy2(source_path, dest)
         dest.chmod(0o644)
 
@@ -425,7 +453,7 @@ def write_index(
 </body>
 </html>
 """
-    (output_dir / "index.html").write_text(index_html, encoding="utf-8")
+    write_public_text(output_dir / "index.html", index_html)
     write_reader_pages(output_dir, title, byline, pages, pdf_name, timestamp, build_version, css)
 
 
@@ -501,8 +529,7 @@ def write_reader_pages(
 </html>
 """
         path = output_dir / page_href
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(page_html, encoding="utf-8")
+        write_public_text(path, page_html)
 
 
 def write_pdf(output_dir: Path, pages: list[GraphicPage], pdf_name: str, title_page: Path) -> None:
@@ -523,13 +550,17 @@ def write_pdf(output_dir: Path, pages: list[GraphicPage], pdf_name: str, title_p
 
         if pdf_images:
             first, rest = pdf_images[0], pdf_images[1:]
+            destination = output_dir / pdf_name
+            new_destination = not destination.exists()
             first.save(
-                output_dir / pdf_name,
+                destination,
                 "PDF",
                 resolution=150.0,
                 save_all=True,
                 append_images=rest,
             )
+            if new_destination:
+                destination.chmod(0o644)
     finally:
         for img in pdf_images:
             img.close()
@@ -540,7 +571,7 @@ def main() -> None:
     image_dir = Path(args.image_dir)
     output_dir = Path(args.output_dir)
 
-    output_dir.mkdir(parents=True, exist_ok=True)
+    public_directory(output_dir)
 
     pages = build_pages(image_dir, output_dir)
     write_index(output_dir, args.title, args.byline, pages, args.pdf_name)
