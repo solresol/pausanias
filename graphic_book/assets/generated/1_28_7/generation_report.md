@@ -70,8 +70,18 @@ operational update records execution outcomes.
 One persisted optional replacement draw **0.9961137382868923**, above .20.
 Recorded **skipped**, with no target, candidate, old-page alteration or second
 new page. Existing accepted 1.28.6 and replacement 1.6.3 remain intact. Decision
-outcome is persisted in the shared run and this Git report. Claim release is
-the remaining final workflow action; its result will be reported after success.
+outcome is persisted in the shared run and this Git report.
+
+`finish` succeeded at **2026-11-05T01:14:54.472023+00:00**, run status completed,
+claim released. A fresh independent read-only S3 snapshot check confirms an
+empty active-worker table, the exact draw/skipped outcome with null target,
+the new result and all six supporting files, **185** catalogued illustrations
+and next passage **1.28.8**. Protected 1.28.6 retains result
+`a94ec1cce2e2417ba84a019537f5c2d6` and its original 3e4088a4… hash; 1.6.3
+retains replacement `9d579c05e2314b8f86f007f95d8d90c0` and hash
+`23614063853c5b993d822e1d9c3be7b9050663e279fb393ace39d05f0973b68f`.
+No duplicate result or replacement was submitted. Temporary local preview
+server and disposable browsers stopped after review.
 
 Result import_status is **pending**. Next overnight raksasa PostgreSQL import,
 independent promotion and website publication are separate future operations;
