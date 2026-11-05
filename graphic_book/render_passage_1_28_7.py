@@ -19,6 +19,7 @@ from graphic_book.render_passage_1_3_2 import FitRecord, fit_text_block
 from graphic_book.render_passage_1_10_1 import validate_fit_records
 
 ASSETS = ROOT / 'graphic_book/assets/generated/1_28_7'
+APPROVED_ENGLISH_SHA256 = '1f238fcf580a83fdd6514a30f32135c2496cbfe7c57eace1d55c0731f6e0faa2'
 ART_RECT = (48, 500, 2352, 1730)
 FIRST_RECT = (64, 326, 2336, 474)
 REST_RECT = (64, 1950, 2336, 2358)
@@ -32,6 +33,8 @@ def render(output: Path, preflight: bool = False) -> None:
     """Measure every padded glyph rectangle and preserve exact English order."""
     snapshot_path()
     passage = load_translation('1.28.7')
+    if hashlib.sha256(passage.encode()).hexdigest() != APPROVED_ENGLISH_SHA256:
+        raise RuntimeError('1.28.7 requires the reviewed correction: Mecisteus at Oedipus\'s funeral games')
     split = passage.index('. ') + 1
     first, rest = passage[:split], passage[split + 1:]
     if first + ' ' + rest != passage:

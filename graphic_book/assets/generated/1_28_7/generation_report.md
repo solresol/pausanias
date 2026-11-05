@@ -1,89 +1,79 @@
-# 5 November 2026 — Pausanias 1.28.7
+# 5 November 2026 — corrected Pausanias 1.28.7
 
-Run **ec0aca27d3d044e48ade5c84364556d3**, the single authorized scheduled
-production run in classical-texts. Exact runtime source version matches the
-parent's live catalogue mapping from the required saved public selector.
-Expected origin, clean worktree, safe fast-forward, required Python 3.12.14
-and frozen uv sync passed before conditional begin. All workflow commands
-retain prescribed UV_PYTHON, UV_CACHE_DIR and existing absolute uv executable.
-Existing AWS authentication succeeds; no secret/binding, environment, schedule,
-other repository, legacy database or local PostgreSQL changes.
+Current targeted correction run **2987a76bad564721910f5b59f9a736f3** supersedes
+the unimported stale page result **2e41bed854834110aa0e862c6fc5ddf9**. Greg
+explicitly authorized the genuine corpus translation error to be corrected,
+the image regenerated and propagation verified. Database/corpus correction
+and later import/publication belong to the coordinated owner. This image task
+performs no PostgreSQL write, rival export or promotion of the stale result.
 
-Shared exported corpus: **3,170 passages / 3,170 translations / 184 accepted
-pages** before generation. Hydrate and supplementary parallel read-only verified
-S3 downloads verify accepted PNGs, result components and existing title. No
-global cache-manifest rebuild or old combined backup. Shared next selects
-**1.28.7**; accepted **1.28.6** and replacement **1.6.3** remain intact.
+Same classical-texts runtime and exact published version verified again.
+Expected origin, clean checkout/current origin/main, Python 3.12.14 and frozen
+uv setup pass before claim. Required UV_PYTHON/UV_CACHE_DIR and existing absolute
+uv retained. No environment, credential, schedule or other repository changes.
 
-References inspected: craft anchors **1.1.4 / 1.1.5**; six preceding actual PNGs
-and plans **1.28.1–1.28.6** in numeric order. The plan records composition,
-translation positions, panel counts, viewpoint, palette/light, three proposals
-and rejection reasons. Selected one central tomb study between two numbered
-full-width English bands, no sidebar or inset. Its family appears once in the
-candidate plus five and differs from both immediate predecessors. Open sun,
-low memorial without people, earth/olive/ivory and oblique perspective visibly
-change at least two choices from yesterday's shaded statues/worshippers.
+## Authoritative source and safe mode
 
-Complete exact English **392 characters / 69 words**, split only after the
-first sentence, byte-identical reassembly, **56px** body above 46px minimum.
-All eight padded glyph bounds independently audited. Native-resolution OCR
-recovers every word/punctuation in original order after whitespace normalization.
-Full-size raster and final PNG, recent seven-page comparison, semantic fit,
-orientation, historical restraint, suitability and anchor-level craft pass.
-The imagined tomb and enclosure are clearly conjectural. Camera is a shallow
-elevated oblique view rather than the prompt's low view, olive trunk/foliage
-more prominent, and finish naturalistic; accepted departures documented.
+Direct preclaim S3 GET matches owner corpus SHA-256
+**1389db0ca6b54d3434287ebd7b2d361e3e0087589c0e9d93230cdf997da6392b** and
+ETag **"f4782bc36f58b3c631461110be691b95"**. Export timestamp
+**2026-11-05T01:26:11.481127+00:00**. Corrected source hash independently
+recomputed with the workflow's Greek/English length-framed method:
+**41eb52c84a5b814d75150808df524bedfa578eb93607be548991ba1e0f6cd66e**.
+English UTF-8 hash derived from the exact exported row:
+**1f238fcf580a83fdd6514a30f32135c2496cbfe7c57eace1d55c0731f6e0faa2**.
+The translations Greek copy matches passages Greek. Whole preceding English
+prefix is byte-identical; only the erroneous final clause changes.
 
-Source caveat: the exported final clause reverses Oedipus/Mecisteus relative to
-the Jones translation at https://topostext.org/work/213 (1.28.7). Preserved
-verbatim as explicitly required; no disputed athletic event is illustrated.
-This is logged for separate corpus review and does not authorize source edits.
+Correct semantics: after Oedipus died, Mecisteus went to Thebes and competed
+in Oedipus's funeral games. The complete exported English is rendered via
+snapshot_path()/load_translation(), not a manually reconstructed string.
 
-Whole required local build passes: **185 illustrations, 186 PDF pages**. Actual
-reader HTML/navigation/image identity checked; real Chromium CDP confirms full
-load and 2400px source, screenshot visually inspected, browser closed. Last
-PDF page rasterized at 2400px and review preview visually inspected with all
-content/margins intact. No daytime raksasa import/promotion/site publication.
+Fresh preclaim snapshot confirms no active worker, no 1.28.7 illustration row,
+next 1.28.7, and immutable old result retained pending with a stale source hash.
+Thus the corrected checkpoint kind is **new**. The stale result is not imported
+to fabricate an original for a replacement. New claim succeeds; hydrate verifies
+184 existing accepted pages. Current run has no unrelated page, optional target
+selection or random replacement draw; the earlier daily draw remains historical.
 
-Reviewed page: graphic_book/images/1/28/7.png, **5,975,333 bytes**, SHA-256
-`056548bab2e9b1a8219c23f9e0e00cda7750be7f3892ede63079f1eb458ae9b6`.
-Component: tomb_study.png, **4,092,994 bytes**, SHA-256
-`da81b544dc8be9c0040e57b88d715f54a3ee45e497af2ff4778b44701f7518ff`.
-Renderer, sole prompt, page plan, deterministic layout report and this review
-will be committed/pushed before conditional record-result. Component binary
-is excluded from Git and will be included explicitly in result_files.
+## Render and review
 
-## Conditional checkpoint and replacement decision
+Accurate central tomb art reused unchanged, SHA-256
+**da81b544dc8be9c0040e57b88d715f54a3ee45e497af2ff4778b44701f7518ff**.
+Eight old page/source/component/review files archived and hashed. Current
+plan/layout/report replace stale active versions; original wording remains only
+in clearly labelled superseded history. Prompt/art contain no reversed roles.
 
-Reviewed source commit **96240c631a82cd675ce9c4c33ca5141acb5cd17e** pushed to
-origin/main and verified against the remote ref. Result helper succeeded as
-**2e41bed854834110aa0e862c6fc5ddf9**, with the final page plus all **six** new
-supporting files: renderer, sole raster prompt, component PNG, page plan,
-deterministic layout report and this generation/review report. Every immutable
-object was read back and its byte count / SHA-256 verified before conditional
-catalogue checkpoint. Page key:
-`s3://pausanias-graphic-book-assets-849621205733/workflow/results/2e41bed854834110aa0e862c6fc5ddf9/page.png`.
-Page hash is the reviewed `056548ba...458ae9b6` above. Original review/source
-file versions remain immutable at that result and source commit; this later
-operational update records execution outcomes.
+Complete corrected English **390 characters / 69 words**, two numbered fields,
+**56px** body, all eight actual glyph rectangles with **20px** padding pass.
+Native-resolution OCR recovers every word/punctuation exactly in original order,
+including the corrected death/participant/possessive sequence. Full-size PNG
+viewed. Pixel differences occur only within the second English field at
+(86,2165)-(2308,2285); all art, headers, captions and other areas are identical.
+Root renderer pins the corrected English hash. Dated renderer also requires
+verified source/export/English hashes, unchanged surrounding prefix and art hash.
 
-One persisted optional replacement draw **0.9961137382868923**, above .20.
-Recorded **skipped**, with no target, candidate, old-page alteration or second
-new page. Existing accepted 1.28.6 and replacement 1.6.3 remain intact. Decision
-outcome is persisted in the shared run and this Git report.
+Actual eight-panel thumbnail comparison includes six predecessors
+**1.28.1–1.28.6**, superseded original and corrected candidate. Craft anchors
+**1.1.4/1.1.5** and the original art-quality review remain applicable to the
+checksum-identical raster. Central-band family differs from both immediate
+predecessors, occurs once in candidate plus five, no left sidebar. Tomb/people
+balance, oblique perspective, sunlight and earth/olive palette maintain variety.
+No following accepted pages exist. Text, semantics, history, geographic
+orientation, suitability, hierarchy, art and variety pass.
 
-`finish` succeeded at **2026-11-05T01:14:54.472023+00:00**, run status completed,
-claim released. A fresh independent read-only S3 snapshot check confirms an
-empty active-worker table, the exact draw/skipped outcome with null target,
-the new result and all six supporting files, **185** catalogued illustrations
-and next passage **1.28.8**. Protected 1.28.6 retains result
-`a94ec1cce2e2417ba84a019537f5c2d6` and its original 3e4088a4… hash; 1.6.3
-retains replacement `9d579c05e2314b8f86f007f95d8d90c0` and hash
-`23614063853c5b993d822e1d9c3be7b9050663e279fb393ace39d05f0973b68f`.
-No duplicate result or replacement was submitted. Temporary local preview
-server and disposable browsers stopped after review.
+Temporary full HTML/PDF build substitutes only corrected 1.28.7 alongside
+184 verified accepted pages: **185 illustrations / 186 PDF pages**. Real Chromium
+loads the reader completely, verifies 2400px source and 185 of 185 position;
+actual screenshot viewed. PDF page 186 rasterized and viewed with the entire
+corrected clause, scene and margins intact. No stale English remains in these
+current derived views. The normal canonical build also succeeds with 185
+illustrations. Canonical, candidate and canonical-site PNGs all have the same
+corrected SHA-256; the stale PNG remains only in labelled historical archives.
 
-Result import_status is **pending**. Next overnight raksasa PostgreSQL import,
-independent promotion and website publication are separate future operations;
-none is claimed completed by this daytime result upload. No runtime approval
-denial, ownership conflict or unresolved workflow blocker occurred.
+Corrected final image: **5,976,961 bytes**, SHA-256
+**80fc774a08218f3e852a357209ad060825882b9dbf246345286de5fbc3b1d693**.
+Detailed source verification, provenance contract, archives, page plan and review
+are in revisions/20261105-correction/. Checkpoint/source push/claim-release
+results are appended only after execution. Owner import and public propagation
+remain pending and will be verified separately by the coordinated owner.

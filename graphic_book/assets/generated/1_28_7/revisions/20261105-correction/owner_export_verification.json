@@ -1,0 +1,24 @@
+{
+  "metadata": {
+    "singleton": 1,
+    "schema_version": 1,
+    "generation": 133,
+    "exported_at": "2026-11-05T01:26:11.481127+00:00",
+    "updated_at": "2026-11-05T01:26:11.532602+00:00"
+  },
+  "corpus_sha256": "1389db0ca6b54d3434287ebd7b2d361e3e0087589c0e9d93230cdf997da6392b",
+  "etag": "\"f4782bc36f58b3c631461110be691b95\"",
+  "corrected_source_sha256": "41eb52c84a5b814d75150808df524bedfa578eb93607be548991ba1e0f6cd66e",
+  "english_utf8_sha256": "1f238fcf580a83fdd6514a30f32135c2496cbfe7c57eace1d55c0731f6e0faa2",
+  "exact_english": "Within the enclosure there is also a tomb of Oedipus. In my careful investigation, I found that his bones had been brought from Thebes; for the account Sophocles composed about the death of Oedipus did not appear credible to me, since Homer did not allow me to accept it as true, having said that after the death of Oedipus, Mecisteus went to Thebes and competed in Oedipus's funeral games.",
+  "stale_result": {
+    "result_id": "2e41bed854834110aa0e862c6fc5ddf9",
+    "source_sha256": "3454372c9d58e9699c49e441c67cf6ca3e536d63593bdc035174e37891b53101",
+    "import_status": "pending",
+    "import_reason": ""
+  },
+  "active_workers": 0,
+  "page_pointer_present": false,
+  "next_passage": "1.28.7",
+  "checkpoint_kind": "new"
+}

@@ -1,0 +1,68 @@
+{
+  "status": "historical stale result; preserve for provenance only; never promote",
+  "stale_result": {
+    "result_id": "2e41bed854834110aa0e862c6fc5ddf9",
+    "run_id": "ec0aca27d3d044e48ade5c84364556d3",
+    "passage_id": "1.28.7",
+    "kind": "new",
+    "source_sha256": "3454372c9d58e9699c49e441c67cf6ca3e536d63593bdc035174e37891b53101",
+    "image_s3_key": "workflow/results/2e41bed854834110aa0e862c6fc5ddf9/page.png",
+    "image_sha256": "056548bab2e9b1a8219c23f9e0e00cda7750be7f3892ede63079f1eb458ae9b6",
+    "byte_count": 5975333,
+    "original_sha256": null,
+    "source_commit": "96240c631a82cd675ce9c4c33ca5141acb5cd17e",
+    "created_at": "2026-11-05T01:13:49.129481+00:00",
+    "import_status": "pending",
+    "import_reason": ""
+  },
+  "stale_translation": {
+    "passage_id": "1.28.7",
+    "english_translation": "Within the enclosure there is also a tomb of Oedipus. In my careful investigation, I found that his bones had been brought from Thebes; for the account Sophocles composed about the death of Oedipus did not appear credible to me, since Homer did not allow me to accept it as true, having said that after the death of Mecisteus, Oedipus himself went to Thebes and participated in funeral games.",
+    "source_sha256": "3454372c9d58e9699c49e441c67cf6ca3e536d63593bdc035174e37891b53101"
+  },
+  "stale_translation_utf8_sha256": "ea0e2d6c0dfc3ce1aa485ad079b31732834fe47f0881c8b5a1818e8e8419d465",
+  "review_source_commit": "96240c631a82cd675ce9c4c33ca5141acb5cd17e",
+  "operational_report_commit": "2b6a44f1f456a6f9432d6bbcc610c93e3e79d950",
+  "archives": [
+    {
+      "file": "previous-completion-report.md",
+      "bytes": 5691,
+      "sha256": "a064fed6ef1438bac1d99dcd896180cc47c711df723a4741015d10887c6c9c36"
+    },
+    {
+      "file": "previous-generation-report.md",
+      "bytes": 3758,
+      "sha256": "3da792d04abf1f86612a6174b9baa0bef6d943938b752acd67d1f2e8a438c238"
+    },
+    {
+      "file": "previous-layout-report.json",
+      "bytes": 4344,
+      "sha256": "13cb951647def98d196ce3cd18c450befd56eb2993ff9f990cca3469107c0c77"
+    },
+    {
+      "file": "previous-page-plan.md",
+      "bytes": 12569,
+      "sha256": "460e26bd5db322e649709cf1ccccdf2e41ddbe59959ce62641581d2bd6252822"
+    },
+    {
+      "file": "previous-page.png",
+      "bytes": 5975333,
+      "sha256": "056548bab2e9b1a8219c23f9e0e00cda7750be7f3892ede63079f1eb458ae9b6"
+    },
+    {
+      "file": "previous-renderer.py",
+      "bytes": 5483,
+      "sha256": "8b245bcec8fd9b44892e18458938a228ddc6feaae7a14cfac6060f4e680e7e39"
+    },
+    {
+      "file": "previous-tomb-study.png",
+      "bytes": 4092994,
+      "sha256": "da81b544dc8be9c0040e57b88d715f54a3ee45e497af2ff4778b44701f7518ff"
+    },
+    {
+      "file": "previous-tomb-study.prompt.txt",
+      "bytes": 2560,
+      "sha256": "84499994c3599bba6669d7a2aeda8f30c49245be789276aecee10cd7a9791268"
+    }
+  ]
+}

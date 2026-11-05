@@ -1,0 +1,17 @@
+{
+  "passage_id": "1.28.7",
+  "status": "authoritative-corrected-export-verified",
+  "expected_source_sha256": "41eb52c84a5b814d75150808df524bedfa578eb93607be548991ba1e0f6cd66e",
+  "expected_translation_utf8_sha256": "1f238fcf580a83fdd6514a30f32135c2496cbfe7c57eace1d55c0731f6e0faa2",
+  "expected_exported_at": "2026-11-05T01:26:11.481127+00:00",
+  "stale_result_id": "2e41bed854834110aa0e862c6fc5ddf9",
+  "stale_source_sha256": "3454372c9d58e9699c49e441c67cf6ca3e536d63593bdc035174e37891b53101",
+  "stale_image_sha256": "056548bab2e9b1a8219c23f9e0e00cda7750be7f3892ede63079f1eb458ae9b6",
+  "preserved_english_prefix": "Within the enclosure there is also a tomb of Oedipus. In my careful investigation, I found that his bones had been brought from Thebes; for the account Sophocles composed about the death of Oedipus did not appear credible to me, since Homer did not allow me to accept it as true, ",
+  "correct_semantics": "After Oedipus died, Mecisteus came to Thebes and competed in Oedipus's funeral games.",
+  "reuse_component_sha256": "da81b544dc8be9c0040e57b88d715f54a3ee45e497af2ff4778b44701f7518ff",
+  "verified_preclaim_corpus_sha256": "1389db0ca6b54d3434287ebd7b2d361e3e0087589c0e9d93230cdf997da6392b",
+  "verified_preclaim_etag": "\"f4782bc36f58b3c631461110be691b95\"",
+  "checkpoint_kind": "new",
+  "authoritative_english": "Within the enclosure there is also a tomb of Oedipus. In my careful investigation, I found that his bones had been brought from Thebes; for the account Sophocles composed about the death of Oedipus did not appear credible to me, since Homer did not allow me to accept it as true, having said that after the death of Oedipus, Mecisteus went to Thebes and competed in Oedipus's funeral games."
+}
