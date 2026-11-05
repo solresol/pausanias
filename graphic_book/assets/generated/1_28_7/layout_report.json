@@ -1,0 +1,188 @@
+{
+  "passage_id": "1.28.7",
+  "preflight": false,
+  "canvas": [
+    2400,
+    2400
+  ],
+  "art_rectangle": [
+    48,
+    500,
+    2352,
+    1730
+  ],
+  "translation_rectangles": [
+    [
+      64,
+      326,
+      2336,
+      474
+    ],
+    [
+      64,
+      1950,
+      2336,
+      2358
+    ]
+  ],
+  "reading_order": "1 above the image, then 2 below; split after the first sentence",
+  "translation_exact": "Within the enclosure there is also a tomb of Oedipus. In my careful investigation, I found that his bones had been brought from Thebes; for the account Sophocles composed about the death of Oedipus did not appear credible to me, since Homer did not allow me to accept it as true, having said that after the death of Mecisteus, Oedipus himself went to Thebes and participated in funeral games.",
+  "translation_characters": 392,
+  "translation_words": 69,
+  "translation_utf8_sha256": "ea0e2d6c0dfc3ce1aa485ad079b31732834fe47f0881c8b5a1818e8e8419d465",
+  "translation_matches_export": true,
+  "split_rejoins_byte_identically": true,
+  "minimum_body_font_size": 46,
+  "body_font_sizes": [
+    56,
+    56
+  ],
+  "padding": 20,
+  "text_blocks_checked": 8,
+  "fit_records": [
+    {
+      "name": "passage-id",
+      "rect": [
+        42,
+        24,
+        680,
+        120
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 44,
+      "text_bbox": [
+        62,
+        44,
+        462,
+        77
+      ],
+      "text": "PASSAGE 1.28.7"
+    },
+    {
+      "name": "title",
+      "rect": [
+        730,
+        24,
+        2358,
+        120
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 64,
+      "text_bbox": [
+        750,
+        44,
+        1846,
+        93
+      ],
+      "text": "OEDIPUS: A DISPUTED TOMB"
+    },
+    {
+      "name": "orientation",
+      "rect": [
+        42,
+        134,
+        2358,
+        214
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 36,
+      "text_bbox": [
+        62,
+        154,
+        1333,
+        190
+      ],
+      "text": "ATHENS | THE SEMNAI ENCLOSURE, NEAR THE AREOPAGUS"
+    },
+    {
+      "name": "first-heading",
+      "rect": [
+        64,
+        238,
+        2336,
+        314
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 36,
+      "text_bbox": [
+        84,
+        258,
+        461,
+        284
+      ],
+      "text": "1 THE MEMORIAL"
+    },
+    {
+      "name": "english-1",
+      "rect": [
+        64,
+        326,
+        2336,
+        474
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 56,
+      "text_bbox": [
+        84,
+        346,
+        1596,
+        401
+      ],
+      "text": "Within the enclosure there is also a tomb of Oedipus."
+    },
+    {
+      "name": "interpretive-caption",
+      "rect": [
+        48,
+        1750,
+        2352,
+        1858
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 34,
+      "text_bbox": [
+        68,
+        1770,
+        2213,
+        1803
+      ],
+      "text": "A conjectural tomb study in the Semnai enclosure. The monument and setting are imagined; no surviving tomb is identified."
+    },
+    {
+      "name": "second-heading",
+      "rect": [
+        64,
+        1866,
+        2336,
+        1940
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 36,
+      "text_bbox": [
+        84,
+        1886,
+        898,
+        1912
+      ],
+      "text": "2 PAUSANIAS WEIGHS THE ACCOUNTS"
+    },
+    {
+      "name": "english-2",
+      "rect": [
+        64,
+        1950,
+        2336,
+        2358
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 56,
+      "text_bbox": [
+        84,
+        1970,
+        2310,
+        2285
+      ],
+      "text": "In my careful investigation, I found that his bones had been brought from\nThebes; for the account Sophocles composed about the death of Oedipus did\nnot appear credible to me, since Homer did not allow me to accept it as true,\nhaving said that after the death of Mecisteus, Oedipus himself went to Thebes\nand participated in funeral games."
+    }
+  ]
+}
