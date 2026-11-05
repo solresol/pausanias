@@ -74,6 +74,36 @@ corrected SHA-256; the stale PNG remains only in labelled historical archives.
 Corrected final image: **5,976,961 bytes**, SHA-256
 **80fc774a08218f3e852a357209ad060825882b9dbf246345286de5fbc3b1d693**.
 Detailed source verification, provenance contract, archives, page plan and review
-are in revisions/20261105-correction/. Checkpoint/source push/claim-release
-results are appended only after execution. Owner import and public propagation
-remain pending and will be verified separately by the coordinated owner.
+are in revisions/20261105-correction/.
+
+## Corrected checkpoint and released claim
+
+Reviewed correction sources pushed to origin/main and remote-ref verified at
+**3e7521d429aea9c4c717ce9ef64716bfb65554b3**. Corrected **new** result
+**c70962fc040b48afa4fe7a1cdc189710** checkpointed at
+**2026-11-05T01:37:31.535967+00:00**. All **24** support files, including both
+renderers, active review/layout/plan, prompt/reused art, correction contract,
+owner-export evidence and all historical archives, were uploaded immutably,
+downloaded again and size/SHA-256 verified before conditional checkpoint.
+Page key:
+`s3://pausanias-graphic-book-assets-849621205733/workflow/results/c70962fc040b48afa4fe7a1cdc189710/page.png`.
+Source and image hashes match the reviewed corrected values above. Immutable
+review versions remain pinned to the cited source commit; this later Git report
+update records operational completion.
+
+`finish` succeeds at **2026-11-05T01:38:15.285004+00:00**, status completed,
+claim released. Independent fresh S3 snapshot confirms **zero active workers**,
+page pointer references only corrected result c70962fc..., corrected translation
+source/English hashes, all 24 file records, **185** illustrations and next
+**1.28.8**. Independent S3 page download matches the final hash and size, and
+native-resolution OCR of that downloaded PNG reproduces the entire corrected
+English exactly. Stale result 2e41bed8... remains preserved/unimported at this
+check, with its stale source hash, and is not the current page pointer. The
+owner's subsequent import must reject it through the source guard and accept
+only the corrected result. No result is force-promoted or ledger deleted.
+
+No optional lottery, replacement target or unrelated page was generated in
+this targeted correction run. No blocker or pending approval. Corrected result
+and claim-release evidence handed to the owner for PostgreSQL import, six
+derived-page refreshes, mirror/materialization, website/PDF publication and
+public readback. Those owner operations are not claimed completed here.
