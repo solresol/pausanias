@@ -77,4 +77,29 @@ checkpoint or incomplete global asset manifest was created.
 One persisted replacement draw **0.25897701717396915** is at least 0.20.
 The same value was returned when recording **skipped**. Target remains NULL;
 no candidate shuffle, replacement art, old-page source modification or second
-result is authorized/needed for this draw. Claim release follows this report.
+result is authorized/needed for this draw. Decision/report persisted in Git
+commit fee61af77fb727c30318222dc84e47d9ba4a2849 and pushed before finish.
+
+## Released claim and independent final verification
+
+`finish` succeeds at **2026-11-06T01:11:10.502898+00:00**, run status completed.
+Fresh direct read-only S3 snapshot confirms **zero active workers**, **186
+illustration pointers**, and exactly one result in this run. New result remains
+**pending** for overnight PostgreSQL import; daytime website promotion is not
+claimed. Replacement draw/NULL target/skipped outcome match the persisted values.
+
+Final snapshot generation **145**, ETag `"dc1d082b294530341c58a38b067d4bba"`,
+SHA-256 87501157a14b2d2c9db1c19c85ef3985545c9fd11b8c0c7a2dc5e7c365bcac6c.
+Independent post-release GETs recheck all eight immutable support objects and
+the final page's sizes/SHA-256. Every text support object is byte-identical to
+its version in pushed source commit 678f901fe7c71b23b2a5563d91da85a22535d0b6;
+the S3 page is byte-identical to the reviewed local final PNG. No new source
+file is omitted from result_files. This evolving completion report is a later
+Git version, not an overwrite of any immutable source object.
+
+Every pre-existing illustration, result and result_files row is unchanged in
+the fresh snapshot compared with a captured pre-checkpoint baseline. Corrected
+1.28.7 still points to c70962fc040b48afa4fe7a1cdc189710; the stale result has
+not regained a pointer. No untracked source or unrelated work remains. Only
+the scoped generation/report commits were pushed, with no binary/site/database
+or global asset-manifest change. No active preview process remains. No blocker.
