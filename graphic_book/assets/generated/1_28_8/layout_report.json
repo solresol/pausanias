@@ -1,0 +1,140 @@
+{
+  "passage_id": "1.28.8",
+  "preflight": false,
+  "canvas": [
+    2400,
+    2400
+  ],
+  "art_rectangle": [
+    48,
+    256,
+    1296,
+    2192
+  ],
+  "translation_rectangle": [
+    1360,
+    416,
+    2352,
+    2188
+  ],
+  "reading_order": "one continuous right English field, top to bottom",
+  "translation_exact": "The Athenians also have other law courts, but they have not reached such renown. One is called Parabyston, another Trigonon: the first is in an obscure part of the city, and only a very few gather there, while the second derives its name from its shape. Batrachion (\"Frog\") and Phoinikion (\"Red\") have their names from their colors, and one of them continues to be known as such to this day. The largest court, where most gather, they call the Heliaia. There are additional courts dealing specifically with murderers; among these is one called \"At the Palladion,\" established to judge those who have committed involuntary homicide. And no one disputes that Demophon was the first to stand trial in this place.",
+  "translation_characters": 709,
+  "translation_words": 120,
+  "translation_utf8_sha256": "b82c2122b836aebe9f7f94d3ea768c13ead58d668059e3600b5ab1456732ec44",
+  "translation_matches_export": true,
+  "minimum_body_font_size": 44,
+  "body_font_size": 56,
+  "padding": 20,
+  "text_blocks_checked": 6,
+  "fit_records": [
+    {
+      "name": "passage-id",
+      "rect": [
+        40,
+        24,
+        690,
+        124
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 44,
+      "text_bbox": [
+        60,
+        44,
+        460,
+        77
+      ],
+      "text": "PASSAGE 1.28.8"
+    },
+    {
+      "name": "title",
+      "rect": [
+        716,
+        24,
+        2360,
+        124
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 64,
+      "text_bbox": [
+        736,
+        44,
+        1677,
+        93
+      ],
+      "text": "THE COURTS OF ATHENS"
+    },
+    {
+      "name": "orientation",
+      "rect": [
+        40,
+        140,
+        2360,
+        218
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 34,
+      "text_bbox": [
+        60,
+        160,
+        1359,
+        194
+      ],
+      "text": "ATHENS | CIVIC COURTS | THE HELIAIA: AN INTERPRETIVE VIEW"
+    },
+    {
+      "name": "reading-heading",
+      "rect": [
+        1360,
+        272,
+        2352,
+        388
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 38,
+      "text_bbox": [
+        1380,
+        292,
+        1906,
+        321
+      ],
+      "text": "PAUSANIAS'S ACCOUNT"
+    },
+    {
+      "name": "translation",
+      "rect": [
+        1360,
+        416,
+        2352,
+        2188
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 56,
+      "text_bbox": [
+        1380,
+        436,
+        2332,
+        2032
+      ],
+      "text": "The Athenians also have other\nlaw courts, but they have not\nreached such renown. One is\ncalled Parabyston, another\nTrigonon: the first is in an\nobscure part of the city, and only\na very few gather there, while\nthe second derives its name from\nits shape. Batrachion (\"Frog\")\nand Phoinikion (\"Red\") have\ntheir names from their colors,\nand one of them continues to be\nknown as such to this day. The\nlargest court, where most gather,\nthey call the Heliaia. There are\nadditional courts dealing\nspecifically with murderers;\namong these is one called \"At the\nPalladion,\" established to judge\nthose who have committed\ninvoluntary homicide. And no\none disputes that Demophon was\nthe first to stand trial in this\nplace."
+    },
+    {
+      "name": "interpretive-caption",
+      "rect": [
+        48,
+        2234,
+        2352,
+        2370
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 36,
+      "text_bbox": [
+        68,
+        2254,
+        2296,
+        2331
+      ],
+      "text": "The Heliaia: an imagined gathering for the largest court in Pausanias's account. Architecture, dress and arrangement are\nconjectural; no excavated building or particular trial is identified."
+    }
+  ]
+}
