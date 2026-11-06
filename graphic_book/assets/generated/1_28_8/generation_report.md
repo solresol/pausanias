@@ -1,9 +1,11 @@
 # Scheduled Pausanias illustration — 6 November 2026
 
-New reviewed page **1.28.8, The courts of Athens** is ready for immutable exchange
-checkpoint. This report's initial source commit precedes checkpoint; completion
-and the persisted optional replacement decision will be appended after actual
-operations. No PostgreSQL import or website publication is claimed here.
+New reviewed page **1.28.8, The courts of Athens** is immutably uploaded and
+conditionally checkpointed as result **132e4839c99642f296a108621b9c4147**.
+Optional replacement is **skipped**, persisted draw **0.25897701717396915**.
+No PostgreSQL import or website publication is claimed here. Immutable uploaded
+source/review versions remain pinned to the source commit below; this later
+Git report records operational completion.
 
 Run `09d22c3ebfd14704b39c74ccbdce70aa` in the verified published classical-texts
 runtime. Exact version matches
@@ -49,10 +51,30 @@ Required full HTML/PDF build passes, 186 illustrations / 187 PDF pages with titl
 Reader HTML and real Chromium screenshot inspected: 186 of 186, previous
 1.28.7, disabled next, full correct page, translation/contents/PDF links.
 Site image identical to reviewed PNG. PDF page 187 rendered at 2400px and
-visually inspected, all content/margins intact. Browser closed; temporary
-preview server will close at completion. No full site generation/publication.
+visually inspected, all content/margins intact. Browser and temporary loopback
+preview server closed. No full site generation/publication.
 
-Sources, prompts, plan, layout and review only will enter Git; binary component
+Sources, prompts, plan, layout and review only entered Git; binary component
 and canonical PNG, workflow SQLite/session, generated site, title image/cache
 and unrelated work remain excluded. Every new source/component/review file
-will be enumerated to record-result, with immutable upload/readback verification.
+was enumerated to record-result, with immutable upload/readback verification.
+
+## Checkpoint and optional replacement
+
+Sources pushed to origin/main at full commit
+**678f901fe7c71b23b2a5563d91da85a22535d0b6**; remote ref independently verified.
+Helper uploaded the reviewed PNG plus **eight support files**: renderer, page
+plan, detailed prompt, exact actual prompt, component PNG, layout report,
+review and this report's source version. Each object was read back, byte count
+and SHA-256 checked before conditional checkpoint at
+**2026-11-06T01:09:53.329792+00:00**. Result ID
+**132e4839c99642f296a108621b9c4147**, kind new, import_status pending.
+Page key:
+`s3://pausanias-graphic-book-assets-849621205733/workflow/results/132e4839c99642f296a108621b9c4147/page.png`.
+Catalogue source/image checksums match reviewed hashes above. No duplicate
+checkpoint or incomplete global asset manifest was created.
+
+One persisted replacement draw **0.25897701717396915** is at least 0.20.
+The same value was returned when recording **skipped**. Target remains NULL;
+no candidate shuffle, replacement art, old-page source modification or second
+result is authorized/needed for this draw. Claim release follows this report.
