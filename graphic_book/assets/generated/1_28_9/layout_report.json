@@ -1,0 +1,140 @@
+{
+  "passage_id": "1.28.9",
+  "preflight": false,
+  "canvas": [
+    2400,
+    2480
+  ],
+  "art_rectangle": [
+    48,
+    244,
+    2352,
+    1468
+  ],
+  "translation_rectangle": [
+    64,
+    1760,
+    2336,
+    2440
+  ],
+  "reading_order": "one continuous lower English field, top to bottom",
+  "translation_exact": "As to why there are differing accounts about it, various things are said. They relate that when Troy had fallen, Diomedes was sailing homeward with his fleet and that night had already come upon them as they reached the area off Phalerum. The Argives landed on hostile territory, believing mistakenly in the night that it was some other land, not Attica. Then, it is said, Demophon came out against them, equally ignorant that they, the men from the ships, were Argives; he killed some of them and carried off the Palladion. During this attack an Athenian was inadvertently knocked down and trampled to death by Demophon's horse. Because of this incident, Demophon was compelled to stand trial; some claim he was prosecuted by the relatives of the man trampled, while others say he was accused publicly by the Argives as a whole.",
+  "translation_characters": 829,
+  "translation_words": 142,
+  "translation_utf8_sha256": "705d402755dc948d65d5a3e5cc53d92ce1302b78ba799ecf3e576b82a1dbc3e8",
+  "translation_matches_export": true,
+  "minimum_body_font_size": 46,
+  "body_font_size": 50,
+  "padding": 20,
+  "text_blocks_checked": 6,
+  "fit_records": [
+    {
+      "name": "passage-id",
+      "rect": [
+        40,
+        24,
+        690,
+        124
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 44,
+      "text_bbox": [
+        60,
+        44,
+        460,
+        77
+      ],
+      "text": "PASSAGE 1.28.9"
+    },
+    {
+      "name": "title",
+      "rect": [
+        716,
+        24,
+        2360,
+        124
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 64,
+      "text_bbox": [
+        736,
+        44,
+        1655,
+        91
+      ],
+      "text": "LANDFALL IN THE DARK"
+    },
+    {
+      "name": "orientation",
+      "rect": [
+        40,
+        140,
+        2360,
+        218
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 34,
+      "text_bbox": [
+        60,
+        160,
+        1175,
+        194
+      ],
+      "text": "PHALERUM | ATTIC COAST | A DISPUTED HOMECOMING"
+    },
+    {
+      "name": "interpretive-caption",
+      "rect": [
+        48,
+        1488,
+        2352,
+        1652
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 34,
+      "text_bbox": [
+        68,
+        1508,
+        2304,
+        1582
+      ],
+      "text": "Phalerum, on the coast of Attica: the Argives make an unrecognized landfall in Pausanias's reported story. Shoreline, ships, dress\nand figures are conjectural. The later attack and accidental death are not depicted."
+    },
+    {
+      "name": "reading-heading",
+      "rect": [
+        64,
+        1668,
+        2336,
+        1748
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 36,
+      "text_bbox": [
+        84,
+        1688,
+        583,
+        1714
+      ],
+      "text": "PAUSANIAS'S ACCOUNT"
+    },
+    {
+      "name": "translation",
+      "rect": [
+        64,
+        1760,
+        2336,
+        2440
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 50,
+      "text_bbox": [
+        84,
+        1780,
+        2294,
+        2369
+      ],
+      "text": "As to why there are differing accounts about it, various things are said. They relate\nthat when Troy had fallen, Diomedes was sailing homeward with his fleet and that\nnight had already come upon them as they reached the area off Phalerum. The Argives\nlanded on hostile territory, believing mistakenly in the night that it was some other\nland, not Attica. Then, it is said, Demophon came out against them, equally ignorant\nthat they, the men from the ships, were Argives; he killed some of them and carried off\nthe Palladion. During this attack an Athenian was inadvertently knocked down and\ntrampled to death by Demophon's horse. Because of this incident, Demophon was\ncompelled to stand trial; some claim he was prosecuted by the relatives of the man\ntrampled, while others say he was accused publicly by the Argives as a whole."
+    }
+  ]
+}

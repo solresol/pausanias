@@ -1,0 +1,25 @@
+{
+  "translation_source_equal": true,
+  "original_order": true,
+  "all_six_bounds_padded": true,
+  "native_tesseract_exact_after_layout_whitespace": true,
+  "translation_utf8_sha256": "705d402755dc948d65d5a3e5cc53d92ce1302b78ba799ecf3e576b82a1dbc3e8",
+  "source_sha256": "a5ff47934a84629d08623b246e3180281099d8902057a530f63f9565a8d3e37a",
+  "body_font_size": 50,
+  "final_page": {
+    "bytes": 4530967,
+    "sha256": "7d7849633f33e887c3c0e23652c79a0beb5772b01ccdbe9ea0cc7eb573d15532",
+    "dimensions": [
+      2400,
+      2480
+    ]
+  },
+  "component": {
+    "bytes": 2909020,
+    "sha256": "bff1bb0a3508f39362ce608b5e0cb3627c6ef968fcc4fbb1cd3e423eed211ae2",
+    "dimensions": [
+      1719,
+      915
+    ]
+  }
+}
