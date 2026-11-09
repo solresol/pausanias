@@ -340,7 +340,21 @@ def fallback_csv_headers(path: str, width: int) -> list[str]:
 
 
 def csv_record_from_row(headers: list[str], row: list[str]) -> dict[str, Any]:
-    record = {header: row[index] if index < len(row) else "" for index, header in enumerate(headers)}
+    # Nodegoat can export a display Name and a raw Name under identical headers.
+    # Retain the first (display) value for normal lookups and preserve every later
+    # value under a collision-free key instead of silently overwriting data.
+    record: dict[str, Any] = {}
+    reserved = set(headers)
+    for index, header in enumerate(headers):
+        key = header
+        duplicate = 2
+        while key in record:
+            key = f"{header} [duplicate {duplicate}]"
+            duplicate += 1
+            while key in reserved:
+                key = f"{header} [duplicate {duplicate}]"
+                duplicate += 1
+        record[key] = row[index] if index < len(row) else ""
     if len(row) > len(headers):
         record["_extra_columns"] = row[len(headers) :]
     return record

@@ -68,3 +68,36 @@ def test_archive_rejects_wrong_checksum_or_byte_size(tmp_path):
     r.file_size+=1
     with pytest.raises(ValueError,match='byte-size'):
         inspect_archive(p,r)
+
+
+@pytest.mark.parametrize('duplicate_value',['Same','Different'])
+def test_duplicate_names_are_preserved_even_when_display_and_raw_differ(tmp_path,duplicate_value):
+    p,r=make_archive(tmp_path)
+    name='data/unesco_status_11364/unesco_status_objects_11364.csv'
+    with zipfile.ZipFile(p,'a') as z:
+        z.writestr(name,'"nodegoat ID","Object ID",Name,Name\nnode2,2,Same,'+duplicate_value+'\n')
+    r.file_size=p.stat().st_size
+    r.file_checksum='md5:'+hashlib.md5(p.read_bytes()).hexdigest()
+    result=inspect_archive(p,r)
+    assert result['preserved_duplicate_headers'][name]==['Name']
+    assert result['differing_display_raw_name_rows'].get(name,0)==(duplicate_value!='Same')
+
+
+def test_duplicate_csv_headers_never_overwrite_or_collide():
+    from manto_importer import csv_record_from_row
+    headers=['Object ID','Name','Name','Name [duplicate 2]','Name']
+    row=['123','📜 Title','Title','Other value','Last title']
+    parsed=csv_record_from_row(headers,row)
+    assert parsed['Name']=='📜 Title'
+    assert len(parsed)==len(headers)
+    assert list(parsed.values())==row
+
+
+def test_conflicting_duplicate_identifiers_are_rejected(tmp_path):
+    p,r=make_archive(tmp_path)
+    with zipfile.ZipFile(p,'a') as z:
+        z.writestr('data/bad.csv','Object ID,Object ID,Name\n1,2,Title\n')
+    r.file_size=p.stat().st_size
+    r.file_checksum='md5:'+hashlib.md5(p.read_bytes()).hexdigest()
+    with pytest.raises(ValueError,match='Conflicting non-Name'):
+        inspect_archive(p,r)

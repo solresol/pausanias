@@ -20,7 +20,7 @@ from psycopg import sql
 
 from manto_importer import (
     ENTITY_DETAILS_PATH, TIE_DETAILS_PATH, acquire_import_lock,
-    csv_header_likely, fallback_csv_headers, import_release, release_import_lock,
+    csv_header_likely, csv_record_from_row, fallback_csv_headers, import_release, release_import_lock,
 )
 from manto_release import checksum_matches, release_from_zenodo_record
 from manto_release_check import upsert_release
@@ -46,6 +46,8 @@ def inspect_archive(path, release):
         raise ValueError('Pinned archive byte-size mismatch')
     detail_counts = {}
     csv_counts = {}
+    duplicate_headers = {}
+    differing_name_rows = {}
     with zipfile.ZipFile(path) as archive:
         names = archive.namelist()
         if len(set(names)) != len(names):
@@ -67,20 +69,31 @@ def inspect_archive(path, release):
                     continue
                 has_header = csv_header_likely(first)
                 headers = first if has_header else fallback_csv_headers(name, len(first))
-                if len(set(headers)) != len(headers):
-                    raise ValueError(f'Duplicate headers: {name}')
+                duplicated = {header: [i for i, value in enumerate(headers) if value == header]
+                              for header in set(headers) if headers.count(header) > 1}
+                if duplicated:
+                    duplicate_headers[name] = sorted(duplicated)
                 if name in (ENTITY_DETAILS_PATH, TIE_DETAILS_PATH) and not {'nodegoat ID', 'Object ID', 'Name'}.issubset(headers):
                     raise ValueError(f'Required columns missing: {name}')
                 count = 0 if has_header else 1
                 for row in rows:
                     if len(row) != len(headers):
                         raise ValueError(f'CSV row-width mismatch: {name}, row {count + 2}')
+                    for header, indices in duplicated.items():
+                        if len({row[index] for index in indices}) != 1:
+                            if header != 'Name':
+                                raise ValueError(f'Conflicting non-Name duplicate values: {name}, {header}, row {count + 2}')
+                            differing_name_rows[name] = differing_name_rows.get(name, 0) + 1
+                    if duplicated and list(csv_record_from_row(headers, row).values()) != row:
+                        raise ValueError(f'Duplicate-column preservation failed: {name}, row {count + 2}')
                     count += 1
                 csv_counts[name] = count
                 if name in (ENTITY_DETAILS_PATH, TIE_DETAILS_PATH):
                     detail_counts[name] = count
         return {'zip_entries': len(names), 'uncompressed_bytes': sum(i.file_size for i in archive.infolist()),
                 'detail_csv_rows': detail_counts, 'csv_record_counts': csv_counts, 'archive_size': path.stat().st_size,
+                'preserved_duplicate_headers': duplicate_headers,
+                'differing_display_raw_name_rows': differing_name_rows,
                 'archive_checksum': release.file_checksum}
 
 
