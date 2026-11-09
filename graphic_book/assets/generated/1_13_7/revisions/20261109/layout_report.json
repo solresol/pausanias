@@ -1,0 +1,190 @@
+{
+  "passage_id": "1.13.7",
+  "kind": "replacement",
+  "preflight": false,
+  "canvas": [
+    2400,
+    2400
+  ],
+  "art_rectangle": [
+    48,
+    680,
+    2352,
+    1730
+  ],
+  "translation_rectangles": [
+    [
+      64,
+      324,
+      2336,
+      650
+    ],
+    [
+      64,
+      2034,
+      2336,
+      2356
+    ]
+  ],
+  "reading_order": "upper 1 then lower 2",
+  "translation_exact": "Around this same time, when the protraction of the Spartan war continued, Antigonus, having restored the cities of the Macedonians, hastened toward the Peloponnese, knowing well that if Pyrrhus succeeded in capturing Sparta and most parts of the Peloponnese, he would move not back toward Epirus but instead against Macedonia, thus renewing war in that region. As Antigonus was preparing to lead his army from Argos towards Laconia, Pyrrhus himself arrived at Argos. Although victorious on that occasion as well, Pyrrhus pursued the fleeing soldiers right into the city, and consequently, as might be expected, his formation was thrown into disorder.",
+  "translation_parts_exact": [
+    "Around this same time, when the protraction of the Spartan war continued, Antigonus, having restored the cities of the Macedonians, hastened toward the Peloponnese, knowing well that if Pyrrhus succeeded in capturing Sparta and most parts of the Peloponnese, he would move not back toward Epirus but instead against Macedonia, thus renewing war in that region. ",
+    "As Antigonus was preparing to lead his army from Argos towards Laconia, Pyrrhus himself arrived at Argos. Although victorious on that occasion as well, Pyrrhus pursued the fleeing soldiers right into the city, and consequently, as might be expected, his formation was thrown into disorder."
+  ],
+  "translation_characters": 650,
+  "translation_words": 101,
+  "translation_utf8_sha256": "92a279b66bca21d3fcba8bf9acec82a2c5434acfa1839204def6fb4336da74fc",
+  "translation_matches_export": true,
+  "original_catalogue_sha256": "56be8926568f5b096650845ff16b7b8c161139d1c864272706652562e995e82e",
+  "minimum_body_font_size": 46,
+  "body_font_size": 49,
+  "padding": 20,
+  "text_blocks_checked": 8,
+  "fit_records": [
+    {
+      "name": "passage-id",
+      "rect": [
+        40,
+        24,
+        720,
+        124
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 44,
+      "text_bbox": [
+        60,
+        44,
+        460,
+        77
+      ],
+      "text": "PASSAGE 1.13.7"
+    },
+    {
+      "name": "title",
+      "rect": [
+        790,
+        24,
+        2360,
+        124
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 58,
+      "text_bbox": [
+        810,
+        44,
+        1853,
+        88
+      ],
+      "text": "VICTORY BECOMES DISORDER"
+    },
+    {
+      "name": "orientation",
+      "rect": [
+        40,
+        140,
+        2360,
+        222
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 34,
+      "text_bbox": [
+        60,
+        160,
+        1116,
+        194
+      ],
+      "text": "ARGOS | PELOPONNESE | PYRRHUS AND ANTIGONUS"
+    },
+    {
+      "name": "heading-1",
+      "rect": [
+        64,
+        246,
+        2336,
+        318
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 34,
+      "text_bbox": [
+        84,
+        266,
+        671,
+        291
+      ],
+      "text": "1 ANTIGONUS MOVES SOUTH"
+    },
+    {
+      "name": "interpretive-caption",
+      "rect": [
+        48,
+        1750,
+        2352,
+        1900
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 32,
+      "text_bbox": [
+        68,
+        1770,
+        2332,
+        1839
+      ],
+      "text": "Pursuit into Argos: the victorious formation loses order inside the city. Figures, dress, gate and street are conjectural; no precise entrance,\nindividual portrait or episode of the later fighting is identified."
+    },
+    {
+      "name": "heading-2",
+      "rect": [
+        64,
+        1936,
+        2336,
+        2010
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 34,
+      "text_bbox": [
+        84,
+        1956,
+        562,
+        1981
+      ],
+      "text": "2 PURSUIT INTO ARGOS"
+    },
+    {
+      "name": "translation-1",
+      "rect": [
+        64,
+        324,
+        2336,
+        650
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 49,
+      "text_bbox": [
+        84,
+        344,
+        2248,
+        628
+      ],
+      "text": "Around this same time, when the protraction of the Spartan war continued, Antigonus,\nhaving restored the cities of the Macedonians, hastened toward the Peloponnese,\nknowing well that if Pyrrhus succeeded in capturing Sparta and most parts of the\nPeloponnese, he would move not back toward Epirus but instead against Macedonia,\nthus renewing war in that region."
+    },
+    {
+      "name": "translation-2",
+      "rect": [
+        64,
+        2034,
+        2336,
+        2356
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 49,
+      "text_bbox": [
+        84,
+        2054,
+        2262,
+        2269
+      ],
+      "text": "As Antigonus was preparing to lead his army from Argos towards Laconia, Pyrrhus\nhimself arrived at Argos. Although victorious on that occasion as well, Pyrrhus pursued\nthe fleeing soldiers right into the city, and consequently, as might be expected, his\nformation was thrown into disorder."
+    }
+  ]
+}

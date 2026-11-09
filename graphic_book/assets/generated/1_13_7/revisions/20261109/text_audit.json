@@ -1,0 +1,38 @@
+{
+  "passage": "1.13.7",
+  "source_sha256": "91edb65b087cbd88d1d7a88297e1f0fa86885b6146cd98c8a1cfe8c1045775f4",
+  "english_sha256": "92a279b66bca21d3fcba8bf9acec82a2c5434acfa1839204def6fb4336da74fc",
+  "characters": 650,
+  "words": 101,
+  "exact_source_reassembly": true,
+  "all_8_padded_glyph_bounds_pass": true,
+  "ocr_exact_after_layout_whitespace_normalization": true,
+  "ocr_text": "Around this same time, when the protraction of the Spartan war continued, Antigonus, having restored the cities of the Macedonians, hastened toward the Peloponnese, knowing well that if Pyrrhus succeeded in capturing Sparta and most parts of the Peloponnese, he would move not back toward Epirus but instead against Macedonia, thus renewing war in that region. As Antigonus was preparing to lead his army from Argos towards Laconia, Pyrrhus himself arrived at Argos. Although victorious on that occasion as well, Pyrrhus pursued the fleeing soldiers right into the city, and consequently, as might be expected, his formation was thrown into disorder.",
+  "candidate": {
+    "path": "graphic_book/output/replacements/1_13_7/20261109/candidate.png",
+    "sha256": "3f3546f166764bff27bfec852ab94eb726f0f367dffd6f5ec1a7c200918632bc",
+    "bytes": 4140227,
+    "dimensions": [
+      2400,
+      2400
+    ]
+  },
+  "component": {
+    "path": "graphic_book/assets/generated/1_13_7/revisions/20261109/argos_pursuit.png",
+    "sha256": "f3dc2aadbddf74a84938b498b20484f4519eba5b31f1e2e7f0231ab6a70808d4",
+    "bytes": 3061651,
+    "dimensions": [
+      1858,
+      846
+    ]
+  },
+  "canonical_original_unchanged": {
+    "path": "graphic_book/images/1/13/7.png",
+    "sha256": "56be8926568f5b096650845ff16b7b8c161139d1c864272706652562e995e82e",
+    "bytes": 1725719,
+    "dimensions": [
+      1402,
+      1122
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "original_catalogue": {
+    "passage_id": "1.13.7",
+    "image_s3_key": "images/1/13/7.png",
+    "image_sha256": "56be8926568f5b096650845ff16b7b8c161139d1c864272706652562e995e82e",
+    "byte_count": 1725719,
+    "source_sha256": null,
+    "result_id": null
+  },
+  "original_component_manifest_records": [
+    {
+      "bytes": 3319988,
+      "media_type": "image/png",
+      "path": "graphic_book/assets/generated/1_13_7/main_argos_pursuit.png",
+      "s3_key": "assets/generated/1_13_7/main_argos_pursuit.png",
+      "sha256": "859a658d541ce528b0e382ea1ec19c23ed00fcb8c567e461cbcd5ce213c111ec"
+    },
+    {
+      "bytes": 3765623,
+      "media_type": "image/png",
+      "path": "graphic_book/assets/generated/1_13_7/peloponnese_relief.png",
+      "s3_key": "assets/generated/1_13_7/peloponnese_relief.png",
+      "sha256": "a209d167e438d286f7e35b2cbb91bac86f63eba1c2eed3c3eda9581b5d48a455"
+    }
+  ],
+  "source_base_commit": "7f99c84ece58724963a9f7e44f730ece6f49c7b4"
+}
