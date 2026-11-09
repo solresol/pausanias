@@ -71,3 +71,23 @@ GitHub IDs resolved read-only and all unrelated checkouts clean/untouched.
 All output, source pushes and checks succeeded; no denied/uncertain action or
 blocker remains. Claim release is the next bounded workflow operation and its
 actual terminal result will be appended after finish returns.
+
+## Terminal result
+
+`finish --notes ...` returned **Run completed and claim released**, exit 0.
+Run status **completed**, completed_at **2026-11-09T01:17:01.217835+00:00**;
+local active_worker table empty. The final local audit confirms exactly one new
+result and one replacement, file counts 8 and 18, same persisted draw/target/
+accepted outcome, both import_status values pending, and unchanged canonical
+original at 1.13.7. No lease expiry or conditional conflict occurred.
+
+Fresh independent read-only S3 `status` returns **Active: []**, generation 163,
+updated_at 2026-11-09T01:17:01.218140+00:00, 3,170 passages/translations,
+188 shared illustration pointers and **next passage 1.28.11**. This completes
+the authorized trigger; no further generation is performed. Checkpoints and
+decision report were committed/pushed before finish; this final source-only
+supplement records its observed outcome without modifying immutable results.
+All unrelated checkouts remain untouched. No blockers, denied actions, pending
+cloud mutations or uncertain operations remain. PostgreSQL import/acceptance,
+original-hash recheck/promotion and public website publication are still pending
+the next overnight Raksasa run, and are not claimed as completed here.
