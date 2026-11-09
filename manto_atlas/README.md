@@ -43,6 +43,16 @@ not a substitute for its source-date, identity and endpoint-adjudication gates.
 
 ## Validation recorded 9 November 2026
 
+The subsequent v3 refresh uses the validated isolated October import: 2,452
+geographic entities, 1,498 mapped locations, 81,342 nearby pairs and 1,954
+existing passage claims. All 63 focused MANTO/model tests and the five-view
+desktop/mobile browser checks passed. It does not activate the public release
+or carry forward older name-to-place links. See
+`documentation/manto_v3_staged_import_2026-11-09.md` for the import receipt,
+validation details and current limitations.
+
+The earlier August preview was checked as follows:
+
 - Built from the August release using current PG18 read-only queries: 2,450
   geographic entities, 1,954 passage claims and 77,896 within-100-km pairs.
 - 39 focused tests passed across atlas, importer, connectedness, geography,
@@ -55,8 +65,9 @@ not a substitute for its source-date, identity and endpoint-adjudication gates.
 
 ## Remaining work before production
 
-- Audit the v3 archive and chronology, settlement-only identities and human
-  outcome labels; the current importer uses a provisional 180 CE cutoff.
+- The v3 archive and import integrity checks are complete. Audit chronology,
+  settlement-only identities and human outcome labels; the current importer
+  uses a provisional 180 CE cutoff.
 - Implement direct source citations per narrative assertion; current figure
   scores are snapshot diagnostics, not independently witnessed findings.
 - Replace suffix-based aggregation with reviewed regions and uncertainty-aware

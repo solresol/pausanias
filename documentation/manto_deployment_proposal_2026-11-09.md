@@ -5,16 +5,16 @@ Inspected read-only on 9 November 2026. No infrastructure changes performed.
 ## Verified target and existing capability
 
 - Proposed hostname `manto.symmachus.org`: current DNS NXDOMAIN; no matching vhost
-  or directory found. Public origin for the existing sibling convention is
-  `59.167.239.92`, with a proxied Cloudflare A record, TTL 1.
+  or directory found. The existing sibling-site convention is a proxied
+  Cloudflare A record, TTL 1. Recheck its configured origin during provisioning.
 - Existing repository: `https://github.com/solresol/pausanias.git`. Public read
   access requires no new Git credential. Atlas source lives under `manto_atlas/`.
 - Raksasa: Linux, existing Greg sudo access verified; no `manto` OS account.
-- Merah: OpenBSD, `merah.cassia.ifost.org.au`; Greg SSH and doas access verified.
+- Merah: OpenBSD; Greg SSH and doas access verified.
   Use doas, not Linux-specific sudo commands. No `manto` OS account.
 - Existing Merah httpd serves Pausanias under
   `/var/www/vhosts/pausanias.symmachus.org/htdocs/`; relayd exposes public HTTP and
-  forwards to internal httpd at `192.168.91.1:80`.
+  forwards to an internal httpd listener.
 - Existing Pausanias HTTPS works through Cloudflare. No origin IPv4 443 listener
   was observed. The actual zone TLS policy is unverified; do not assume strict
   origin TLS or change a zone-wide setting to make this site work.

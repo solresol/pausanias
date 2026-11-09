@@ -2,6 +2,13 @@
 
 Research and pipeline plan, 9 November 2026
 
+**Subsequent import update:** after the initial planning audit below, the October
+release was downloaded, imported into an isolated schema and validated. The
+local atlas was refreshed from it; the active public tables remain on the
+earlier release. See the [v3 import and preview verification](manto_v3_staged_import_2026-11-09.md)
+for actual counts, checks and remaining activation steps. The August counts and
+historical model results below retain their original scope.
+
 ## Recommendation
 
 Build on the existing Pausanias/MANTO pipeline, but do not start by adding more graph centralities. The next study should measure **documented local mythic distinctiveness relative to independently defined geographic neighbours**, distinguish that from connections to wider mythic networks, and test whether it improves prediction of settlement status in Pausanias's time.
@@ -62,7 +69,7 @@ Read-only inspection of the documented current PostgreSQL 18 database on 9 Novem
 | Curated LLM link rows | 109, all unreviewed; 98 distinct MANTO targets |
 | Connectedness features / model runs for August release | Neither present |
 
-These are counts of the existing representation, **not counts of independent stories or eligible cities**. The latest public archive was identified but not downloaded or imported for this planning task. No production schema, data, model, scheduled job or website was changed.
+These are counts of the existing representation, **not counts of independent stories or eligible cities**. At this initial planning audit, the latest public archive had been identified but not yet downloaded or imported. No production schema, data, model, scheduled job or website was changed by that audit. The subsequent isolated import is documented in the update above.
 
 The public [model page](https://pausanias.symmachus.org/places/manto-survival-model.html) has no eligible runs for its current release. This is compatible with the historical July results remaining in the database under the March release; it does not mean the July work never happened.
 
