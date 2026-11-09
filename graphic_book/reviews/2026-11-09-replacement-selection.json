@@ -378,5 +378,6 @@
   ],
   "selected_target": "1.13.7",
   "original_catalogue_sha256": "56be8926568f5b096650845ff16b7b8c161139d1c864272706652562e995e82e",
-  "persisted_target_outcome": "pending"
+  "persisted_target_outcome": "accepted",
+  "checkpoint_result_id": "f4b46d986ac54e2cb0b453b371f0a1a0"
 }

@@ -36,3 +36,10 @@ Local review accepts candidate for helper verification/checkpoint. Shared
 decision remains pending until successful record-result; terminal outcomes
 are added to 1_28_10/generation_report.md. Raksasa import/promotion/publication
 remain subsequent independent operations.
+
+Replacement source commit c9290ab580c7a007a80f092c50dc335b965990b4 pushed.
+Result f4b46d986ac54e2cb0b453b371f0a1a0 checkpointed at
+2026-11-09T01:15:40.899340+00:00 after helper independently downloaded,
+hash-verified and archived the remote original, and read back/verified candidate
+plus all 18 result_files. Persisted shared outcome is now accepted, same draw
+and target. Import_status remains pending; canonical original is unchanged.

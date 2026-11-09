@@ -42,3 +42,32 @@ their actual tool results. This update supplements the immutable new result's
 pre-upload report without rewriting any result objects.
 PostgreSQL acceptance and public publication are pending the overnight Raksasa
 workflow and are not performed by this daytime run.
+
+## Checkpointed replacement and persisted decision
+
+Replacement source commit **c9290ab580c7a007a80f092c50dc335b965990b4** pushed
+to authorized origin/main. Result **f4b46d986ac54e2cb0b453b371f0a1a0**
+checkpointed at **2026-11-09T01:15:40.899340+00:00**. Immutable candidate:
+`s3://pausanias-graphic-book-assets-849621205733/workflow/results/f4b46d986ac54e2cb0b453b371f0a1a0/page.png`.
+Helper independently retrieved and hash-verified original
+`56be8926568f5b096650845ff16b7b8c161139d1c864272706652562e995e82e`,
+archived it at `workflow/results/f4b46d986ac54e2cb0b453b371f0a1a0/previous-page.png`,
+then downloaded and verified candidate plus all **18 result_files** before
+conditional checkpoint. Every new source/component/preserved-art/review file
+was enumerated. Candidate SHA-256
+`3f3546f166764bff27bfec852ab94eb726f0f367dffd6f5ec1a7c200918632bc`.
+
+`replacement-decision --passage 1.13.7 --outcome accepted` succeeded, reusing
+**0.13053275896525451**. Shared target remains **1.13.7**, outcome **accepted**.
+No second target, redraw or replacement. Local original canonical PNG remains
+checksum-identical; shared illustration pointer records candidate for the
+subsequent importer. Neither result has yet been accepted into PostgreSQL:
+both exported result import_status values are **pending**.
+
+New checkpoint timestamp **2026-11-09T01:07:19.288330+00:00**. This source-only
+report update supplements both immutable pre-upload reports. Eight catalogue
+repository identities/origins have been cross-checked, with the four numeric
+GitHub IDs resolved read-only and all unrelated checkouts clean/untouched.
+All output, source pushes and checks succeeded; no denied/uncertain action or
+blocker remains. Claim release is the next bounded workflow operation and its
+actual terminal result will be appended after finish returns.
