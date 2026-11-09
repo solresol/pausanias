@@ -1,0 +1,191 @@
+{
+  "passage_id": "1.28.10",
+  "preflight": false,
+  "canvas": [
+    2400,
+    2600
+  ],
+  "art_rectangle": [
+    48,
+    720,
+    2352,
+    1820
+  ],
+  "translation_rectangles": [
+    [
+      64,
+      324,
+      2336,
+      688
+    ],
+    [
+      64,
+      2070,
+      2336,
+      2554
+    ]
+  ],
+  "reading_order": "numbered upper field 1, then lower field 2",
+  "translation_exact": "At the Delphinion, a trial is established for those claiming to have committed homicide with just cause\u2014a plea such as Theseus successfully offered and thereby escaped penalty when he had slain Pallas and his sons who rose against him. Before Theseus received acquittal for such acts, it had been customary for anyone who committed homicide either to flee universally or remain and suffer death in equal retribution. As for the procedure called the \"trial in the Prytaneion,\" wherein judgments are passed upon iron implements and all other lifeless objects alike, I believe its origin to be as follows: during the reign of Erechtheus as king of the Athenians, the first ox was slain by a certain ox-killer at the altar of Zeus Polieus; the man, abandoning the axe there, fled from the country in exile, but the axe itself, when adjudicated, was immediately acquitted, and even up to the present it undergoes a judgment each year.",
+  "translation_parts_exact": [
+    "At the Delphinion, a trial is established for those claiming to have committed homicide with just cause\u2014a plea such as Theseus successfully offered and thereby escaped penalty when he had slain Pallas and his sons who rose against him. Before Theseus received acquittal for such acts, it had been customary for anyone who committed homicide either to flee universally or remain and suffer death in equal retribution. ",
+    "As for the procedure called the \"trial in the Prytaneion,\" wherein judgments are passed upon iron implements and all other lifeless objects alike, I believe its origin to be as follows: during the reign of Erechtheus as king of the Athenians, the first ox was slain by a certain ox-killer at the altar of Zeus Polieus; the man, abandoning the axe there, fled from the country in exile, but the axe itself, when adjudicated, was immediately acquitted, and even up to the present it undergoes a judgment each year."
+  ],
+  "translation_characters": 929,
+  "translation_words": 156,
+  "translation_utf8_sha256": "70d25d5a426347a22d874630abaa95ee1bfa55537f257f4a448de91b2dfc3e86",
+  "translation_matches_export": true,
+  "minimum_body_font_size": 46,
+  "body_font_sizes": [
+    50,
+    52
+  ],
+  "padding": 20,
+  "text_blocks_checked": 8,
+  "fit_records": [
+    {
+      "name": "passage-id",
+      "rect": [
+        40,
+        24,
+        720,
+        124
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 44,
+      "text_bbox": [
+        60,
+        44,
+        491,
+        77
+      ],
+      "text": "PASSAGE 1.28.10"
+    },
+    {
+      "name": "title",
+      "rect": [
+        790,
+        24,
+        2360,
+        124
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 64,
+      "text_bbox": [
+        810,
+        44,
+        1521,
+        93
+      ],
+      "text": "THE AXE ON TRIAL"
+    },
+    {
+      "name": "orientation",
+      "rect": [
+        40,
+        140,
+        2360,
+        222
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 32,
+      "text_bbox": [
+        60,
+        160,
+        1383,
+        192
+      ],
+      "text": "ATHENS | DELPHINION AND PRYTANEION | TWO KINDS OF JUDGMENT"
+    },
+    {
+      "name": "first-heading",
+      "rect": [
+        64,
+        246,
+        2336,
+        318
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 34,
+      "text_bbox": [
+        84,
+        266,
+        475,
+        291
+      ],
+      "text": "1 THE DELPHINION"
+    },
+    {
+      "name": "translation-1",
+      "rect": [
+        64,
+        324,
+        2336,
+        688
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 50,
+      "text_bbox": [
+        84,
+        344,
+        2286,
+        633
+      ],
+      "text": "At the Delphinion, a trial is established for those claiming to have committed homicide\nwith just cause\u2014a plea such as Theseus successfully offered and thereby escaped\npenalty when he had slain Pallas and his sons who rose against him. Before Theseus\nreceived acquittal for such acts, it had been customary for anyone who committed\nhomicide either to flee universally or remain and suffer death in equal retribution."
+    },
+    {
+      "name": "interpretive-caption",
+      "rect": [
+        48,
+        1840,
+        2352,
+        1986
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 32,
+      "text_bbox": [
+        68,
+        1860,
+        2284,
+        1929
+      ],
+      "text": "The axe as an object of judgment in the Prytaneion tradition. Tool, support and architectural setting are conjectural; no surviving axe or\nexcavated court is identified. The killing and sacrifice are not depicted."
+    },
+    {
+      "name": "second-heading",
+      "rect": [
+        64,
+        1992,
+        2336,
+        2064
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 34,
+      "text_bbox": [
+        84,
+        2012,
+        475,
+        2037
+      ],
+      "text": "2 THE PRYTANEION"
+    },
+    {
+      "name": "translation-2",
+      "rect": [
+        64,
+        2070,
+        2336,
+        2554
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 52,
+      "text_bbox": [
+        84,
+        2090,
+        2286,
+        2520
+      ],
+      "text": "As for the procedure called the \"trial in the Prytaneion,\" wherein judgments are\npassed upon iron implements and all other lifeless objects alike, I believe its origin\nto be as follows: during the reign of Erechtheus as king of the Athenians, the first\nox was slain by a certain ox-killer at the altar of Zeus Polieus; the man, abandoning\nthe axe there, fled from the country in exile, but the axe itself, when adjudicated,\nwas immediately acquitted, and even up to the present it undergoes a judgment\neach year."
+    }
+  ]
+}

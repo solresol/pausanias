@@ -1,0 +1,33 @@
+{
+  "passage": "1.28.10",
+  "source_sha256": "7dcfc75f3a24dc4e576a347ffe6beb028ee81c5d02d9ff01bb74d3ed6d25bfed",
+  "english_sha256": "70d25d5a426347a22d874630abaa95ee1bfa55537f257f4a448de91b2dfc3e86",
+  "characters": 929,
+  "words": 156,
+  "exact_source_reassembly": true,
+  "all_8_padded_glyph_bounds_pass": true,
+  "ocr_exact_after_layout_whitespace_normalization": false,
+  "ocr_text": "At the Delphinion, a trial is established for those claiming to have committed homicide with just cause\u2014a plea such as Theseus successfully offered and thereby escaped penalty when he had slain Pallas and his sons who rose against him. Before Theseus received acquittal for such acts, it had been customary for anyone who committed homicide either to flee universally or remain and suffer death in equal retribution. As for the procedure called the \"trial in the Prytaneion,\" wherein judgments are passed upon iron implements and all other lifeless objects alike, I believe its origin to be as follows: during the reign of Erechtheus as king of the Athenians, the first ox was Slain by a certain ox-killer at the altar of Zeus Polieus; the man, abandoning the axe there, fled from the country in exile, but the axe itself, when adjudicated, was immediately acquitted, and even up to the present it undergoes a judgment each year.",
+  "page": {
+    "path": "graphic_book/images/1/28/10.png",
+    "sha256": "f0ae12674213b5dd4144a196bddf117b7f6027b41d1daae24d65bab02dbbd413",
+    "bytes": 4244628,
+    "dimensions": [
+      2400,
+      2600
+    ]
+  },
+  "component": {
+    "path": "graphic_book/assets/generated/1_28_10/axe_study.png",
+    "sha256": "580ee03511fbab0f57fe00392293df8e831b8f81be658e1e99b5997231cea43e",
+    "bytes": 3005496,
+    "dimensions": [
+      1815,
+      867
+    ]
+  },
+  "second_pass_2x_ocr_exact": false,
+  "second_pass_2x_ocr_text": "At the Delphinion, a trial is established for those claiming to have committed homicide with just cause\u2014a plea such as Theseus successfully offered and thereby escaped penalty when he had slain Pallas and his sons who rose against him. Before Theseus received acquittal for such acts, it had been customary for anyone who committed homicide either to flee universally or remain and suffer death in equal retribution. As for the procedure called the \"trial in the Prytaneion,\" wherein judgments are passed upon iron implements and all other lifeless objects alike, I believe its origin to be as follows: during the reign of Erechtheus as king of the Athenians, the first ox was Slain by a certain ox-killer at the altar of Zeus Polieus; the man, abandoning the axe there, fled from the country in exile, but the axe itself, when adjudicated, was immediately acquitted, and even up to the present it undergoes a judgment each year.",
+  "native_ocr_case_only_difference": true,
+  "visual_case_check": "Rendered lowercase s in slain verified in full-size PNG and rasterized PDF; native OCR reports Slain."
+}
