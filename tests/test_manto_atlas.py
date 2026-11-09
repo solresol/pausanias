@@ -51,6 +51,14 @@ def test_claim_candidates_never_become_verified_labels():
     assert 'target_label' not in payload['claims'][0]
 
 
+def test_release_freshness_matches_the_actual_snapshot():
+    from manto_atlas.build import LATEST_PUBLIC
+    old = prepare_payload({'record_id':22239985},[],[],[],[],[])
+    latest = prepare_payload({'record_id':LATEST_PUBLIC['record_id']},[],[],[],[],[])
+    assert old['provenance']['is_latest_verified_public_release'] is False
+    assert latest['provenance']['is_latest_verified_public_release'] is True
+
+
 def test_write_site_has_no_inline_data_injection(tmp_path):
     payload={'release':{'record_id':1},'danger':'</script><script>alert(1)</script>'}
     manifest=write_site(payload,tmp_path)

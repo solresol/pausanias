@@ -133,6 +133,7 @@ def prepare_payload(release, places_rows, edge_rows, claims_rows, links_rows, me
         "provenance": {
             "mode": "local research preview; not an adjudicated settlement dataset",
             "source_read_only": True,
+            "is_latest_verified_public_release": int(release["record_id"]) == LATEST_PUBLIC["record_id"],
             "edge_filter": "existing importer is_pre_pausanias=true; date provenance not independently audited",
             "temporal_cutoff_ce": 180,
             "neighbours": "great-circle distances from representative Pleiades coordinates; all geographic entity types",

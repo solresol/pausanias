@@ -33,8 +33,9 @@ for(const [value,label] of [[data.places.length,'geographic entities in the impo
  const d=el('div',undefined,'metric');d.append(el('div',number(value),'metric-value'),el('div',label,'metric-label'));$('metrics').append(d);
 }
 const release=$('release-summary');release.append(el('p',`Displayed: ${data.release.file_key}`),link(`Imported MANTO release ${data.release.record_id}`,`https://zenodo.org/records/${data.release.record_id}`));
-release.append(el('p',`Latest public release verified ${data.latest_public.verified_on}: ${data.latest_public.date}. It is not imported into this preview.`, 'notice'));
-release.append(link('View the newer public release ↗',data.latest_public.url),el('p','Comparisons and evidence claims are derived from the existing project database. Scores describe this snapshot; they are not culture or survival verdicts.','muted'));
+const usesLatest=Number(data.release.record_id)===Number(data.latest_public.record_id);
+release.append(el('p',`Latest public release verified ${data.latest_public.verified_on}: ${data.latest_public.date}. ${usesLatest?'This preview uses that release.':'That release is not included in this preview.'}`, 'notice'));
+release.append(link(usesLatest?'View the source release ↗':'View the latest verified public release ↗',data.latest_public.url),el('p','Comparisons and evidence claims are derived from the project database. Scores describe this snapshot; they are not culture or survival verdicts.','muted'));
 const ordered=[...data.places].sort((a,b)=>a.name.localeCompare(b.name));
 for(const p of ordered){const o=el('option',`${p.name}${p.figures.length?'':' · no selected figure evidence'}`);o.value=p.id;$('place-select').append(o);}
 const initial=places.has(params.get('place'))?params.get('place'):(ordered.find(p=>p.name.startsWith('Argos (Argolid)')&&p.figures.length)||ordered.find(p=>p.lat!==null&&p.figures.length)||ordered[0]).id;
