@@ -30,9 +30,12 @@ publication change has been made.
   [#pausanias](https://ifost.slack.com/archives/C0CDAQ68FV2), channel `C0CDAQ68FV2`.
   The existing service-owned webhook file is private; its contents were not read.
 - PG18 is on `/var/run/postgresql`, port 5433, database `pausanias`. Manual read
-  queries work as Greg. The `epimanto` DB role does not exist. Existing local
-  peer authentication supports a future scoped role without changing pg_hba.
-  Greg's superuser capability is not an appropriate grant for the new job.
+  queries work as Greg. The `epimanto` DB role does not exist. Role-specific
+  authentication isolation must precede enabling that login: allow only the
+  existing local socket and Pausanias database, rejecting other database,
+  TCP and replication connections. This additional configuration step awaits
+  separate approval. Greg's superuser capability is not an appropriate grant
+  for the new job.
 
 ## Installed key and remaining access scope
 
@@ -64,7 +67,10 @@ publication change has been made.
    `passage_place_state_mentions`, `place_survival_model_runs`.
    No table writes, sequence privileges, role administration, creation rights or
    access to unrelated tables. Default read-only transactions and bounded query
-   timeouts. A service-produced export snapshot could avoid a new live DB grant,
+   timeouts are guardrails, not an authorization boundary: validate privileges
+   independently of those defaults, including inherited PUBLIC rights across
+   the shared cluster. The login must not be enabled before its connection
+   isolation is verified. A service-produced export snapshot could avoid a new live DB grant,
    but its access and scheduled export ownership must be designed explicitly.
 6. Existing-channel Slack reporting under job ID `epimanto`, through a
    separately approved scoped credential/service. Do not make the existing
