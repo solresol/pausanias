@@ -64,4 +64,22 @@ Persisted replacement draw **0.8346826040877957**, at or above 0.20.
 replacement-decision --outcome skipped succeeded and reused that exact draw;
 target null, outcome **skipped**, no candidate selected or replacement attempted.
 One new checkpoint in this run, no repeated checkpointed page. Fresh local
-snapshot now identifies 1.29.1 as next. Claim release to follow using finish.
+snapshot now identifies 1.29.1 as next. Checkpoint/draw/outcome report persisted
+and pushed in bf904a935732eb204ff61b0442db93f7555d18c9 before finish.
+
+## Released claim and terminal state
+
+finish succeeded: **Run completed and claim released**. Fresh read-only remote
+status confirms Active: [], generation 170, update
+2026-11-10T01:10:16.168166+00:00, 3,170 passages, 3,170 translations,
+189 illustration pointers, next 1.29.1. Session file removed by the helper;
+the run is completed, replacement outcome skipped, target null. No optional
+replacement, later error, expired lease or conditional conflict occurred.
+No denied or uncertain operation remains. Source and operational reports pushed
+without force; unrelated repositories and secret bindings preserved.
+
+The immutable uploaded report remains the reviewed source-commit version;
+these completion details are the subsequent Git operational record. The new
+shared pointer and uploaded/hash-verified assets await next overnight raksasa
+PostgreSQL import/acceptance and website publication. Those later steps were
+not run or claimed by this worker.
