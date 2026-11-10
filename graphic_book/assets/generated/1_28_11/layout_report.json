@@ -1,0 +1,150 @@
+{
+  "passage_id": "1.28.11",
+  "preflight": false,
+  "canvas": [
+    2400,
+    2580
+  ],
+  "art_rectangle": [
+    48,
+    240,
+    2352,
+    2310
+  ],
+  "reading_panel": [
+    80,
+    1190,
+    1490,
+    2276
+  ],
+  "translation_rectangles": [
+    [
+      100,
+      1292,
+      1470,
+      2250
+    ]
+  ],
+  "reading_order": "one continuous top-to-bottom lower-left English field",
+  "translation_exact": "Indeed, it is said that even certain inanimate objects have spontaneously executed just vengeance against men; but of these the sword of Cambyses provided the finest and most celebrated example. There is a place by the sea in Piraeus known as Phreattys, where exiles, if another accusation is brought against them when they have gone abroad, make their defense from a ship to those listening from the shore. Tradition says Teucer first used such means to defend himself before Telamon, pleading that he had committed no wrong regarding the death of Ajax. Thus I have related these things for the benefit of those who take a serious interest in matters of judicial procedure.",
+  "translation_characters": 674,
+  "translation_words": 113,
+  "translation_utf8_sha256": "b0803f74a4d4dfd3d00b388e0b0c0e6015ef41e5a8bc05adde96d9018e38dce7",
+  "translation_matches_export": true,
+  "minimum_body_font_size": 46,
+  "body_font_sizes": [
+    51
+  ],
+  "padding": 24,
+  "text_blocks_checked": 6,
+  "fit_records": [
+    {
+      "name": "passage-id",
+      "rect": [
+        32,
+        16,
+        720,
+        116
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 44,
+      "text_bbox": [
+        56,
+        40,
+        487,
+        73
+      ],
+      "text": "PASSAGE 1.28.11"
+    },
+    {
+      "name": "title",
+      "rect": [
+        750,
+        16,
+        2368,
+        116
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 59,
+      "text_bbox": [
+        774,
+        40,
+        1897,
+        85
+      ],
+      "text": "A DEFENCE ACROSS THE WATER"
+    },
+    {
+      "name": "orientation",
+      "rect": [
+        32,
+        126,
+        2368,
+        214
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 34,
+      "text_bbox": [
+        56,
+        150,
+        1256,
+        184
+      ],
+      "text": "PIRAEUS | PHREATTYS | A SHIP AND THE LISTENING SHORE"
+    },
+    {
+      "name": "reading-heading",
+      "rect": [
+        100,
+        1202,
+        1470,
+        1284
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 34,
+      "text_bbox": [
+        124,
+        1226,
+        596,
+        1251
+      ],
+      "text": "PAUSANIAS\u2019S ACCOUNT"
+    },
+    {
+      "name": "translation",
+      "rect": [
+        100,
+        1292,
+        1470,
+        2250
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 51,
+      "text_bbox": [
+        124,
+        1316,
+        1437,
+        2220
+      ],
+      "text": "Indeed, it is said that even certain inanimate\nobjects have spontaneously executed just\nvengeance against men; but of these the sword of\nCambyses provided the finest and most celebrated\nexample. There is a place by the sea in Piraeus\nknown as Phreattys, where exiles, if another\naccusation is brought against them when they\nhave gone abroad, make their defense from a ship\nto those listening from the shore. Tradition says\nTeucer first used such means to defend himself\nbefore Telamon, pleading that he had committed\nno wrong regarding the death of Ajax. Thus I have\nrelated these things for the benefit of those who\ntake a serious interest in matters of judicial\nprocedure."
+    },
+    {
+      "name": "interpretive-caption",
+      "rect": [
+        48,
+        2340,
+        2352,
+        2540
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 34,
+      "text_bbox": [
+        72,
+        2364,
+        2210,
+        2437
+      ],
+      "text": "Phreattys, on the coast of Piraeus: an imagined defence spoken from a ship to listeners ashore. Shoreline, vessel, dress and\ngathering are conjectural; no precise court site or individual trial is identified."
+    }
+  ]
+}

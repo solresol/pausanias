@@ -1,0 +1,30 @@
+{
+  "passage_id": "1.28.11",
+  "characters": 674,
+  "words": 113,
+  "exported_english_sha256": "b0803f74a4d4dfd3d00b388e0b0c0e6015ef41e5a8bc05adde96d9018e38dce7",
+  "greek_english_source_sha256": "3b15f8e227b6edc461ec10bfd5415cdf9383a323413694692cb977465014de09",
+  "exact_source_matches_layout": true,
+  "wrapped_order_matches_source": true,
+  "all_actual_glyph_bounds_pass_padding": true,
+  "native_tesseract_psm_6": "Indeed, it is said that even certain inanimate\nobjects have spontaneously executed just\nvengeance against men; but of these the sword of\nCambyses provided the finest and most celebrated\nexample. There is a place by the sea in Piraeus\nknown as Phreattys, where exiles, if another\naccusation is brought against them when they\nhave gone abroad, make their defense from a ship\nto those listening from the shore. Tradition says\nTeucer first used such means to defend himself\nbefore Telamon, pleading that he had committed\nno wrong regarding the death of Ajax. Thus I have\nrelated these things for the benefit of those who\ntake a serious interest in matters of judicial\nprocedure.\n",
+  "ocr_exact_after_layout_whitespace_normalization": true,
+  "assets": {
+    "graphic_book/images/1/28/11.png": {
+      "bytes": 5519775,
+      "sha256": "ed253d9d630bf43c19f1eea7b4863cbcc28d24c9c65fd767538fa64075690c9d",
+      "dimensions": [
+        2400,
+        2580
+      ]
+    },
+    "graphic_book/assets/generated/1_28_11/phreattys.png": {
+      "bytes": 3267195,
+      "sha256": "9346759872691736ca99b9bb2cfe18035b2f815cd92304865245a412e05bd354",
+      "dimensions": [
+        1322,
+        1190
+      ]
+    }
+  }
+}
