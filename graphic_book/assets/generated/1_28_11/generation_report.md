@@ -43,5 +43,25 @@ errors. Canonical and reader image hashes equal. Browser/server stopped.
 All checks precede checkpointing. Shared upload/checkpoint is distinct from
 the next overnight PostgreSQL acceptance/import and public website publication.
 
-Source push, immutable result checkpoint, persisted replacement decision and
-claim-release evidence will be appended after their actual outcomes.
+## Pushed sources and successful immutable checkpoint
+
+Source commit a5f8230fdf3842ddb6508efa91343cd931cf5216 pushed safely to origin/main.
+Only scoped renderer, prompt, plan, review, layout/text audit and report are
+tracked. Binary images, workflow/session/SQLite, generated reader/PDF, global
+manifest and unrelated files excluded; Git status clean after source push.
+
+record-result returned **e9048e7c03284781ad320fb286a26393**, new 1.28.11,
+created 2026-11-10T01:09:06.318006+00:00. The helper uploaded the page and all
+eight supplied files (renderer, prompt, page plan, layout report, text audit,
+review, this report at source commit, and component PNG), downloaded each into
+fresh temporary paths and verified byte counts/SHA-256 before successful
+conditional SQLite checkpoint. Page key:
+workflow/results/e9048e7c03284781ad320fb286a26393/page.png.
+Shared illustration pointer now references this result; import_status remains
+**pending**, without claiming PostgreSQL acceptance or public publication.
+
+Persisted replacement draw **0.8346826040877957**, at or above 0.20.
+replacement-decision --outcome skipped succeeded and reused that exact draw;
+target null, outcome **skipped**, no candidate selected or replacement attempted.
+One new checkpoint in this run, no repeated checkpointed page. Fresh local
+snapshot now identifies 1.29.1 as next. Claim release to follow using finish.
