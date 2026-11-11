@@ -1,0 +1,126 @@
+{
+  "passage_id": "1.29.1",
+  "preflight": false,
+  "canvas": [
+    2600,
+    2400
+  ],
+  "art_rectangle": [
+    48,
+    596,
+    2552,
+    2200
+  ],
+  "translation_rectangles": [
+    [
+      64,
+      254,
+      2536,
+      564
+    ]
+  ],
+  "reading_order": "one continuous full-width English field above the image",
+  "translation_exact": "Near the Areopagus there is shown a ship constructed for the procession of the Panathenaia. Someone, I believe, has already made one even larger than this; but as for the ship at Delos, I know of none yet that has surpassed it, as it holds nine banks of rowers from the decks.",
+  "translation_characters": 276,
+  "translation_words": 52,
+  "translation_utf8_sha256": "38e7f19297a6ec6c8ba4d4087708f56031406c682912a171be373113a39ca068",
+  "translation_matches_export": true,
+  "minimum_body_font_size": 50,
+  "body_font_sizes": [
+    58
+  ],
+  "padding": 24,
+  "text_blocks_checked": 5,
+  "fit_records": [
+    {
+      "name": "passage-id",
+      "rect": [
+        32,
+        20,
+        720,
+        120
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 46,
+      "text_bbox": [
+        56,
+        44,
+        474,
+        79
+      ],
+      "text": "PASSAGE 1.29.1"
+    },
+    {
+      "name": "title",
+      "rect": [
+        810,
+        20,
+        2568,
+        120
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 62,
+      "text_bbox": [
+        834,
+        44,
+        1735,
+        91
+      ],
+      "text": "THE PANATHENAIC SHIP"
+    },
+    {
+      "name": "orientation",
+      "rect": [
+        32,
+        138,
+        2568,
+        226
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 36,
+      "text_bbox": [
+        56,
+        162,
+        1484,
+        198
+      ],
+      "text": "ATHENS | NEAR THE AREOPAGUS | A VESSEL FOR THE PROCESSION"
+    },
+    {
+      "name": "translation",
+      "rect": [
+        64,
+        254,
+        2536,
+        564
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 58,
+      "text_bbox": [
+        88,
+        278,
+        2498,
+        527
+      ],
+      "text": "Near the Areopagus there is shown a ship constructed for the procession of the\nPanathenaia. Someone, I believe, has already made one even larger than this; but\nas for the ship at Delos, I know of none yet that has surpassed it, as it holds nine\nbanks of rowers from the decks."
+    },
+    {
+      "name": "interpretive-caption",
+      "rect": [
+        48,
+        2220,
+        2552,
+        2376
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 36,
+      "text_bbox": [
+        72,
+        2244,
+        2444,
+        2321
+      ],
+      "text": "Athens, near the Areopagus: an interpretive display of the Panathenaic procession ship on land. Hull, rig, wheeled support and\nsetting are conjectural. The Delian ship mentioned for comparison is not depicted; no exact ship design or display site is claimed."
+    }
+  ]
+}

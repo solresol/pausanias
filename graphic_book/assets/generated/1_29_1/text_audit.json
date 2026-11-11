@@ -1,0 +1,36 @@
+{
+  "passage_id": "1.29.1",
+  "exact_export_equality": true,
+  "wrapped_word_order_equal": true,
+  "characters": 276,
+  "words": 52,
+  "english_utf8_sha256": "38e7f19297a6ec6c8ba4d4087708f56031406c682912a171be373113a39ca068",
+  "source_sha256": "4ce5cb526bb749c3ae2dea955736476aa8d6a4c803764a82d4cd55d337af288d",
+  "source_hash_independently_recomputed": true,
+  "actual_glyph_bounds_pass": true,
+  "blocks_checked": 5,
+  "body_font_sizes": [
+    58
+  ],
+  "padding": 24,
+  "ocr_text": "Near the Areopagus there is shown a ship constructed for the procession of the\nPanathenaia. Someone, I believe, has already made one even larger than this; but\nas for the ship at Delos, I know of none yet that has surpassed it, as it holds nine\nbanks of rowers from the decks.",
+  "ocr_exact_after_layout_whitespace_normalization": true,
+  "files": {
+    "graphic_book/images/1/29/1.png": {
+      "bytes": 6484440,
+      "sha256": "f66ff74e11473f08461b917d12605529a42f9630e45a23a8238b391404132cf6",
+      "dimensions": [
+        2600,
+        2400
+      ]
+    },
+    "graphic_book/assets/generated/1_29_1/procession_ship.png": {
+      "bytes": 3316809,
+      "sha256": "c68a6daa975ba02333f6c9643d812a4e299036c062e87f67628729cf0689869f",
+      "dimensions": [
+        1566,
+        1004
+      ]
+    }
+  }
+}
