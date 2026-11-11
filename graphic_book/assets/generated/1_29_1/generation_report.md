@@ -58,3 +58,26 @@ recorded below after their actual successful operations. Immutable uploaded
 review files retain the source-commit version. Shared uploaded/checkpointed
 results remain distinct from overnight raksasa PostgreSQL import/acceptance
 and public website publication; those later steps are not run by this worker.
+
+## Successful checkpoint and persisted replacement decision
+
+Source commit **aafb2da10b5d242d2a533221255c479d78e570a0** safely pushed to
+origin/main without force. Only seven scoped source/review files tracked;
+worktree clean after source push. record-result returned
+**d3f57741e83a4d27891b3db54dea03c2**, new 1.29.1, created
+2026-11-11T01:18:55.193513+00:00. The helper uploaded the PNG and all eight
+supporting files: renderer, exact prompt, plan, layout report, text audit,
+review, generation report and component PNG. Fresh read-back of every object
+verified byte counts/SHA-256 before successful conditional checkpoint.
+Result page key:
+workflow/results/d3f57741e83a4d27891b3db54dea03c2/page.png.
+Shared illustration pointer references the result. Import status **pending**;
+no claim of PostgreSQL acceptance or website publication.
+
+The single persisted replacement draw is **0.8666276787993129**, above 0.20.
+replacement-decision --outcome skipped succeeded and returned the identical
+draw. Target **null**, outcome **skipped**; no candidate selected, no old page
+changed. Exactly one new result in this run; next passage **1.29.2**.
+Snapshot generation 176 at 2026-11-11T01:19:28.595430+00:00 records this state.
+This checkpoint/decision record is committed and pushed before releasing the
+owned claim. Immutable S3 review files remain the source-commit version above.
