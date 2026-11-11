@@ -81,3 +81,22 @@ changed. Exactly one new result in this run; next passage **1.29.2**.
 Snapshot generation 176 at 2026-11-11T01:19:28.595430+00:00 records this state.
 This checkpoint/decision record is committed and pushed before releasing the
 owned claim. Immutable S3 review files remain the source-commit version above.
+
+## Released claim and terminal verification
+
+Checkpoint/decision report pushed in
+**77651cd3e632095b7c3c21e003bc406ba8a6d9b9** before finish.
+finish returned **Run completed and claim released**. Fresh read-only remote
+status: Active **[]**, generation **177**, updated
+2026-11-11T01:20:10.813138+00:00, 3,170 passages, 3,170 translations,
+190 illustration pointers, 26 accumulated results, next **1.29.2**.
+Local run row confirms completed at 2026-11-11T01:20:10.812723+00:00,
+draw 0.8666276787993129, target null, outcome skipped, exactly one new result.
+Session file removed by helper. No replacement, expired lease, conditional
+conflict, denied action or uncertain outcome remains. Source/report pushes
+were ordinary fast-forward updates; other repositories and bindings preserved.
+
+This final Git operational record supplements the immutable source-commit
+report uploaded with the page. Result d3f57741e83a4d27891b3db54dea03c2 remains
+**pending** for the next overnight raksasa PostgreSQL import/acceptance and
+website publication. Neither later operation was run or claimed here.
