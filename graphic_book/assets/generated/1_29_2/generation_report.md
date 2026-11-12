@@ -88,3 +88,24 @@ replacement art generated or original changed. Exactly one new result for this
 run. Snapshot generation **183**, updated **2026-11-12T01:22:39.725417+00:00**,
 records the checkpoint and decision. This record is committed/pushed before
 finish; actual claim-release evidence follows only after successful release.
+
+## Released claim and terminal verification
+
+Checkpoint/decision record pushed in
+**3c545541522b1e9c7aaacaf225de7d93a7098273** before finish.
+finish returned **Run completed and claim released**. Run completed at
+**2026-11-12T01:23:15.928467+00:00**. Fresh remote read-only status confirms
+**Active []**, snapshot generation **184**, updated
+**2026-11-12T01:23:15.929005+00:00**, 3,170 passages/translations,
+**191 illustration pointers**, 27 accumulated results and next **1.29.3**.
+Local run row is completed, exactly one new result **dd0e53466d5441e0a915161730c3d2c1**,
+draw **0.9924019642082975**, target null, outcome skipped. Active-worker count
+zero and helper session file removed. No expiry, conditional conflict, denied
+action or uncertain write outcome remains. All pushes were ordinary
+fast-forward updates; source scope, other repositories, bindings and schedules
+preserved. This final operational record is committed/pushed separately from
+the immutable checkpoint's source report version.
+
+Result **dd0e53466d5441e0a915161730c3d2c1** remains **pending** for overnight
+Raksasa PostgreSQL import/acceptance and public website publication. Neither
+later operation was run, scheduled anew or claimed completed here.
