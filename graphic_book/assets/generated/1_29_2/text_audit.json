@@ -1,0 +1,45 @@
+{
+  "passage_id": "1.29.2",
+  "source_export": "/workspace/pausanias/graphic_book/workflow/corpus.sqlite",
+  "translation_utf8_sha256": "e7f494d51a122a170457158464e179f88524381061dbfdc3abe166478d5a53da",
+  "exported_source_hash": "b3d05a2700b83607e8ae9d011c4709bd027434e7439b96189d76071cf9783e2a",
+  "exact_substring_reassembly": true,
+  "all_words_original_order": true,
+  "all_ten_actual_glyph_bounds_pass_24px_padding": true,
+  "body_font_size": 56,
+  "minimum_body_font_size": 46,
+  "native_tesseract_psm6": [
+    "The Athenians also have\nsanctuaries of gods and heroes,\nand tombs of men, both outside\nthe city in the demes and along\nthe roads. Nearest of these is the\nAcademy, once the estate of a\nprivate man, but in my time a\ngymnasium. As one descends into\nit, there is an enclosure sacred to\nArtemis, containing wooden\nimages of Ariste (\"Best\") and\nKalliste (\"Fairest\").",
+    "In my opinion\u2014and indeed the verses\nof Pamphos agree\u2014these are epithets\nof Artemis; I am aware that another\nstory is told about them, but I pass\nover it. There is also a small temple\ninto which, on appointed days of every\nyear, they bring the statue of Dionysus\nEleuthereus."
+  ],
+  "ocr_matches_exact_normalized_translation": true,
+  "files": {
+    "graphic_book/images/1/29/2.png": {
+      "bytes": 5814772,
+      "sha256": "e1580bb1b1adea6b30d28e061352c2c52439ab815f9b1f7886088a1b3a810dfb",
+      "dimensions": [
+        2600,
+        2700
+      ]
+    },
+    "graphic_book/assets/generated/1_29_2/artemis_enclosure.png": {
+      "bytes": 3527571,
+      "sha256": "ffea57def5453f0ebdca168b3ee7c9325b6acc147145f4775297213189f375d2",
+      "dimensions": [
+        1366,
+        1152
+      ]
+    },
+    "graphic_book/assets/generated/1_29_2/dionysus_temple.png": {
+      "bytes": 3573382,
+      "sha256": "fa84f082a62f71be311913a7c6a85c598e99b1a2648be6df8c5b7a34f021d39a",
+      "dimensions": [
+        1615,
+        974
+      ]
+    }
+  },
+  "independent_length_framed_greek_english_hash": "b3d05a2700b83607e8ae9d011c4709bd027434e7439b96189d76071cf9783e2a",
+  "source_hash_matches_export": true,
+  "reader_png_matches_canonical": true
+}

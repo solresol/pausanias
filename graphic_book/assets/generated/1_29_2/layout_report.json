@@ -1,0 +1,232 @@
+{
+  "passage_id": "1.29.2",
+  "preflight": false,
+  "canvas": [
+    2600,
+    2700
+  ],
+  "art_rectangles": [
+    [
+      48,
+      252,
+      1468,
+      1448
+    ],
+    [
+      1290,
+      1640,
+      2552,
+      2400
+    ]
+  ],
+  "translation_rectangles": [
+    [
+      1530,
+      354,
+      2552,
+      1450
+    ],
+    [
+      48,
+      1740,
+      1216,
+      2490
+    ]
+  ],
+  "reading_order": "1: upper right, then 2: lower left; each top-to-bottom",
+  "translation_exact": "The Athenians also have sanctuaries of gods and heroes, and tombs of men, both outside the city in the demes and along the roads. Nearest of these is the Academy, once the estate of a private man, but in my time a gymnasium. As one descends into it, there is an enclosure sacred to Artemis, containing wooden images of Ariste (\"Best\") and Kalliste (\"Fairest\"). In my opinion\u2014and indeed the verses of Pamphos agree\u2014these are epithets of Artemis; I am aware that another story is told about them, but I pass over it. There is also a small temple into which, on appointed days of every year, they bring the statue of Dionysus Eleuthereus.",
+  "translation_chunks": [
+    "The Athenians also have sanctuaries of gods and heroes, and tombs of men, both outside the city in the demes and along the roads. Nearest of these is the Academy, once the estate of a private man, but in my time a gymnasium. As one descends into it, there is an enclosure sacred to Artemis, containing wooden images of Ariste (\"Best\") and Kalliste (\"Fairest\").",
+    "In my opinion\u2014and indeed the verses of Pamphos agree\u2014these are epithets of Artemis; I am aware that another story is told about them, but I pass over it. There is also a small temple into which, on appointed days of every year, they bring the statue of Dionysus Eleuthereus."
+  ],
+  "translation_characters": 635,
+  "translation_words": 113,
+  "translation_utf8_sha256": "e7f494d51a122a170457158464e179f88524381061dbfdc3abe166478d5a53da",
+  "translation_matches_export": true,
+  "minimum_body_font_size": 46,
+  "body_font_size": 56,
+  "padding": 24,
+  "text_blocks_checked": 10,
+  "fit_records": [
+    {
+      "name": "passage-id",
+      "rect": [
+        32,
+        20,
+        730,
+        120
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 46,
+      "text_bbox": [
+        56,
+        44,
+        474,
+        79
+      ],
+      "text": "PASSAGE 1.29.2"
+    },
+    {
+      "name": "title",
+      "rect": [
+        790,
+        20,
+        2568,
+        120
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 58,
+      "text_bbox": [
+        814,
+        44,
+        1927,
+        88
+      ],
+      "text": "ON THE ROAD TO THE ACADEMY"
+    },
+    {
+      "name": "orientation",
+      "rect": [
+        32,
+        138,
+        2568,
+        226
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 34,
+      "text_bbox": [
+        56,
+        162,
+        1561,
+        196
+      ],
+      "text": "ATHENS | APPROACH TO THE ACADEMY | SANCTUARIES OUTSIDE THE CITY"
+    },
+    {
+      "name": "reading-heading-1",
+      "rect": [
+        1530,
+        252,
+        2552,
+        342
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 39,
+      "text_bbox": [
+        1554,
+        276,
+        2185,
+        305
+      ],
+      "text": "1 THE SACRED ENCLOSURE"
+    },
+    {
+      "name": "reading-heading-2",
+      "rect": [
+        48,
+        1640,
+        1216,
+        1730
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 39,
+      "text_bbox": [
+        72,
+        1664,
+        702,
+        1693
+      ],
+      "text": "2 EPITHETS AND A TEMPLE"
+    },
+    {
+      "name": "translation-1",
+      "rect": [
+        1530,
+        354,
+        2552,
+        1450
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 56,
+      "text_bbox": [
+        1554,
+        378,
+        2515,
+        1155
+      ],
+      "text": "The Athenians also have\nsanctuaries of gods and heroes,\nand tombs of men, both outside\nthe city in the demes and along\nthe roads. Nearest of these is the\nAcademy, once the estate of a\nprivate man, but in my time a\ngymnasium. As one descends into\nit, there is an enclosure sacred to\nArtemis, containing wooden\nimages of Ariste (\"Best\") and\nKalliste (\"Fairest\")."
+    },
+    {
+      "name": "translation-2",
+      "rect": [
+        48,
+        1740,
+        1216,
+        2490
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 56,
+      "text_bbox": [
+        72,
+        1764,
+        1172,
+        2270
+      ],
+      "text": "In my opinion\u2014and indeed the verses\nof Pamphos agree\u2014these are epithets\nof Artemis; I am aware that another\nstory is told about them, but I pass\nover it. There is also a small temple\ninto which, on appointed days of every\nyear, they bring the statue of Dionysus\nEleuthereus."
+    },
+    {
+      "name": "artemis-caption",
+      "rect": [
+        48,
+        1464,
+        1468,
+        1590
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 34,
+      "text_bbox": [
+        72,
+        1488,
+        1403,
+        1521
+      ],
+      "text": "Artemis: imagined wooden images of Ariste and Kalliste within an enclosure."
+    },
+    {
+      "name": "dionysus-caption",
+      "rect": [
+        1290,
+        2416,
+        2552,
+        2524
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 34,
+      "text_bbox": [
+        1314,
+        2440,
+        2379,
+        2473
+      ],
+      "text": "The small temple for the yearly visit of Dionysus Eleuthereus."
+    },
+    {
+      "name": "interpretive-note",
+      "rect": [
+        48,
+        2552,
+        2552,
+        2680
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 34,
+      "text_bbox": [
+        72,
+        2576,
+        2523,
+        2649
+      ],
+      "text": "Separate interpretive scenes, not a surveyed view. Image forms, precinct, temple, dress and placement are conjectural; the annual transfer is\nnot depicted."
+    }
+  ]
+}
