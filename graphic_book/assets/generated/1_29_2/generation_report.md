@@ -62,3 +62,29 @@ all eight source/review files and both component PNGs, in addition to final PNG.
 Actual pushed commit, result ID, S3 readback/checkpoint, persisted replacement
 draw/outcome and release will be appended after they succeed. No daytime claim
 of overnight Raksasa import/acceptance or public website publication is made.
+
+## Successful checkpoint and persisted replacement outcome
+
+Eight scoped source/review files committed and safely pushed to origin/main in
+**bcf571e331d9d212944d8e8c782a3939a14b2d94**. Worktree clean after source push.
+record-result succeeded at **2026-11-12T01:22:03.640285+00:00**, result
+**dd0e53466d5441e0a915161730c3d2c1**, new **1.29.2**. Immutable page key:
+**workflow/results/dd0e53466d5441e0a915161730c3d2c1/page.png**.
+Helper uploaded final PNG plus all ten supporting files (eight text/source/
+review files and two component PNGs), read every object back into fresh
+temporary paths, verified sizes and SHA-256 hashes, then conditionally
+checkpointed the shared catalogue. The ten result_files rows and illustration
+pointer match source commit and final/component hashes above.
+
+Import status **pending**. This is a durable shared checkpoint, not completed
+PostgreSQL acceptance or public website publication. Immutable S3 report/review
+objects retain their source-commit versions; this Git operational record
+supplements them without overwriting their keys.
+
+Single persisted replacement draw **0.9924019642082975**, above 0.20.
+replacement-decision --outcome skipped succeeded and returned the identical
+draw. Target **null**, outcome **skipped**. No older candidate selected,
+replacement art generated or original changed. Exactly one new result for this
+run. Snapshot generation **183**, updated **2026-11-12T01:22:39.725417+00:00**,
+records the checkpoint and decision. This record is committed/pushed before
+finish; actual claim-release evidence follows only after successful release.
