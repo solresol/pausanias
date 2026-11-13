@@ -59,3 +59,31 @@ plus canonical page, with immutable read-back size/SHA-256 verification.
 Pushed source SHA, checkpoint ID, replacement draw/outcome and claim release
 will be appended only after actual success. Raksasa import and public website
 publication remain separate future work on the overnight pipeline.
+
+## Successful checkpoint and persisted replacement outcome
+
+Eight scoped text/source files committed and pushed to origin/main in
+**2d064402add96d0efc6649f79391d89b0012ef04**. Work branch preserved, worktree
+clean after push. record-result succeeded **2026-11-13T01:20:25.987214+00:00**,
+new result **8c4a18bf2c4042ec90da3dc017a57265**, passage **1.29.3**.
+Immutable page key:
+**workflow/results/8c4a18bf2c4042ec90da3dc017a57265/page.png** in
+**s3://pausanias-graphic-book-assets-849621205733/**.
+
+Helper uploaded canonical PNG plus all **13** supporting files: eight
+text/source/review files and five raster component/review images. Every
+object read back into fresh temporary paths and size/SHA-256 verified before
+the successful conditional catalogue checkpoint. All thirteen result_files
+rows present; illustration pointer, hashes, size and full source commit match.
+Exactly one new result recorded in this run. Import status **pending**.
+This is a durable shared checkpoint; PostgreSQL acceptance and public website
+promotion have not been performed here. Immutable S3 report/review files
+retain their source-commit contents; this Git operational supplement does not
+overwrite them or duplicate the checkpoint.
+
+One persisted replacement draw **0.22081244747911666**, above 0.20. Outcome
+**skipped** persisted with the identical returned draw; target **null**.
+No replacement target selection or art, no accepted original changed.
+Snapshot generation **190**, updated **2026-11-13T01:20:52.039328+00:00**,
+records the new page and outcome. This operational record is committed/pushed
+before finish; claim release is reported only after its actual success.
