@@ -1,0 +1,206 @@
+{
+  "passage_id": "1.29.3",
+  "preflight": false,
+  "canvas": [
+    3000,
+    2460
+  ],
+  "art_rectangle": [
+    810,
+    280,
+    2190,
+    2200
+  ],
+  "translation_rectangles": [
+    [
+      50,
+      602,
+      750,
+      1880
+    ],
+    [
+      2250,
+      462,
+      2950,
+      2110
+    ]
+  ],
+  "reading_order": "1: left wing top-to-bottom, then 2: right wing top-to-bottom",
+  "translation_exact": "Such are the sanctuaries hereabouts; and among tombs, first is that of Thrasybulus, son of Lycus, a man who surpassed in every excellence all Athenians noteworthy both before and after him\u2014my following brief statement will sufficiently confirm this assertion: for it was he who, first setting out from Thebes with only sixty men, overthrew the tyranny of those called the Thirty, and persuaded the Athenians, who were then afflicted with civil strife, to reconcile and abide by the agreements made. This tomb stands first; after it come those of Pericles, Chabrias, and Phormio.",
+  "translation_chunks": [
+    "Such are the sanctuaries hereabouts; and among tombs, first is that of Thrasybulus, son of Lycus, a man who surpassed in every excellence all Athenians noteworthy both before and after him\u2014my following brief statement will sufficiently confirm this assertion:",
+    "for it was he who, first setting out from Thebes with only sixty men, overthrew the tyranny of those called the Thirty, and persuaded the Athenians, who were then afflicted with civil strife, to reconcile and abide by the agreements made. This tomb stands first; after it come those of Pericles, Chabrias, and Phormio."
+  ],
+  "translation_characters": 578,
+  "translation_words": 93,
+  "translation_utf8_sha256": "241bf2d892e48f02be319707dbaee1ff6c3a1041ecd357fe629ec56813df4020",
+  "translation_matches_export": true,
+  "minimum_body_font_size": 48,
+  "body_font_size": 56,
+  "padding": 24,
+  "text_blocks_checked": 9,
+  "fit_records": [
+    {
+      "name": "passage-id",
+      "rect": [
+        32,
+        20,
+        760,
+        130
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 52,
+      "text_bbox": [
+        56,
+        44,
+        529,
+        84
+      ],
+      "text": "PASSAGE 1.29.3"
+    },
+    {
+      "name": "title",
+      "rect": [
+        800,
+        20,
+        2968,
+        130
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 66,
+      "text_bbox": [
+        824,
+        44,
+        2294,
+        94
+      ],
+      "text": "THRASYBULUS AND RECONCILIATION"
+    },
+    {
+      "name": "orientation",
+      "rect": [
+        32,
+        146,
+        2968,
+        246
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 38,
+      "text_bbox": [
+        56,
+        170,
+        1998,
+        208
+      ],
+      "text": "ATHENS | THE TOMBS ON THE APPROACH TO THE ACADEMY | AN INTERPRETIVE VIEW"
+    },
+    {
+      "name": "reading-heading-1",
+      "rect": [
+        50,
+        450,
+        750,
+        570
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 43,
+      "text_bbox": [
+        74,
+        474,
+        557,
+        506
+      ],
+      "text": "1 THE FIRST TOMB"
+    },
+    {
+      "name": "reading-heading-2",
+      "rect": [
+        2250,
+        310,
+        2950,
+        430
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 43,
+      "text_bbox": [
+        2274,
+        334,
+        2772,
+        366
+      ],
+      "text": "2 THE RECONCILER"
+    },
+    {
+      "name": "translation-1",
+      "rect": [
+        50,
+        602,
+        750,
+        1880
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 56,
+      "text_bbox": [
+        74,
+        626,
+        701,
+        1528
+      ],
+      "text": "Such are the\nsanctuaries\nhereabouts; and\namong tombs, first is\nthat of Thrasybulus,\nson of Lycus, a man\nwho surpassed in\nevery excellence all\nAthenians noteworthy\nboth before and after\nhim\u2014my following\nbrief statement will\nsufficiently confirm\nthis assertion:"
+    },
+    {
+      "name": "translation-2",
+      "rect": [
+        2250,
+        462,
+        2950,
+        2110
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 56,
+      "text_bbox": [
+        2274,
+        486,
+        2925,
+        1520
+      ],
+      "text": "for it was he who, first\nsetting out from\nThebes with only sixty\nmen, overthrew the\ntyranny of those called\nthe Thirty, and\npersuaded the\nAthenians, who were\nthen afflicted with\ncivil strife, to\nreconcile and abide by\nthe agreements made.\nThis tomb stands first;\nafter it come those of\nPericles, Chabrias,\nand Phormio."
+    },
+    {
+      "name": "art-caption",
+      "rect": [
+        810,
+        2216,
+        2190,
+        2368
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 36,
+      "text_bbox": [
+        834,
+        2240,
+        2157,
+        2317
+      ],
+      "text": "An imagined monument for Thrasybulus beside the tomb-lined Academy\napproach."
+    },
+    {
+      "name": "interpretive-note",
+      "rect": [
+        50,
+        2374,
+        2950,
+        2454
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 30,
+      "text_bbox": [
+        74,
+        2398,
+        1878,
+        2427
+      ],
+      "text": "Monument form, road, other tombs, dress and placement are conjectural; no surviving tomb or exact site is identified."
+    }
+  ]
+}

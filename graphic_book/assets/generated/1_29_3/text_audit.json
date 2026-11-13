@@ -1,0 +1,86 @@
+{
+  "passage_id": "1.29.3",
+  "english_utf8_sha256": "241bf2d892e48f02be319707dbaee1ff6c3a1041ecd357fe629ec56813df4020",
+  "source_sha256": "ea2b95b5639ff90723d7e29130658239e887df4bc55ccc76d4f71f1d95ca4403",
+  "exact_reassembly": true,
+  "body_font_size": 56,
+  "padding": 24,
+  "fields": [
+    {
+      "name": "passage-id",
+      "ocr": "PASSAGE 1.29.3",
+      "expected": "PASSAGE 1.29.3",
+      "exact_after_layout_whitespace": true,
+      "padded_glyph_bounds_pass": true
+    },
+    {
+      "name": "title",
+      "ocr": "THRASYBULUS AND RECONCILIATION",
+      "expected": "THRASYBULUS AND RECONCILIATION",
+      "exact_after_layout_whitespace": true,
+      "padded_glyph_bounds_pass": true
+    },
+    {
+      "name": "orientation",
+      "ocr": "ATHENS | THE TOMBS ON THE APPROACH TO THE ACADEMY | AN INTERPRETIVE VIEW",
+      "expected": "ATHENS | THE TOMBS ON THE APPROACH TO THE ACADEMY | AN INTERPRETIVE VIEW",
+      "exact_after_layout_whitespace": true,
+      "padded_glyph_bounds_pass": true
+    },
+    {
+      "name": "reading-heading-1",
+      "ocr": "1 THE FIRST TOMB",
+      "expected": "1 THE FIRST TOMB",
+      "exact_after_layout_whitespace": true,
+      "padded_glyph_bounds_pass": true
+    },
+    {
+      "name": "reading-heading-2",
+      "ocr": "2 THE RECONCILER",
+      "expected": "2 THE RECONCILER",
+      "exact_after_layout_whitespace": true,
+      "padded_glyph_bounds_pass": true
+    },
+    {
+      "name": "translation-1",
+      "ocr": "Such are the sanctuaries hereabouts; and among tombs, first is that of Thrasybulus, son of Lycus, a man who surpassed in every excellence all Athenians noteworthy both before and after him\u2014my following brief statement will sufficiently confirm this assertion:",
+      "expected": "Such are the sanctuaries hereabouts; and among tombs, first is that of Thrasybulus, son of Lycus, a man who surpassed in every excellence all Athenians noteworthy both before and after him\u2014my following brief statement will sufficiently confirm this assertion:",
+      "exact_after_layout_whitespace": true,
+      "padded_glyph_bounds_pass": true
+    },
+    {
+      "name": "translation-2",
+      "ocr": "for it was he who, first setting out from Thebes with only sixty men, overthrew the tyranny of those called the Thirty, and persuaded the Athenians, who were then afflicted with civil strife, to reconcile and abide by the agreements made. This tomb stands first; after it come those of Pericles, Chabrias, and Phormio.",
+      "expected": "for it was he who, first setting out from Thebes with only sixty men, overthrew the tyranny of those called the Thirty, and persuaded the Athenians, who were then afflicted with civil strife, to reconcile and abide by the agreements made. This tomb stands first; after it come those of Pericles, Chabrias, and Phormio.",
+      "exact_after_layout_whitespace": true,
+      "padded_glyph_bounds_pass": true
+    },
+    {
+      "name": "art-caption",
+      "ocr": "An imagined monument for Thrasybulus beside the tomb-lined Academy approach.",
+      "expected": "An imagined monument for Thrasybulus beside the tomb-lined Academy approach.",
+      "exact_after_layout_whitespace": true,
+      "padded_glyph_bounds_pass": true
+    },
+    {
+      "name": "interpretive-note",
+      "ocr": "Monument form, road, other tombs, dress and placement are conjectural; no surviving tomb or exact site is identified.",
+      "expected": "Monument form, road, other tombs, dress and placement are conjectural; no surviving tomb or exact site is identified.",
+      "exact_after_layout_whitespace": true,
+      "padded_glyph_bounds_pass": true
+    }
+  ],
+  "all_ocr_exact": true,
+  "thrasybulus_tomb.png": {
+    "bytes": 3294399,
+    "sha256": "2a856cab621645e5a06cca479666cc791a4a72cb86124345a2321b8bf3727099"
+  },
+  "final_png": {
+    "bytes": 5020014,
+    "sha256": "da61b53f94408eb6bcc6f535b014cbd673d81c771fe9026fd0d09800f51288ef",
+    "size": [
+      3000,
+      2460
+    ]
+  }
+}
