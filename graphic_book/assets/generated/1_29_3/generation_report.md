@@ -87,3 +87,14 @@ No replacement target selection or art, no accepted original changed.
 Snapshot generation **190**, updated **2026-11-13T01:20:52.039328+00:00**,
 records the new page and outcome. This operational record is committed/pushed
 before finish; claim release is reported only after its actual success.
+
+## Claim released and terminal verification
+
+Checkpoint/decision record pushed as
+**72b320915ad7cba045d392145ed440f8963194c6** before finish.
+finish returned **Run completed and claim released**. Fresh read-only remote
+status verifies **Active: []**, snapshot generation **191**, updated
+**2026-11-13T01:21:27.127574+00:00**, 3,170 passages/translations,
+**192 illustration pointers**, 28 accumulated results, and next **1.29.4**.
+No additional page generated and no replacement checkpoint. The released run
+retains its one new page, skipped decision and pending overnight import.
