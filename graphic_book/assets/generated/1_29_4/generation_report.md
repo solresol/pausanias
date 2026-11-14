@@ -63,3 +63,29 @@ rasters, plus canonical page. Pushed SHA, immutable result ID, S3 read-back,
 persisted replacement draw/outcome and claim release will be recorded only
 after actual success. Raksasa independently imports and verifies overnight;
 shared checkpoint is distinct from public website promotion.
+
+## Successful checkpoint and persisted decision
+
+Eight scoped text/source files committed and pushed to origin/main at
+**9b2b5800db5d455e61b5e7168bf04bc94e095e91**; work branch preserved and
+worktree clean after push. record-result succeeded at
+**2026-11-14T01:10:35.020222+00:00**, result
+**436b4dd9c54b4663a7d7461b26b1cb6a**, passage **1.29.4**.
+Immutable PNG key **workflow/results/436b4dd9c54b4663a7d7461b26b1cb6a/page.png**
+in **s3://pausanias-graphic-book-assets-849621205733/**.
+
+Helper uploaded the canonical page and all **14** supporting files (eight
+source/review/audit files and six raster component/review files), read every
+object back into fresh temporary paths, verified size/SHA-256, then
+conditionally checkpointed. All 14 result_files rows present. Catalogue
+pointer, page size/hash, source hash and full pushed source SHA match.
+Exactly one new result in this run, import status **pending**. No duplicate
+checkpoint. Immutable reports retain their source-commit contents; this Git
+operational supplement does not overwrite uploaded objects.
+
+One persisted replacement draw **0.3654696867399063**, above 0.20. Calling
+replacement-decision --outcome skipped returned the identical draw and
+persisted **skipped**, with target **null**. No replacement selection or art.
+This operational record is committed/pushed before finish; claim release
+will be recorded after actual success. PostgreSQL import and public website
+publication remain separate future overnight operations on Raksasa.
