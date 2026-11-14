@@ -89,3 +89,16 @@ persisted **skipped**, with target **null**. No replacement selection or art.
 This operational record is committed/pushed before finish; claim release
 will be recorded after actual success. PostgreSQL import and public website
 publication remain separate future overnight operations on Raksasa.
+
+## Claim released and terminal verification
+
+Checkpoint/decision supplement pushed as
+**4c1e601dc14bf606882ff18ff17873f164eb1607** before finish. finish returned
+**Run completed and claim released** at **2026-11-14T01:11:35.060774+00:00**.
+Fresh read-only remote status verifies **Active: []**, generation **198**,
+updated **2026-11-14T01:11:35.061123+00:00**, 3,170 passages/translations,
+**193 illustration pointers**, 29 accumulated results and next **1.29.5**.
+Local run is completed, worker table empty and session removed. Exactly one
+new result retained, replacement skipped with null target, import pending.
+No further page generated and no public promotion claimed. No remaining
+production blocker; overnight import/publication is the normal next stage.
