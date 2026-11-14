@@ -1,0 +1,90 @@
+{
+  "passage_id": "1.29.4",
+  "english_utf8_sha256": "3843194ee3483d6cb2ab47b0da8a7eeedfd63296aef6d397718840a3ca684015",
+  "source_sha256": "a41d13793e62a8e527b77ee3187fc55294c3cc51fe8873de603a0d3b4cd2e4b7",
+  "exact_reassembly": true,
+  "body_font_size": 58,
+  "padding": 24,
+  "fields": [
+    {
+      "name": "passage-id",
+      "ocr": "PASSAGE 1.29.4",
+      "expected": "PASSAGE 1.29.4",
+      "exact_after_layout_whitespace": true,
+      "padded_glyph_bounds_pass": true
+    },
+    {
+      "name": "title",
+      "ocr": "THE ATHENIAN WAR DEAD",
+      "expected": "THE ATHENIAN WAR DEAD",
+      "exact_after_layout_whitespace": true,
+      "padded_glyph_bounds_pass": true
+    },
+    {
+      "name": "orientation",
+      "ocr": "ATHENS | ROAD TO THE ACADEMY | COLLECTIVE REMEMBRANCE",
+      "expected": "ATHENS | ROAD TO THE ACADEMY | COLLECTIVE REMEMBRANCE",
+      "exact_after_layout_whitespace": true,
+      "padded_glyph_bounds_pass": true
+    },
+    {
+      "name": "reading-heading-1",
+      "ocr": "1 THE MONUMENT AND THE MARATHON EXCEPTION",
+      "expected": "1 THE MONUMENT AND THE MARATHON EXCEPTION",
+      "exact_after_layout_whitespace": true,
+      "padded_glyph_bounds_pass": true
+    },
+    {
+      "name": "reading-heading-2",
+      "ocr": "2 THE ROAD, THE PILLARS AND THE FIRST BURIALS",
+      "expected": "2 THE ROAD, THE PILLARS AND THE FIRST BURIALS",
+      "exact_after_layout_whitespace": true,
+      "padded_glyph_bounds_pass": true
+    },
+    {
+      "name": "translation-1",
+      "ocr": "There is also a monument for all Athenians who happened to fall both in naval engagements and land battles, except for those who fought at Marathon; for these have tombs at the place itself because of their bravery.",
+      "expected": "There is also a monument for all Athenians who happened to fall both in naval engagements and land battles, except for those who fought at Marathon; for these have tombs at the place itself because of their bravery.",
+      "exact_after_layout_whitespace": true,
+      "padded_glyph_bounds_pass": true
+    },
+    {
+      "name": "translation-2",
+      "ocr": "The others lie along the road to the Academy, and on their graves stand pillars bearing the names and deme of each man. The first to be buried were those who, while once victorious in Thrace up to the region of Drabeskos, were unexpectedly attacked and killed by the Edonians.",
+      "expected": "The others lie along the road to the Academy, and on their graves stand pillars bearing the names and deme of each man. The first to be buried were those who, while once victorious in Thrace up to the region of Drabeskos, were unexpectedly attacked and killed by the Edonians.",
+      "exact_after_layout_whitespace": true,
+      "padded_glyph_bounds_pass": true
+    },
+    {
+      "name": "art-caption",
+      "ocr": "The Academy road imagined from above: groups of grave markers beside the approach. The Marathon graves and the fighting in Thrace are not depicted.",
+      "expected": "The Academy road imagined from above: groups of grave markers beside the approach. The Marathon graves and the fighting in Thrace are not depicted.",
+      "exact_after_layout_whitespace": true,
+      "padded_glyph_bounds_pass": true
+    },
+    {
+      "name": "interpretive-note",
+      "ocr": "Road, plots, pillars, visitors and landscape are conjectural; no exact grave plan, inscription or surviving monument is reconstructed.",
+      "expected": "Road, plots, pillars, visitors and landscape are conjectural; no exact grave plan, inscription or surviving monument is reconstructed.",
+      "exact_after_layout_whitespace": true,
+      "padded_glyph_bounds_pass": true
+    }
+  ],
+  "all_ocr_exact": true,
+  "academy_road.png": {
+    "bytes": 3553033,
+    "sha256": "364056ff1af477e63d1ed6392be33c80bfa7ce90814510ca01cc38730fb12488",
+    "size": [
+      1783,
+      882
+    ]
+  },
+  "final_png": {
+    "bytes": 5694258,
+    "sha256": "3d86621475aba5c95bc1b35980a678c3c1c9c4e1e83346b04e80244cbaa07360",
+    "size": [
+      2600,
+      2780
+    ]
+  }
+}

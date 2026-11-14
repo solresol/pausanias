@@ -1,0 +1,206 @@
+{
+  "passage_id": "1.29.4",
+  "preflight": false,
+  "canvas": [
+    2600,
+    2780
+  ],
+  "art_rectangle": [
+    56,
+    730,
+    2544,
+    1960
+  ],
+  "translation_rectangles": [
+    [
+      64,
+      328,
+      2536,
+      690
+    ],
+    [
+      64,
+      2210,
+      2536,
+      2650
+    ]
+  ],
+  "reading_order": "1: upper full-width prose, then 2: lower full-width prose",
+  "translation_exact": "There is also a monument for all Athenians who happened to fall both in naval engagements and land battles, except for those who fought at Marathon; for these have tombs at the place itself because of their bravery. The others lie along the road to the Academy, and on their graves stand pillars bearing the names and deme of each man. The first to be buried were those who, while once victorious in Thrace up to the region of Drabeskos, were unexpectedly attacked and killed by the Edonians.",
+  "translation_chunks": [
+    "There is also a monument for all Athenians who happened to fall both in naval engagements and land battles, except for those who fought at Marathon; for these have tombs at the place itself because of their bravery.",
+    "The others lie along the road to the Academy, and on their graves stand pillars bearing the names and deme of each man. The first to be buried were those who, while once victorious in Thrace up to the region of Drabeskos, were unexpectedly attacked and killed by the Edonians."
+  ],
+  "translation_characters": 492,
+  "translation_words": 88,
+  "translation_utf8_sha256": "3843194ee3483d6cb2ab47b0da8a7eeedfd63296aef6d397718840a3ca684015",
+  "translation_matches_export": true,
+  "minimum_body_font_size": 48,
+  "body_font_size": 58,
+  "padding": 24,
+  "text_blocks_checked": 9,
+  "fit_records": [
+    {
+      "name": "passage-id",
+      "rect": [
+        32,
+        20,
+        780,
+        130
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 54,
+      "text_bbox": [
+        56,
+        44,
+        547,
+        85
+      ],
+      "text": "PASSAGE 1.29.4"
+    },
+    {
+      "name": "title",
+      "rect": [
+        814,
+        20,
+        2568,
+        130
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 68,
+      "text_bbox": [
+        838,
+        44,
+        1904,
+        94
+      ],
+      "text": "THE ATHENIAN WAR DEAD"
+    },
+    {
+      "name": "orientation",
+      "rect": [
+        32,
+        146,
+        2568,
+        234
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 39,
+      "text_bbox": [
+        56,
+        170,
+        1555,
+        209
+      ],
+      "text": "ATHENS | ROAD TO THE ACADEMY | COLLECTIVE REMEMBRANCE"
+    },
+    {
+      "name": "reading-heading-1",
+      "rect": [
+        64,
+        246,
+        2536,
+        322
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 37,
+      "text_bbox": [
+        88,
+        270,
+        1245,
+        297
+      ],
+      "text": "1 THE MONUMENT AND THE MARATHON EXCEPTION"
+    },
+    {
+      "name": "reading-heading-2",
+      "rect": [
+        64,
+        2120,
+        2536,
+        2200
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 36,
+      "text_bbox": [
+        88,
+        2144,
+        1193,
+        2176
+      ],
+      "text": "2 THE ROAD, THE PILLARS AND THE FIRST BURIALS"
+    },
+    {
+      "name": "translation-1",
+      "rect": [
+        64,
+        328,
+        2536,
+        690
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 58,
+      "text_bbox": [
+        88,
+        352,
+        2392,
+        545
+      ],
+      "text": "There is also a monument for all Athenians who happened to fall both in naval\nengagements and land battles, except for those who fought at Marathon; for\nthese have tombs at the place itself because of their bravery."
+    },
+    {
+      "name": "translation-2",
+      "rect": [
+        64,
+        2210,
+        2536,
+        2650
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 58,
+      "text_bbox": [
+        88,
+        2234,
+        2499,
+        2495
+      ],
+      "text": "The others lie along the road to the Academy, and on their graves stand pillars\nbearing the names and deme of each man. The first to be buried were those who,\nwhile once victorious in Thrace up to the region of Drabeskos, were unexpectedly\nattacked and killed by the Edonians."
+    },
+    {
+      "name": "art-caption",
+      "rect": [
+        56,
+        1980,
+        2544,
+        2114
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 37,
+      "text_bbox": [
+        80,
+        2004,
+        2508,
+        2084
+      ],
+      "text": "The Academy road imagined from above: groups of grave markers beside the approach. The Marathon graves and the fighting in\nThrace are not depicted."
+    },
+    {
+      "name": "interpretive-note",
+      "rect": [
+        56,
+        2664,
+        2544,
+        2760
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 32,
+      "text_bbox": [
+        80,
+        2688,
+        2232,
+        2719
+      ],
+      "text": "Road, plots, pillars, visitors and landscape are conjectural; no exact grave plan, inscription or surviving monument is reconstructed."
+    }
+  ]
+}

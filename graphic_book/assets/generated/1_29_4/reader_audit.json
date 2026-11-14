@@ -1,0 +1,28 @@
+{
+  "http_status": 200,
+  "position": "Passage 1.29.4 (193 of 193)",
+  "image": {
+    "width": 2600,
+    "height": 2780,
+    "complete": true,
+    "src": "../../images/1/29/4.png?v=20261114010655"
+  },
+  "toolbar": "Previous\nPassage 1.29.4 (193 of 193)\nNext",
+  "nav": "\n            <a class=\"button secondary\" href=\"3.html\">Previous</a>\n            <div class=\"reader-position\">Passage 1.29.4 (193 of 193)</div>\n            <span class=\"button secondary disabled\">Next</span>\n        ",
+  "links": [
+    {
+      "text": "Formal Translation",
+      "href": "../../../translation/1/29/4.html"
+    },
+    {
+      "text": "Contents",
+      "href": "../../index.html"
+    },
+    {
+      "text": "Download PDF",
+      "href": "../../pausanias-graphic-book.pdf?v=20261114010655"
+    }
+  ],
+  "page_errors": [],
+  "image_hash_matches_canonical": true
+}
