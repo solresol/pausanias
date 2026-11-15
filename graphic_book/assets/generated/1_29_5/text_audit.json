@@ -1,0 +1,160 @@
+{
+  "passage_id": "1.29.5",
+  "engine": "Tesseract native-resolution psm 6",
+  "translation_matches_export_byte_exact": true,
+  "source_hash_matches": true,
+  "source_sha256": "2b80f964e7faf2e1b613d30bf9c6c24d4aa1499efa084f83e4ab3a569d6989a4",
+  "fields": [
+    {
+      "name": "passage-id",
+      "expected": "PASSAGE 1.29.5",
+      "ocr": "PASSAGE 1.29.5",
+      "exact_after_layout_whitespace": true,
+      "font_size": 58,
+      "rect": [
+        24,
+        16,
+        820,
+        136
+      ],
+      "bbox": [
+        50,
+        42,
+        578,
+        86
+      ]
+    },
+    {
+      "name": "title",
+      "expected": "THE THIRD EXPEDITION",
+      "ocr": "THE THIRD EXPEDITION",
+      "exact_after_layout_whitespace": true,
+      "font_size": 74,
+      "rect": [
+        1000,
+        16,
+        2976,
+        136
+      ],
+      "bbox": [
+        1026,
+        42,
+        2091,
+        98
+      ]
+    },
+    {
+      "name": "orientation",
+      "expected": "THRACE | ATHENIAN EXPEDITION | A REPORTED STORM",
+      "ocr": "THRACE | ATHENIAN EXPEDITION | A REPORTED STORM",
+      "exact_after_layout_whitespace": true,
+      "font_size": 36,
+      "rect": [
+        24,
+        146,
+        2976,
+        234
+      ],
+      "bbox": [
+        50,
+        172,
+        1242,
+        208
+      ]
+    },
+    {
+      "name": "reading-heading",
+      "expected": "PAUSANIAS'S ACCOUNT",
+      "ocr": "PAUSANIAS'S ACCOUNT",
+      "exact_after_layout_whitespace": true,
+      "font_size": 44,
+      "rect": [
+        1820,
+        318,
+        2952,
+        420
+      ],
+      "bbox": [
+        1846,
+        344,
+        2456,
+        377
+      ]
+    },
+    {
+      "name": "translation",
+      "expected": "It is said also that thunderbolts fell\nupon them. The commanders\namong others included Leagros,\nupon whom chiefly the command\nof the army was conferred, and\nSophanes from Deceleia, who had\nkilled Eurybates of Argos, a victor\nin the pentathlon at the Nemean\ngames, when Eurybates came to\naid the Aeginetans. This army was\nthe third which the Athenians had\ndispatched outside Greece. For the\nwar against Priam and the Trojans\nhad been undertaken jointly by all\nthe Greeks, but the Athenians\nalone, first with Iolaus, waged a\ncampaign against Sardinia,\nsecondly sailed against what is\nnow Ionia, and thirdly now made\nthis expedition into Thrace.",
+      "ocr": "It is said also that thunderbolts fell\nupon them. The commanders\namong others included Leagros,\nupon whom chiefly the command\nof the army was conferred, and\nSophanes from Deceleia, who had\nkilled Eurybates of Argos, a victor\nin the pentathlon at the Nemean\ngames, when Eurybates came to\naid the Aeginetans. This army was\nthe third which the Athenians had\ndispatched outside Greece. For the\nwar against Priam and the Trojans\nhad been undertaken jointly by all\nthe Greeks, but the Athenians\nalone, first with Iolaus, waged a\nCampaign against Sardinia,\nsecondly sailed against what is\nnow Ionia, and thirdly now made\nthis expedition into Thrace.",
+      "exact_after_layout_whitespace": false,
+      "font_size": 60,
+      "rect": [
+        1820,
+        450,
+        2952,
+        2150
+      ],
+      "bbox": [
+        1846,
+        476,
+        2915,
+        1883
+      ]
+    },
+    {
+      "name": "art-caption",
+      "expected": "A conjectural view of the Athenian expedition in Thrace. The thunderstorm is a reported tradition; no commander, exact route or battlefield is\nidentified. Terrain, equipment and staging are imagined.",
+      "ocr": "A conjectural view of the Athenian expedition in Thrace. The thunderstorm is a reported tradition; no commander, exact route or battlefield is\nidentified. Terrain, equipment and staging are imagined.",
+      "exact_after_layout_whitespace": true,
+      "font_size": 39,
+      "rect": [
+        48,
+        2270,
+        2952,
+        2458
+      ],
+      "bbox": [
+        74,
+        2296,
+        2890,
+        2381
+      ]
+    }
+  ],
+  "all_fields_ocr_exact": false,
+  "images": [
+    {
+      "path": "graphic_book/images/1/29/5.png",
+      "dimensions": [
+        3000,
+        2480
+      ],
+      "bytes": 5875671,
+      "sha256": "1aa9b6a7d1dd52ac6ec0194e511c32aa12ab08aacaa2530643744c633c3e23bb"
+    },
+    {
+      "path": "graphic_book/assets/generated/1_29_5/thracian_storm.png",
+      "dimensions": [
+        1164,
+        1351
+      ],
+      "bytes": 3222300,
+      "sha256": "2d4e84e2c54c96b9d1b82a27e83a815ba0e45c9160d99bb34735bb1d5b7517cf"
+    }
+  ],
+  "all_fields_casefold_match": true,
+  "line_second_pass": {
+    "target": "campaign against Sardinia,",
+    "ocr": "Campaign against Sardinia,",
+    "rectangle": [
+      1820,
+      1598,
+      2952,
+      1675
+    ]
+  },
+  "manual_visual_review": {
+    "passed": true,
+    "ocr_only_difference": "campaign recognized as Campaign in both full-block and line OCR; actual lowercase c inspected in native-resolution crop and full PNG/PDF. No text change or crowding.",
+    "all_words_and_punctuation_preserved": true
+  }
+}

@@ -1,0 +1,140 @@
+{
+  "passage_id": "1.29.5",
+  "preflight": false,
+  "canvas": [
+    3000,
+    2480
+  ],
+  "art_rectangle": [
+    48,
+    252,
+    1760,
+    2240
+  ],
+  "translation_rectangle": [
+    1820,
+    450,
+    2952,
+    2150
+  ],
+  "reading_order": "single continuous right prose field, top to bottom",
+  "translation_exact": "It is said also that thunderbolts fell upon them. The commanders among others included Leagros, upon whom chiefly the command of the army was conferred, and Sophanes from Deceleia, who had killed Eurybates of Argos, a victor in the pentathlon at the Nemean games, when Eurybates came to aid the Aeginetans. This army was the third which the Athenians had dispatched outside Greece. For the war against Priam and the Trojans had been undertaken jointly by all the Greeks, but the Athenians alone, first with Iolaus, waged a campaign against Sardinia, secondly sailed against what is now Ionia, and thirdly now made this expedition into Thrace.",
+  "translation_characters": 642,
+  "translation_words": 106,
+  "translation_utf8_sha256": "60cc812ef441af96ff56f00e78c6d58f94dfaaf23b565b09afe98a215df4600a",
+  "translation_matches_export": true,
+  "minimum_body_font_size": 50,
+  "body_font_size": 60,
+  "padding": 26,
+  "text_blocks_checked": 6,
+  "fit_records": [
+    {
+      "name": "passage-id",
+      "rect": [
+        24,
+        16,
+        820,
+        136
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 58,
+      "text_bbox": [
+        50,
+        42,
+        578,
+        86
+      ],
+      "text": "PASSAGE 1.29.5"
+    },
+    {
+      "name": "title",
+      "rect": [
+        1000,
+        16,
+        2976,
+        136
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 74,
+      "text_bbox": [
+        1026,
+        42,
+        2091,
+        98
+      ],
+      "text": "THE THIRD EXPEDITION"
+    },
+    {
+      "name": "orientation",
+      "rect": [
+        24,
+        146,
+        2976,
+        234
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 36,
+      "text_bbox": [
+        50,
+        172,
+        1242,
+        208
+      ],
+      "text": "THRACE | ATHENIAN EXPEDITION | A REPORTED STORM"
+    },
+    {
+      "name": "reading-heading",
+      "rect": [
+        1820,
+        318,
+        2952,
+        420
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 44,
+      "text_bbox": [
+        1846,
+        344,
+        2456,
+        377
+      ],
+      "text": "PAUSANIAS'S ACCOUNT"
+    },
+    {
+      "name": "translation",
+      "rect": [
+        1820,
+        450,
+        2952,
+        2150
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 60,
+      "text_bbox": [
+        1846,
+        476,
+        2915,
+        1883
+      ],
+      "text": "It is said also that thunderbolts fell\nupon them. The commanders\namong others included Leagros,\nupon whom chiefly the command\nof the army was conferred, and\nSophanes from Deceleia, who had\nkilled Eurybates of Argos, a victor\nin the pentathlon at the Nemean\ngames, when Eurybates came to\naid the Aeginetans. This army was\nthe third which the Athenians had\ndispatched outside Greece. For the\nwar against Priam and the Trojans\nhad been undertaken jointly by all\nthe Greeks, but the Athenians\nalone, first with Iolaus, waged a\ncampaign against Sardinia,\nsecondly sailed against what is\nnow Ionia, and thirdly now made\nthis expedition into Thrace."
+    },
+    {
+      "name": "art-caption",
+      "rect": [
+        48,
+        2270,
+        2952,
+        2458
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 39,
+      "text_bbox": [
+        74,
+        2296,
+        2890,
+        2381
+      ],
+      "text": "A conjectural view of the Athenian expedition in Thrace. The thunderstorm is a reported tradition; no commander, exact route or battlefield is\nidentified. Terrain, equipment and staging are imagined."
+    }
+  ]
+}
