@@ -71,3 +71,17 @@ This report is committed/pushed before finish; claim-release outcome will be
 appended after successful release. Raksasa import, independent verification
 and public website publication remain future overnight work; no daytime
 promotion or full-site publication claimed.
+
+## Claim released and terminal verification
+
+Checkpoint/decision report pushed as
+**d284309ddf0267bdf135b64c345e9ba9868f076b** before finish. finish returned
+**Run completed and claim released** at **2026-11-15T01:15:23.353593+00:00**.
+Fresh read-only remote status confirms **Active: []**, generation **205**,
+updated 2026-11-15T01:15:23.354178+00:00, 3,170 passages/translations,
+**194 illustration pointers**, 30 accumulated results, next **1.29.6**.
+Local run is completed, worker table empty and session removed. Exactly one
+new result retained, replacement skipped with null target, import pending.
+No second page generated, no duplicate checkpoint or public promotion.
+Worktree clean after scoped source pushes. No remaining production blocker;
+overnight Raksasa import and publication are the normal next stage.
