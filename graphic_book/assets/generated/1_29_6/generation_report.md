@@ -43,8 +43,26 @@ inspected. HTTP 200, correct position/navigation/links, no page errors,
 2800 x 3000 complete image and reader/canonical hash equality. Browser and local
 server closed. No full-site generation, daytime Raksasa import or publication.
 
-Sources and textual reviews are ready for scoped commit/push. Final PNG,
-component and binary review evidence remain out of Git. All new component,
-prompt, renderer, plan and review files will be included in immutable
-record-result upload/readback verification. Checkpoint, persisted replacement
-draw/outcome and claim release are pending at this source snapshot.
+## Source push, immutable checkpoint and replacement decision
+
+Scoped source/text commit d6c337cf7fab7a18eefec4bc142dff7a323e540f pushed to
+origin/main; remote ref independently confirmed. Eight text/source files only;
+binary page/components/review images, workflow files, generated site, legacy
+database and unrelated work excluded from Git.
+
+Successful record-result checkpoint:
+3937d873f2d7473ba81512cb08a98ad6, kind new, passage 1.29.6.
+Page key workflow/results/3937d873f2d7473ba81512cb08a98ad6/page.png in the
+configured pausanias-graphic-book-assets-849621205733 S3 bucket. Helper uploaded
+the page plus all 13 new renderer/component/prompt/plan/review files and verified
+their S3 readbacks by SHA-256 and byte count before the conditional catalogue
+checkpoint. The immutable uploaded report preserves its honest pre-checkpoint
+state; this later Git update records the completed operations.
+
+One persisted replacement draw: 0.8173720917961332, above 0.20.
+replacement-decision --outcome skipped succeeded and reused the same draw.
+No target selected; no replacement art, candidate or result created.
+
+Checkpoint is complete and will survive any later failure. Finish/claim release
+is next. PostgreSQL import and public website publication remain for the next
+overnight Raksasa cycle; neither is claimed from this daytime upload.
