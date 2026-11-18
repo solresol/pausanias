@@ -63,6 +63,18 @@ One persisted replacement draw: 0.8173720917961332, above 0.20.
 replacement-decision --outcome skipped succeeded and reused the same draw.
 No target selected; no replacement art, candidate or result created.
 
-Checkpoint is complete and will survive any later failure. Finish/claim release
-is next. PostgreSQL import and public website publication remain for the next
-overnight Raksasa cycle; neither is claimed from this daytime upload.
+## Terminal verification and claim release
+
+finish succeeded: Run completed and claim released at
+2026-11-18T01:47:50.424846+00:00. A separate read-only S3 snapshot fetch into a
+temporary observer independently confirms completed run status, zero active
+workers, unchanged persisted draw, null replacement target and skipped outcome.
+Result 3937d873f2d7473ba81512cb08a98ad6 is present with the expected full source
+commit, page SHA-256, 7,154,561-byte size, all 13 result_files rows, and matching
+1.29.6 catalogue pointer. Shared catalogue now contains 195 illustrated pages;
+next eligible passage is 1.29.7. No second page was generated or claimed.
+
+Result import_status remains pending. PostgreSQL import and public website
+publication remain for the next overnight Raksasa cycle; neither is claimed
+from this daytime upload. No blocker remains. This completion note is committed
+and pushed separately from the immutable source snapshot referenced by the result.
