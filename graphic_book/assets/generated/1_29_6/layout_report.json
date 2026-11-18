@@ -1,0 +1,140 @@
+{
+  "passage_id": "1.29.6",
+  "preflight": false,
+  "canvas": [
+    2800,
+    3000
+  ],
+  "art_rectangle": [
+    56,
+    270,
+    2744,
+    1890
+  ],
+  "translation_rectangle": [
+    56,
+    2180,
+    2744,
+    2920
+  ],
+  "reading_order": "one uninterrupted full-width lower prose field",
+  "translation_exact": "In front of this tomb is a stele depicting horsemen engaged in battle. Their names are Melanopos and Makartatos, who fell facing the ranks of the Spartans and Boeotians, at the boundary of the Eleonian land adjacent to the Tanagraeans. Here also is the grave of Thessalian cavalrymen, who had come out of ancient friendship at the time when the Peloponnesians, under Archidamus, first invaded Attica with their army. Nearby are buried the Cretan archers; and further off are the tombs of the Athenians, including Cleisthenes, who created the tribal divisions still established today, and of the horsemen who fell when the Thessalians assisted them in the danger of battle.",
+  "translation_characters": 672,
+  "translation_words": 110,
+  "translation_utf8_sha256": "f30d0716ab6e265f649e2d3bdfc34c5cd84f89cb1635a5bd46bd480db042739e",
+  "translation_matches_export": true,
+  "minimum_body_font_size": 50,
+  "body_font_size": 64,
+  "padding": 26,
+  "text_blocks_checked": 6,
+  "fit_records": [
+    {
+      "name": "passage-id",
+      "rect": [
+        32,
+        20,
+        800,
+        132
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 56,
+      "text_bbox": [
+        58,
+        46,
+        567,
+        89
+      ],
+      "text": "PASSAGE 1.29.6"
+    },
+    {
+      "name": "title",
+      "rect": [
+        1000,
+        20,
+        2768,
+        132
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 72,
+      "text_bbox": [
+        1026,
+        46,
+        2047,
+        100
+      ],
+      "text": "CAVALRY REMEMBERED"
+    },
+    {
+      "name": "orientation",
+      "rect": [
+        32,
+        146,
+        2768,
+        236
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 38,
+      "text_bbox": [
+        58,
+        172,
+        1313,
+        210
+      ],
+      "text": "ATHENS | ACADEMY ROAD | MEMORIALS TO HORSEMEN"
+    },
+    {
+      "name": "art-caption",
+      "rect": [
+        56,
+        1910,
+        2744,
+        2062
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 40,
+      "text_bbox": [
+        82,
+        1936,
+        2513,
+        2022
+      ],
+      "text": "An imagined funerary stele with mounted combatants beside the Academy road. The relief, grave forms and setting are\nconjectural; no surviving monument is identified."
+    },
+    {
+      "name": "reading-heading",
+      "rect": [
+        56,
+        2080,
+        2744,
+        2170
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 44,
+      "text_bbox": [
+        82,
+        2106,
+        692,
+        2139
+      ],
+      "text": "PAUSANIAS'S ACCOUNT"
+    },
+    {
+      "name": "translation",
+      "rect": [
+        56,
+        2180,
+        2744,
+        2920
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 64,
+      "text_bbox": [
+        82,
+        2206,
+        2697,
+        2877
+      ],
+      "text": "In front of this tomb is a stele depicting horsemen engaged in battle. Their\nnames are Melanopos and Makartatos, who fell facing the ranks of the Spartans\nand Boeotians, at the boundary of the Eleonian land adjacent to the\nTanagraeans. Here also is the grave of Thessalian cavalrymen, who had come\nout of ancient friendship at the time when the Peloponnesians, under\nArchidamus, first invaded Attica with their army. Nearby are buried the Cretan\narchers; and further off are the tombs of the Athenians, including Cleisthenes,\nwho created the tribal divisions still established today, and of the horsemen who\nfell when the Thessalians assisted them in the danger of battle."
+    }
+  ]
+}

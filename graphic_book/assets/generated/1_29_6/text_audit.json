@@ -1,0 +1,141 @@
+{
+  "passage_id": "1.29.6",
+  "export_exact": true,
+  "original_reading_order": true,
+  "english_utf8_sha256": "f30d0716ab6e265f649e2d3bdfc34c5cd84f89cb1635a5bd46bd480db042739e",
+  "independent_framed_source_sha256": "b44c57ed8aeed466706abdd7e3e6617e4ebba0fde539df2893b0a95db8f4fbd3",
+  "matches_export_source_sha256": true,
+  "canvas": [
+    2800,
+    3000
+  ],
+  "all_padded_bounds_pass": true,
+  "fields": [
+    {
+      "name": "passage-id",
+      "rect": [
+        32,
+        20,
+        800,
+        132
+      ],
+      "font_size": 56,
+      "glyph_bbox": [
+        58,
+        46,
+        567,
+        89
+      ],
+      "padded_bounds_pass": true,
+      "expected": "PASSAGE 1.29.6",
+      "ocr": "PASSAGE 1.29.6",
+      "ocr_exact_after_layout_whitespace": true,
+      "ocr_casefold_equal": true
+    },
+    {
+      "name": "title",
+      "rect": [
+        1000,
+        20,
+        2768,
+        132
+      ],
+      "font_size": 72,
+      "glyph_bbox": [
+        1026,
+        46,
+        2047,
+        100
+      ],
+      "padded_bounds_pass": true,
+      "expected": "CAVALRY REMEMBERED",
+      "ocr": "CAVALRY REMEMBERED",
+      "ocr_exact_after_layout_whitespace": true,
+      "ocr_casefold_equal": true
+    },
+    {
+      "name": "orientation",
+      "rect": [
+        32,
+        146,
+        2768,
+        236
+      ],
+      "font_size": 38,
+      "glyph_bbox": [
+        58,
+        172,
+        1313,
+        210
+      ],
+      "padded_bounds_pass": true,
+      "expected": "ATHENS | ACADEMY ROAD | MEMORIALS TO HORSEMEN",
+      "ocr": "ATHENS | ACADEMY ROAD | MEMORIALS TO HORSEMEN",
+      "ocr_exact_after_layout_whitespace": true,
+      "ocr_casefold_equal": true
+    },
+    {
+      "name": "art-caption",
+      "rect": [
+        56,
+        1910,
+        2744,
+        2062
+      ],
+      "font_size": 40,
+      "glyph_bbox": [
+        82,
+        1936,
+        2513,
+        2022
+      ],
+      "padded_bounds_pass": true,
+      "expected": "An imagined funerary stele with mounted combatants beside the Academy road. The relief, grave forms and setting are conjectural; no surviving monument is identified.",
+      "ocr": "An imagined funerary stele with mounted combatants beside the Academy road. The relief, grave forms and setting are conjectural; no surviving monument is identified.",
+      "ocr_exact_after_layout_whitespace": true,
+      "ocr_casefold_equal": true
+    },
+    {
+      "name": "reading-heading",
+      "rect": [
+        56,
+        2080,
+        2744,
+        2170
+      ],
+      "font_size": 44,
+      "glyph_bbox": [
+        82,
+        2106,
+        692,
+        2139
+      ],
+      "padded_bounds_pass": true,
+      "expected": "PAUSANIAS'S ACCOUNT",
+      "ocr": "PAUSANIAS'S ACCOUNT",
+      "ocr_exact_after_layout_whitespace": true,
+      "ocr_casefold_equal": true
+    },
+    {
+      "name": "translation",
+      "rect": [
+        56,
+        2180,
+        2744,
+        2920
+      ],
+      "font_size": 64,
+      "glyph_bbox": [
+        82,
+        2206,
+        2697,
+        2877
+      ],
+      "padded_bounds_pass": true,
+      "expected": "In front of this tomb is a stele depicting horsemen engaged in battle. Their names are Melanopos and Makartatos, who fell facing the ranks of the Spartans and Boeotians, at the boundary of the Eleonian land adjacent to the Tanagraeans. Here also is the grave of Thessalian cavalrymen, who had come out of ancient friendship at the time when the Peloponnesians, under Archidamus, first invaded Attica with their army. Nearby are buried the Cretan archers; and further off are the tombs of the Athenians, including Cleisthenes, who created the tribal divisions still established today, and of the horsemen who fell when the Thessalians assisted them in the danger of battle.",
+      "ocr": "In front of this tomb is a stele depicting horsemen engaged in battle. Their names are Melanopos and Makartatos, who fell facing the ranks of the Spartans and Boeotians, at the boundary of the Eleonian land adjacent to the Tanagraeans. Here also is the grave of Thessalian cavalrymen, who had come out of ancient friendship at the time when the Peloponnesians, under Archidamus, first invaded Attica with their army. Nearby are buried the Cretan archers; and further off are the tombs of the Athenians, including Cleisthenes, who created the tribal divisions still established today, and of the horsemen who fell when the Thessalians assisted them in the danger of battle.",
+      "ocr_exact_after_layout_whitespace": true,
+      "ocr_casefold_equal": true
+    }
+  ]
+}
