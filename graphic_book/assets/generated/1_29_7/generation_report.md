@@ -1,0 +1,54 @@
+# 1.29.7 generation report — 19 November 2026
+
+Conditional run a4c1571fabe3465889368499a19c4ae5 in the same verified published
+classical-texts runtime. Parent verified the exact saved-selector launch and
+live catalogue; three mounted checkout fingerprints matched. Runtime remained
+running/connected. Separate source-configuration namespace is not a mismatch.
+No alternate environment or task launched.
+
+Existing clean work branch safely fast-forwarded from authorized origin/main to
+a49416685f828ccd122cae33d4b2e3990ea603a1. Prescribed Python 3.12.14 and absolute
+uv sync --frozen --no-python-downloads passed before begin. UV_PYTHON and
+UV_CACHE_DIR preserved throughout. AGENTS.md, CLAUDE.md, cloud_workflow.md and
+README.md read. No other checkout, lockfile, Python-version file, environment,
+secret binding, schedule, local PostgreSQL or legacy database used/changed.
+Existing AWS authentication succeeded; no additional credential source used.
+
+begin selected earliest absent translation 1.29.7; fresh next confirmed.
+Six-hour claim began 2026-11-19 01:04:47 UTC. Validated full exported snapshot
+dated 2026-11-18T18:15:42.633646+00:00, 3,170 passages/translations and 195 page
+pointers. Hydrate succeeded, verifying all 195 current PNGs. Supplemental
+read-only SDK retrieval verified 195 pages, 73 components and the title against
+its unchanged existing manifest. No backup script or global manifest upload.
+
+Exactly one new page generated. Selected continuous scene wrapping above/left
+around lower-right English island; three compositions planned before art.
+Actual anchors 1.1.4/1.1.5 and preceding 1.29.1–1.29.6 inspected. Full-size and
+thumbnail checks pass composition, variety, rich raster craft, semantic fit,
+orientation, historical restraint, suitability and text. See page_plan.md and
+review.md for observations and accepted conjectural details.
+
+Exact English 794 characters / 131 words at 58px, minimum 50px; six measured
+glyph bounds with 26px padding. Exact source byte equality and original-order
+wrapping pass. Native OCR matches all six text fields exactly after layout
+whitespace normalization. Text/reader audits and layout report retain evidence.
+
+One 1402 x 1122 component raster, original preserved at
+/workspace/generated_images/exec-fd42e309-1f86-4318-bc92-0fe835508ccc.png,
+copied unchanged into public_memorial.png. Final PNG 3200 x 3000,
+7,978,942 bytes, SHA-256
+6d823497a8a635a795a1fbf6fd9cf563fad25c4a82a89c39f717b861b1142e14.
+
+Required local whole-book build passes: 196 illustrated passages / 197 PDF
+pages including verified title. Last PDF page raster and actual Chromium reader
+screenshot inspected. HTTP 200, correct image dimensions/hash, position 196/196,
+previous 1.29.6, next disabled, expected links, no page errors. Browser and
+temporary local server shut down. No full-site generation or daytime Raksasa
+import/promotion/publication.
+
+## Publication state before source commit
+
+Page accepted locally. Scoped source commit/push, immutable S3 checkpoint,
+persisted replacement decision and claim release are still pending here.
+This report will be updated in Git after those operations complete; immutable
+uploaded source snapshot preserves this honest pre-checkpoint state.

@@ -1,0 +1,146 @@
+{
+  "passage_id": "1.29.7",
+  "preflight": false,
+  "canvas": [
+    3200,
+    3000
+  ],
+  "art_rectangle": [
+    56,
+    280,
+    3144,
+    2750
+  ],
+  "reading_island": [
+    1450,
+    1210,
+    3144,
+    2750
+  ],
+  "translation_rectangle": [
+    1490,
+    1370,
+    3104,
+    2680
+  ],
+  "reading_order": "one uninterrupted lower-right English field",
+  "translation_exact": "Here also lie Cleonaeans who came into Attica alongside the Argives; the reason for this I shall explain when my narrative reaches the Argives. Also there is a tomb here for Athenians who fought against the Aeginetans before the Persian invasion. Indeed, there was a just decree of the people, inasmuch as the Athenians permitted even slaves publicly to be buried and their names inscribed upon a monument; this clearly shows they had distinguished themselves valiantly in battle alongside their masters. There are here also the names of other men who fought in various places and under different circumstances: among them are the most notable of those who went against Olynthus, and also Melesandros, who led ships into upper Caria sailing up the Maeander. Buried too are those who died there.",
+  "translation_characters": 794,
+  "translation_words": 131,
+  "translation_utf8_sha256": "a158eda58307fce1caf0d3a5c0bacd1b09fc0062dcc1ad40bf5e7038a63c9e87",
+  "translation_matches_export": true,
+  "minimum_body_font_size": 50,
+  "body_font_size": 58,
+  "padding": 26,
+  "text_blocks_checked": 6,
+  "fit_records": [
+    {
+      "name": "passage-id",
+      "rect": [
+        32,
+        20,
+        850,
+        134
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 58,
+      "text_bbox": [
+        58,
+        46,
+        586,
+        90
+      ],
+      "text": "PASSAGE 1.29.7"
+    },
+    {
+      "name": "title",
+      "rect": [
+        940,
+        20,
+        3168,
+        134
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 76,
+      "text_bbox": [
+        966,
+        46,
+        2221,
+        103
+      ],
+      "text": "NAMES IN PUBLIC MEMORY"
+    },
+    {
+      "name": "orientation",
+      "rect": [
+        32,
+        148,
+        3168,
+        246
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 46,
+      "text_bbox": [
+        58,
+        174,
+        1516,
+        220
+      ],
+      "text": "ATHENS | ACADEMY ROAD | THE PUBLIC WAR GRAVES"
+    },
+    {
+      "name": "reading-heading",
+      "rect": [
+        1490,
+        1250,
+        3104,
+        1350
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 48,
+      "text_bbox": [
+        1516,
+        1276,
+        2181,
+        1313
+      ],
+      "text": "PAUSANIAS'S ACCOUNT"
+    },
+    {
+      "name": "translation",
+      "rect": [
+        1490,
+        1370,
+        3104,
+        2680
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 58,
+      "text_bbox": [
+        1516,
+        1396,
+        3067,
+        2529
+      ],
+      "text": "Here also lie Cleonaeans who came into Attica\nalongside the Argives; the reason for this I shall\nexplain when my narrative reaches the Argives. Also\nthere is a tomb here for Athenians who fought\nagainst the Aeginetans before the Persian invasion.\nIndeed, there was a just decree of the people,\ninasmuch as the Athenians permitted even slaves\npublicly to be buried and their names inscribed\nupon a monument; this clearly shows they had\ndistinguished themselves valiantly in battle\nalongside their masters. There are here also the\nnames of other men who fought in various places\nand under different circumstances: among them are\nthe most notable of those who went against\nOlynthus, and also Melesandros, who led ships into\nupper Caria sailing up the Maeander. Buried too are\nthose who died there."
+    },
+    {
+      "name": "art-caption",
+      "rect": [
+        56,
+        2780,
+        3144,
+        2960
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 43,
+      "text_bbox": [
+        82,
+        2806,
+        3003,
+        2899
+      ],
+      "text": "An imagined public memorial beside the Academy road. Monument forms, visitors, dress and placement are conjectural; no surviving\ntomb or individual is identified, and the reported inscriptions are not reconstructed."
+    }
+  ]
+}

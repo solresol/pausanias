@@ -1,0 +1,50 @@
+{
+  "passage_id": "1.29.7",
+  "source_sha256": "c711c9f1a45c0655a0832ae3238467484000c4834fd06598dbcb4bdffab1d5b9",
+  "english_byte_exact": true,
+  "rendered_order_exact": true,
+  "ocr": [
+    {
+      "name": "passage-id",
+      "ocr": "PASSAGE 1.29.7",
+      "expected": "PASSAGE 1.29.7",
+      "matches_normalized": true,
+      "matches_casefold": true
+    },
+    {
+      "name": "title",
+      "ocr": "NAMES IN PUBLIC MEMORY",
+      "expected": "NAMES IN PUBLIC MEMORY",
+      "matches_normalized": true,
+      "matches_casefold": true
+    },
+    {
+      "name": "orientation",
+      "ocr": "ATHENS | ACADEMY ROAD | THE PUBLIC WAR GRAVES",
+      "expected": "ATHENS | ACADEMY ROAD | THE PUBLIC WAR GRAVES",
+      "matches_normalized": true,
+      "matches_casefold": true
+    },
+    {
+      "name": "reading-heading",
+      "ocr": "PAUSANIAS'S ACCOUNT",
+      "expected": "PAUSANIAS'S ACCOUNT",
+      "matches_normalized": true,
+      "matches_casefold": true
+    },
+    {
+      "name": "translation",
+      "ocr": "Here also lie Cleonaeans who came into Attica\nalongside the Argives; the reason for this I shall\nexplain when my narrative reaches the Argives. Also\nthere is a tomb here for Athenians who fought\nagainst the Aeginetans before the Persian invasion.\nIndeed, there was a just decree of the people,\ninasmuch as the Athenians permitted even slaves\npublicly to be buried and their names inscribed\nupon a monument; this clearly shows they had\ndistinguished themselves valiantly in battle\nalongside their masters. There are here also the\nnames of other men who fought in various places\nand under different circumstances: among them are\nthe most notable of those who went against\nOlynthus, and also Melesandros, who led ships into\nupper Caria sailing up the Maeander. Buried too are\nthose who died there.",
+      "expected": "Here also lie Cleonaeans who came into Attica\nalongside the Argives; the reason for this I shall\nexplain when my narrative reaches the Argives. Also\nthere is a tomb here for Athenians who fought\nagainst the Aeginetans before the Persian invasion.\nIndeed, there was a just decree of the people,\ninasmuch as the Athenians permitted even slaves\npublicly to be buried and their names inscribed\nupon a monument; this clearly shows they had\ndistinguished themselves valiantly in battle\nalongside their masters. There are here also the\nnames of other men who fought in various places\nand under different circumstances: among them are\nthe most notable of those who went against\nOlynthus, and also Melesandros, who led ships into\nupper Caria sailing up the Maeander. Buried too are\nthose who died there.",
+      "matches_normalized": true,
+      "matches_casefold": true
+    },
+    {
+      "name": "art-caption",
+      "ocr": "An imagined public memorial beside the Academy road. Monument forms, visitors, dress and placement are conjectural; no surviving\ntomb or individual is identified, and the reported inscriptions are not reconstructed.",
+      "expected": "An imagined public memorial beside the Academy road. Monument forms, visitors, dress and placement are conjectural; no surviving\ntomb or individual is identified, and the reported inscriptions are not reconstructed.",
+      "matches_normalized": true,
+      "matches_casefold": true
+    }
+  ]
+}
