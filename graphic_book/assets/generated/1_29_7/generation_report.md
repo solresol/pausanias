@@ -67,5 +67,18 @@ this later Git update records completed operations.
 One persisted replacement draw: 0.6128034857369298, above 0.20.
 replacement-decision --outcome skipped succeeded and reused the same draw.
 No target selected; no old-page art, replacement candidate or second result.
-Claim release remains pending until the explicit finish operation below.
-PostgreSQL import/public publication remain for the next overnight Raksasa run.
+
+## Terminal verification and release
+
+finish succeeded: run completed and claim released at
+2026-11-19T01:16:33.673578+00:00. A separate read-only S3 snapshot fetch into a
+temporary observer independently confirms completed status, zero active workers,
+unchanged persisted draw 0.6128034857369298, null target and skipped outcome.
+Exactly one result for this run, eec7b81077d14f5fbb67d5531d7f2a35, has the
+expected source commit, source hash, page hash, 7,978,942-byte size and all 13
+result_files records. Shared catalogue now has 196 illustrated pages.
+
+Result import_status is pending. PostgreSQL import and public website publication
+remain for the next overnight Raksasa run; neither happened in this daytime
+workflow. No blocker remains. This completed-operation note is committed/pushed
+separately from the immutable source snapshot referenced by the result.
