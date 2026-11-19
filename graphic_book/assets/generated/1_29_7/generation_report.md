@@ -46,9 +46,26 @@ previous 1.29.6, next disabled, expected links, no page errors. Browser and
 temporary local server shut down. No full-site generation or daytime Raksasa
 import/promotion/publication.
 
-## Publication state before source commit
+## Source push, immutable checkpoint and replacement decision
 
-Page accepted locally. Scoped source commit/push, immutable S3 checkpoint,
-persisted replacement decision and claim release are still pending here.
-This report will be updated in Git after those operations complete; immutable
-uploaded source snapshot preserves this honest pre-checkpoint state.
+Scoped source/text commit e89158d5e80a1bbaf8e28aa01a08b0b270262b57 pushed to
+origin/main; remote ref independently confirmed. Eight source/review text files
+only; binary pages/components/review images, workflow SQLite/session files,
+generated site, legacy database and unrelated repositories excluded from Git.
+
+Successful record-result checkpoint: eec7b81077d14f5fbb67d5531d7f2a35,
+kind new, passage 1.29.7. Immutable page key
+workflow/results/eec7b81077d14f5fbb67d5531d7f2a35/page.png in the configured
+pausanias-graphic-book-assets-849621205733 bucket. The helper uploaded the page
+and all 13 new source/component/prompt/plan/review files, read them back and
+verified SHA-256 and byte counts before conditionally checkpointing the catalogue.
+Source PNG component: 3,686,134 bytes, SHA-256
+38d0b1c645036f9950a855f5287e35192d388a38885585df1899acdd99e452cd.
+The immutable uploaded report preserves its honest pre-checkpoint state;
+this later Git update records completed operations.
+
+One persisted replacement draw: 0.6128034857369298, above 0.20.
+replacement-decision --outcome skipped succeeded and reused the same draw.
+No target selected; no old-page art, replacement candidate or second result.
+Claim release remains pending until the explicit finish operation below.
+PostgreSQL import/public publication remain for the next overnight Raksasa run.
