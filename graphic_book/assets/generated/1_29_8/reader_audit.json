@@ -1,0 +1,51 @@
+{
+  "passage_id": "1.29.8",
+  "http_status": 200,
+  "position": "Passage 1.29.8 (197 of 197)",
+  "dimensions": {
+    "complete": true,
+    "width": 2800,
+    "height": 3060,
+    "src": "../../images/1/29/8.png?v=20261120011259"
+  },
+  "links": [
+    {
+      "text": "Home",
+      "href": "../../../index.html"
+    },
+    {
+      "text": "Translation",
+      "href": "../../../translation/index.html"
+    },
+    {
+      "text": "Graphic Book",
+      "href": "../../index.html"
+    },
+    {
+      "text": "Previous",
+      "href": "7.html"
+    },
+    {
+      "text": "Formal Translation",
+      "href": "../../../translation/1/29/8.html"
+    },
+    {
+      "text": "Contents",
+      "href": "../../index.html"
+    },
+    {
+      "text": "Download PDF",
+      "href": "../../pausanias-graphic-book.pdf?v=20261120011259"
+    }
+  ],
+  "disabled": [
+    "Next"
+  ],
+  "page_errors": [],
+  "copied_image_sha256": "b8593378cda892e73ae59a718739d08c15a1275c43f9faf20dd4d23d5e5f5a6b",
+  "canonical_image_sha256": "b8593378cda892e73ae59a718739d08c15a1275c43f9faf20dd4d23d5e5f5a6b",
+  "images_equal": true,
+  "local_only": true,
+  "browser_closed": true,
+  "server_closed": true
+}

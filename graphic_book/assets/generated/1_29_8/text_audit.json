@@ -1,0 +1,59 @@
+{
+  "passage_id": "1.29.8",
+  "translation_byte_equal": true,
+  "independent_source_sha256": "1c8e42e7e03476d32072c31721c233693e47a6a5ddf1f584513feb4a4ff49f6d",
+  "catalogue_source_sha256": "1c8e42e7e03476d32072c31721c233693e47a6a5ddf1f584513feb4a4ff49f6d",
+  "source_hash_matches": true,
+  "all_glyph_bounds_padded": true,
+  "ocr_fields": [
+    {
+      "field": "passage-id",
+      "expected": "PASSAGE 1.29.8",
+      "ocr": "PASSAGE 1.29.8",
+      "exact_after_layout_whitespace": true
+    },
+    {
+      "field": "title",
+      "expected": "THE AID SPARTA REFUSED",
+      "ocr": "THE AID SPARTA REFUSED",
+      "exact_after_layout_whitespace": true
+    },
+    {
+      "field": "orientation",
+      "expected": "SPARTA | CIMON'S ATHENIAN CONTINGENT",
+      "ocr": "SPARTA | CIMON'S ATHENIAN CONTINGENT",
+      "exact_after_layout_whitespace": true
+    },
+    {
+      "field": "reading-heading-1",
+      "expected": "1 | ALLIANCE, EARTHQUAKE AND REVOLT",
+      "ocr": "1 | ALLIANCE, EARTHQUAKE AND REVOLT",
+      "exact_after_layout_whitespace": true
+    },
+    {
+      "field": "translation-1",
+      "expected": "While Cassander was at war, the Athenians had also formed an alliance with the Argives at that time. They recount that their alliance with the Argives had come about in the following manner: after the god had shaken Sparta with an earthquake, the Helots revolted and withdrew to Ithome.",
+      "ocr": "While Cassander was at war, the Athenians had also formed an alliance with the Argives at that time. They recount that their alliance with the Argives had come about in the following manner: after the god had shaken Sparta with an earthquake, the Helots revolted and withdrew to Ithome.",
+      "exact_after_layout_whitespace": true
+    },
+    {
+      "field": "reading-heading-2",
+      "expected": "2 | ASSISTANCE DISMISSED",
+      "ocr": "2 | ASSISTANCE DISMISSED",
+      "exact_after_layout_whitespace": true
+    },
+    {
+      "field": "translation-2",
+      "expected": "On account of this revolt, the Spartans sent entreaties for help, both to others and to Athens. The Athenians dispatched chosen warriors under the leadership of Cimon, son of Miltiades; the Spartans, however, dismissed them out of mistrust.",
+      "ocr": "On account of this revolt, the Spartans sent entreaties for help, both to others and to Athens. The Athenians dispatched chosen warriors under the leadership of Cimon, son of Miltiades; the Spartans, however, dismissed them out of mistrust.",
+      "exact_after_layout_whitespace": true
+    },
+    {
+      "field": "art-caption",
+      "expected": "An imagined departure of the Athenian force from Sparta. The setting, equipment and figures are conjectural; no named individual, precise route or surviving site is identified. Ithome is a separate place of refuge, not the mountain shown.",
+      "ocr": "An imagined departure of the Athenian force from Sparta. The setting, equipment and figures are conjectural; no named individual, precise route or surviving site is identified. Ithome is a separate place of refuge, not the mountain shown.",
+      "exact_after_layout_whitespace": true
+    }
+  ],
+  "all_ocr_exact": true
+}

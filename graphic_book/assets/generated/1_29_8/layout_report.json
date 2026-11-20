@@ -1,0 +1,178 @@
+{
+  "passage_id": "1.29.8",
+  "preflight": false,
+  "canvas": [
+    2800,
+    3060
+  ],
+  "art_rectangle": [
+    56,
+    850,
+    2744,
+    2300
+  ],
+  "reading_order": "upper numbered English 1, then lower English 2",
+  "translation_exact": "While Cassander was at war, the Athenians had also formed an alliance with the Argives at that time. They recount that their alliance with the Argives had come about in the following manner: after the god had shaken Sparta with an earthquake, the Helots revolted and withdrew to Ithome. On account of this revolt, the Spartans sent entreaties for help, both to others and to Athens. The Athenians dispatched chosen warriors under the leadership of Cimon, son of Miltiades; the Spartans, however, dismissed them out of mistrust.",
+  "translation_parts": [
+    "While Cassander was at war, the Athenians had also formed an alliance with the Argives at that time. They recount that their alliance with the Argives had come about in the following manner: after the god had shaken Sparta with an earthquake, the Helots revolted and withdrew to Ithome.",
+    "On account of this revolt, the Spartans sent entreaties for help, both to others and to Athens. The Athenians dispatched chosen warriors under the leadership of Cimon, son of Miltiades; the Spartans, however, dismissed them out of mistrust."
+  ],
+  "translation_characters": 527,
+  "translation_words": 87,
+  "translation_utf8_sha256": "29e8385ad98209a9ef7d5aac3f86529789fd80d8955ab05cab5cf7bff801c6f3",
+  "translation_matches_export": true,
+  "substring_reassembly_byte_exact": true,
+  "minimum_body_font_size": 50,
+  "padding": 26,
+  "body_font_sizes": [
+    62,
+    62
+  ],
+  "text_blocks_checked": 8,
+  "fit_records": [
+    {
+      "name": "passage-id",
+      "rect": [
+        32,
+        20,
+        850,
+        132
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 58,
+      "text_bbox": [
+        58,
+        46,
+        586,
+        90
+      ],
+      "text": "PASSAGE 1.29.8"
+    },
+    {
+      "name": "title",
+      "rect": [
+        900,
+        20,
+        2768,
+        132
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 70,
+      "text_bbox": [
+        926,
+        46,
+        2017,
+        99
+      ],
+      "text": "THE AID SPARTA REFUSED"
+    },
+    {
+      "name": "orientation",
+      "rect": [
+        32,
+        146,
+        2768,
+        246
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 46,
+      "text_bbox": [
+        58,
+        172,
+        1237,
+        218
+      ],
+      "text": "SPARTA | CIMON'S ATHENIAN CONTINGENT"
+    },
+    {
+      "name": "reading-heading-1",
+      "rect": [
+        56,
+        272,
+        2744,
+        370
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 46,
+      "text_bbox": [
+        82,
+        298,
+        1202,
+        344
+      ],
+      "text": "1 | ALLIANCE, EARTHQUAKE AND REVOLT"
+    },
+    {
+      "name": "translation-1",
+      "rect": [
+        56,
+        386,
+        2744,
+        810
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 62,
+      "text_bbox": [
+        82,
+        412,
+        2610,
+        694
+      ],
+      "text": "While Cassander was at war, the Athenians had also formed an alliance with the\nArgives at that time. They recount that their alliance with the Argives had come\nabout in the following manner: after the god had shaken Sparta with an\nearthquake, the Helots revolted and withdrew to Ithome."
+    },
+    {
+      "name": "reading-heading-2",
+      "rect": [
+        56,
+        2330,
+        2744,
+        2428
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 46,
+      "text_bbox": [
+        82,
+        2356,
+        823,
+        2402
+      ],
+      "text": "2 | ASSISTANCE DISMISSED"
+    },
+    {
+      "name": "translation-2",
+      "rect": [
+        56,
+        2440,
+        2744,
+        2820
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 62,
+      "text_bbox": [
+        82,
+        2466,
+        2679,
+        2674
+      ],
+      "text": "On account of this revolt, the Spartans sent entreaties for help, both to others and\nto Athens. The Athenians dispatched chosen warriors under the leadership of\nCimon, son of Miltiades; the Spartans, however, dismissed them out of mistrust."
+    },
+    {
+      "name": "art-caption",
+      "rect": [
+        56,
+        2840,
+        2744,
+        3040
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 41,
+      "text_bbox": [
+        82,
+        2866,
+        2598,
+        2955
+      ],
+      "text": "An imagined departure of the Athenian force from Sparta. The setting, equipment and figures are conjectural; no named\nindividual, precise route or surviving site is identified. Ithome is a separate place of refuge, not the mountain shown."
+    }
+  ]
+}
