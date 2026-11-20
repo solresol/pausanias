@@ -76,4 +76,21 @@ pre-checkpoint state; this Git update records completed operations.
 One persisted replacement draw: **0.442508106114364**, above the 0.20 threshold.
 replacement-decision --outcome skipped succeeded and reused the identical draw.
 No candidate shuffle, target selection, older-page art or second result.
-Claim release follows; terminal verification will record the actual result.
+Checkpoint/skip report committed and pushed as
+6f8aa2b133452b30392d3bae1b9743ba394b547d before finish.
+
+## Terminal verification and release
+
+finish succeeded: run completed and claim released at
+2026-11-20T01:42:24.077406+00:00. A separate read-only S3 fetch into a temporary
+observer independently verified completed status, zero active workers, unchanged
+draw 0.442508106114364, null target and skipped outcome. Exactly one result for
+this run: 77318309c9c14246b5237c9e032b98c4, kind new, passage 1.29.8, expected
+full pushed source commit, source/page hashes, 6,827,702-byte page size and 15
+result_files. Shared catalogue now contains 197 illustrated pages. No checkpoint
+repeated and no other worker's claim touched. No remaining workflow blocker.
+
+Result import_status remains pending. PostgreSQL import and public website
+publication belong to the next overnight Raksasa run; neither is claimed as
+completed by this daytime workflow. This terminal note is committed separately
+from the immutable pre-checkpoint source snapshot referenced by the result.
