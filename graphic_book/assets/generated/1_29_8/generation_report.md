@@ -50,6 +50,30 @@ daytime Raksasa import/promotion/publication.
 
 ## Checkpoint and optional replacement
 
-Pending scoped source commit/push, immutable record-result, one persisted
-replacement draw and finish. This pre-checkpoint report does not claim uploads
-or completion in advance. Later Git updates will record actual operations.
+Nine scoped source/review text files committed and pushed to origin/main at
+38849a9e771da647296a8e352e91daefe6a30ee9; remote ref independently confirmed.
+No binary, generated site, workflow SQLite/session, legacy database or unrelated
+work entered Git. Initial record-result invocation accidentally supplied a
+mistyped full source SHA. It was interrupted during S3 read-back verification,
+before result insertion/publish. Remote status still showed generation 226,
+196 pages and next 1.29.8; local run had no result or target illustration.
+Thus no checkpointed result was repeated and no accepted metadata needed repair.
+That interrupted attempt may leave unreferenced immutable artifact objects;
+they are retained as allowed by the workflow, never force-uploaded or removed.
+
+The corrected invocation read HEAD directly and required equality with the
+fresh origin/main SHA before passing it to the unchanged exchange helper.
+Successful new-page checkpoint: **77318309c9c14246b5237c9e032b98c4**, passage
+1.29.8, source commit 38849a9e771da647296a8e352e91daefe6a30ee9.
+Immutable page key workflow/results/77318309c9c14246b5237c9e032b98c4/page.png
+in pausanias-graphic-book-assets-849621205733. The helper uploaded the page and
+all **15** new source/prompt/plan/audit/review/component files, downloaded them
+again and verified SHA-256/byte counts before conditional catalogue checkpoint.
+Local result row confirms that source commit, kind new and import_status pending;
+exactly 15 result_files records. The immutable report preserves its honest
+pre-checkpoint state; this Git update records completed operations.
+
+One persisted replacement draw: **0.442508106114364**, above the 0.20 threshold.
+replacement-decision --outcome skipped succeeded and reused the identical draw.
+No candidate shuffle, target selection, older-page art or second result.
+Claim release follows; terminal verification will record the actual result.
