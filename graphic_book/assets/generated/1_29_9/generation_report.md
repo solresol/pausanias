@@ -40,6 +40,31 @@ The source translation row records hash
 The local build and visual review passed for the Chromium reader and the
 199-page PDF, with 198 illustrated passages and the title page.
 
-The checkpoint, optional replacement decision and lease release are ready
-to run after the scoped source commit is pushed. Raksasa handles PostgreSQL
-import and public website publication in its overnight run.
+## Exchange results and replacement decision
+
+Pushed the scoped new-page sources to origin/main at
+`302fddfaf7fbd23bb40d491ea29350e8c5633a2b`. The exchange helper verified
+immutable S3 read-back of the page and all 13 submitted files before
+checkpointing new result `e77871da00c645f89d306503469ad637`.
+
+The one persisted draw was `0.05209213488415898`, within the 20% window.
+The eligible catalogue order excluded the six latest pages, the two style
+anchors and previous successful replacements. The first of 178 shuffled
+eligible pages, 1.4.4, qualified on inspection and was persisted as the
+only target. Its original remained canonical and its source and binary
+component stayed intact. The candidate uses one low-angle storm panorama
+between two horizontal English bands. The 166-word English fits at 53px
+and all eight fields matched native OCR. Full-size and thumbnail inspection
+against the original and its eight neighbours passed. The temporary 199-page
+PDF and the Chromium reader used only the substituted 1.4.4 candidate.
+
+Pushed the scoped replacement sources to origin/main at
+`fa3b6cfb9422f5c81cbc2093b46cf7411919607f`. The exchange archived and
+verified the old PNG at catalogued hash
+`b15f9b6562ccceb183e0a0145c44616b47777f24bf79eb8198cc2107985794aa`.
+It verified the candidate and all 11 result-file records, including that
+archive, before checkpointing replacement result
+`202b74cb095e49299bf96177ce564c57`. The persisted replacement outcome is
+`accepted`. Both results have `import_status=pending` in the shared
+catalogue. Raksasa handles the original-hash check, PostgreSQL import
+and public website publication in its next overnight run.

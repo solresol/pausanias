@@ -396,5 +396,6 @@
   ],
   "selected_target": "1.4.4",
   "original_catalogue_sha256": "b15f9b6562ccceb183e0a0145c44616b47777f24bf79eb8198cc2107985794aa",
-  "persisted_target_outcome": "pending"
+  "persisted_target_outcome": "accepted",
+  "checkpoint_result_id": "202b74cb095e49299bf96177ce564c57"
 }
