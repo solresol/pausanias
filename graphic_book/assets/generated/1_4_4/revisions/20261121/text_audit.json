@@ -1,0 +1,57 @@
+{
+  "passage": "1.4.4",
+  "candidate_sha256": "1499fce7429730e99a2f2b5d75a9f54827226c9131a59d77a864d426ce8b7125",
+  "candidate_bytes": 7493753,
+  "original_sha256": "b15f9b6562ccceb183e0a0145c44616b47777f24bf79eb8198cc2107985794aa",
+  "english_sha256": "60a59c42003c0fc3aeaa92866c85fe46b2c4d9e6c8a63142a50fc1e77d765a51",
+  "fields": [
+    {
+      "field": "title",
+      "expected": "Storm at Delphi",
+      "observed": "Storm at Delphi",
+      "matches": true
+    },
+    {
+      "field": "passage-id",
+      "expected": "PAUSANIAS 1.4.4",
+      "observed": "PAUSANIAS 1.4.4",
+      "matches": true
+    },
+    {
+      "field": "orientation",
+      "expected": "DELPHI, MOUNT PARNASSUS",
+      "observed": "DELPHI, MOUNT PARNASSUS",
+      "matches": true
+    },
+    {
+      "field": "phase-1",
+      "expected": "1. The approach to Delphi",
+      "observed": "1. The approach to Delphi",
+      "matches": true
+    },
+    {
+      "field": "phase-2",
+      "expected": "2. The storm and the heroes",
+      "observed": "2. The storm and the heroes",
+      "matches": true
+    },
+    {
+      "field": "translation-1",
+      "expected": "These, then, were the men who saved the Greeks in the manner just described, while the Gauls were within Thermopylae and, having disregarded the remaining towns, sought only to seize Delphi and plunder the treasures of the god, upon which they particularly set their desires. Against them stood the Delphians themselves, as well as the Phokians who inhabited the cities around Parnassus, and besides these arrived a force of Aetolians\u2014for at that time the Aetolian nation was at the peak of youthful vigor.",
+      "observed": "These, then, were the men who saved the Greeks in the manner just described, while the Gauls were within Thermopylae and, having disregarded the remaining towns, sought only to seize Delphi and plunder the treasures of the god, upon which they particularly set their desires. Against them stood the Delphians themselves, as well as the Phokians who inhabited the cities around Parnassus, and besides these arrived a force of Aetolians\u2014for at that time the Aetolian nation was at the peak of youthful vigor.",
+      "matches": true
+    },
+    {
+      "field": "translation-2",
+      "expected": "When the two sides joined battle, lightning bolts fell upon the Gauls and rocks, suddenly torn loose from Parnassus, crashed down upon them; terrifying armed figures appeared to face the barbarians. It is said that among these warriors were two who came from the Hyperboreans\u2014Hyperochus and Amadocus\u2014and a third who was Pyrrhus, the son of Achilles. In honor of this aid given to them, the Delphians henceforth sacrificed to Pyrrhus, though previously, as a former enemy, his tomb had been subjected to dishonor.",
+      "observed": "When the two sides joined battle, lightning bolts fell upon the Gauls and rocks, suddenly torn loose from Parnassus, crashed down upon them; terrifying armed figures appeared to face the barbarians. It is said that among these warriors were two who came from the Hyperboreans\u2014Hyperochus and Amadocus\u2014and a third who was Pyrrhus, the son of Achilles. In honor of this aid given to them, the Delphians henceforth sacrificed to Pyrrhus, though previously, as a former enemy, his tomb had been subjected to dishonor.",
+      "matches": true
+    },
+    {
+      "field": "caption",
+      "expected": "Apollo's sanctuary beneath the Phaedriades cliffs. The painting imagines the approach, rockfall and portents in Pausanias's account.",
+      "observed": "Apollo's sanctuary beneath the Phaedriades cliffs. The painting imagines the approach, rockfall and portents in Pausanias's account.",
+      "matches": true
+    }
+  ]
+}

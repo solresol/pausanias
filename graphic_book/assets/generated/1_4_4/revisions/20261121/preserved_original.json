@@ -1,0 +1,18 @@
+{
+  "passage": "1.4.4",
+  "canonical_png_sha256": "b15f9b6562ccceb183e0a0145c44616b47777f24bf79eb8198cc2107985794aa",
+  "unchanged_source_git_blobs": {
+    "graphic_book/render_passage_1_4_4.py": "c8053a3dc334a106c31d147d8123216934ecfd0c",
+    "graphic_book/assets/generated/1_4_4/page_plan.md": "3c45da52461afaf924a2d6c7f8e967498a3d3079",
+    "graphic_book/assets/generated/1_4_4/main_delphi_parnassus_galatian_attack.prompt.txt": "75c6cdb6e4059a66bcd066d031ef7b1c28ce7acf"
+  },
+  "original_components": [
+    {
+      "bytes": 3440468,
+      "media_type": "image/png",
+      "path": "graphic_book/assets/generated/1_4_4/main_delphi_parnassus_galatian_attack.png",
+      "s3_key": "assets/generated/1_4_4/main_delphi_parnassus_galatian_attack.png",
+      "sha256": "db0dcbb0e43e31853200f0021a9542efaee973f80dce4e09797fecf07c40fe0a"
+    }
+  ]
+}

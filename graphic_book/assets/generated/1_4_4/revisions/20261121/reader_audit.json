@@ -1,0 +1,18 @@
+{
+  "http": 200,
+  "position": "Passage 1.4.4 (20 of 198)",
+  "previous": "3.html",
+  "next": "5.html",
+  "dimensions": [
+    3100,
+    2950
+  ],
+  "errors": [],
+  "originalSha256": "b15f9b6562ccceb183e0a0145c44616b47777f24bf79eb8198cc2107985794aa",
+  "candidateAndPreviewSha256": "1499fce7429730e99a2f2b5d75a9f54827226c9131a59d77a864d426ce8b7125",
+  "comparedPageCopies": 198,
+  "substitutedPageCopies": [
+    "1/4/4.png"
+  ],
+  "pdfPageWithTitle": 21
+}

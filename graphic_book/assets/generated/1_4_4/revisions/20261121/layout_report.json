@@ -1,0 +1,173 @@
+{
+  "passage": "1.4.4",
+  "canvas": [
+    3100,
+    2950
+  ],
+  "art_rectangle": [
+    70,
+    860,
+    3030,
+    2260
+  ],
+  "preflight": false,
+  "reading_order": [
+    "upper prose",
+    "lower prose"
+  ],
+  "english": "These, then, were the men who saved the Greeks in the manner just described, while the Gauls were within Thermopylae and, having disregarded the remaining towns, sought only to seize Delphi and plunder the treasures of the god, upon which they particularly set their desires. Against them stood the Delphians themselves, as well as the Phokians who inhabited the cities around Parnassus, and besides these arrived a force of Aetolians\u2014for at that time the Aetolian nation was at the peak of youthful vigor. When the two sides joined battle, lightning bolts fell upon the Gauls and rocks, suddenly torn loose from Parnassus, crashed down upon them; terrifying armed figures appeared to face the barbarians. It is said that among these warriors were two who came from the Hyperboreans\u2014Hyperochus and Amadocus\u2014and a third who was Pyrrhus, the son of Achilles. In honor of this aid given to them, the Delphians henceforth sacrificed to Pyrrhus, though previously, as a former enemy, his tomb had been subjected to dishonor.",
+  "english_sha256": "60a59c42003c0fc3aeaa92866c85fe46b2c4d9e6c8a63142a50fc1e77d765a51",
+  "body_px": 53,
+  "minimum_body_px": 51,
+  "padding_px": 24,
+  "fields": [
+    {
+      "name": "title",
+      "rect": [
+        46,
+        38,
+        1780,
+        200
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 109,
+      "text_bbox": [
+        70,
+        62,
+        1044,
+        168
+      ],
+      "text": "Storm at Delphi"
+    },
+    {
+      "name": "passage-id",
+      "rect": [
+        1950,
+        59,
+        3030,
+        137
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 37,
+      "text_bbox": [
+        1974,
+        83,
+        2338,
+        110
+      ],
+      "text": "PAUSANIAS 1.4.4"
+    },
+    {
+      "name": "orientation",
+      "rect": [
+        1950,
+        140,
+        3030,
+        217
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 32,
+      "text_bbox": [
+        1974,
+        164,
+        2519,
+        192
+      ],
+      "text": "DELPHI, MOUNT PARNASSUS"
+    },
+    {
+      "name": "phase-1",
+      "rect": [
+        46,
+        259,
+        525,
+        460
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 47,
+      "text_bbox": [
+        70,
+        283,
+        496,
+        386
+      ],
+      "text": "1. The approach\nto Delphi"
+    },
+    {
+      "name": "phase-2",
+      "rect": [
+        46,
+        2318,
+        525,
+        2530
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 50,
+      "text_bbox": [
+        70,
+        2342,
+        488,
+        2440
+      ],
+      "text": "2. The storm\nand the heroes"
+    },
+    {
+      "name": "translation-1",
+      "rect": [
+        556,
+        259,
+        3030,
+        797
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 53,
+      "text_bbox": [
+        580,
+        283,
+        2981,
+        650
+      ],
+      "text": "These, then, were the men who saved the Greeks in the manner just described, while the\nGauls were within Thermopylae and, having disregarded the remaining towns, sought\nonly to seize Delphi and plunder the treasures of the god, upon which they particularly\nset their desires. Against them stood the Delphians themselves, as well as the Phokians\nwho inhabited the cities around Parnassus, and besides these arrived a force of\nAetolians\u2014for at that time the Aetolian nation was at the peak of youthful vigor."
+    },
+    {
+      "name": "translation-2",
+      "rect": [
+        556,
+        2318,
+        3030,
+        2778
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 53,
+      "text_bbox": [
+        580,
+        2342,
+        2972,
+        2709
+      ],
+      "text": "When the two sides joined battle, lightning bolts fell upon the Gauls and rocks, suddenly\ntorn loose from Parnassus, crashed down upon them; terrifying armed figures appeared\nto face the barbarians. It is said that among these warriors were two who came from the\nHyperboreans\u2014Hyperochus and Amadocus\u2014and a third who was Pyrrhus, the son of\nAchilles. In honor of this aid given to them, the Delphians henceforth sacrificed to\nPyrrhus, though previously, as a former enemy, his tomb had been subjected to dishonor."
+    },
+    {
+      "name": "caption",
+      "rect": [
+        46,
+        2814,
+        3030,
+        2938
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 38,
+      "text_bbox": [
+        70,
+        2838,
+        2631,
+        2875
+      ],
+      "text": "Apollo's sanctuary beneath the Phaedriades cliffs. The painting imagines the approach, rockfall and portents in Pausanias's account."
+    }
+  ],
+  "art_source_dimensions": [
+    1823,
+    863
+  ]
+}
