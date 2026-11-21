@@ -1,0 +1,195 @@
+{
+  "passage_id": "1.29.9",
+  "canvas": [
+    3100,
+    2500
+  ],
+  "preflight": false,
+  "art": [
+    [
+      [
+        75,
+        310,
+        1815,
+        1210
+      ],
+      "tanagra_infantry.png"
+    ],
+    [
+      [
+        1465,
+        1370,
+        3025,
+        2260
+      ],
+      "tanagra_cavalry.png"
+    ]
+  ],
+  "reading_order": [
+    "upper right",
+    "lower left"
+  ],
+  "translation": "To the Athenians, being subjected to such humiliation seemed intolerable. Accordingly, upon their return home, they made an alliance with the Argives, who had always been hostile towards the Lacedaemonians. Later, when the Athenians were about to engage in battle at Tanagra against the Boeotians and Lacedaemonians, the Argives came to aid the Athenians. At first, the Argives had the upper hand, but the onset of night obscured the clear outcome of the victory. On the next day, however, the Lacedaemonians prevailed, since the Thessalians betrayed the Athenians.",
+  "translation_characters": 565,
+  "translation_words": 88,
+  "translation_utf8_sha256": "30cbea3038643d9a9a8a47a1e951b2f917ae02d7a4ce94020e734e630fd634f8",
+  "body_pixels": 56,
+  "body_minimum": 50,
+  "padding": 24,
+  "text": [
+    {
+      "name": "title",
+      "rect": [
+        51,
+        45,
+        1770,
+        205
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 112,
+      "text_bbox": [
+        75,
+        69,
+        761,
+        176
+      ],
+      "text": "At Tanagra"
+    },
+    {
+      "name": "passage-id",
+      "rect": [
+        1885,
+        66,
+        3025,
+        150
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 40,
+      "text_bbox": [
+        1909,
+        90,
+        2330,
+        120
+      ],
+      "text": "PAUSANIAS 1.29.9"
+    },
+    {
+      "name": "orientation",
+      "rect": [
+        1885,
+        151,
+        3025,
+        238
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 37,
+      "text_bbox": [
+        1909,
+        175,
+        2342,
+        208
+      ],
+      "text": "TANAGRA, BOEOTIA"
+    },
+    {
+      "name": "phase-1",
+      "rect": [
+        1885,
+        310,
+        3025,
+        430
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 50,
+      "text_bbox": [
+        1909,
+        334,
+        2723,
+        383
+      ],
+      "text": "1. Argos comes to aid Athens"
+    },
+    {
+      "name": "phase-2",
+      "rect": [
+        75,
+        1370,
+        1345,
+        1488
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+      "font_size": 50,
+      "text_bbox": [
+        99,
+        1394,
+        783,
+        1443
+      ],
+      "text": "2. Nightfall and reversal"
+    },
+    {
+      "name": "translation-1",
+      "rect": [
+        1885,
+        458,
+        3025,
+        1220
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 56,
+      "text_bbox": [
+        1909,
+        482,
+        2975,
+        1196
+      ],
+      "text": "To the Athenians, being subjected to\nsuch humiliation seemed intolerable.\nAccordingly, upon their return home,\nthey made an alliance with the\nArgives, who had always been hostile\ntowards the Lacedaemonians. Later,\nwhen the Athenians were about to\nengage in battle at Tanagra against\nthe Boeotians and Lacedaemonians,\nthe Argives came to aid the\nAthenians."
+    },
+    {
+      "name": "translation-2",
+      "rect": [
+        75,
+        1518,
+        1345,
+        2220
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 56,
+      "text_bbox": [
+        99,
+        1542,
+        1264,
+        1921
+      ],
+      "text": "At first, the Argives had the upper hand,\nbut the onset of night obscured the clear\noutcome of the victory. On the next day,\nhowever, the Lacedaemonians prevailed,\nsince the Thessalians betrayed the\nAthenians."
+    },
+    {
+      "name": "caption",
+      "rect": [
+        51,
+        2311,
+        3025,
+        2462
+      ],
+      "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+      "font_size": 40,
+      "text_bbox": [
+        75,
+        2335,
+        2887,
+        2421
+      ],
+      "text": "Above, the Argive reinforcement. Below, Thessalian horsemen on the field where they changed sides. Both scenes imagine the terrain and\npositions around Tanagra."
+    }
+  ],
+  "component_dimensions": {
+    "tanagra_infantry.png": [
+      1743,
+      902
+    ],
+    "tanagra_cavalry.png": [
+      1661,
+      947
+    ]
+  }
+}

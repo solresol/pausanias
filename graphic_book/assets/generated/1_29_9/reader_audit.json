@@ -1,0 +1,17 @@
+{
+  "http": 200,
+  "dimensions": [
+    3100,
+    2500
+  ],
+  "position": "Passage 1.29.9 (198 of 198)",
+  "previous": "8.html",
+  "nextDisabled": "Next",
+  "links": {
+    "Formal Translation": "/translation/1/29/9.html",
+    "Contents": "/index.html",
+    "Download PDF": "/pausanias-graphic-book.pdf"
+  },
+  "errors": [],
+  "canonicalAndReaderSha256": "2462a302c2d58046692228439440399e9e012a43d37482121363387082358efa"
+}

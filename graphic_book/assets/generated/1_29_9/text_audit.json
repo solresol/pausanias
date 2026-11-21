@@ -1,0 +1,56 @@
+{
+  "passage": "1.29.9",
+  "page_sha256": "2462a302c2d58046692228439440399e9e012a43d37482121363387082358efa",
+  "page_bytes": 5578241,
+  "method": "Tesseract PSM 6 over native padded text crops; normalize layout whitespace only",
+  "fields": [
+    {
+      "field": "title",
+      "expected": "At Tanagra",
+      "observed": "At Tanagra",
+      "exact": true
+    },
+    {
+      "field": "passage-id",
+      "expected": "PAUSANIAS 1.29.9",
+      "observed": "PAUSANIAS 1.29.9",
+      "exact": true
+    },
+    {
+      "field": "orientation",
+      "expected": "TANAGRA, BOEOTIA",
+      "observed": "TANAGRA, BOEOTIA",
+      "exact": true
+    },
+    {
+      "field": "phase-1",
+      "expected": "1. Argos comes to aid Athens",
+      "observed": "1. Argos comes to aid Athens",
+      "exact": true
+    },
+    {
+      "field": "phase-2",
+      "expected": "2. Nightfall and reversal",
+      "observed": "2. Nightfall and reversal",
+      "exact": true
+    },
+    {
+      "field": "translation-1",
+      "expected": "To the Athenians, being subjected to such humiliation seemed intolerable. Accordingly, upon their return home, they made an alliance with the Argives, who had always been hostile towards the Lacedaemonians. Later, when the Athenians were about to engage in battle at Tanagra against the Boeotians and Lacedaemonians, the Argives came to aid the Athenians.",
+      "observed": "To the Athenians, being subjected to such humiliation seemed intolerable. Accordingly, upon their return home, they made an alliance with the Argives, who had always been hostile towards the Lacedaemonians. Later, when the Athenians were about to engage in battle at Tanagra against the Boeotians and Lacedaemonians, the Argives came to aid the Athenians.",
+      "exact": true
+    },
+    {
+      "field": "translation-2",
+      "expected": "At first, the Argives had the upper hand, but the onset of night obscured the clear outcome of the victory. On the next day, however, the Lacedaemonians prevailed, since the Thessalians betrayed the Athenians.",
+      "observed": "At first, the Argives had the upper hand, but the onset of night obscured the clear outcome of the victory. On the next day, however, the Lacedaemonians prevailed, since the Thessalians betrayed the Athenians.",
+      "exact": true
+    },
+    {
+      "field": "caption",
+      "expected": "Above, the Argive reinforcement. Below, Thessalian horsemen on the field where they changed sides. Both scenes imagine the terrain and positions around Tanagra.",
+      "observed": "Above, the Argive reinforcement. Below, Thessalian horsemen on the field where they changed sides. Both scenes imagine the terrain and positions around Tanagra.",
+      "exact": true
+    }
+  ]
+}
