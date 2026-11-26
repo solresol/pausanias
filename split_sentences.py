@@ -11,6 +11,7 @@ from openai import OpenAI
 from tqdm import tqdm
 
 from pausanias_db import add_database_argument, connect
+from pausanias_models import SPLIT_FALLBACK_MODEL, tool_call_options
 
 
 def parse_arguments():
@@ -44,8 +45,8 @@ def parse_arguments():
     )
     parser.add_argument(
         "--fallback-model",
-        default="gpt-5",
-        help="Model to retry with if the primary model returns an invalid alignment (default: gpt-5)",
+        default=SPLIT_FALLBACK_MODEL,
+        help=f"Model to retry with if the primary model returns an invalid alignment (default: {SPLIT_FALLBACK_MODEL})",
     )
     parser.add_argument(
         "--debug",
@@ -142,6 +143,7 @@ def split_passage(client, model, passage_id, passage_text, translation, debug=Fa
     try:
         response = client.chat.completions.create(
             model=model,
+            **tool_call_options(model),
             messages=[
                 {"role": "system", "content": system_prompt},
                 {

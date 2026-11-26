@@ -9,6 +9,7 @@ import os
 from datetime import datetime
 
 from pausanias_db import add_database_argument, connect
+from pausanias_models import TEXT_MODEL
 from .data import (
     get_analyzed_passages,
     get_mythicness_predictors,
@@ -125,8 +126,8 @@ def parse_arguments():
                         help="Fetch missing phrase translations using LLM (requires OpenAI API key)")
     parser.add_argument("--openai-api-key-file", default="~/.openai.key",
                         help="File containing OpenAI API key (default: ~/.openai.key)")
-    parser.add_argument("--model", default="gpt-5",
-                        help="OpenAI model to use for translations (default: gpt-5)")
+    parser.add_argument("--model", default=TEXT_MODEL,
+                        help=f"OpenAI model to use for translations (default: {TEXT_MODEL})")
     parser.add_argument("--grammar-model", default="gpt-5.6-luna",
                         help="LLM grammar model to publish on grammar pages (default: gpt-5.6-luna)")
 

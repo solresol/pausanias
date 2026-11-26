@@ -13,12 +13,13 @@ from openai import OpenAI
 from tqdm import tqdm
 
 from pausanias_db import add_database_argument, column_exists, connect
+from pausanias_models import ANNOTATION_MODEL, tool_call_options
 
 
 LEGACY_PROMPT_VERSION = "legacy-mythic-scepticism-v1"
 GRETA_PROMPT_VERSION = "greta-myth-history-other-v1"
 GRETA_BOTH_PROMPT_VERSION = "greta-myth-history-both-other-v1"
-DEFAULT_MODEL = "gpt-5"
+DEFAULT_MODEL = ANNOTATION_MODEL
 DEFAULT_COMPARISON_MODEL = "gpt-5.6-luna"
 DEFAULT_JUDGE_MODEL = "gpt-5.4"
 BUCKETS = ("mythic", "historical", "other")
@@ -596,6 +597,7 @@ def analyse_sentence_legacy(
     try:
         response = client.chat.completions.create(
             model=model,
+            **tool_call_options(model),
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_content},
@@ -656,6 +658,7 @@ def analyse_sentence_greta(
     try:
         response = client.chat.completions.create(
             model=model,
+            **tool_call_options(model),
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_content},
@@ -714,6 +717,7 @@ def analyse_sentence_greta_both(
     try:
         response = client.chat.completions.create(
             model=model,
+            **tool_call_options(model),
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_content},
@@ -794,6 +798,7 @@ def judge_legacy_discrepancy(
     try:
         response = client.chat.completions.create(
             model=model,
+            **tool_call_options(model),
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_content},

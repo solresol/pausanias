@@ -38,6 +38,7 @@ from lemma_text import (
 )
 from manto_place_feature_catalog import FEATURE_CATALOG
 from pausanias_db import read_sql_query, table_exists as pg_table_exists
+from pausanias_models import TEXT_MODEL
 from stats_utils import compute_p_q_values
 
 WORD_PATTERN = re.compile(r"(?u)\b\w+\b")
@@ -7560,7 +7561,7 @@ def get_progress_data(conn):
 
 
 def add_phrase_translations(df: pd.DataFrame, conn, client: Optional[OpenAI] = None,
-                           model: str = "gpt-5") -> pd.DataFrame:
+                           model: str = TEXT_MODEL) -> pd.DataFrame:
     """Add English translations to a predictor dataframe.
 
     Args:

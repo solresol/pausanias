@@ -10,6 +10,7 @@ from openai import OpenAI
 from tqdm import tqdm
 
 from pausanias_db import add_database_argument, connect
+from pausanias_models import TEXT_MODEL
 
 
 def parse_arguments():
@@ -21,8 +22,8 @@ def parse_arguments():
                         help="Maximum number of records to process (default: all)")
     parser.add_argument("--progress-bar", action="store_true", default=False,
                         help="Show progress bar")
-    parser.add_argument("--model", default="gpt-5",
-                        help="OpenAI model to use (default: gpt-5)")
+    parser.add_argument("--model", default=TEXT_MODEL,
+                        help=f"OpenAI model to use (default: {TEXT_MODEL})")
     parser.add_argument("--debug", action="store_true", default=False,
                         help="Print the full API response for debugging")
     

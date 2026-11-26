@@ -13,6 +13,7 @@ from openai import OpenAI
 from tqdm import tqdm
 
 from pausanias_db import add_database_argument, connect
+from pausanias_models import ANNOTATION_MODEL, tool_call_options
 
 QUIET_EMPTY_ENV_VAR = "PAUSANIAS_QUIET_EMPTY"
 
@@ -30,8 +31,8 @@ def parse_arguments():
                         help="Maximum number of records to process (default: all)")
     parser.add_argument("--progress-bar", action="store_true", default=False,
                         help="Show progress bar")
-    parser.add_argument("--model", default="gpt-5",
-                        help="OpenAI model to use (default: gpt-5)")
+    parser.add_argument("--model", default=ANNOTATION_MODEL,
+                        help=f"OpenAI model to use (default: {ANNOTATION_MODEL})")
     
     return parser.parse_args()
 
@@ -132,6 +133,7 @@ def analyze_passage(client, model, passage_id, passage_text):
     try:
         response = client.chat.completions.create(
             model=model,
+            **tool_call_options(model),
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": f"Passage {passage_id}:\n\n{passage_text}\n\nAnalyze this passage and provide your results using the save_annotations function."}

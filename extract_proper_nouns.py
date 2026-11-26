@@ -11,6 +11,7 @@ from openai import OpenAI
 from tqdm import tqdm
 
 from pausanias_db import add_database_argument, connect
+from pausanias_models import ANNOTATION_MODEL, tool_call_options
 
 QUIET_EMPTY_ENV_VAR = "PAUSANIAS_QUIET_EMPTY"
 
@@ -28,8 +29,8 @@ def parse_arguments():
                         help="Maximum number of records to process (default: all)")
     parser.add_argument("--progress-bar", action="store_true", default=False,
                         help="Show progress bar")
-    parser.add_argument("--model", default="gpt-5",
-                        help="OpenAI model to use (default: gpt-5)")
+    parser.add_argument("--model", default=ANNOTATION_MODEL,
+                        help=f"OpenAI model to use (default: {ANNOTATION_MODEL})")
     parser.add_argument("--debug", action="store_true", default=False,
                         help="Print the full API response for debugging")
     
@@ -215,6 +216,7 @@ IMPORTANT: Almost every passage from Pausanias mentions at least one place or pe
     try:
         response = client.chat.completions.create(
             model=model,
+            **tool_call_options(model),
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": f"Passage {passage_id}:\n\n{passage_text}\n\nExtract all proper nouns from this passage with their English transcriptions and entity types."}
