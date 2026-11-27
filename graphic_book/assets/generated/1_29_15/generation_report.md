@@ -1,0 +1,9 @@
+# Pausanias graphic book · 2026-11-27
+
+**1.29.15, Graves by the Academy**, was the first translated passage absent from the shared illustration catalogue. The Pausanias checkout in classical-texts fast-forwarded from `1597fdd9bbcc25e2f015510b94f27cf789b5baf0` to `420e4a4c93f7c7acdafa9d9a6dfabe167cade4d3`. The frozen dependency sync passed with the configured Python 3.12 runtime. The shared catalogue was idle before acquisition. Hydration verified 203 accepted passage images against the export, which held 3,170 translations.
+
+The final road-level reconstruction uses a single painting and two staggered reading fields. The wall and angled funerary base follow the archaeology of Lycurgus’s family plot. The caption preserves the distinction between the excavated plot and the description of his grave. Full-size inspection, comparison with anchors 1.1.4 and 1.1.5 and the accepted 1.29.9–1.29.14 thumbnails, measured lettering, independent exact-English OCR, and inspection of the local HTML reader and PDF passed. The rebuilt reader includes 204 illustrated passages. The illustrated spread appears on PDF page 205 after the cover. [Page plan](page_plan.md) · [Visual and text review](review.md)
+
+The source commit `4bd13051330f882d2bfa40872855668fc1256f0d` was pushed to `origin/main`. The exchange uploaded the page and six component and source files under immutable result `1ee2ab1178584dc89b6cddc23922a4ff`, verified each object by downloading it, and conditionally checkpointed the page in the shared catalogue. The illustration points to that result, and the six recorded file hashes match the reviewed sources. PostgreSQL import was pending at checkpoint. Raksasa’s next overnight run handles import and website publication.
+
+The persisted replacement draw was `0.819203728631193`. The exchange recorded `skipped` with an empty target because the draw was above 0.20.
